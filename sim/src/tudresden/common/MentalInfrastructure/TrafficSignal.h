@@ -23,12 +23,22 @@ public:
         return s;
     }
 
+    void AddValidLane(const MentalInfrastructure::Lane *lanePtr) {
+        validLanes.push_back(lanePtr);
+    }
+
+    std::vector<const MentalInfrastructure::Lane *> GetValidLanes() const {
+        return validLanes;
+    }
+
     const MentalInfrastructure::Road *GetRoad() const {
         return road;
     }
 
 protected:
     const MentalInfrastructure::Road *road;
+    std::vector<const MentalInfrastructure::Lane *> validLanes;
+
     double s;
     Common::Vector2d position;
 };

@@ -26,18 +26,6 @@ public:
     }
     ~TrafficLight() = default;
 
-    const Common::Vector2d GetPosition() const {
-        return position;
-    }
-
-    double GetS() const {
-        return s;
-    }
-
-    const MentalInfrastructure::Road *GetRoad() const {
-        return road;
-    }
-
     void SetState(TrafficLightState newState) {
         state = newState;
     }
@@ -53,9 +41,5 @@ public:
 private:
     TrafficLightState state{TrafficLightState::Off};
     TrafficLightType type;
-
-    const MentalInfrastructure::Road *road;
-    double s;
-    Common::Vector2d position;
 };
 } // namespace MentalInfrastructure

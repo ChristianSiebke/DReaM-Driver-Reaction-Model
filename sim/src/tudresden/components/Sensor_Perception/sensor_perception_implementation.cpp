@@ -67,7 +67,7 @@ void Sensor_Perception_Implementation::UpdateOutput(int localLinkId, std::shared
                 sensorPerceptionLogic.GetTrafficSignalPerception());
         }
         catch (const std::bad_alloc &) {
-            const std::string msg = COMPONENTNAME + " could not instantiate signal (localLinkId 3 = TrafficSigns)";
+            const std::string msg = COMPONENTNAME + " could not instantiate signal (localLinkId 3 = TrafficSignals)";
             LOG(CbkLogLevel::Debug, msg);
             throw std::runtime_error(msg);
         }

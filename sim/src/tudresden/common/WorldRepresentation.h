@@ -52,20 +52,55 @@ struct AgentInterpretation {
     std::optional<double> followingDistanceToLeadingVehicle;
 };
 
-struct VisibleTrafficSigns {
-    std::unordered_map<OdId, std::unordered_map<MentalInfrastructure::TrafficSignType,
-                                                std::unordered_map<OwlId, const MentalInfrastructure::TrafficSign *>>>
-        trafficSigns;
+struct MemorizedTrafficSignal {
+    const MentalInfrastructure::TrafficSignal *trafficSignal;
+    int firstTimeStamp;
+    int lastTimeStamp;
+};
 
-    std::unordered_map<MentalInfrastructure::TrafficSignType, std::unordered_map<OwlId, const MentalInfrastructure::TrafficSign *>>
-    GetSignsForRoad(OdId roadId) {
-        auto findIter = trafficSigns.find(roadId);
-        if (findIter != trafficSigns.end())
-            return findIter->second;
+struct VisibleTrafficSignals {
+    // lane DReaMId -> TrafficSignals on that lane
+    std::unordered_map<DReaMId, std::list<const MentalInfrastructure::TrafficSignal *>> laneTrafficSignalMap;
 
-        std::unordered_map<MentalInfrastructure::TrafficSignType, std::unordered_map<OwlId, const MentalInfrastructure::TrafficSign *>>
-            empty;
-        return empty;
+    // speed limit information
+    const MentalInfrastructure::TrafficSign *upcomingSpeedLimitSign;
+    const MentalInfrastructure::TrafficSign *currentSpeedLimitSign;
+    const MentalInfrastructure::TrafficSign *previousSpeedLimitSign;
+
+    std::optional<const MentalInfrastructure::TrafficSign *> GetSignForLane(DReaMId laneId, MentalInfrastructure::TrafficSignType type) {
+        if (laneTrafficSignalMap.find(laneId) != laneTrafficSignalMap.end()) {
+            for (const auto signal : laneTrafficSignalMap[laneId]) {
+                auto trafficSign = dynamic_cast<const MentalInfrastructure::TrafficSign *>(signal);
+                if (trafficSign != nullptr && trafficSign->GetType() == type)
+                    return trafficSign;
+            }
+            return std::nullopt;
+        }
+        return std::nullopt;
+    }
+
+    std::optional<const MentalInfrastructure::TrafficLight *> GetTrafficLightForLane(DReaMId laneId) {
+        if (laneTrafficSignalMap.find(laneId) != laneTrafficSignalMap.end()) {
+            for (const auto signal : laneTrafficSignalMap[laneId]) {
+                auto trafficLight = dynamic_cast<const MentalInfrastructure::TrafficLight *>(signal);
+                if (trafficLight != nullptr)
+                    return trafficLight;
+            }
+            return std::nullopt;
+        }
+        return std::nullopt;
+    }
+
+    std::vector<const MentalInfrastructure::TrafficSign *> GetSignsForLane(DReaMId laneId) {
+        std::vector<const MentalInfrastructure::TrafficSign *> toReturn;
+        if (laneTrafficSignalMap.find(laneId) != laneTrafficSignalMap.end()) {
+            for (const auto signal : laneTrafficSignalMap[laneId]) {
+                auto trafficSign = dynamic_cast<const MentalInfrastructure::TrafficSign *>(signal);
+                if (trafficSign != nullptr)
+                    toReturn.push_back(trafficSign);
+            }
+        }
+        return toReturn;
     }
 };
 
@@ -73,7 +108,7 @@ struct WorldRepresentation {
     const EgoAgentRepresentation* egoAgent;
     const InfrastructureRepresentation* infrastructure;
     const AmbientAgentRepresentations* agentMemory;
-    const VisibleTrafficSigns* trafficSignMemory;
+    const VisibleTrafficSignals *trafficSignMemory;
 };
 
 struct WorldInterpretation {

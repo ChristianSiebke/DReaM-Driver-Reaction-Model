@@ -445,6 +445,11 @@ const MentalInfrastructure::TrafficSign *RoadNetworkSensor::ConvertTrafficSign(c
         Common::Vector2d(sign->GetReferencePointPosition().x, sign->GetReferencePointPosition().y), sign->GetSpecification(0).value,
         sign->GetSpecification(0).type);
 
+    for (const auto lane : road->GetLanes()) {
+        if (sign->IsValidForLane(lane->GetOwlId()))
+            newSign->AddValidLane(lane);
+    }
+
     trafficSignLookup.insert(std::make_pair(sign->GetId(), newSign.get()));
     perceptionData->trafficSigns.push_back(newSign);
     return newSign.get();
@@ -461,6 +466,11 @@ const MentalInfrastructure::TrafficLight *RoadNetworkSensor::ConvertTrafficLight
         (OdId)trafficLight->GetId(), GenerateUniqueId(), road, trafficLight->GetS(),
         Common::Vector2d(trafficLight->GetReferencePointPosition().x, trafficLight->GetReferencePointPosition().y),
         (MentalInfrastructure::TrafficLightType)trafficLight->GetSpecification(0).type);
+
+    for (const auto lane : road->GetLanes()) {
+        if (trafficLight->IsValidForLane(lane->GetOwlId()))
+            newLight->AddValidLane(lane);
+    }
 
     trafficLightLookup.insert(std::make_pair(trafficLight->GetId(), newLight.get()));
     perceptionData->trafficLights.push_back(newLight);

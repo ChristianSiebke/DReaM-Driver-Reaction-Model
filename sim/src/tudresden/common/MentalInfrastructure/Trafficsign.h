@@ -29,37 +29,23 @@ public:
     }
     ~TrafficSign() = default;
 
-    const Common::Vector2d GetPosition() const {
-        return position;
-    }
-
     double GetValue() const {
         return value;
-    }
-
-    double GetS() const {
-        return s;
     }
 
     TrafficSignType GetType() const {
         return type;
     }
+
     int GetPriority() const {
         return priority;
-    }
-
-    const MentalInfrastructure::Road *GetRoad() const {
-        return road;
     }
 
 private:
     int Priority(TrafficSignType sign);
 
-    const MentalInfrastructure::Road *road;
     TrafficSignType type;
     int priority;
     double value;
-    double s;
-    Common::Vector2d position;
 };
 } // namespace MentalInfrastructure

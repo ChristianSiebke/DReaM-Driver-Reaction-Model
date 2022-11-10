@@ -39,8 +39,8 @@ DriverReactionModel::DriverReactionModel(std::string behaviourConfigPath, std::s
 void DriverReactionModel::UpdateDReaM(int time, std::shared_ptr<EgoPerception> egoAgent,
                                       std::vector<std::shared_ptr<AgentPerception>> ambientAgents,
                                       std::shared_ptr<InfrastructurePerception> infrastructure,
-                                      std::vector<const MentalInfrastructure::TrafficSign *> trafficSigns) {
-    UpdateInput(time, egoAgent, ambientAgents, infrastructure, trafficSigns);
+                                      std::vector<const MentalInfrastructure::TrafficSignal *> trafficSignals) {
+    UpdateInput(time, egoAgent, ambientAgents, infrastructure, trafficSignals);
     UpdateComponents();
     UpdateAgentStateRecorder(time, egoAgent->id, infrastructure);
 }
@@ -48,8 +48,8 @@ void DriverReactionModel::UpdateDReaM(int time, std::shared_ptr<EgoPerception> e
 void DriverReactionModel::UpdateInput(int time, std::shared_ptr<EgoPerception> egoAgent,
                                       std::vector<std::shared_ptr<AgentPerception>> ambientAgents,
                                       std::shared_ptr<InfrastructurePerception> infrastructure,
-                                      std::vector<const MentalInfrastructure::TrafficSign *> trafficSigns) {
-    cognitiveMap->UpdateInput(time, egoAgent, ambientAgents, infrastructure, trafficSigns);
+                                      std::vector<const MentalInfrastructure::TrafficSignal *> trafficSignals) {
+    cognitiveMap->UpdateInput(time, egoAgent, ambientAgents, infrastructure, trafficSignals);
 }
 
 void DriverReactionModel::UpdateComponents() {
