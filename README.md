@@ -1,7 +1,7 @@
 # What is DReaM
 
 The Driver Reaction Model (DReaM) focuses on simulating "realistic" traffic flow to create a virtual test field for investigating safety-related issues.
-DReaM is a component of the traffic simulation software openPASS. More information about DReaM can be found [here](https://driver-model.de/).
+DReaM is a driver behaviour model and component of the traffic simulation software openPASS. More information about DReaM can be found [here](https://driver-model.de/). 
 
 # What is openPASS
 
