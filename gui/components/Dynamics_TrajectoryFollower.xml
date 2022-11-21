@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component>
+  <type>Algorithm</type>
+  <title>Dynamics_TrajectoryFollower</title>
+  <schedule>
+    <offset>0</offset>
+    <cycle>1</cycle>
+    <response>0</response>
+  </schedule>
+  <parameters>
+    <parameter>
+      <id>0</id>
+      <type>string</type>
+      <title>TrajectoryFile</title>
+      <unit></unit>
+      <value>Trajectory.xml</value>
+    </parameter>
+    <parameter>
+      <id>1</id>
+      <type>bool</type>
+      <title>AutomaticDeactivation</title>
+      <unit></unit>
+      <value>1</value>
+    </parameter>
+    <parameter>
+      <id>2</id>
+      <type>bool</type>
+      <title>EnforceTrajectory</title>
+      <unit></unit>
+      <value>1</value>
+    </parameter>
+  </parameters>
+  <inputs>
+    <input>
+      <id>0</id>
+      <type>LateralSignal</type>
+      <title>Lateral Signal</title>
+      <unit></unit>
+      <cardinality>1</cardinality>
+    </input>
+    <input>
+      <id>1</id>
+      <type>AccelerationSignal</type>
+      <title>Acceleration Signal</title>
+      <unit></unit>
+      <cardinality>1</cardinality>
+    </input>
+  </inputs>
+  <outputs>
+    <output>
+      <id>0</id>
+      <type>DynamicsSignal</type>
+      <title>Dynamics Signal</title>
+      <unit></unit>
+    </output>
+    <output>
+      <id>1</id>
+      <type>AgentCompToCompCtrlSignal</type>
+      <title>AgentCompToCompCtrlSignal</title>
+      <unit></unit>
+    </output>
+  </outputs>
+</component>

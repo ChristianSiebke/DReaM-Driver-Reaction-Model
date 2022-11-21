@@ -1,0 +1,34 @@
+{
+    //
+    // CMAKE
+    //
+    // Optional: Adjust to your needs
+    "cmake.parallelJobs": 4,
+    // See openPASS documentation for individual WITH_* settings
+    "cmake.configureArgs": [
+    "-DCMAKE_INSTALL_PREFIX=/openPASS/bin/core",
+    // Adjust paths depending on your system
+    "-DCMAKE_PREFIX_PATH=${workspaceRoot}/deps/thirdParty/linux64/FMILibrary;${workspaceRoot}/deps/thirdParty/linux64/osi;${workspaceRoot}/deps/thirdParty/linux64/minizip",
+    "-DUSE_CCACHE=ON",
+    "-DWITH_GUI=OFF",
+    "-DWITH_SIMCORE=ON",
+    "-DWITH_TESTS=ON",
+    "-DWITH_DOC=OFF",
+    // For integration with IntelliSense (see c_cpp_properties.json)
+    "-DCMAKE_EXPORT_COMPILE_COMMANDS=ON"
+    ],
+    //
+    // TESTMATE
+    //
+    // Optional: Adjust to your needs
+    "testMate.cpp.test.parallelExecutionLimit": 4,
+    "testMate.cpp.test.parallelExecutionOfExecutableLimit": 2,
+    // Optional: Set, if you like to debug test discovery and test start issues
+    "testMate.cpp.log.logfile": "/tmp/cpp.testmate.log",
+    //
+    // VSCODE
+    //
+    // Enforce usage of .clang-format of modified code
+    "editor.formatOnSave": true,
+    "editor.formatOnSaveMode": "modifications"
+}

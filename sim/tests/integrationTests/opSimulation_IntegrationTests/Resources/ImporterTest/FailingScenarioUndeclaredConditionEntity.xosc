@@ -1,0 +1,67 @@
+<?xml version="1.0"?>
+<OpenSCENARIO>
+  <FileHeader revMajor="1" revMinor="0" date="2020-06-22T15:05:00" description="Integration test failing scenario with undeclared condition entity" author="in-tech GmbH"/>
+  <ParameterDeclarations>
+    <ParameterDeclaration name="OP_OSC_SchemaVersion" parameterType="string" value="0.4.0"/>
+  </ParameterDeclarations>
+  <CatalogLocations>
+    <VehicleCatalog>
+      <Directory path="VehicleModelsCatalog.xosc"/>
+    </VehicleCatalog>
+    <PedestrianCatalog>
+      <Directory path="PedestrianModelsCatalog.xosc"/>
+    </PedestrianCatalog>
+    <ControllerCatalog>
+      <Directory path=""/>
+    </ControllerCatalog>
+    <ManeuverCatalog>
+      <Directory path=""/>
+    </ManeuverCatalog>
+    <MiscObjectCatalog>
+      <Directory path=""/>
+    </MiscObjectCatalog>
+    <EnvironmentCatalog>
+      <Directory path=""/>
+    </EnvironmentCatalog>
+    <TrajectoryCatalog>
+      <Directory path=""/>
+    </TrajectoryCatalog>
+    <RouteCatalog>
+      <Directory path=""/>
+    </RouteCatalog>
+  </CatalogLocations>
+  <RoadNetwork>
+    <LogicFile filepath="SceneryConfiguration.xodr"/>
+    <SceneGraphFile filepath=""/>
+  </RoadNetwork>
+  <Entities>
+    <ScenarioObject name="DefinedEntity">
+      <CatalogReference catalogName="TheCatalog" entryName="TheEntry"/>
+    </ScenarioObject>
+  </Entities>
+  <Storyboard>
+    <Init/>
+    <Story name="TheStory">
+      <Act name="TheAct">
+        <ManeuverGroup maximumExecutionCount="1" name="TheSequence">
+          <Maneuver name="TheManeuver">
+            <Event name="TheEvent" priority="overwrite">
+              <Action name="TheAction"/>
+              <StartTrigger>
+                <ConditionGroup>
+                  <Condition name="TheCondition">
+                    <ByEntityCondition>
+                      <TriggeringEntities>
+                        <EntityRef entityRef="UndefinedEntity"/>
+                      </TriggeringEntities>
+                    </ByEntityCondition>
+                  </Condition>
+                </ConditionGroup>
+              </StartTrigger>
+            </Event>
+          </Maneuver>
+        </ManeuverGroup>
+      </Act>
+    </Story>
+  </Storyboard>
+</OpenSCENARIO>

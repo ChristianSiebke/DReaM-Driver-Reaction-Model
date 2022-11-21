@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<opSimulationManager>
+    <logLevel>2</logLevel>
+    <logFileSimulationManager>opSimulationManager.log</logFileSimulationManager>
+    <simulation>opSimulation.exe</simulation>
+    <libraries>./modules</libraries>
+    <simulationConfigs>
+        <simulationConfig>
+            <configurations>result_pcm/1000232/0-0-0/Default/configs</configurations>
+            <logFileSimulation>result_pcm/1000232/0-0-0/Default/opSimulation.log</logFileSimulation>
+            <results>result_pcm/1000232/0-0-0/Default/results</results>
+        </simulationConfig>
+    </simulationConfigs>
+</opSimulationManager>

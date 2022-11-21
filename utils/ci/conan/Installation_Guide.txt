@@ -1,0 +1,15 @@
+1. Install MSYS2 64-bit to C:/msys64 (default)
+	https://www.msys2.org/
+	
+2. Open MSYS2 Shell and execute the following commands. Reply with "yes" or "return" if necessary.
+	- $ yes | pacman -Syu (repeat until no additional packages where installed)
+	- navigate with "cd" to script folder
+	- $ sh 10_prepare_msys2.sh
+	
+3. Open MSYS2 MINGW64 Shell and execute the following commands. Reply with "yes" or "return" if necessary.
+	- $ sh 15_prepare_mingw.sh
+
+4. Configure Conan and build openpass with the following command
+	- $ sh 20_build.sh
+
+5. Add "c:\msys64\mingw64\bin" (your Msys2 Installation path) to your PATH enviromnent variables.

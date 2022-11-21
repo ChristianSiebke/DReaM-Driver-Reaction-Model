@@ -1,0 +1,12 @@
+venv/*
+__pychache__/*
+.idea
+.pytest_cache
+*.pyc
+*.xml
+**/.ipynb_checkpoints/*
+
+########################################
+#           Test Artifacts             #
+########################################
+**/*result_*.xml 

@@ -1,0 +1,284 @@
+<?xml version="1.0"?>
+<OpenSCENARIO>
+  <FileHeader revMajor="1" revMinor="0" date="2020-06-26T00:17:00" description="openPASS vehicle models" author="in-tech GmbH"/>
+  <Catalog name="VehicleCatalog">
+    <Vehicle name="car_bmw_i3" vehicleCategory="car">
+      <Properties>
+        <Property name="AirDragCoefficient" value="0.3"/>
+        <Property name="AxleRatio" value="1.0"/>
+        <Property name="DecelerationFromPowertrainDrag" value="0.5"/>
+        <Property name="FrictionCoefficient" value="1.0"/>
+        <Property name="FrontSurface" value="2.38"/>
+        <Property name="GearRatio1" value="9.665"/>
+        <Property name="Mass" value="1320.0"/>
+        <Property name="MaximumEngineSpeed" value="6000.0"/>
+        <Property name="MaximumEngineTorque" value="250.0"/>
+        <Property name="MinimumEngineSpeed" value="900.0"/>
+        <Property name="MinimumEngineTorque" value="-54.0"/>
+        <Property name="MomentInertiaPitch" value="0.0"/>
+        <Property name="MomentInertiaRoll" value="0.0"/>
+        <Property name="MomentInertiaYaw" value="0.0"/>
+        <Property name="NumberOfGears" value="1"/>
+        <Property name="SteeringRatio" value="10.7"/>
+      </Properties>
+      <BoundingBox>
+        <Center x="1.25" y="0.0" z="0.84"/>
+        <Dimensions width="2.04" length="3.96" height="1.68"/>
+      </BoundingBox>
+      <Performance maxSpeed="41.67" maxAcceleration="9.80665" maxDeceleration="9.80665"/>
+      <Axles>
+        <FrontAxle maxSteering="0.5282" wheelDiameter="0.682" trackWidth="1.8" positionX="2.52" positionZ="0.341"/>
+        <RearAxle maxSteering="0.0" wheelDiameter="0.682" trackWidth="1.8" positionX="0.0" positionZ="0.341"/>
+      </Axles>
+    </Vehicle>
+    <Vehicle name="car_bmw_3" vehicleCategory="car">
+      <Properties>
+        <Property name="AirDragCoefficient" value="0.3"/>
+        <Property name="AxleRatio" value="2.813"/>
+        <Property name="DecelerationFromPowertrainDrag" value="0.5"/>
+        <Property name="FrictionCoefficient" value="1.0"/>
+        <Property name="FrontSurface" value="2.2"/>
+        <Property name="GearRatio1" value="5.0"/>
+        <Property name="GearRatio2" value="3.2"/>
+        <Property name="GearRatio3" value="2.143"/>
+        <Property name="GearRatio4" value="1.72"/>
+        <Property name="GearRatio5" value="1.314"/>
+        <Property name="GearRatio6" value="1.0"/>
+        <Property name="GearRatio7" value="0.822"/>
+        <Property name="GearRatio8" value="0.64"/>
+        <Property name="Mass" value="1525.0"/>
+        <Property name="MaximumEngineSpeed" value="6000.0"/>
+        <Property name="MaximumEngineTorque" value="270.0"/>
+        <Property name="MinimumEngineSpeed" value="900.0"/>
+        <Property name="MinimumEngineTorque" value="-54.0"/>
+        <Property name="MomentInertiaPitch" value="0.0"/>
+        <Property name="MomentInertiaRoll" value="0.0"/>
+        <Property name="MomentInertiaYaw" value="0.0"/>
+        <Property name="NumberOfGears" value="8"/>
+        <Property name="SteeringRatio" value="10.7"/>
+      </Properties>
+      <BoundingBox>
+        <Center x="1.285" y="0.0" z="0.72"/>
+        <Dimensions width="1.96" length="4.63" height="1.44"/>
+      </BoundingBox>
+      <Performance maxSpeed="69.44" maxAcceleration="9.80665" maxDeceleration="9.80665"/>
+      <Axles>
+        <FrontAxle maxSteering="0.5012" wheelDiameter="0.634" trackWidth="1.8" positionX="2.81" positionZ="0.317"/>
+        <RearAxle maxSteering="0.0" wheelDiameter="0.634" trackWidth="1.8" positionX="0.0" positionZ="0.317"/>
+      </Axles>
+    </Vehicle>
+    <Vehicle name="car_bmw_7_1" vehicleCategory="car">
+      <Properties>
+        <Property name="AirDragCoefficient" value="0.3"/>
+        <Property name="AxleRatio" value="3.077"/>
+        <Property name="DecelerationFromPowertrainDrag" value="0.5"/>
+        <Property name="FrictionCoefficient" value="1.0"/>
+        <Property name="FrontSurface" value="2.42"/>
+        <Property name="GearRatio1" value="5.0"/>
+        <Property name="GearRatio2" value="3.2"/>
+        <Property name="GearRatio3" value="2.143"/>
+        <Property name="GearRatio4" value="1.72"/>
+        <Property name="GearRatio5" value="1.314"/>
+        <Property name="GearRatio6" value="1.0"/>
+        <Property name="GearRatio7" value="0.822"/>
+        <Property name="GearRatio8" value="0.64"/>
+        <Property name="Mass" value="1845.0"/>
+        <Property name="MaximumEngineSpeed" value="6000.0"/>
+        <Property name="MaximumEngineTorque" value="450.0"/>
+        <Property name="MinimumEngineSpeed" value="900.0"/>
+        <Property name="MinimumEngineTorque" value="-54.0"/>
+        <Property name="MomentInertiaPitch" value="0.0"/>
+        <Property name="MomentInertiaRoll" value="0.0"/>
+        <Property name="MomentInertiaYaw" value="0.0"/>
+        <Property name="NumberOfGears" value="8"/>
+        <Property name="SteeringRatio" value="10.7"/>
+      </Properties>
+      <BoundingBox>
+        <Center x="1.46" y="0.0" z="0.755"/>
+        <Dimensions width="2.18" length="5.26" height="1.51"/>
+      </BoundingBox>
+      <Performance maxSpeed="69.44" maxAcceleration="9.80665" maxDeceleration="9.80665"/>
+      <Axles>
+        <FrontAxle maxSteering="0.5226" wheelDiameter="0.682" trackWidth="1.8" positionX="3.22" positionZ="0.341"/>
+        <RearAxle maxSteering="0.0" wheelDiameter="0.682" trackWidth="1.8" positionX="0.0" positionZ="0.341"/>
+      </Axles>
+    </Vehicle>
+    <Vehicle name="car_bmw_7_2" vehicleCategory="car">
+      <Properties>
+        <Property name="AirDragCoefficient" value="0.3"/>
+        <Property name="AxleRatio" value="3.077"/>
+        <Property name="DecelerationFromPowertrainDrag" value="0.5"/>
+        <Property name="FrictionCoefficient" value="1.0"/>
+        <Property name="FrontSurface" value="2.42"/>
+        <Property name="GearRatio1" value="4.714"/>
+        <Property name="GearRatio2" value="3.143"/>
+        <Property name="GearRatio3" value="2.106"/>
+        <Property name="GearRatio4" value="1.667"/>
+        <Property name="GearRatio5" value="1.285"/>
+        <Property name="GearRatio6" value="1.0"/>
+        <Property name="GearRatio7" value="0.839"/>
+        <Property name="GearRatio8" value="0.667"/>
+        <Property name="Mass" value="1900.0"/>
+        <Property name="MaximumEngineSpeed" value="6000.0"/>
+        <Property name="MaximumEngineTorque" value="450.0"/>
+        <Property name="MinimumEngineSpeed" value="900.0"/>
+        <Property name="MinimumEngineTorque" value="-54.0"/>
+        <Property name="MomentInertiaPitch" value="0.0"/>
+        <Property name="MomentInertiaRoll" value="0.0"/>
+        <Property name="MomentInertiaYaw" value="0.0"/>
+        <Property name="NumberOfGears" value="8"/>
+        <Property name="SteeringRatio" value="10.7"/>
+      </Properties>
+      <BoundingBox>
+        <Center x="1.485" y="0.0" z="0.745"/>
+        <Dimensions width="2.16" length="5.27" height="1.49"/>
+      </BoundingBox>
+      <Performance maxSpeed="69.44" maxAcceleration="9.80665" maxDeceleration="9.80665"/>
+      <Axles>
+        <FrontAxle maxSteering="0.5279" wheelDiameter="0.682" trackWidth="1.8" positionX="3.25" positionZ="0.341"/>
+        <RearAxle maxSteering="0.0" wheelDiameter="0.682" trackWidth="1.8" positionX="0.0" positionZ="0.341"/>
+      </Axles>
+    </Vehicle>
+    <Vehicle name="car_mini_cooper" vehicleCategory="car">
+      <Properties>
+        <Property name="AirDragCoefficient" value="0.3"/>
+        <Property name="AxleRatio" value="3.789"/>
+        <Property name="DecelerationFromPowertrainDrag" value="0.5"/>
+        <Property name="FrictionCoefficient" value="1.0"/>
+        <Property name="FrontSurface" value="2.07"/>
+        <Property name="GearRatio1" value="4.154"/>
+        <Property name="GearRatio2" value="2.45"/>
+        <Property name="GearRatio3" value="1.557"/>
+        <Property name="GearRatio4" value="1.09"/>
+        <Property name="GearRatio5" value="0.843"/>
+        <Property name="GearRatio6" value="0.675"/>
+        <Property name="GearRatio7" value="0.547"/>
+        <Property name="Mass" value="1235.0"/>
+        <Property name="MaximumEngineSpeed" value="6000.0"/>
+        <Property name="MaximumEngineTorque" value="220.0"/>
+        <Property name="MinimumEngineSpeed" value="900.0"/>
+        <Property name="MinimumEngineTorque" value="-54.0"/>
+        <Property name="MomentInertiaPitch" value="0.0"/>
+        <Property name="MomentInertiaRoll" value="0.0"/>
+        <Property name="MomentInertiaYaw" value="0.0"/>
+        <Property name="NumberOfGears" value="7"/>
+        <Property name="SteeringRatio" value="10.7"/>
+      </Properties>
+      <BoundingBox>
+        <Center x="1.35" y="0.0" z="0.71"/>
+        <Dimensions width="1.89" length="3.8" height="1.42"/>
+      </BoundingBox>
+      <Performance maxSpeed="58.33" maxAcceleration="9.80665" maxDeceleration="9.80665"/>
+      <Axles>
+        <FrontAxle maxSteering="0.4766" wheelDiameter="0.59" trackWidth="1.8" positionX="2.48" positionZ="0.295"/>
+        <RearAxle maxSteering="0.0" wheelDiameter="0.59" trackWidth="1.8" positionX="0.0" positionZ="0.295"/>
+      </Axles>
+    </Vehicle>
+    <Vehicle name="bus" vehicleCategory="truck">
+      <Properties>
+        <Property name="AirDragCoefficient" value="0.8"/>
+        <Property name="AxleRatio" value="4.0"/>
+        <Property name="DecelerationFromPowertrainDrag" value="1.0"/>
+        <Property name="FrictionCoefficient" value="1.0"/>
+        <Property name="FrontSurface" value="9.0"/>
+        <Property name="GearRatio1" value="6.316"/>
+        <Property name="GearRatio2" value="4.554"/>
+        <Property name="GearRatio3" value="3.269"/>
+        <Property name="GearRatio4" value="2.352"/>
+        <Property name="GearRatio5" value="1.692"/>
+        <Property name="GearRatio6" value="1.217"/>
+        <Property name="GearRatio7" value="0.876"/>
+        <Property name="GearRatio8" value="0.630"/>
+        <Property name="Mass" value="25000.0"/>
+        <Property name="MaximumEngineSpeed" value="2500.0"/>
+        <Property name="MaximumEngineTorque" value="1400.0"/>
+        <Property name="MinimumEngineSpeed" value="600.0"/>
+        <Property name="MinimumEngineTorque" value="-140.0"/>
+        <Property name="MomentInertiaPitch" value="0.0"/>
+        <Property name="MomentInertiaRoll" value="0.0"/>
+        <Property name="MomentInertiaYaw" value="0.0"/>
+        <Property name="NumberOfGears" value="8"/>
+        <Property name="SteeringRatio" value="15.0"/>
+      </Properties>
+      <BoundingBox>
+        <Center x="2.815" y="0.0" z="1.92"/>
+        <Dimensions width="2.91" length="13.23" height="3.84"/>
+      </BoundingBox>
+      <Performance maxSpeed="33.33" maxAcceleration="9.80665" maxDeceleration="9.80665"/>
+      <Axles>
+        <FrontAxle maxSteering="0.6972" wheelDiameter="0.808" trackWidth="1.8" positionX="6.64" positionZ="0.404"/>
+        <RearAxle maxSteering="0.0" wheelDiameter="0.808" trackWidth="1.8" positionX="0.0" positionZ="0.404"/>
+      </Axles>
+    </Vehicle>
+    <Vehicle name="truck" vehicleCategory="truck">
+      <Properties>
+        <Property name="AirDragCoefficient" value="0.8"/>
+        <Property name="AxleRatio" value="4.0"/>
+        <Property name="DecelerationFromPowertrainDrag" value="1.0"/>
+        <Property name="FrictionCoefficient" value="1.0"/>
+        <Property name="FrontSurface" value="9.0"/>
+        <Property name="GearRatio1" value="6.316"/>
+        <Property name="GearRatio2" value="4.554"/>
+        <Property name="GearRatio3" value="3.269"/>
+        <Property name="GearRatio4" value="2.352"/>
+        <Property name="GearRatio5" value="1.692"/>
+        <Property name="GearRatio6" value="1.217"/>
+        <Property name="GearRatio7" value="0.876"/>
+        <Property name="GearRatio8" value="0.630"/>
+        <Property name="Mass" value="30000.0"/>
+        <Property name="MaximumEngineSpeed" value="2500.0"/>
+        <Property name="MaximumEngineTorque" value="1400.0"/>
+        <Property name="MinimumEngineSpeed" value="600.0"/>
+        <Property name="MinimumEngineTorque" value="-140.0"/>
+        <Property name="MomentInertiaPitch" value="0.0"/>
+        <Property name="MomentInertiaRoll" value="0.0"/>
+        <Property name="MomentInertiaYaw" value="0.0"/>
+        <Property name="NumberOfGears" value="8"/>
+        <Property name="SteeringRatio" value="15.0"/>
+      </Properties>
+      <BoundingBox>
+        <Center x="2.685" y="0.0" z="1.74"/>
+        <Dimensions width="3.16" length="8.83" height="3.48"/>
+      </BoundingBox>
+      <Performance maxSpeed="25.0" maxAcceleration="9.80665" maxDeceleration="9.80665"/>
+      <Axles>
+        <FrontAxle maxSteering="0.4352" wheelDiameter="0.808" trackWidth="1.8" positionX="4.36" positionZ="0.404"/>
+        <RearAxle maxSteering="0.0" wheelDiameter="0.808" trackWidth="1.8" positionX="0.0" positionZ="0.404"/>
+      </Axles>
+    </Vehicle>
+    <Vehicle name="bicycle" vehicleCategory="bicycle">
+      <Properties>
+        <Property name="AirDragCoefficient" value="0.3"/>
+        <Property name="AxleRatio" value="3.0"/>
+        <Property name="DecelerationFromPowertrainDrag" value="0.5"/>
+        <Property name="FrictionCoefficient" value="1.0"/>
+        <Property name="FrontSurface" value="1.9"/>
+        <Property name="GearRatio1" value="4.350"/>
+        <Property name="GearRatio2" value="2.496"/>
+        <Property name="GearRatio3" value="1.665"/>
+        <Property name="GearRatio4" value="1.230"/>
+        <Property name="GearRatio5" value="1.0"/>
+        <Property name="GearRatio6" value="0.851"/>
+        <Property name="Mass" value="90.0"/>
+        <Property name="MaximumEngineSpeed" value="6000.0"/>
+        <Property name="MaximumEngineTorque" value="540.0"/>
+        <Property name="MinimumEngineSpeed" value="900.0"/>
+        <Property name="MinimumEngineTorque" value="-54.0"/>
+        <Property name="MomentInertiaPitch" value="0.0"/>
+        <Property name="MomentInertiaRoll" value="0.0"/>
+        <Property name="MomentInertiaYaw" value="0.0"/>
+        <Property name="NumberOfGears" value="6"/>
+        <Property name="SteeringRatio" value="10.7"/>
+      </Properties>
+      <BoundingBox>
+        <Center x="0.175" y="0.0" z="0.9325"/>
+        <Dimensions width="0.5" length="1.89" height="1.865"/>
+      </BoundingBox>
+      <Performance maxSpeed="10.0" maxAcceleration="9.80665" maxDeceleration="9.80665"/>
+      <Axles>
+        <FrontAxle maxSteering="1.5708" wheelDiameter="0.636" trackWidth="0.1" positionX="1.04" positionZ="0.318"/>
+        <RearAxle maxSteering="0.0" wheelDiameter="0.636" trackWidth="0.1" positionX="0.0" positionZ="0.318"/>
+      </Axles>
+    </Vehicle>
+  </Catalog>
+</OpenSCENARIO>

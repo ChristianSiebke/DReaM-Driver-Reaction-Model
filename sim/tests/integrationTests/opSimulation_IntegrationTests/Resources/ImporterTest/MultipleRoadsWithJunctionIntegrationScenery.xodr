@@ -1,0 +1,255 @@
+<?xml version="1.0" ?>
+<!--
+*******************************************************************************************
+Dummy scenery for IntegrationTests.
+This scenery consists of multiple roads with a junction connecting them.
+				|  Road 1  || Junction ||
+				|  100.0m  ||		   ||
+-1.width = 3.0	|++++++++++||< Path 4 >||++-1++ Road 2 ++++| length = 200.0m
+-2.width = 4.0	|++++++++++||< Path 4 >||++-2++ Road 2 ++++| length = 200.0m
+-3.width = 5.0	|++++++++++||< Path 5 >||++-1++ Road 3 ++++| length = 300.0m
+-4.width = 6.0	|++++++++++||< Path 5 >||++-2++ Road 3 ++++| length = 300.0m
+*******************************************************************************************
+-->
+<OpenDRIVE>
+	<header revMajor="1" revMinor="1" name="MultipleRoadsWithJunctions" version="1" date="Thu Feb 25 13:00:00 2019" north="2.0000000000000000e+003" south="-2.0000000000000000e+003" east="2.0000000000000000e+003" west="-2.0000000000000000e+003" />
+	<road name="" length="100.0" id="1" junction="-1">
+        <link>
+            <successor elementType="junction" elementId="6"/>
+        </link>
+		<planView>
+		  <geometry s="0.0000000000000000e+000" x="0" y="7.5" hdg="0" length="100.0">
+		   <line/>
+		  </geometry>
+		</planView>
+		<elevationProfile/>
+		<lateralProfile/>
+		<lanes>
+		  <laneSection s="0.0000000000000000e+000">
+			<left/>
+			<center>
+			  <lane id="0" type="border" level="true">
+				<link/>
+				<roadMark weight="standard" sOffset="0" type="solid" color="standard" width="0.12" laneChange="both"/>
+			  </lane>
+			</center>
+			<right>
+				<lane id="-1" type="driving" level="true">
+					<link>
+						<successor id="-1" />
+					</link>
+					<width sOffset="0" a="3.0" b="0" c="0" d="0" />
+					<roadMark weight='standard' sOffset='0' type='broken' color='standard' width='0.12' laneChange='both' />
+				</lane>
+				<lane id="-2" type="driving" level="true">
+					<link>
+						<successor id="-2" />
+					</link>
+					<width sOffset="0" a="4.0" b="0" c="0" d="0" />
+					<roadMark weight='standard' sOffset='0' type='broken' color='standard' width='0.12' laneChange='both' />
+				</lane>
+				<lane id="-3" type="driving" level="true">
+					<link>
+						<successor id="-1" />
+					</link>
+					<width sOffset="0" a="5.0" b="0" c="0" d="0" />
+					<roadMark weight='standard' sOffset='0' type='broken' color='standard' width='0.12' laneChange='both' />
+				</lane>
+				<lane id="-4" type="driving" level="true">
+					<link>
+						<successor id="-2" />
+					</link>
+					<width sOffset="0" a="6.0" b="0" c="0" d="0" />
+					<roadMark weight='standard' sOffset='0' type='solid' color='standard' width='0.12' laneChange='both' />
+				</lane>
+			</right>
+		  </laneSection>
+		</lanes>
+		<objects/>
+		<signals/>
+	</road>
+	<!-- upper outgoing road -->
+	<road name="" length="200.0" id="2" junction="-1">
+        <link>
+            <predecessor elementType="junction" elementId="6"/>
+        </link>
+		<planView>
+		  <geometry s="0.0000000000000000e+000" x="120.0" y="7.5" hdg="0" length="200.0">
+		   <line/>
+		  </geometry>
+		</planView>
+		<elevationProfile/>
+		<lateralProfile/>
+		<lanes>
+		  <laneSection s="0.0000000000000000e+000">
+			<left/>
+			<center>
+			  <lane id="0" type="border" level="true">
+				<link/>
+				<roadMark weight="standard" sOffset="0" type="solid" color="standard" width="0.12" laneChange="both"/>
+			  </lane>
+			</center>
+			<right>
+				<lane id="-1" type="driving" level="true">
+					<link>
+						<predecessor id="-1" />
+					</link>
+					<width sOffset="0" a="3.0" b="0" c="0" d="0" />
+					<roadMark weight='standard' sOffset='0' type='broken' color='standard' width='0.12' laneChange='both' />
+				</lane>
+				<lane id="-2" type="driving" level="true">
+					<link>
+						<predecessor id="-2" />
+					</link>
+					<width sOffset="0" a="4.0" b="0" c="0" d="0" />
+					<roadMark weight='standard' sOffset='0' type='broken' color='standard' width='0.12' laneChange='both' />
+				</lane>
+			</right>
+		  </laneSection>
+		</lanes>
+		<objects/>
+		<signals/>
+	</road>
+	<!-- lower outgoing road -->
+	<road name="" length="300.0" id="3" junction="-1">
+        <link>
+            <predecessor elementType="junction" elementId="6"/>
+        </link>
+		<planView>
+		  <geometry s="0.0000000000000000e+000" x="120.0" y="0.5" hdg="0" length="300.0">
+		   <line/>
+		  </geometry>
+		</planView>
+		<elevationProfile/>
+		<lateralProfile/>
+		<lanes>
+		  <laneSection s="0.0000000000000000e+000">
+			<left/>
+			<center>
+			  <lane id="0" type="border" level="true">
+				<link/>
+				<roadMark weight="standard" sOffset="0" type="solid" color="standard" width="0.12" laneChange="both"/>
+			  </lane>
+			</center>
+			<right>
+				<lane id="-1" type="driving" level="true">
+					<link>
+						<predecessor id="-1" />
+					</link>
+					<width sOffset="0" a="5.0" b="0" c="0" d="0" />
+					<roadMark weight='standard' sOffset='0' type='broken' color='standard' width='0.12' laneChange='both' />
+				</lane>
+				<lane id="-2" type="driving" level="true">
+					<link>
+						<predecessor id="-2" />
+					</link>
+					<width sOffset="0" a="6.0" b="0" c="0" d="0" />
+					<roadMark weight='standard' sOffset='0' type='broken' color='standard' width='0.12' laneChange='both' />
+				</lane>
+			</right>
+		  </laneSection>
+		</lanes>
+		<objects/>
+		<signals/>
+	</road>
+	<!-- upper connecting road -->
+	<road name="" length="20.0" id="4" junction="6">
+        <link>
+            <predecessor elementType="road" elementId="1" contactPoint="end"/>
+			<successor elementType="road" elementId="2" contactPoint="start"/> 
+        </link>
+		<planView>
+		  <geometry s="0.0000000000000000e+000" x="100.0" y="7.5" hdg="0" length="20.0">
+		   <line/>
+		  </geometry>
+		</planView>
+		<elevationProfile/>
+		<lateralProfile/>
+		<lanes>
+		  <laneSection s="0.0000000000000000e+000">
+			<left/>
+			<center>
+			  <lane id="0" type="border" level="true">
+				<link/>
+				<roadMark weight="standard" sOffset="0" type="solid" color="standard" width="0.12" laneChange="both"/>
+			  </lane>
+			</center>
+			<right>
+				<lane id="-1" type="driving" level="true">
+					<link>
+						<predecessor id="-1" />
+						<successor id="-1" />
+					</link>
+					<width sOffset="0" a="3.0" b="0" c="0" d="0" />
+					<roadMark weight='standard' sOffset='0' type='broken' color='standard' width='0.12' laneChange='both' />
+				</lane>
+				<lane id="-2" type="driving" level="true">
+					<link>
+						<predecessor id="-2" />
+						<successor id="-2" />
+					</link>
+					<width sOffset="0" a="4.0" b="0" c="0" d="0" />
+					<roadMark weight='standard' sOffset='0' type='broken' color='standard' width='0.12' laneChange='both' />
+				</lane>
+			</right>
+		  </laneSection>
+		</lanes>
+		<objects/>
+		<signals/>
+	</road>
+	<!-- lower connecting road -->
+	<road name="" length="20.0" id="5" junction="6">
+        <link>
+            <predecessor elementType="road" elementId="1" contactPoint="end"/>
+			<successor elementType="road" elementId="3" contactPoint="start"/> 
+        </link>
+		<planView>
+		  <geometry s="0.0000000000000000e+000" x="100.0" y="0.5" hdg="0" length="20.0">
+		   <line/>
+		  </geometry>
+		</planView>
+		<elevationProfile/>
+		<lateralProfile/>
+		<lanes>
+		  <laneSection s="0.0000000000000000e+000">
+			<left/>
+			<center>
+			  <lane id="0" type="border" level="true">
+				<link/>
+				<roadMark weight="standard" sOffset="0" type="solid" color="standard" width="0.12" laneChange="both"/>
+			  </lane>
+			</center>
+			<right>
+				<lane id="-1" type="driving" level="true">
+					<link>
+						<predecessor id="-3" />
+						<successor id="-1" />
+					</link>
+					<width sOffset="0" a="5.0" b="0" c="0" d="0" />
+					<roadMark weight='standard' sOffset='0' type='broken' color='standard' width='0.12' laneChange='both' />
+				</lane>
+				<lane id="-2" type="driving" level="true">
+					<link>
+						<predecessor id="-4" />
+						<successor id="-2" />
+					</link>
+					<width sOffset="0" a="6.0" b="0" c="0" d="0" />
+					<roadMark weight='standard' sOffset='0' type='broken' color='standard' width='0.12' laneChange='both' />
+				</lane>
+			</right>
+		  </laneSection>
+		</lanes>
+		<objects/>
+		<signals/>
+	</road>
+	<junction name="Junction" id="6">
+		<connection id="12" incomingRoad="1" connectingRoad="4" contactPoint="start">
+			<laneLink from="-1" to="-1"/>
+			<laneLink from="-2" to="-2"/>
+		</connection>
+		<connection id="13" incomingRoad="1" connectingRoad="5" contactPoint="start">
+			<laneLink from="-3" to="-1"/>
+			<laneLink from="-4" to="-2"/>
+		</connection>
+	</junction>
+</OpenDRIVE>

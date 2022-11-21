@@ -1,0 +1,27 @@
+Conan tips:
+	- Install and build if something is binaries are missing
+		$ conan install <path to conanfile.txt> --build=missing
+	- CleanUp everything
+		$ conan remove "*" -s -b -f
+	- create new package
+		$ conan new myPackage
+	- build and export recipe to local cache
+		$ conan create <path to conanfile.py> myPackage/<version>
+	- export recipe to local cache
+		$ conan export <path to conanfile.py> myPackage/<version>
+	- show what packages are currently in the local cache
+		$ conan search
+	- show what´s in your current default profile
+		$ conan profile show default
+	- show dependencies 
+		$ conan info <path to conanfile.txt>
+
+    - to build manually and step by step while developing a recipe 
+        - call source function
+            $ conan source <path to conanfile.py> --source-folder=<source_folder>
+        - call install function which installs the dependencies and calls the import function
+            $ conan install <path to conanfile.py> --install-folder=<install_folder, e.g. "build> --build=missing
+        - call build function
+            $ conan build <path to conanfile.py> --source-folder=<source_folder> --build-folder=<build_folder>
+        - call package function
+            $ conan package <path to conanfile.py> --source-folder=<source_folder> --build-folder=<build_folder> --package-folder<package_folder>
