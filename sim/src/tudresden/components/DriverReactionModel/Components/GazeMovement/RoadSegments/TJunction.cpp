@@ -55,9 +55,11 @@ void TJunction::CalculateControlFixPointsOnTJunction() {
         Common::Vector2d startPoinStraightConLane = {(straightConLane->GetFirstPoint())->x, (straightConLane->GetFirstPoint())->y};
         double direction = (straightConLane->GetFirstPoint())->hdg;
         auto oncomingPoint = Common::CreatPointInDistance(viewingDepthIntoRoad, startPoinStraightConLane, direction + M_PI);
+        auto oncomingPoint1 = Common::CreatPointInDistance(viewingDepthIntoRoad, startPoinStraightConLane, direction + M_PI - .1);
+        auto oncomingPoint2 = Common::CreatPointInDistance(viewingDepthIntoRoad, startPoinStraightConLane, direction + M_PI + .1);
         controlFixPointsOnTJunction.push_back(oncomingPoint);
-        controlFixPointsOnTJunction.push_back(oncomingPoint);
-        controlFixPointsOnTJunction.push_back(oncomingPoint);
+        controlFixPointsOnTJunction.push_back(oncomingPoint1);
+        controlFixPointsOnTJunction.push_back(oncomingPoint2);
     }
     else {
         if (layout != TJunctionLayout::LeftRight) {

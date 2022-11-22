@@ -99,13 +99,13 @@ void GazeMovement::UpdateRoadSegment() {
                     }
                 }
                 TJunctionLayout layout;
-                if (nextLanes.leftLanes.size() > 0 && nextLanes.straightLanes.size() > 0 && nextLanes.leftLanes.size() == 0) {
+                if (nextLanes.leftLanes.size() > 0 && nextLanes.straightLanes.size() > 0 && nextLanes.rightLanes.size() == 0) {
                     layout = TJunctionLayout::LeftStraight;
                 }
-                else if (nextLanes.leftLanes.size() > 0 && nextLanes.straightLanes.size() == 0 && nextLanes.leftLanes.size() > 0) {
+                else if (nextLanes.leftLanes.size() > 0 && nextLanes.straightLanes.size() == 0 && nextLanes.rightLanes.size() > 0) {
                     layout = TJunctionLayout::LeftRight;
                 }
-                else if (nextLanes.leftLanes.size() == 0 && nextLanes.straightLanes.size() > 0 && nextLanes.leftLanes.size() > 0) {
+                else if (nextLanes.leftLanes.size() == 0 && nextLanes.straightLanes.size() > 0 && nextLanes.rightLanes.size() > 0) {
                     layout = TJunctionLayout::StraightRight;
                 }
                 else {
