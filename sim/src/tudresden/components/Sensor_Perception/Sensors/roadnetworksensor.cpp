@@ -271,7 +271,19 @@ MentalInfrastructure::Lane *RoadNetworkSensor::ConvertLane(const OWL::Lane *lane
     }
 
     AddLaneGeometry(newLane.get(), lane);
-    newLane->SetRoad(ConvertRoad(&lane->GetSection().GetRoad()));
+    auto road = ConvertRoad(&lane->GetSection().GetRoad());
+    newLane->SetRoad(road);
+
+    // convert traffic signs
+    for (auto &value : lane->GetTrafficSigns()) {
+        const_cast<MentalInfrastructure::Road *>(road)->AddTrafficSign(ConvertTrafficSign(road, value));
+    }
+
+    // convert traffic lights
+    for (auto &value : lane->GetTrafficLights()) {
+        const_cast<MentalInfrastructure::Road *>(road)->AddTrafficLight(ConvertTrafficLight(road, value));
+    }
+
     return newLane.get();
 }
 
@@ -370,21 +382,6 @@ const MentalInfrastructure::Road *RoadNetworkSensor::ConvertRoad(const OWL::Inte
     auto newRoad = std::make_shared<MentalInfrastructure::Road>(openDriveIdRoad, GenerateUniqueId(), posXStart, posYStart, hdg, length);
     perceptionData->roads.push_back(newRoad);
 
-    // FIXME re-implement Traffic Signs
-    // the framework does not provide a way of directly finding out what road a traffic sign belongs to
-    // using isValidForLane(OwlId) it would be possible to check if the sign is valid for any lane of the road and then assign it
-
-    // convert traffic signs
-    for (auto &[key, value] : worldData->GetTrafficSigns()) {
-        for (auto &section : sections) {
-            for (auto &lane : section->GetLanes()) {
-                if (value->IsValidForLane(lane->GetId())) {
-                    newRoad->AddTrafficSign(ConvertTrafficSign(newRoad.get(), value));
-                }
-            }
-        } 
-    }
-
     const MentalInfrastructure::Section *lastSectionPtr = nullptr;
 
     int secCtr = 0;
@@ -438,19 +435,72 @@ const MentalInfrastructure::Road *RoadNetworkSensor::ConvertRoad(const OWL::Inte
 
 const MentalInfrastructure::TrafficSign *RoadNetworkSensor::ConvertTrafficSign(const MentalInfrastructure::Road *road,
                                                                                const OWL::Interfaces::TrafficSign *sign) {
-    // TODO fix t value being -42
-    auto newSign = std::make_shared<MentalInfrastructure::TrafficSign>(
-        (OdId)sign->GetId(), GenerateUniqueId(), road, sign->GetSpecification(0).value, -42, sign->GetS(),
-        Common::Vector2d(sign->GetReferencePointPosition().x, sign->GetReferencePointPosition().y), sign->GetSpecification(0).type);
+    auto trafficSignLookup = perceptionData->lookupTableRoadNetwork.trafficSigns;
+    if (trafficSignLookup.find(sign->GetId()) == trafficSignLookup.end()) {
+        return trafficSignLookup[sign->GetId()];
+    }
 
-    perceptionData->lookupTableRoadNetwork.trafficSigns.insert(std::make_pair(sign->GetId(), newSign.get()));
+    auto newSign = std::make_shared<MentalInfrastructure::TrafficSign>(
+        (OdId)sign->GetId(), GenerateUniqueId(), road, sign->GetS(),
+        Common::Vector2d(sign->GetReferencePointPosition().x, sign->GetReferencePointPosition().y), sign->GetSpecification(0).value,
+        sign->GetSpecification(0).type);
+
+    for (const auto lane : road->GetLanes()) {
+        if (sign->IsValidForLane(lane->GetOwlId()))
+            newSign->AddValidLane(lane);
+    }
+
+    trafficSignLookup.insert(std::make_pair(sign->GetId(), newSign.get()));
     perceptionData->trafficSigns.push_back(newSign);
     return newSign.get();
 }
 
+const MentalInfrastructure::TrafficLight *RoadNetworkSensor::ConvertTrafficLight(const MentalInfrastructure::Road *road,
+                                                                                 const OWL::Interfaces::TrafficLight *trafficLight) {
+    auto trafficLightLookup = perceptionData->lookupTableRoadNetwork.trafficLights;
+    if (trafficLightLookup.find(trafficLight->GetId()) == trafficLightLookup.end()) {
+        return trafficLightLookup[trafficLight->GetId()];
+    }
+
+    auto newLight = std::make_shared<MentalInfrastructure::TrafficLight>(
+        (OdId)trafficLight->GetId(), GenerateUniqueId(), road, trafficLight->GetS(),
+        Common::Vector2d(trafficLight->GetReferencePointPosition().x, trafficLight->GetReferencePointPosition().y),
+        (MentalInfrastructure::TrafficLightType)trafficLight->GetSpecification(0).type);
+
+    for (const auto lane : road->GetLanes()) {
+        if (trafficLight->IsValidForLane(lane->GetOwlId()))
+            newLight->AddValidLane(lane);
+    }
+
+    trafficLightLookup.insert(std::make_pair(trafficLight->GetId(), newLight.get()));
+    perceptionData->trafficLights.push_back(newLight);
+    return newLight.get();
+}
+
+void RoadNetworkSensor::UpdateTrafficLights() {
+    auto worldData = static_cast<OWL::WorldData *>(world->GetWorldData());
+    auto trafficLightLookup = perceptionData->lookupTableRoadNetwork.trafficLights;
+
+    // TODO maybe switch the for loops after extensive testing so the error message is not necessary?
+    // should only be done if it is certain, that all traffic lights are converted correctly
+    for (auto &[key, value] : worldData->GetTrafficLights()) {
+        if (trafficLightLookup.find(value->GetId()) != trafficLightLookup.end()) {
+            trafficLightLookup.at(value->GetId())->SetState((MentalInfrastructure::TrafficLightState)value->GetState());
+        }
+        else {
+            // this case should not occur if all traffic lights are added correctly during scenery import
+            std::string message = __FILE__ " Line: " + std::to_string(__LINE__) + " The traffic light " + value->GetId() +
+                                  " was never converted (is it not valid for a lane?). Skipping...";
+            std::cerr << message << std::endl;
+        }
+    }
+}
+
 std::shared_ptr<InfrastructurePerception> RoadNetworkSensor::GetRoadNetwork() {
-    if (infrastructureExists)
+    if (infrastructureExists) {
+        UpdateTrafficLights();
         return perceptionData;
+    }
 
     auto worldData = static_cast<OWL::WorldData *>(world->GetWorldData());
 

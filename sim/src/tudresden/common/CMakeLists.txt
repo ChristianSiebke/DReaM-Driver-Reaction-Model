@@ -6,7 +6,9 @@ add_openpass_target(
     MentalInfrastructure/Junction.h
     MentalInfrastructure/Lane.h
     MentalInfrastructure/Road.h
-    MentalInfrastructure/Trafficsign.h
+    MentalInfrastructure/TrafficSignal.h
+    MentalInfrastructure/TrafficSign.h
+    MentalInfrastructure/TrafficLight.h
     MentalInfrastructure/RoadmapGraph/roadmap_graph.h
     Definitions.h
     Helper.h
@@ -15,13 +17,17 @@ add_openpass_target(
     WorldRepresentation.h
     BehaviourData.h
     complexSignals.h
+    MentalInfrastructure/Definitions.h
+    TimeMeasurement.hpp
  
   SOURCES
     MentalInfrastructure/Element.cpp
     MentalInfrastructure/Junction.cpp
     MentalInfrastructure/Lane.cpp
     MentalInfrastructure/Road.cpp
-    MentalInfrastructure/Trafficsign.cpp
+    MentalInfrastructure/TrafficSignal.cpp
+    MentalInfrastructure/TrafficSign.cpp
+    MentalInfrastructure/TrafficLight.cpp
     MentalInfrastructure/RoadmapGraph/roadmap_graph.cpp
     Helper.cpp
     PerceptionData.cpp    

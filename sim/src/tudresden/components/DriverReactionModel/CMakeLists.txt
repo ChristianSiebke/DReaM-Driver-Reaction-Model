@@ -41,7 +41,7 @@ add_openpass_target(
     Components/GazeMovement/RoadSegments/TJunction.h
     Components/Importer/BehaviourConverter.h
     Components/Importer/BehaviourImporter.h
-    Components/TrafficSignMemory/TrafficSignMemory.h   
+    Components/TrafficSignalMemory/TrafficSignalMemory.h   
   SOURCES
     Algorithm_DReaM.cpp
     Algorithm_DReaMImplementation.cpp
@@ -73,7 +73,7 @@ add_openpass_target(
     Components/GazeMovement/RoadSegments/TJunction.cpp
     Components/Importer/BehaviourConverter.cpp
     Components/Importer/BehaviourImporter.cpp
-    Components/TrafficSignMemory/TrafficSignMemory.cpp
+    Components/TrafficSignalMemory/TrafficSignalMemory.cpp
     ../../../common/xmlParser.cpp
   INCDIRS
     ${OPENPASS_SIMCORE_DIR}/core

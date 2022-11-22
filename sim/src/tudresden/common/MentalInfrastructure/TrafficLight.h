@@ -15,37 +15,31 @@
 
 #include "Definitions.h"
 #include "TrafficSignal.h"
-#include "unordered_map"
 
 namespace MentalInfrastructure {
 
-class TrafficSign : public TrafficSignal {
+class TrafficLight : public TrafficSignal {
 public:
-    TrafficSign(OdId openDriveId, DReaMId dreamId, const MentalInfrastructure::Road *road, double s, Common::Vector2d pos, double v,
-                CommonTrafficSign::Type commonType) :
-        TrafficSignal(openDriveId, dreamId, road, s, pos), value(v) {
-        type = (trafficSignMapping.at(commonType));
-        priority = Priority(type);
+    TrafficLight(OdId openDriveId, DReaMId dreamId, const MentalInfrastructure::Road *road, double s, Common::Vector2d pos,
+                 TrafficLightType type) :
+        TrafficSignal(openDriveId, dreamId, road, s, pos), type(type) {
     }
-    ~TrafficSign() = default;
+    ~TrafficLight() = default;
 
-    double GetValue() const {
-        return value;
+    void SetState(TrafficLightState newState) {
+        state = newState;
     }
 
-    TrafficSignType GetType() const {
+    TrafficLightState GetState() const {
+        return state;
+    }
+
+    TrafficLightType GetType() const {
         return type;
     }
 
-    int GetPriority() const {
-        return priority;
-    }
-
 private:
-    int Priority(TrafficSignType sign);
-
-    TrafficSignType type;
-    int priority;
-    double value;
+    TrafficLightState state{TrafficLightState::Off};
+    TrafficLightType type;
 };
 } // namespace MentalInfrastructure

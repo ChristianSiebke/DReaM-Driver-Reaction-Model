@@ -11,7 +11,8 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  *****************************************************************************/
-#include "Trafficsign.h"
+
+#include "TrafficSign.h"
 
 namespace MentalInfrastructure {
 
