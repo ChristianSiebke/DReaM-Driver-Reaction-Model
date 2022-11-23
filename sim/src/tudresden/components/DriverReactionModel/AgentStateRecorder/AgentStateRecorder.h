@@ -109,7 +109,6 @@ public:
     void AddGazeStates(int time, int id, GazeState);
 
     void AddOtherAgents(int time, int id, std::vector<AgentPerception>);
-<<<<<<< HEAD
 
     void AddCrossingInfos(int time, int id, CrossingInfo);
 
