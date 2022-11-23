@@ -96,4 +96,10 @@ void Road::AddTrafficSign(const TrafficSign *sign) {
     }
 }
 
+void Road::AddTrafficLight(const TrafficLight *trafficLight) {
+    if (std::find(trafficLights.begin(), trafficLights.end(), trafficLight) == trafficLights.end()) {
+        trafficLights.push_back(trafficLight);
+    }
+}
+
 } // namespace MentalInfrastructure

@@ -44,6 +44,7 @@ void AABBTreeHandler::FirstExecution()
     }
 
     auto trafficSigns = worldData->GetTrafficSigns();
+    auto trafficLights = worldData->GetTrafficLights();
     auto agents = world->GetAgents();
 
     // initial tree generated (size = size of all objects in the world)
@@ -62,7 +63,7 @@ void AABBTreeHandler::FirstExecution()
 
     for (const auto &[_, trafficSign] : trafficSigns)
     {
-        auto obj = std::make_shared<ObservedTrafficSign>();
+        auto obj = std::make_shared<ObservedTrafficSignal>();
         obj->area = ConstructPolygon(trafficSign);
         obj->RecalculateAABB();
         obj->objectType = ObservedObjectType::TrafficSign;
@@ -78,8 +79,29 @@ void AABBTreeHandler::FirstExecution()
         }
 
         aabbTree->InsertObject(obj);
-        this->trafficSigns.push_back(obj);
-        this->trafficSignsMappingReversed.insert(std::make_pair(obj, trafficSign));
+        this->trafficSignals.push_back(obj);
+        this->trafficSignalsMappingReversed.insert(std::make_pair(obj, trafficSign->GetId()));
+    }
+
+    for (const auto &[_, trafficLight] : trafficLights) {
+        auto obj = std::make_shared<ObservedTrafficSignal>();
+        obj->area = ConstructPolygon(trafficLight);
+        obj->RecalculateAABB();
+        obj->objectType = ObservedObjectType::TrafficLight;
+        obj->referencePosition = Common::Vector2d(trafficLight->GetReferencePointPosition().x, trafficLight->GetReferencePointPosition().y);
+        try {
+            obj->id = std::stoi(trafficLight->GetId());
+        }
+        catch (std::invalid_argument const &ex) {
+            printf("Error while trying to add traffic sign with id %s to the AABBTree, ignoring.\nPlease be aware that only integer ids "
+                   "are supported.",
+                   obj->id);
+            continue;
+        }
+
+        aabbTree->InsertObject(obj);
+        this->trafficSignals.push_back(obj);
+        this->trafficSignalsMappingReversed.insert(std::make_pair(obj, trafficLight->GetId()));
     }
 
     for (const auto &[_, agent] : agents)

@@ -56,7 +56,7 @@
 
 #include "Common/ComplexSignals.h"
 #include "Common/primitiveSignals.h"
-#include "Components/TrafficSignMemory/TrafficSignMemory.h"
+#include "Components/TrafficSignalMemory/TrafficSignalMemory.h"
 #include "DriverReactionModel.h"
 #include "core/opSimulation/framework/commandLineParser.h"
 #include "core/opSimulation/framework/sampler.h"
@@ -137,7 +137,7 @@ class AlgorithmDReaMImplementation : public AlgorithmInterface {
     std::vector<std::shared_ptr<AgentPerception>> ambientAgents;
 
     //! All perceived traffic signs
-    std::vector<const MentalInfrastructure::TrafficSign*> trafficSigns;
+    std::vector<const MentalInfrastructure::TrafficSignal*> trafficSignals;
 
     //! Ego perception information of sensor_DriverPerception
     std::shared_ptr<EgoPerception> egoPerception;

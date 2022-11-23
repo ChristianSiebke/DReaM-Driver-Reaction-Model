@@ -11,9 +11,9 @@
 #pragma once
 #include "Common/BehaviourData.h"
 #include "Common/Helper.h"
-#include "Components/TrafficSignMemory/TrafficSignMemory.h"
-#include "ReactionTime.h"
 #include "Common/WorldRepresentation.h"
+#include "Components/TrafficSignalMemory/TrafficSignalMemory.h"
+#include "ReactionTime.h"
 
 struct WorldRepresentation;
 
@@ -24,7 +24,7 @@ class Memory {
         : cycletime{static_cast<double>(cycletime)}, behaviourData{behaviourData},
           reactionTime(behaviourData.cmBehaviour.initialPerceptionTime, behaviourData.cmBehaviour.perceptionLatency, cycletime,
                        stochastics) {
-        trafficSignMemory = std::make_unique<TrafficSignMemory::TrafficSignMemory>();
+        trafficSignalMemory = std::make_unique<TrafficSignalMemory::TrafficSignalMemory>();
     }
     Memory(const Memory&) = delete;
     Memory(Memory&&) = delete;
@@ -40,11 +40,11 @@ class Memory {
 
     void UpdateSensorInput(int time, std::shared_ptr<EgoPerception> egoAgent, std::vector<std::shared_ptr<AgentPerception>> agents,
                            std::shared_ptr<InfrastructurePerception> infrastruct,
-                           std::vector<const MentalInfrastructure::TrafficSign*> signs) {
+                           std::vector<const MentalInfrastructure::TrafficSignal *> s) {
         timestamp = time;
         egoAgentPerception = egoAgent;
         infrastructurePerception = infrastruct;
-        lastSeenTrafficSigns = signs;
+        lastSeenTrafficSignals = s;
         reactionTime.Update(agents);
     }
 
@@ -52,7 +52,7 @@ class Memory {
     const EgoAgentRepresentation* UpdateEgoAgentRepresentation();
     const AmbientAgentRepresentations* UpdateAmbientAgentRepresentations();
     const InfrastructureRepresentation* UpdateInfrastructureRepresentation();
-    const VisibleTrafficSigns* UpdateVisibleTrafficSigns();
+    const VisibleTrafficSignals *UpdateVisibleTrafficSignals();
 
     /*!
      * \brief extrapolate the internal data of an ambient agent
@@ -70,7 +70,7 @@ class Memory {
     // perceived data
     std::shared_ptr<InfrastructurePerception> infrastructurePerception;
     std::shared_ptr<EgoPerception> egoAgentPerception;
-    std::vector<const MentalInfrastructure::TrafficSign*> lastSeenTrafficSigns;
+    std::vector<const MentalInfrastructure::TrafficSignal *> lastSeenTrafficSignals;
 
     // current active data
     EgoAgentRepresentation egoAgent;
@@ -83,6 +83,6 @@ class Memory {
     ReactionTime reactionTime;
 
     // sub components
-    std::unique_ptr<TrafficSignMemory::TrafficSignMemory> trafficSignMemory;
+    std::unique_ptr<TrafficSignalMemory::TrafficSignalMemory> trafficSignalMemory;
 };
 } // namespace CognitiveMap

@@ -54,6 +54,7 @@ void AgentStateRecorder::AddOtherAgents(int time, int id, std::vector<AgentPerce
     }
     record.observedAgents.at(time).insert(std::make_pair(id, agents));
 }
+
 void AgentStateRecorder::AddFixationPoints(int time, int id, std::vector<Common::Vector2d> fixationPoints) {
     if (record.segmentControlFixationPoints.find(time) == record.segmentControlFixationPoints.end()) {
         std::map<agentID, std::vector<Common::Vector2d>> idMap;
@@ -62,20 +63,34 @@ void AgentStateRecorder::AddFixationPoints(int time, int id, std::vector<Common:
     record.segmentControlFixationPoints.at(time).insert(std::make_pair(id, fixationPoints));
 }
 
+void AgentStateRecorder::AddTrafficSignals(int time, int id, std::unordered_map<DReaMId, MemorizedTrafficSignal> *signals) {
+    if (record.trafficSignalMemory.find(time) == record.trafficSignalMemory.end()) {
+        std::map<agentID, std::vector<OdId>> idMap;
+        record.trafficSignalMemory.insert(std::make_pair(time, idMap));
+    }
+
+    std::vector<OdId> signalIdList;
+    for (const auto &[id, signal] : *signals) {
+        signalIdList.push_back(signal.trafficSignal->GetOpenDriveId());
+    }
+    record.trafficSignalMemory[time].insert(std::make_pair(id, signalIdList));
+}
+
 std::string AgentStateRecorder::GenerateDataSet(int time, int agentId) {
     std::string outputLine;
 
-    // GazeType,Int,ufovAngle,openingAngle,viewDistance
+    // gaze information:
+    // <GazeType>, <ScanAOI>, <ufovAngle>, <openingAngle>, <viewDistance>
     GazeState gazeState = record.gazeStates.at(time).at(agentId);
-
     outputLine += gazeTypes[(int)gazeState.fixationState.first] + ",";
     outputLine += scanAOIs[gazeState.fixationState.second] + ",";
     outputLine += std::to_string(gazeState.ufovAngle) += ",";
     outputLine += std::to_string(gazeState.openingAngle) += ",";
     outputLine += std::to_string(gazeState.viewDistance) += ",";
-    // TODO: catch for empty GazeType
+    // TODO catch for empty GazeType
 
-    //[otherAgentId,double,double,double]
+    // other agents as perceived by the current:
+    // [{<id> | <x> | <y> | <yaw>} | { ... }]
     outputLine += "[";
     for (auto agent : record.observedAgents.at(time).at(agentId)) {
         outputLine += "{";
@@ -86,13 +101,14 @@ std::string AgentStateRecorder::GenerateDataSet(int time, int agentId) {
     }
     outputLine += "],";
 
-    // crossingType,crossingPhase
+    // crossingType & crossingPhase:
+    // <crossingType>, <crossingPhase>
     auto crossingInfo = record.crossingInfos.at(time).at(agentId);
-
     outputLine += crossingTypes[(int)crossingInfo.type] + ",";
     outputLine += crossingPhases[(int)crossingInfo.phase] + ",";
 
-    //[FixationPointX,FixationPointY]
+    // fixation points:
+    // [{<x> | <y>} | { ... }]
     outputLine += "[";
     for (auto point : record.segmentControlFixationPoints.at(time).at(agentId)) {
         outputLine += ("{");
@@ -101,6 +117,18 @@ std::string AgentStateRecorder::GenerateDataSet(int time, int agentId) {
     }
     outputLine += "]";
     outputLine += "}";
+
+    // memorized traffic signals:
+    // [<TrafficSignalOdId> | ...]
+    outputLine += "[";
+    for (int i = 0; i < record.trafficSignalMemory.at(time).at(agentId).size(); i++) {
+        outputLine += record.trafficSignalMemory.at(time).at(agentId)[i];
+        if (i != record.trafficSignalMemory.at(time).at(agentId).size() - 1) {
+            outputLine += " | ";
+        }
+    }
+
+    outputLine += "],";
 
     return outputLine;
 }
@@ -122,7 +150,8 @@ std::string AgentStateRecorder::GenerateHeader() {
     header += "crossingPhase, ";
     header += "fixationPoints[{";
     header += "FixationPointX | ";
-    header += "FixationPointY}]";
+    header += "FixationPointY}], ";
+    header += "TrafficSignalss[TrafficSignalId]";
 
     return header;
 }

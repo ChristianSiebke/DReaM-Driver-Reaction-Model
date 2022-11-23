@@ -84,6 +84,34 @@ void GazeMovement::UpdateRoadSegment() {
                     currentSegmentType = SegmentType::XJunction;
                 }
             }
+            else if (NextJunction->GetIncomingRoads().size() == 3) {
+                NextDirectionLanes nextLanes;
+                // assumption movingInLaneDirection = true for now
+                if (auto nextLanesPtr = InfrastructurePerception::NextLanes(true, worldRepresentation.egoAgent->GetLane())) {
+                    if (nextLanesPtr.has_value()) {
+                        nextLanes = nextLanesPtr.value();
+                    }
+                }
+                TJunctionLayout layout;
+                if (nextLanes.leftLanes.size() > 0 && nextLanes.straightLanes.size() > 0 && nextLanes.rightLanes.size() == 0) {
+                    layout = TJunctionLayout::LeftStraight;
+                }
+                else if (nextLanes.leftLanes.size() > 0 && nextLanes.straightLanes.size() == 0 && nextLanes.rightLanes.size() > 0) {
+                    layout = TJunctionLayout::LeftRight;
+                }
+                else if (nextLanes.leftLanes.size() == 0 && nextLanes.straightLanes.size() > 0 && nextLanes.rightLanes.size() > 0) {
+                    layout = TJunctionLayout::StraightRight;
+                }
+                else {
+                    std::string message = __FILE__ " Line: " + std::to_string(__LINE__) + " invalid T-Junction layout";
+                    throw std::runtime_error(message);
+                }
+
+                if (currentSegmentType != SegmentType::TJunction) {
+                    roadSegment = std::make_unique<TJunction>(worldRepresentation, GetStochastic(), GetBehaviourData(), layout);
+                    currentSegmentType = SegmentType::TJunction;
+                }
+            }
             else {
                 std::string message = __FILE__ " Line: " + std::to_string(__LINE__) + "unknown node segment";
                 throw std::runtime_error(message);

@@ -15,7 +15,7 @@
 #include "Sensors/basicvisualsensor.h"
 #include "Sensors/driverperception.h"
 #include "Sensors/roadnetworksensor.h"
-#include "Sensors/trafficsignvisualsensor.h"
+#include "Sensors/trafficsignalvisualsensor.h"
 #include "include/agentInterface.h"
 
 struct GazeState;
@@ -33,7 +33,7 @@ class SensorPerceptionLogic {
           aabbTreeHandler = AABBTreeHandler::GetInstance(world);
           driverPerception = std::make_shared<DriverPerception>(agent, world, roadNetworkSensor->GetRoadNetwork());
           visualSensor = std::make_shared<BasicVisualSensor>(agent, world, roadNetworkSensor->GetRoadNetwork());
-          trafficSignVisualSensor = std::make_shared<TrafficSignVisualSensor>(agent, world, roadNetworkSensor->GetRoadNetwork());
+          trafficSignalVisualSensor = std::make_shared<TrafficSignalVisualSensor>(agent, world, roadNetworkSensor->GetRoadNetwork());
       }
     ~SensorPerceptionLogic() {
         perceivedAgents.clear();
@@ -73,18 +73,20 @@ class SensorPerceptionLogic {
     ///
     /// \brief Returns the list of currently visible traffic signs, no calculation is performed.
     ///
-    const std::vector<const MentalInfrastructure::TrafficSign*> GetTrafficSignPerception() const { return perceivedTrafficSigns; }
+    const std::vector<const MentalInfrastructure::TrafficSignal *> GetTrafficSignalPerception() const {
+        return perceivedTrafficSignals;
+    }
 
   private:
     std::shared_ptr<VisualSensorInterface<std::shared_ptr<AgentPerception>>> visualSensor;
-    std::shared_ptr<VisualSensorInterface<const MentalInfrastructure::TrafficSign*>> trafficSignVisualSensor;
+    std::shared_ptr<VisualSensorInterface<const MentalInfrastructure::TrafficSignal *>> trafficSignalVisualSensor;
     std::shared_ptr<AABBTreeHandler> aabbTreeHandler;
 
     std::shared_ptr<DriverPerception> driverPerception;
     std::shared_ptr<RoadNetworkSensor> roadNetworkSensor;
 
     std::vector<std::shared_ptr<AgentPerception>> perceivedAgents;
-    std::vector<const MentalInfrastructure::TrafficSign*> perceivedTrafficSigns;
+    std::vector<const MentalInfrastructure::TrafficSignal *> perceivedTrafficSignals;
 
     AgentInterface* driver;
     WorldInterface* world;

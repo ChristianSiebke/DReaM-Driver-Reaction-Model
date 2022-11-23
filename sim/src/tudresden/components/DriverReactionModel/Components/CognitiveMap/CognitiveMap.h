@@ -43,7 +43,7 @@ class CognitiveMap : public Component::ComponentInterface {
     virtual void Update() override;
     virtual void UpdateInput(int time, std::shared_ptr<EgoPerception> egoAgent, std::vector<std::shared_ptr<AgentPerception>> ambientAgents,
                              std::shared_ptr<InfrastructurePerception> infrastructure,
-                             std::vector<const MentalInfrastructure::TrafficSign*> trafficSigns);
+                             std::vector<const MentalInfrastructure::TrafficSignal*> trafficSignals);
 
   private:
     void UpdateWorldRepresentation();

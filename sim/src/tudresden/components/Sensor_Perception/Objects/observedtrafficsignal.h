@@ -7,22 +7,13 @@
  *
  * for further information please visit:  https://www.driver-model.de
  *****************************************************************************/
-#ifndef OBSERVEDTRAFFICSIGN_H
-#define OBSERVEDTRAFFICSIGN_H
+#pragma once
 
 #include "common/Definitions.h"
 #include "common/worldDefinitions.h"
 #include "observedstaticobject.h"
 
 ///
-/// \brief The ObservedTrafficSign struct
+/// \brief The ObservedTrafficSignal struct
 ///
-struct ObservedTrafficSign : ObservedStaticObject
-{
-    ///
-    /// \brief The type of sign
-    ///
-    CommonTrafficSign::Type signType;
-};
-
-#endif // OBSERVEDTRAFFICSIGN_H
+struct ObservedTrafficSignal : ObservedStaticObject {};

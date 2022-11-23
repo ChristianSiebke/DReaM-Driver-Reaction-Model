@@ -7,9 +7,9 @@
  *
  * for further information please visit:  https://www.driver-model.de
  *****************************************************************************/
-#include "trafficsignvisualsensor.h"
+#include "trafficsignalvisualsensor.h"
 
-void TrafficSignVisualSensor::Trigger(int timestamp, double fovAngle, double distance, double opening) {
+void TrafficSignalVisualSensor::Trigger(int timestamp, double fovAngle, double distance, double opening) {
     driverPos = Common::Vector2d(egoAgent->GetPositionX(), egoAgent->GetPositionY());
     minViewAngle = -opening / 2.0;
     maxViewAngle = opening / 2.0;
@@ -19,11 +19,11 @@ void TrafficSignVisualSensor::Trigger(int timestamp, double fovAngle, double dis
     DynamicInfrastructurePerceptionMethod();
 }
 
-void TrafficSignVisualSensor::DynamicInfrastructurePerceptionMethod() {
+void TrafficSignalVisualSensor::DynamicInfrastructurePerceptionMethod() {
     perceived.clear();
 
-    for (const auto &trafficSign : aabbTreeHandler->trafficSigns) {
-        auto rayDirection = trafficSign->referencePosition - driverPos;
+    for (const auto &trafficSignal : aabbTreeHandler->trafficSignals) {
+        auto rayDirection = trafficSignal->referencePosition - driverPos;
 
         const Ray ray(driverPos, rayDirection);
         // transform point to local sensor funnel direction
@@ -64,15 +64,23 @@ void TrafficSignVisualSensor::DynamicInfrastructurePerceptionMethod() {
         if (closest == nullptr)
             continue;
 
-        if (closest->id != trafficSign->id)
+        if (closest->id != trafficSignal->id)
             continue;
 
-        const auto &tmp2 = std::dynamic_pointer_cast<ObservedTrafficSign>(closest);
-        auto owlTrafficSign = aabbTreeHandler->trafficSignsMappingReversed.at(tmp2);
+        const auto &tmp2 = std::dynamic_pointer_cast<ObservedTrafficSignal>(closest);
+        auto signalId = aabbTreeHandler->trafficSignalsMappingReversed.at(tmp2);
 
-        auto pointerIter = infrastructurePerception->lookupTableRoadNetwork.trafficSigns.find(owlTrafficSign->GetId());
-        if (pointerIter != infrastructurePerception->lookupTableRoadNetwork.trafficSigns.end()) {
-            perceived.push_back(pointerIter->second);
+        if (tmp2->objectType == ObservedObjectType::TrafficSign) {
+            auto pointerIter = infrastructurePerception->lookupTableRoadNetwork.trafficSigns.find(signalId);
+            if (pointerIter != infrastructurePerception->lookupTableRoadNetwork.trafficSigns.end()) {
+                perceived.push_back(pointerIter->second);
+            }
+        }
+        else if (tmp2->objectType == ObservedObjectType::TrafficLight) {
+            auto pointerIter = infrastructurePerception->lookupTableRoadNetwork.trafficLights.find(signalId);
+            if (pointerIter != infrastructurePerception->lookupTableRoadNetwork.trafficLights.end()) {
+                perceived.push_back(pointerIter->second);
+            }
         }
 
         // auto pointerFind = infrastructurePerception->trafficSigns.

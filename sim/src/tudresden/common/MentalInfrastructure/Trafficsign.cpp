@@ -7,7 +7,8 @@
  *
  * for further information please visit:  https://www.driver-model.de
  *****************************************************************************/
-#include "Trafficsign.h"
+
+#include "TrafficSign.h"
 
 namespace MentalInfrastructure {
 

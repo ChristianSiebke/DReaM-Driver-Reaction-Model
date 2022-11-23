@@ -66,8 +66,8 @@ void AlgorithmDReaMImplementation::UpdateInput(int localLinkId, const std::share
         infrastructurePerception = signal->value;
     }
     else if (localLinkId == 3) {
-        std::shared_ptr<ContainerSignal<std::vector<const MentalInfrastructure::TrafficSign *>> const> signal =
-            std::dynamic_pointer_cast<ContainerSignal<std::vector<const MentalInfrastructure::TrafficSign *>> const>(data);
+        std::shared_ptr<ContainerSignal<std::vector<const MentalInfrastructure::TrafficSignal *>> const> signal =
+            std::dynamic_pointer_cast<ContainerSignal<std::vector<const MentalInfrastructure::TrafficSignal *>> const>(data);
 
         if (!signal) {
             const std::string msg = COMPONENTNAME + " invalid signaltype (localLinkId 4 = TrafficSigns)";
@@ -75,7 +75,7 @@ void AlgorithmDReaMImplementation::UpdateInput(int localLinkId, const std::share
             throw std::runtime_error(msg);
         }
 
-        trafficSigns = signal->value;
+        trafficSignals = signal->value;
     }
     else {
         const std::string msg = COMPONENTNAME + " invalid link";
@@ -136,7 +136,7 @@ void AlgorithmDReaMImplementation::Trigger(int time) {
     Q_UNUSED(time)
     try {
         std::cout << "time: " << time << std::endl;
-        DReaM.UpdateDReaM(time, egoPerception, ambientAgents, infrastructurePerception, trafficSigns);
+        DReaM.UpdateDReaM(time, egoPerception, ambientAgents, infrastructurePerception, trafficSignals);
         out_indicatorState = static_cast<int>(DReaM.GetLateralAction().indicator);
         out_longitudinalAccelerationWish = DReaM.GetAcceleration();
         outGazeState = DReaM.GetGazeState();

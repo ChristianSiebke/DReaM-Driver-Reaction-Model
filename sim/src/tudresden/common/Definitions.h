@@ -44,6 +44,8 @@ enum class ScanAOI { NONE, Right, Straight, Left, Rear, Dashboard, Other };
 enum class ControlAOI { NONE, Right, Left, Oncoming };
 enum class GazeType { NONE, ScanGlance, ObserveGlance, ControlGlance };
 
+enum class TJunctionLayout { LeftRight, LeftStraight, StraightRight };
+
 struct FixationTarget {
     Common::Vector2d fixationPoint{-999, -999};
     int fixationAgent{-999};

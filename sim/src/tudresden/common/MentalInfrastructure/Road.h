@@ -13,12 +13,14 @@
 
 #include "Element.h"
 #include "Junction.h"
+#include "TrafficLight.h"
 #include "Trafficsign.h"
 
 namespace MentalInfrastructure {
 
 class Lane;
 class TrafficSign;
+class TrafficLight;
 
 ///
 /// \brief Represents a road in the road network.
@@ -148,23 +150,39 @@ class Road : public Element {
     ///
     void AddTrafficSign(const TrafficSign* sign);
 
-  private:
-      ///
-      /// Basic information about this road.
-      ///
-      Common::Vector2d startPos;
-      double roadHdg;
-      double roadLength;
+    ///
+    /// TrafficLight data
+    ///
 
-      ///
-      /// Pointers to other objects which are children / siblings of this road.
-      ///
-      const Element *successor = nullptr;
-      const Element *predecessor = nullptr;
-      const Junction *junctionPtr = nullptr;
+    ///
+    /// \brief Adds a TrafficLight to the road.
+    /// \param the traffic light to add
+    ///
+    void AddTrafficLight(const TrafficLight *trafficLight);
 
-      std::vector<const Lane *> lanes;
-      std::vector<const TrafficSign *> trafficSigns;
+    ///
+    /// \brief Returns all traffic lights on this road.
+    ///
+    const std::vector<const TrafficLight *> &GetTrafficLights() const;
+
+private:
+    ///
+    /// Basic information about this road.
+    ///
+    Common::Vector2d startPos;
+    double roadHdg;
+    double roadLength;
+
+    ///
+    /// Pointers to other objects which are children / siblings of this road.
+    ///
+    const Element *successor = nullptr;
+    const Element *predecessor = nullptr;
+    const Junction *junctionPtr = nullptr;
+
+    std::vector<const Lane *> lanes;
+    std::vector<const TrafficSign *> trafficSigns;
+    std::vector<const TrafficLight *> trafficLights;
 };
 
 } // namespace MentalInfrastructure

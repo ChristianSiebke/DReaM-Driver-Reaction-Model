@@ -16,7 +16,7 @@
 #include "Components/GazeMovement/RoadSegments/RoadSegmentInterface.h"
 #include "Components/LateralDecision.h"
 #include "Components/LongitudinalDecision/LongitudinalDecision.h"
-#include "Components/TrafficSignMemory/TrafficSignMemory.h"
+#include "Components/TrafficSignalMemory/TrafficSignalMemory.h"
 
 class DriverReactionModel {
   public:
@@ -30,7 +30,7 @@ class DriverReactionModel {
 
       void UpdateDReaM(int time, std::shared_ptr<EgoPerception> egoAgent, std::vector<std::shared_ptr<AgentPerception>> ambientAgents,
                        std::shared_ptr<InfrastructurePerception> infrastructure,
-                       std::vector<const MentalInfrastructure::TrafficSign *> trafficSigns);
+                       std::vector<const MentalInfrastructure::TrafficSignal *> trafficSignals);
       double GetAcceleration();
       const LateralAction GetLateralAction();
       const GazeState GetGazeState();
@@ -41,7 +41,7 @@ class DriverReactionModel {
   private:
       void UpdateInput(int time, std::shared_ptr<EgoPerception> egoAgent, std::vector<std::shared_ptr<AgentPerception>> ambientAgents,
                        std::shared_ptr<InfrastructurePerception> infrastructure,
-                       std::vector<const MentalInfrastructure::TrafficSign *> trafficSigns);
+                       std::vector<const MentalInfrastructure::TrafficSignal *> trafficSignals);
       void UpdateComponents();
       void UpdateAgentStateRecorder(int time, int id, std::shared_ptr<InfrastructurePerception> infrastructure);
 

@@ -10,10 +10,13 @@
 
 #include "DriverReactionModel.h"
 
+#include "Common/TimeMeasurement.hpp"
 #include "Components/CognitiveMap/CognitiveMap.h"
 #include "Components/GazeMovement/GazeMovement.h"
 #include "Components/Importer/BehaviourImporter.h"
 #include "Components/LongitudinalDecision/LongitudinalDecision.h"
+
+TimeMeasurement timeMeasure("DriverReactionModel.cpp");
 
 DriverReactionModel::DriverReactionModel(std::string behaviourConfigPath, std::string resultPath, LoggerInterface &loggerInterface,
                                          int cycleTime, StochasticsInterface *stochastics) {
@@ -35,8 +38,8 @@ DriverReactionModel::DriverReactionModel(std::string behaviourConfigPath, std::s
 void DriverReactionModel::UpdateDReaM(int time, std::shared_ptr<EgoPerception> egoAgent,
                                       std::vector<std::shared_ptr<AgentPerception>> ambientAgents,
                                       std::shared_ptr<InfrastructurePerception> infrastructure,
-                                      std::vector<const MentalInfrastructure::TrafficSign *> trafficSigns) {
-    UpdateInput(time, egoAgent, ambientAgents, infrastructure, trafficSigns);
+                                      std::vector<const MentalInfrastructure::TrafficSignal *> trafficSignals) {
+    UpdateInput(time, egoAgent, ambientAgents, infrastructure, trafficSignals);
     UpdateComponents();
     UpdateAgentStateRecorder(time, egoAgent->id, infrastructure);
 }
@@ -44,15 +47,23 @@ void DriverReactionModel::UpdateDReaM(int time, std::shared_ptr<EgoPerception> e
 void DriverReactionModel::UpdateInput(int time, std::shared_ptr<EgoPerception> egoAgent,
                                       std::vector<std::shared_ptr<AgentPerception>> ambientAgents,
                                       std::shared_ptr<InfrastructurePerception> infrastructure,
-                                      std::vector<const MentalInfrastructure::TrafficSign *> trafficSigns) {
-    cognitiveMap->UpdateInput(time, egoAgent, ambientAgents, infrastructure, trafficSigns);
+                                      std::vector<const MentalInfrastructure::TrafficSignal *> trafficSignals) {
+    cognitiveMap->UpdateInput(time, egoAgent, ambientAgents, infrastructure, trafficSignals);
 }
 
 void DriverReactionModel::UpdateComponents() {
+    timeMeasure.StartTimePoint("CognitiveMap Update");
     cognitiveMap->Update();
+    timeMeasure.EndTimePoint();
+    timeMeasure.StartTimePoint("Lateral Decision Update");
     lateralDecision->Update();
+    timeMeasure.EndTimePoint();
+    timeMeasure.StartTimePoint("GazeMovement Update");
     gazeMovement->Update();
+    timeMeasure.EndTimePoint();
+    timeMeasure.StartTimePoint("Long. Decision Update");
     longitudinalDecision->Update();
+    timeMeasure.EndTimePoint();
 }
 
 void DriverReactionModel::UpdateAgentStateRecorder(int time, int id, std::shared_ptr<InfrastructurePerception> infrastructure) {
@@ -65,6 +76,7 @@ void DriverReactionModel::UpdateAgentStateRecorder(int time, int id, std::shared
     agentStateRecorder->AddCrossingInfos(time, id, GetWorldInterpretation().crossingInfo);
     agentStateRecorder->AddFixationPoints(time, id, GetSegmentControlFixationPoints());
     agentStateRecorder->AddInfrastructurePerception(infrastructure);
+    agentStateRecorder->AddTrafficSignals(time, id, GetWorldRepresentation().trafficSignalMemory->memory);
 }
 
 double DriverReactionModel::GetAcceleration() {
@@ -86,6 +98,8 @@ const std::vector<Common::Vector2d> DriverReactionModel::GetSegmentControlFixati
 const WorldRepresentation &DriverReactionModel::GetWorldRepresentation() {
     return cognitiveMap->GetWorldRepresentation();
 }
+
 const WorldInterpretation &DriverReactionModel::GetWorldInterpretation() {
     return cognitiveMap->GetWorldInterpretation();
 }
+

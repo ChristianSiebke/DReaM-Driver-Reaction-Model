@@ -15,15 +15,15 @@
 #include "roadnetworksensor.h"
 #include "visualsensorinterface.h"
 
-class TrafficSignVisualSensor : public VisualSensorInterface<const MentalInfrastructure::TrafficSign *> {
+class TrafficSignalVisualSensor : public VisualSensorInterface<const MentalInfrastructure::TrafficSignal *> {
 public:
-    TrafficSignVisualSensor(AgentInterface *egoAgent, WorldInterface *world,
-                            std::shared_ptr<InfrastructurePerception> infrastructurePerception) :
+    TrafficSignalVisualSensor(AgentInterface *egoAgent, WorldInterface *world,
+                              std::shared_ptr<InfrastructurePerception> infrastructurePerception) :
         VisualSensorInterface(egoAgent, world), infrastructurePerception(infrastructurePerception) {
         aabbTreeHandler = AABBTreeHandler::GetInstance(world);
         worldData = static_cast<OWL::WorldData *>(world->GetWorldData());
     }
-    ~TrafficSignVisualSensor() {
+    ~TrafficSignalVisualSensor() {
         if (aabbTreeHandler.use_count() == 2) {
             aabbTreeHandler->ResetAABBTreeHandler();
         }
@@ -31,7 +31,7 @@ public:
 
     void Trigger(int timestamp, double direction, double distance, double opening) override;
 
-    std::vector<const MentalInfrastructure::TrafficSign *> GetVisible() override {
+    std::vector<const MentalInfrastructure::TrafficSignal *> GetVisible() override {
         return perceived;
     }
 
@@ -42,7 +42,7 @@ private:
     OWL::WorldData *worldData;
     std::shared_ptr<AABBTreeHandler> aabbTreeHandler;
     std::shared_ptr<AABBTree> aabbTree;
-    std::vector<const MentalInfrastructure::TrafficSign *> perceived;
+    std::vector<const MentalInfrastructure::TrafficSignal *> perceived;
     std::shared_ptr<InfrastructurePerception> infrastructurePerception;
 
     double sensorDirection;

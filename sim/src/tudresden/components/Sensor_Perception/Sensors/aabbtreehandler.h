@@ -15,7 +15,7 @@
 #include "AABBTree/aabbtree.h"
 #include "Objects/observeddynamicobject.h"
 #include "Objects/observedstaticobject.h"
-#include "Objects/observedtrafficsign.h"
+#include "Objects/observedtrafficsignal.h"
 #include "core/opSimulation/modules/World_OSI/WorldImplementation.h"
 
 class AABBTreeHandler {
@@ -43,9 +43,9 @@ public:
     std::vector<std::shared_ptr<ObservedDynamicObject>> agentObjects;
 
     std::vector<std::shared_ptr<ObservedStaticObject>> stationaryObjects;
-    std::vector<std::shared_ptr<ObservedTrafficSign>> trafficSigns;
+    std::vector<std::shared_ptr<ObservedTrafficSignal>> trafficSignals;
 
-    std::unordered_map<std::shared_ptr<ObservedTrafficSign>, OWL::Interfaces::TrafficSign *> trafficSignsMappingReversed;
+    std::unordered_map<std::shared_ptr<ObservedTrafficSignal>, OdId> trafficSignalsMappingReversed;
 
 private:
     AABBTreeHandler(WorldInterface *world);
@@ -109,6 +109,22 @@ private:
 
     static Polygon2d ConstructPolygon(const OWL::Interfaces::TrafficSign *trafficSign) {
         auto referencePoint = Common::Vector2d(trafficSign->GetReferencePointPosition().x, trafficSign->GetReferencePointPosition().y);
+
+        const auto length = 0.6;
+        const auto width = 0.6;
+
+        auto p1 = Common::Vector2d(referencePoint.x + length / 2, referencePoint.y + width / 2);
+        auto p2 = Common::Vector2d(referencePoint.x + length / 2, referencePoint.y - width / 2);
+        auto p3 = Common::Vector2d(referencePoint.x - length / 2, referencePoint.y - width / 2);
+        auto p4 = Common::Vector2d(referencePoint.x - length / 2, referencePoint.y + width / 2);
+
+        auto polygon = ConstructPolygon(p1, p2, p3, p4);
+
+        return polygon;
+    }
+
+    static Polygon2d ConstructPolygon(const OWL::Interfaces::TrafficLight *trafficLight) {
+        auto referencePoint = Common::Vector2d(trafficLight->GetReferencePointPosition().x, trafficLight->GetReferencePointPosition().y);
 
         const auto length = 0.6;
         const auto width = 0.6;

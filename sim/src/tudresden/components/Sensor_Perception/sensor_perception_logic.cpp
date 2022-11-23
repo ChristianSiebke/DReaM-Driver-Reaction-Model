@@ -16,8 +16,8 @@ void SensorPerceptionLogic::Trigger(int timestamp, double directionAngle, double
                                     std::vector<InternWaypoint> route) {
     visualSensor->Trigger(timestamp, directionAngle, sensorDistance, sensorOpeningAngle);
     perceivedAgents = visualSensor->GetVisible();
-    trafficSignVisualSensor->Trigger(timestamp, directionAngle, sensorDistance, sensorOpeningAngle);
-    perceivedTrafficSigns = trafficSignVisualSensor->GetVisible();
+    trafficSignalVisualSensor->Trigger(timestamp, directionAngle, sensorDistance, sensorOpeningAngle);
+    perceivedTrafficSignals = trafficSignalVisualSensor->GetVisible();
     roadNetworkSensor->GetRoadNetwork();
     driverPerception->CalculatePerception(driver, route);
 }

@@ -17,6 +17,7 @@
 
 #include "../Components/GazeMovement/RoadSegments/RoadSegmentInterface.h"
 #include "Common/Definitions.h"
+#include "Common/WorldRepresentation.h"
 
 #ifdef QMAKE_BUILD
 #define DReaMIMPORT
@@ -60,6 +61,9 @@ struct Record {
 
     //! For each timestep, maps a map containing the Id and position of other known agents for each agent, to the associated timestep
     std::map<time, std::map<agentID, std::vector<AgentPerception>>> observedAgents;
+
+    //! For each timestep, stores the traffic signals currently in memory of an agent
+    std::map<time, std::map<agentID, std::vector<OdId>>> trafficSignalMemory;
 };
 
 /*!
@@ -96,13 +100,21 @@ public:
 
     void AddStoppingPoints(StoppingPointData);
 
-    void AddGazeStates(int, int, GazeState);
+    /**
+     * @brief 
+     * 
+     * @param time 
+     * @param id 
+     */
+    void AddGazeStates(int time, int id, GazeState);
 
-    void AddOtherAgents(int, int, std::vector<AgentPerception>);
+    void AddOtherAgents(int time, int id, std::vector<AgentPerception>);
 
-    void AddCrossingInfos(int, int, CrossingInfo);
+    void AddCrossingInfos(int time, int id, CrossingInfo);
 
-    void AddFixationPoints(int, int, std::vector<Common::Vector2d>);
+    void AddFixationPoints(int time, int id, std::vector<Common::Vector2d>);
+
+    void AddTrafficSignals(int time, int id, std::unordered_map<DReaMId, MemorizedTrafficSignal> *);
 
     //! All information saved in the agentStateRecorder is written into an xml file
     static void WriteOutputFile();
