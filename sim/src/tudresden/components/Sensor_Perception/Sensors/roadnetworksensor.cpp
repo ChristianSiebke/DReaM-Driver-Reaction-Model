@@ -466,6 +466,11 @@ const MentalInfrastructure::TrafficSign *RoadNetworkSensor::ConvertTrafficSign(c
             newSign->AddValidLane(lane);
     }
 
+
+
+
+
+
     trafficSignLookup.insert(std::make_pair(sign->GetId(), newSign.get()));
     perceptionData->trafficSigns.push_back(newSign);
     return newSign.get();
