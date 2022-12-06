@@ -1,3 +1,12 @@
+/******************************************************************************
+ * Copyright (c) 2019 TU Dresden
+ * scientific assistant: Christian Siebke
+ * student assistants:   Christian Gärber
+ *                       Vincent   Adam
+ *                       Jan       Sommer
+ *
+ * for further information please visit:  https://www.driver-model.de
+ *****************************************************************************/
 #include "roadnetworksensor.h"
 
 #include <algorithm>
@@ -213,7 +222,6 @@ const MentalInfrastructure::Junction *RoadNetworkSensor::ConvertJunction(const O
             startLane = const_cast<OWL::Interfaces::Lane *>(worldData->GetLanes().at(startLane->GetPrevious().front()));
             startRoad = &startLane->GetRoad();
         }
-        auto from = ConvertRoad(const_cast<OWL::Road *>(startRoad));
 
         auto endLaneId = connectionRoad->GetSections().front()->GetLanes().front()->GetNext().front();
         auto endLane = const_cast<OWL::Interfaces::Lane *>(worldData->GetLanes().at(endLaneId));
@@ -222,6 +230,14 @@ const MentalInfrastructure::Junction *RoadNetworkSensor::ConvertJunction(const O
             endLane = const_cast<OWL::Interfaces::Lane *>(worldData->GetLanes().at(endLane->GetNext().front()));
             endRoad = &endLane->GetRoad();
         }
+
+        auto connectionLaneId = connectionRoad->GetSections().front()->GetLanes().front()->GetOdId();
+        if (connectionLaneId > 0) {
+            auto temp = startRoad;
+            startRoad = endRoad;
+            endRoad = temp;
+        }
+        auto from = ConvertRoad(const_cast<OWL::Road *>(startRoad));
         auto to = ConvertRoad(const_cast<OWL::Road *>(endRoad));
         auto with = const_cast<MentalInfrastructure::Road *>(ConvertRoad(const_cast<OWL::Road *>(connectionRoad)));
         with->SetOnJunction(newJunction.get());
@@ -449,6 +465,11 @@ const MentalInfrastructure::TrafficSign *RoadNetworkSensor::ConvertTrafficSign(c
         if (sign->IsValidForLane(lane->GetOwlId()))
             newSign->AddValidLane(lane);
     }
+
+
+
+
+
 
     trafficSignLookup.insert(std::make_pair(sign->GetId(), newSign.get()));
     perceptionData->trafficSigns.push_back(newSign);

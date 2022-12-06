@@ -5,7 +5,11 @@
  *                       Vincent   Adam
  *                       Jan       Sommer
  *
- * for further information please visit:  https://www.driver-model.de
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *****************************************************************************/
 #pragma once
 #include "RoadSegmentInterface.h"
@@ -13,11 +17,13 @@
 namespace RoadSegments {
 namespace Node {
 
-class XJunction : public Junction {
+// template <TJunctionLayout T>
+class TJunction : public Junction {
 public:
-    XJunction(const WorldRepresentation &worldRepresentation, StochasticsInterface *stochastics, const BehaviourData &behaviourData);
+    TJunction(const WorldRepresentation &worldRepresentation, StochasticsInterface *stochastics, const BehaviourData &behaviourData,
+              TJunctionLayout layout);
 
-    ~XJunction() override = default;
+    ~TJunction() override = default;
 
     virtual GazeState ControlGlance(CrossingPhase phase) override;
 
@@ -41,19 +47,21 @@ protected:
      * @param CrossingPhase     current crossing phase
      * @return GazeState
      */
-    GazeState ControlGlanceOnXJunction(ControlAOI aoi, CrossingPhase phase);
+    GazeState ControlGlanceOnTJunction(ControlAOI aoi, CrossingPhase phase);
 
-    const Common::Vector2d *FixationPointForCGOnXJunction(const std::vector<Common::Vector2d> &controlFixPoints, CrossingPhase phase,
+    const Common::Vector2d *FixationPointForCGOnTJunction(const std::vector<Common::Vector2d> &controlFixPoints, CrossingPhase phase,
                                                           ControlAOI aoi);
     const Common::Vector2d *FixationPointForCGOnRoad(const std::vector<Common::Vector2d> &controlFixPoints, ControlAOI aoi);
 
-    void CalculateControlFixPointsOnXJunction();
+    void CalculateControlFixPointsOnTJunction();
     void CalculateControlFixPointsOnRoads();
 
 private:
     double viewingDepthIntoRoad; // how far the driver see along the road.
 
-    std::vector<Common::Vector2d> controlFixPointsOnXJunction;
+    TJunctionLayout layout;
+
+    std::vector<Common::Vector2d> controlFixPointsOnTJunction;
     std::vector<Common::Vector2d> controlFixPointsOnRoads;
 };
 } // namespace Node

@@ -5,11 +5,7 @@
  *                       Vincent   Adam
  *                       Jan       Sommer
  *
- * This program and the accompanying materials are made
- * available under the terms of the Eclipse Public License 2.0
- * which is available at https://www.eclipse.org/legal/epl-2.0/
- *
- * SPDX-License-Identifier: EPL-2.0
+ * for further information please visit:  https://www.driver-model.de
  *****************************************************************************/
 
 #pragma once
@@ -107,12 +103,14 @@ std::optional<int> LeadingCarID(const std::unordered_map<int, std::unique_ptr<Ag
 
 /**
  * @brief GetDistanceStoppingPoint - returns Distance to nearest Stopping Point
- * @param type - vehicle type
+ * @param agent
  * @param worldInterpretation
  * @return Distance to nearest Stopping Point
  */
-double GetDistanceStoppingPoint(const AgentVehicleType type, const WorldInterpretation &worldInterpretation);
+double GetDistanceStoppingPoint(const AgentRepresentation *agent, const AgentInterpretation *observedAgent,
+                                const WorldInterpretation &worldInterpretation);
 
+bool IsVehicle(const AgentRepresentation *agent);
 double AngleBetween2d(const Vector2d &vectorA, const Vector2d &vectorB);
 
 } // namespace Common

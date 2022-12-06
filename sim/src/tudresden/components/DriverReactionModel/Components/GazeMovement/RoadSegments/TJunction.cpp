@@ -5,9 +5,13 @@
  *                       Vincent   Adam
  *                       Jan       Sommer
  *
- * for further information please visit:  https://www.driver-model.de
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  *****************************************************************************/
-#include "XJunction.h"
+#include "TJunction.h"
 
 #include "src/common/vector2d.h"
 
@@ -15,20 +19,20 @@ namespace RoadSegments {
 
 namespace Node {
 
-XJunction::XJunction(const WorldRepresentation &worldRepresentation, StochasticsInterface *stochastics,
-                     const BehaviourData &behaviourData) :
-    Junction(worldRepresentation, stochastics, behaviourData) {
+TJunction::TJunction(const WorldRepresentation &worldRepresentation, StochasticsInterface *stochastics, const BehaviourData &behaviourData,
+                     TJunctionLayout layout) :
+    layout{layout}, Junction(worldRepresentation, stochastics, behaviourData) {
     probabilityFixateLeadCar = behaviourData.gmBehaviour.XInt_probabilityFixateLeadCar;
     probabilityControlGlance = behaviourData.gmBehaviour.XInt_probabilityControlGlance;
     viewingDepthIntoRoad = behaviourData.gmBehaviour.XInt_viewingDepthIntoRoad;
-    CalculateControlFixPointsOnXJunction();
+    CalculateControlFixPointsOnTJunction();
     CalculateControlFixPointsOnRoads();
 
-    controlFixationPoints.insert(controlFixationPoints.begin(), controlFixPointsOnXJunction.begin(), controlFixPointsOnXJunction.end());
+    controlFixationPoints.insert(controlFixationPoints.begin(), controlFixPointsOnTJunction.begin(), controlFixPointsOnTJunction.end());
     controlFixationPoints.insert(controlFixationPoints.end(), controlFixPointsOnRoads.begin(), controlFixPointsOnRoads.end());
 }
 
-void XJunction::CalculateControlFixPointsOnXJunction() {
+void TJunction::CalculateControlFixPointsOnTJunction() {
     auto nextJunction = worldRepresentation.egoAgent->NextJunction();
     auto cornerSidewalkLanes = CornerSidewalkLanesOfJunction(nextJunction);
 
@@ -36,27 +40,70 @@ void XJunction::CalculateControlFixPointsOnXJunction() {
         auto halfLength = sidewalkLane->GetLength() / 2;
         auto sCoordniate = sidewalkLane->GetFirstPoint()->sOffset;
         auto point = sidewalkLane->InterpolatePoint(sCoordniate + halfLength);
-        controlFixPointsOnXJunction.push_back({point.x, point.y});
+        controlFixPointsOnTJunction.push_back({point.x, point.y});
     }
 
     auto straightConLane = OncomingStraightConnectionLane(nextJunction);
-    // calculate oncoming point
-    Common::Vector2d startPoinStraightConLane = {(straightConLane->GetFirstPoint())->x, (straightConLane->GetFirstPoint())->y};
-    double direction = (straightConLane->GetFirstPoint())->hdg;
-    auto oncomingPoint = Common::CreatPointInDistance(viewingDepthIntoRoad, startPoinStraightConLane, direction + M_PI);
-    controlFixPointsOnXJunction.push_back(oncomingPoint);
+    if (straightConLane) {
+        if (layout == TJunctionLayout::LeftRight) {
+            std::string message =
+                __FILE__ " Line: " + std::to_string(__LINE__) + "invalid T-Junction Layout specified - unexpected oncoming lane found";
+            throw std::runtime_error(message);
+            return;
+        }
+        // calculate oncoming point
+        Common::Vector2d startPoinStraightConLane = {(straightConLane->GetFirstPoint())->x, (straightConLane->GetFirstPoint())->y};
+        double direction = (straightConLane->GetFirstPoint())->hdg;
+        auto oncomingPoint = Common::CreatPointInDistance(viewingDepthIntoRoad, startPoinStraightConLane, direction + M_PI);
+        auto oncomingPoint1 = Common::CreatPointInDistance(viewingDepthIntoRoad, startPoinStraightConLane, direction + M_PI - .1);
+        auto oncomingPoint2 = Common::CreatPointInDistance(viewingDepthIntoRoad, startPoinStraightConLane, direction + M_PI + .1);
+        controlFixPointsOnTJunction.push_back(oncomingPoint);
+        controlFixPointsOnTJunction.push_back(oncomingPoint1);
+        controlFixPointsOnTJunction.push_back(oncomingPoint2);
+    }
+    else {
+        if (layout != TJunctionLayout::LeftRight) {
+            std::string message =
+                __FILE__ " Line: " + std::to_string(__LINE__) + "invalid T-Junction Layout specified - no oncoming lane found";
+            throw std::runtime_error(message);
+            return;
+        }
+        SortControlFixPoints(controlFixPointsOnTJunction);
+        Common::Vector2d mid1 =
+            controlFixPointsOnTJunction.at(0) + (controlFixPointsOnTJunction.at(2) - controlFixPointsOnTJunction.at(0)) * 0.5;
+        Common::Vector2d mid2 =
+            controlFixPointsOnTJunction.at(3) + (controlFixPointsOnTJunction.at(1) - controlFixPointsOnTJunction.at(3)) * 0.5;
+        Common::Vector2d mid = {(mid1.x + mid2.x) / 2, (mid1.y + mid2.y) / 2};
+        controlFixPointsOnTJunction.push_back(mid);
+    }
 
-    // sketch of sorted junction fixation points
-    //         |x2| |        x2  oncoming point
-    //   -----x3    x1-----  A   Agent
-    //   ------     -------
+    // sketch of sorted junction fixation points (Left-Right Layout)
+    //                       x2  oncoming point
+    //   -----x3----x1-----  A   Agent
+    //   ------  x2 -------
     //   -----x4    x0-----
     //         | |A |
     //
-    SortControlFixPoints(controlFixPointsOnXJunction);
+
+    // sketch of sorted junction fixation points (Straight-Right Layout)
+    //         |x2| |        x2  oncoming point [x2==x3==x4]
+    //         |    x1-----  A   Agent
+    //         |    -------
+    //         |    x0-----
+    //         | |A |
+    //
+
+    // sketch of sorted junction fixation points (Left-Straight Layout)
+    //         |x2| |        x2  oncoming point [x0==x1==x2]
+    //   -----x3    |        A   Agent
+    //   ------     |
+    //   -----x4    |
+    //         | |A |
+    //
+    SortControlFixPoints(controlFixPointsOnTJunction);
 };
 
-void XJunction::CalculateControlFixPointsOnRoads() {
+void TJunction::CalculateControlFixPointsOnRoads() {
     auto NextJunction = worldRepresentation.egoAgent->NextJunction();
     const auto &IncomingJunctionRoadIds = NextJunction->GetIncomingRoads();
     for (auto incomingRoad : IncomingJunctionRoadIds) {
@@ -82,20 +129,20 @@ void XJunction::CalculateControlFixPointsOnRoads() {
     //        |   |A  |
     //        |   |   |
     SortControlFixPoints(controlFixPointsOnRoads);
-    if (controlFixPointsOnRoads.size() != 3) {
+    if (controlFixPointsOnRoads.size() != 2) {
         std::string message = __FILE__ " Line: " + std::to_string(__LINE__) +
-                              "the number of control fixation points on incoming roads (X-Junction) is incorrect";
+                              "the number of control fixation points on incoming roads (T-Junction) is incorrect";
         throw std::runtime_error(message);
     }
 }
 
-GazeState XJunction::ControlGlance(CrossingPhase phase) {
+GazeState TJunction::ControlGlance(CrossingPhase phase) {
     AOIProbabilities scaledAOIProbs = LookUpControlAOIProbability(phase);
     auto aoi = static_cast<ControlAOI>(Sampler::Sample(scaledAOIProbs, stochastics));
 
     if (worldRepresentation.egoAgent->GetDistanceOnJunction() > 0 && (phase > CrossingPhase::Deceleration_TWO)) {
         // control gazes on junction
-        return ControlGlanceOnXJunction(aoi, phase);
+        return ControlGlanceOnTJunction(aoi, phase);
     }
     else if (worldRepresentation.egoAgent->GetDistanceToNextJunction() > 0 && phase < CrossingPhase::Deceleration_TWO) {
         // control gazes in front of junction
@@ -105,7 +152,7 @@ GazeState XJunction::ControlGlance(CrossingPhase phase) {
         // control gazes while approaching an junction
         double rand = stochastics->GetUniformDistributed(0, 1);
         if (rand < 0.20) {
-            return ControlGlanceOnXJunction(aoi, phase);
+            return ControlGlanceOnTJunction(aoi, phase);
         }
         else {
             return ControlGlanceOnRoad(aoi);
@@ -113,7 +160,7 @@ GazeState XJunction::ControlGlance(CrossingPhase phase) {
     }
 }
 
-GazeState XJunction::ControlGlanceOnRoad(ControlAOI aoi) {
+GazeState TJunction::ControlGlanceOnRoad(ControlAOI aoi) {
     GazeState gazeState;
 
     auto fixationPoint = FixationPointForCGOnRoad(controlFixPointsOnRoads, aoi);
@@ -124,16 +171,43 @@ GazeState XJunction::ControlGlanceOnRoad(ControlAOI aoi) {
     return gazeState;
 }
 
-const Common::Vector2d *XJunction::FixationPointForCGOnRoad(const std::vector<Common::Vector2d> &fixPoints, ControlAOI aoi) {
+const Common::Vector2d *TJunction::FixationPointForCGOnRoad(const std::vector<Common::Vector2d> &fixPoints, ControlAOI aoi) {
     const Common::Vector2d *fixPoint;
     if (aoi == ControlAOI::Right) {
-        fixPoint = &fixPoints.at(0);
+        if (layout == TJunctionLayout::LeftRight) {
+            fixPoint = &fixPoints.at(0);
+        }
+        else if (layout == TJunctionLayout::StraightRight) {
+            fixPoint = &fixPoints.at(0);
+        }
+        else {
+            std::string message = __FILE__ " Line: " + std::to_string(__LINE__) + "invalid ControlAOI for T-Junction Layout";
+            throw std::runtime_error(message);
+        }
     }
     else if (aoi == ControlAOI::Oncoming) {
-        fixPoint = &fixPoints.at(1);
+        if (layout == TJunctionLayout::LeftStraight) {
+            fixPoint = &fixPoints.at(0);
+        }
+        else if (layout == TJunctionLayout::StraightRight) {
+            fixPoint = &fixPoints.at(1);
+        }
+        else {
+            std::string message = __FILE__ " Line: " + std::to_string(__LINE__) + "invalid ControlAOI for T-Junction Layout";
+            throw std::runtime_error(message);
+        }
     }
     else if (aoi == ControlAOI::Left) {
-        fixPoint = &fixPoints.at(2);
+        if (layout == TJunctionLayout::LeftStraight) {
+            fixPoint = &fixPoints.at(1);
+        }
+        else if (layout == TJunctionLayout::LeftRight) {
+            fixPoint = &fixPoints.at(1);
+        }
+        else {
+            std::string message = __FILE__ " Line: " + std::to_string(__LINE__) + "invalid ControlAOI for T-Junction Layout";
+            throw std::runtime_error(message);
+        }
     }
     else {
         std::string message = __FILE__ " Line: " + std::to_string(__LINE__) + "unknown ControlAOI";
@@ -142,10 +216,10 @@ const Common::Vector2d *XJunction::FixationPointForCGOnRoad(const std::vector<Co
     return fixPoint;
 }
 
-GazeState XJunction::ControlGlanceOnXJunction(ControlAOI aoi, CrossingPhase phase) {
+GazeState TJunction::ControlGlanceOnTJunction(ControlAOI aoi, CrossingPhase phase) {
     GazeState gazeState;
 
-    auto fixationPoint = FixationPointForCGOnXJunction(controlFixPointsOnXJunction, phase, aoi);
+    auto fixationPoint = FixationPointForCGOnTJunction(controlFixPointsOnTJunction, phase, aoi);
     gazeState.fixationState = {GazeType::ControlGlance, static_cast<int>(aoi)};
     gazeState.target.fixationPoint = *fixationPoint;
     gazeState.openingAngle = 100 * (M_PI / 180); // TODO replace by realistic behaviour
@@ -153,7 +227,7 @@ GazeState XJunction::ControlGlanceOnXJunction(ControlAOI aoi, CrossingPhase phas
     return gazeState;
 }
 
-const Common::Vector2d *XJunction::FixationPointForCGOnXJunction(const std::vector<Common::Vector2d> &fixPoints, CrossingPhase phase,
+const Common::Vector2d *TJunction::FixationPointForCGOnTJunction(const std::vector<Common::Vector2d> &fixPoints, CrossingPhase phase,
                                                                  ControlAOI aoi) {
     const Common::Vector2d *fixPoint;
     switch (phase) {
@@ -236,16 +310,34 @@ const Common::Vector2d *XJunction::FixationPointForCGOnXJunction(const std::vect
     return fixPoint;
 }
 
-double XJunction::LookUpFixationDuration(CrossingPhase phase, ScanAOI aoi) {
+double TJunction::LookUpFixationDuration(CrossingPhase phase, ScanAOI aoi) {
 }
 
-AOIProbabilities XJunction::LookUpControlAOIProbability(CrossingPhase phase) {
+AOIProbabilities TJunction::LookUpControlAOIProbability(CrossingPhase phase) {
     AOIProbabilities aoiProbs;
 
     auto &importedProbs = behaviourData.gmBehaviour.XInt_controlAOIProbabilities;
 
     if (importedProbs.find(phase) != importedProbs.end()) {
         for (auto &prob : importedProbs.at(phase)) {
+            switch (layout) {
+            case TJunctionLayout::LeftRight:
+                if (prob.first == ControlAOI::Oncoming)
+                    continue;
+                break;
+            case TJunctionLayout::StraightRight:
+                if (prob.first == ControlAOI::Left)
+                    continue;
+                break;
+            case TJunctionLayout::LeftStraight:
+                if (prob.first == ControlAOI::Right)
+                    continue;
+                break;
+            default:
+                std::string message = __FILE__ " Line: " + std::to_string(__LINE__) + "Invalid T-Junction Layout specified!";
+                throw std::runtime_error(message);
+                break;
+            }
             aoiProbs.push_back(std::make_pair(static_cast<int>(prob.first), prob.second));
         }
     }
@@ -253,53 +345,11 @@ AOIProbabilities XJunction::LookUpControlAOIProbability(CrossingPhase phase) {
         std::string message = __FILE__ " Line: " + std::to_string(__LINE__) + "Gaze probabilities can not calculated!";
         throw std::runtime_error(message);
     }
-
-    //    // probabilities fictional
-    //    if (phase == CrossingPhase::Approach) {
-    //        aoiProbs.push_back(std::make_pair(static_cast<int>(ControlAOI::Left), 0.20));
-    //        aoiProbs.push_back(std::make_pair(static_cast<int>(ControlAOI::Oncoming), 0.3));
-    //        aoiProbs.push_back(std::make_pair(static_cast<int>(ControlAOI::Right), 0.5));
-
-    //    } else if (phase == CrossingPhase::Deceleration_ONE) {
-    //        aoiProbs.push_back(std::make_pair(static_cast<int>(ControlAOI::Left), 0.20));
-    //        aoiProbs.push_back(std::make_pair(static_cast<int>(ControlAOI::Oncoming), 0.3));
-    //        aoiProbs.push_back(std::make_pair(static_cast<int>(ControlAOI::Right), 0.5));
-
-    //    } else if (phase == CrossingPhase::Deceleration_TWO) {
-    //        aoiProbs.push_back(std::make_pair(static_cast<int>(ControlAOI::Left), 0.20));
-    //        aoiProbs.push_back(std::make_pair(static_cast<int>(ControlAOI::Oncoming), 0.3));
-    //        aoiProbs.push_back(std::make_pair(static_cast<int>(ControlAOI::Right), 0.5));
-
-    //    } else if (phase == CrossingPhase::Crossing_Straight) {
-    //        aoiProbs.push_back(std::make_pair(static_cast<int>(ControlAOI::Left), 0.20));
-    //        aoiProbs.push_back(std::make_pair(static_cast<int>(ControlAOI::Oncoming), 0.4));
-    //        aoiProbs.push_back(std::make_pair(static_cast<int>(ControlAOI::Right), 0.4));
-
-    //    } else if (phase == CrossingPhase::Crossing_Right) {
-    //        // turning right do not have oncoming viewing point
-    //        aoiProbs.push_back(std::make_pair(static_cast<int>(ControlAOI::Left), 0.40));
-    //        aoiProbs.push_back(std::make_pair(static_cast<int>(ControlAOI::Right), 0.6));
-
-    //    } else if (phase == CrossingPhase::Crossing_Left_ONE) {
-    //        aoiProbs.push_back(std::make_pair(static_cast<int>(ControlAOI::Left), 0.20));
-    //        aoiProbs.push_back(std::make_pair(static_cast<int>(ControlAOI::Oncoming), 0.5));
-    //        aoiProbs.push_back(std::make_pair(static_cast<int>(ControlAOI::Right), 0.3));
-
-    //    } else if (phase == CrossingPhase::Crossing_Left_TWO) {
-    //        // turning left do not have oncoming viewing point
-    //        aoiProbs.push_back(std::make_pair(static_cast<int>(ControlAOI::Left), 0.40));
-    //        aoiProbs.push_back(std::make_pair(static_cast<int>(ControlAOI::Right), 0.6));
-
-    //    } else {
-    //        std::string message = __FILE__ " Line: " + std::to_string(__LINE__) + "Gaze probabilities can not calculated!";
-    //        throw std::runtime_error(message);
-    //    }
-
     AOIProbabilities scaledAOIProbs = ScaleProbabilitiesToOneAndEliminateNegativeProbabilities(aoiProbs);
     return scaledAOIProbs;
 }
 
-AOIProbabilities XJunction::LookUpScanAOIProbability(CrossingPhase phase) {
+AOIProbabilities TJunction::LookUpScanAOIProbability(CrossingPhase phase) {
     size_t UpperBoundaryModerateTrafficDensity = 4;
     // TODO detect the traffic density in perceptionInterface and hand over by egoPerceptionData
     // consider traffic density by enum {no traffic, low, moderate, hight}

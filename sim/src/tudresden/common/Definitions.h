@@ -1,15 +1,11 @@
 /******************************************************************************
- * Copyright (c) 2020 TU Dresden
+ * Copyright (c) 2019 TU Dresden
  * scientific assistant: Christian Siebke
  * student assistants:   Christian Gärber
  *                       Vincent   Adam
  *                       Jan       Sommer
  *
- * This program and the accompanying materials are made
- * available under the terms of the Eclipse Public License 2.0
- * which is available at https://www.eclipse.org/legal/epl-2.0/
- *
- * SPDX-License-Identifier: EPL-2.0
+ * for further information please visit:  https://www.driver-model.de
  *****************************************************************************/
 
 #pragma once
@@ -47,6 +43,8 @@ enum class DistanceUnit {
 enum class ScanAOI { NONE, Right, Straight, Left, Rear, Dashboard, Other };
 enum class ControlAOI { NONE, Right, Left, Oncoming };
 enum class GazeType { NONE, ScanGlance, ObserveGlance, ControlGlance };
+
+enum class TJunctionLayout { LeftRight, LeftStraight, StraightRight };
 
 struct FixationTarget {
     Common::Vector2d fixationPoint{-999, -999};
@@ -155,7 +153,7 @@ struct StoppingPoint {
     double sOffset = maxDouble;
 
     // will be set to -1.0 if stopping point is irrelevant
-    double distanceToEgo = maxDouble;
+    double distanceToEgoFront = maxDouble;
 
     // VA 06.04.2020
     // nearest position on the road for the stopping point

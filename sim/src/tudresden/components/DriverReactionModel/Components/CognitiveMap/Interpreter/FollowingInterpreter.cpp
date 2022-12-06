@@ -1,15 +1,11 @@
 /******************************************************************************
- * Copyright (c) 2020 TU Dresden
+ * Copyright (c) 2019 TU Dresden
  * scientific assistant: Christian Siebke
  * student assistants:   Christian Gärber
  *                       Vincent   Adam
  *                       Jan       Sommer
  *
- * This program and the accompanying materials are made
- * available under the terms of the Eclipse Public License 2.0
- * which is available at https://www.eclipse.org/legal/epl-2.0/
- *
- * SPDX-License-Identifier: EPL-2.0
+ * for further information please visit:  https://www.driver-model.de
  *****************************************************************************/
 
 #include "FollowingInterpreter.h"
@@ -36,6 +32,8 @@ std::optional<double> FollowingInterpreter::CalculateFollowingDistance(const Age
     double egoS = representation.egoAgent->GetSCoordinate();
     auto observedLane = agent.GetLane();
     double observedS = agent.GetSCoordinate();
+
+    std::cout << " !!!!!!!!!!!!!!!sCoordinate: " << egoS << std::endl;
 
     double oAgentDistanceBackToReference = agent.GetLength() - agent.GetDistanceReferencePointToLeadingEdge();
     double egoAgentDistanceReferenceToFront = representation.egoAgent->GetDistanceReferencePointToLeadingEdge();
@@ -66,15 +64,21 @@ std::optional<double> FollowingInterpreter::CalculateFollowingDistance(const Age
 
     // agents have conflict area and same successor --> merging manoeuvre
     auto conflictAreaOL = observedLane->GetConflictAreaWithLane(egoLane);
+    auto conflictAreaEL = egoLane->GetConflictAreaWithLane(observedLane);
+    egoS = conflictAreaEL ? egoS : -(egoLane->GetLength() - egoS);
+    auto nextEgoLane = representation.egoAgent->GetNextLane();
+    conflictAreaOL = conflictAreaOL ? conflictAreaOL : observedLane->GetConflictAreaWithLane(nextEgoLane);
+    if (nextEgoLane)
+        conflictAreaEL = conflictAreaEL ? conflictAreaEL : nextEgoLane->GetConflictAreaWithLane(observedLane);
+
     if (conflictAreaOL &&
-        Common::anyElementOfCollectionIsElementOfOtherCollection(egoLane->GetSuccessors(), observedLane->GetSuccessors())) {
-        if (conflictAreaOL->start.sOffset - (observedS - oAgentDistanceBackToReference) < 0) {
-            // back of oAgent is in conflict area
-            auto distanceOAgentToEndCA = conflictAreaOL->end.sOffset - observedS;
-            auto conflictAreaEL = egoLane->GetConflictAreaWithLane(observedLane);
-            auto distanceEgoToEndCA = conflictAreaEL->end.sOffset - egoS;
-            return distanceEgoToEndCA - distanceOAgentToEndCA - distanceReferenceToEdges;
-        }
+        (Common::anyElementOfCollectionIsElementOfOtherCollection(egoLane->GetSuccessors(), observedLane->GetSuccessors()) ||
+         Common::anyElementOfCollectionIsElementOfOtherCollection(representation.egoAgent->GetNextLane()->GetSuccessors(),
+                                                                  observedLane->GetSuccessors()))) {
+        auto distanceOAgentToEndCA = conflictAreaOL->end.sOffset - observedS;
+        auto distanceEgoToEndCA = conflictAreaEL->end.sOffset - egoS;
+        double followingDistance = distanceEgoToEndCA - distanceOAgentToEndCA - distanceReferenceToEdges;
+        return followingDistance > 0 ? std::optional<double>(followingDistance) : std::nullopt;
     }
 
     return std::nullopt;

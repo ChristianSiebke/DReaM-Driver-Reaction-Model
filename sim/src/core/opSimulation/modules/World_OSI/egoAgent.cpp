@@ -76,8 +76,11 @@ void EgoAgent::UpdatePositionInGraph()
     }
 }
 
-bool EgoAgent::HasValidRoute() const
-{
+RoadGraphVertex EgoAgent::GetRootOfWayToTargetGraph() const {
+    return rootOfWayToTargetGraph;
+}
+
+bool EgoAgent::HasValidRoute() const {
     return graphValid;
 }
 

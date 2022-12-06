@@ -5,11 +5,7 @@
  *                       Vincent   Adam
  *                       Jan       Sommer
  *
- * This program and the accompanying materials are made
- * available under the terms of the Eclipse Public License 2.0
- * which is available at https://www.eclipse.org/legal/epl-2.0/
- *
- * SPDX-License-Identifier: EPL-2.0
+ * for further information please visit:  https://www.driver-model.de
  *****************************************************************************/
 
 #include "GazeMovement.h"
@@ -79,15 +75,41 @@ void GazeMovement::DetermineGazeState() {
 }
 
 void GazeMovement::UpdateRoadSegment() {
-    if ((worldRepresentation.egoAgent->GetDistanceToNextJunction() <= 75 &&
-         worldRepresentation.egoAgent->GetDistanceToNextJunction() >= 0) ||
-        worldRepresentation.egoAgent->GetDistanceOnJunction() > 0) {
+    if (worldInterpretation.crossingInfo.phase >= CrossingPhase::Approach) {
         auto NextJunction = worldRepresentation.egoAgent->NextJunction();
         if (NextJunction != nullptr) {
             if (NextJunction->GetIncomingRoads().size() == 4) {
                 if (currentSegmentType != SegmentType::XJunction) {
                     roadSegment = std::make_unique<XJunction>(worldRepresentation, GetStochastic(), GetBehaviourData());
                     currentSegmentType = SegmentType::XJunction;
+                }
+            }
+            else if (NextJunction->GetIncomingRoads().size() == 3) {
+                NextDirectionLanes nextLanes;
+                // assumption movingInLaneDirection = true for now
+                if (auto nextLanesPtr = InfrastructurePerception::NextLanes(true, worldRepresentation.egoAgent->GetLane())) {
+                    if (nextLanesPtr.has_value()) {
+                        nextLanes = nextLanesPtr.value();
+                    }
+                }
+                TJunctionLayout layout;
+                if (nextLanes.leftLanes.size() > 0 && nextLanes.straightLanes.size() > 0 && nextLanes.rightLanes.size() == 0) {
+                    layout = TJunctionLayout::LeftStraight;
+                }
+                else if (nextLanes.leftLanes.size() > 0 && nextLanes.straightLanes.size() == 0 && nextLanes.rightLanes.size() > 0) {
+                    layout = TJunctionLayout::LeftRight;
+                }
+                else if (nextLanes.leftLanes.size() == 0 && nextLanes.straightLanes.size() > 0 && nextLanes.rightLanes.size() > 0) {
+                    layout = TJunctionLayout::StraightRight;
+                }
+                else {
+                    std::string message = __FILE__ " Line: " + std::to_string(__LINE__) + " invalid T-Junction layout";
+                    throw std::runtime_error(message);
+                }
+
+                if (currentSegmentType != SegmentType::TJunction) {
+                    roadSegment = std::make_unique<TJunction>(worldRepresentation, GetStochastic(), GetBehaviourData(), layout);
+                    currentSegmentType = SegmentType::TJunction;
                 }
             }
             else {

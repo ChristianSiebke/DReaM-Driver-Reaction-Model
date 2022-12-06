@@ -1,15 +1,11 @@
 /******************************************************************************
- * Copyright (c) 2020 TU Dresden
+ * Copyright (c) 2019 TU Dresden
  * scientific assistant: Christian Siebke
  * student assistants:   Christian Gärber
  *                       Vincent   Adam
  *                       Jan       Sommer
  *
- * This program and the accompanying materials are made
- * available under the terms of the Eclipse Public License 2.0
- * which is available at https://www.eclipse.org/legal/epl-2.0/
- *
- * SPDX-License-Identifier: EPL-2.0
+ * for further information please visit:  https://www.driver-model.de
  *****************************************************************************/
 
 #include "CollisionInterpreter.h"
@@ -21,8 +17,6 @@
 
 namespace Interpreter {
 
-// max time for collision detection (s)
-const double MAX_TIME = 3;
 // time step size for collision detection (s)
 const double TIME_STEP = 0.1;
 // maximum amounts of lanes an agent will look into
@@ -79,9 +73,10 @@ std::optional<CollisionPoint> CollisionInterpreter::CalculationCollisionPoint(co
         // no agent move --> no crash
         return std::nullopt;
     }
+    double endTime = GetBehaviourData().adBehaviour.collisionImminentMargin;
     unsigned int numberThreads = 8;
-    for (double startTime = 0; startTime < MAX_TIME; startTime += MAX_TIME / numberThreads) {
-        double endTime = startTime + MAX_TIME / numberThreads;
+    for (double startTime = 0; startTime < endTime; startTime += endTime / numberThreads) {
+        double endTime = startTime + endTime / numberThreads;
         futures.push_back(std::async(std::launch::async, &CollisionInterpreter::PerformCollisionPointCalculation, this, startTime, endTime,
                                      representation, observedAgent));
     }
@@ -132,9 +127,7 @@ std::optional<CollisionPoint> CollisionInterpreter::PerformCollisionPointCalcula
             possibleCollisionPoint.oAgentID = observedAgent.GetID();
             possibleCollisionPoint.timeToCollision = time;
             double decelTime = std::abs(representation.egoAgent->GetVelocity() / GetBehaviourData().adBehaviour.comfortDeceleration.mean);
-            possibleCollisionPoint.collisionImminent =
-                (possibleCollisionPoint.timeToCollision <= GetBehaviourData().adBehaviour.collisionImminentMargin ||
-                 decelTime > possibleCollisionPoint.timeToCollision);
+            possibleCollisionPoint.collisionImminent = time <= GetBehaviourData().adBehaviour.collisionImminentMargin;
             return possibleCollisionPoint;
         }
     }

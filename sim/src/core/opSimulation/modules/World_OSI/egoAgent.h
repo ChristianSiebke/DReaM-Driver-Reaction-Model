@@ -92,6 +92,8 @@ public:
 
     Position GetWorldPosition (double sDistance, double tDistance, double yaw = 0) const override;
 
+    RoadGraphVertex GetRootOfWayToTargetGraph() const;
+
 private:
 
     std::optional<RouteElement> GetPreviousRoad(size_t steps = 1) const;

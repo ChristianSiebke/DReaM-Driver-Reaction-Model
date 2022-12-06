@@ -1,6 +1,17 @@
+/******************************************************************************
+ * Copyright (c) 2019 TU Dresden
+ * scientific assistant: Christian Siebke
+ * student assistants:   Christian Gärber
+ *                       Vincent   Adam
+ *                       Jan       Sommer
+ *
+ * for further information please visit:  https://www.driver-model.de
+ *****************************************************************************/
+
 #include "ActionStateHandler.h"
 
-ActionState ActionStateHandler::GetState(const std::unique_ptr<AgentInterpretation>& agent) {
+    ActionState
+    ActionStateHandler::GetState(const std::unique_ptr <AgentInterpretation> &agent) {
     currentState = ActionState::Start;
     while (currentState != ActionState::End) {
         if (DetermineNextState(agent)) {
@@ -17,8 +28,8 @@ bool ActionStateHandler::DetermineNextState(const std::unique_ptr<AgentInterpret
         switch (currentState) {
         case ActionState::Start:
             return false;
-        case ActionState::Collision:
-            return agent->collisionPoint.has_value();
+        case ActionState::CollisionImminent:
+            return agent->collisionPoint.has_value() && agent->collisionPoint->collisionImminent;
         case ActionState::Following:
             return agent->followingDistanceToLeadingVehicle.has_value();
         case ActionState::IntersectionSituation:
@@ -37,9 +48,9 @@ bool ActionStateHandler::DetermineNextState(const std::unique_ptr<AgentInterpret
 void ActionStateHandler::IncrementState() {
     switch (currentState) {
     case ActionState::Start:
-        currentState = ActionState::Collision;
+        currentState = ActionState::CollisionImminent;
         break;
-    case ActionState::Collision:
+    case ActionState::CollisionImminent:
         currentState = ActionState::Following;
         break;
     case ActionState::Following:

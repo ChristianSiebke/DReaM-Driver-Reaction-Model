@@ -5,11 +5,7 @@
  *                       Vincent   Adam
  *                       Jan       Sommer
  *
- * This program and the accompanying materials are made
- * available under the terms of the Eclipse Public License 2.0
- * which is available at https://www.eclipse.org/legal/epl-2.0/
- *
- * SPDX-License-Identifier: EPL-2.0
+ * for further information please visit:  https://www.driver-model.de
  *****************************************************************************/
 #pragma once
 #include <cmath>
@@ -21,6 +17,7 @@
 #include "Components/LateralDecision.h"
 #include "Components/LongitudinalDecision/LongitudinalDecision.h"
 #include "RoadSegments/StandardRoad.h"
+#include "RoadSegments/TJunction.h"
 #include "RoadSegments/XJunction.h"
 #include "core/opSimulation/framework/sampler.h"
 #include "qglobal.h"
@@ -36,11 +33,12 @@ class StandardRoad;
 } // namespace RoadSegments
 using RoadSegmentInterface = RoadSegments::RoadSegmentInterface;
 using XJunction = RoadSegments::Node::XJunction;
+using TJunction = RoadSegments::Node::TJunction;
 using StandardRoad = RoadSegments::Edge::StandardRoad;
 
 namespace GazeMovement {
 
-enum class SegmentType { NONE, XJunction, StandardRoad };
+enum class SegmentType { NONE, XJunction, TJunction, StandardRoad };
 
 class GazeMovement : public Component::ComponentInterface {
   public:

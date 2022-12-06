@@ -313,10 +313,8 @@ bool Lane::Covers(double distance) const
 {
     if (GetDistance(MeasurementPoint::RoadStart) <= distance)
     {
-        return next.empty() ?
-                    GetDistance(MeasurementPoint::RoadEnd) > distance :
-                    GetDistance(MeasurementPoint::RoadEnd) >= distance;
-
+        return next.empty() ? GetDistance(MeasurementPoint::RoadEnd) - distance > -0.001 // TU Dresden
+                            : GetDistance(MeasurementPoint::RoadEnd) > distance;
     }
     return false;
 }
@@ -560,9 +558,8 @@ bool Section::Covers(double distance) const
 {
     if (GetDistance(MeasurementPoint::RoadStart) <= distance)
     {
-        return nextSections.empty() ?
-                    GetDistance(MeasurementPoint::RoadEnd) >= distance :
-                    GetDistance(MeasurementPoint::RoadEnd) > distance;
+        return nextSections.empty() ? GetDistance(MeasurementPoint::RoadEnd) - distance > -0.001 // TU Dresden
+                                    : GetDistance(MeasurementPoint::RoadEnd) > distance;
     }
     return false;
 }

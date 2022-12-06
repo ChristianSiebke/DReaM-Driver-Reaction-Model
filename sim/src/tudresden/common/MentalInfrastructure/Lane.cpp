@@ -1,3 +1,12 @@
+/******************************************************************************
+ * Copyright (c) 2019 TU Dresden
+ * scientific assistant: Christian Siebke
+ * student assistants:   Christian Gärber
+ *                       Vincent   Adam
+ *                       Jan       Sommer
+ *
+ * for further information please visit:  https://www.driver-model.de
+ *****************************************************************************/
 #include "Lane.h"
 
 #include <algorithm>
@@ -138,8 +147,15 @@ LanePoint Lane::InterpolatePoint(double sLaneCoordinate) const
             ((1 / lowerDistanceTo_S_Coordinate) + (1 / upperDistanceTo_S_Coordinate));
         y = (((*lowerPointIter).y / lowerDistanceTo_S_Coordinate) + ((*upperPointIter).y / upperDistanceTo_S_Coordinate)) /
             ((1 / lowerDistanceTo_S_Coordinate) + (1 / upperDistanceTo_S_Coordinate));
-        hdg = (((*lowerPointIter).hdg / lowerDistanceTo_S_Coordinate) + ((*upperPointIter).hdg / upperDistanceTo_S_Coordinate)) /
-              ((1 / lowerDistanceTo_S_Coordinate) + (1 / upperDistanceTo_S_Coordinate));
+
+        auto a = (*lowerPointIter).hdg;
+        auto b = (*upperPointIter).hdg;
+
+        double dif = std::fmod(b - a + M_PI, 2 * M_PI);
+        if (dif < 0)
+            dif += (2 * M_PI);
+        dif = dif - M_PI;
+        hdg = a + (dif * (lowerDistanceTo_S_Coordinate / (upperDistanceTo_S_Coordinate + lowerDistanceTo_S_Coordinate)));
     }
     else if (std::abs(lowerDistanceTo_S_Coordinate) < 0.001)
     {
@@ -163,6 +179,9 @@ bool Lane::SLaneCoordinateOutOfLane(double sLaneCoordniate) const
 
 std::optional<ConflictArea> Lane::GetConflictAreaWithLane(const Lane *lane) const
 {
+    if (!lane) {
+        return std::nullopt;
+    }
     auto iter = conflictAreas.find(lane);
     if (iter != conflictAreas.end())
     {
