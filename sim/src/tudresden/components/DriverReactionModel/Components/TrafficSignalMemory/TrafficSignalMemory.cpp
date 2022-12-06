@@ -99,14 +99,6 @@ VisibleTrafficSignals *TrafficSignalMemory::Update(int timestamp, std::vector<co
     return visibleTrafficSignals.get();
 }
 
-MentalInfrastructure::TrafficSign *GetNextSpeedLimitSignForLane(int recursionDepth, int maxRecursionDepth, int sCoordinate,
-                                                                MentalInfrastructure::Lane *lane, VisibleTrafficSignals *signals) {
-    if (recursionDepth >= maxRecursionDepth)
-        return nullptr;
-
-    auto signsOnLane = signals->GetSignsForLane(lane->GetDReaMId());
-}
-
 void TrafficSignalMemory::InsertIntoVisibleTrafficSignals(const MentalInfrastructure::TrafficSignal *signal) {
     auto validLanes = signal->GetValidLanes();
     for (const auto &lane : validLanes) {
