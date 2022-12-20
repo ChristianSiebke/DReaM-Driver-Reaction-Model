@@ -15,6 +15,7 @@ int AgentStateRecorder::runId = 0;
 boost::property_tree::ptree AgentStateRecorder::simulationOutut = {};
 std::string AgentStateRecorder::resultPath = "";
 bool AgentStateRecorder::infrastructureDataWritten = false;
+std::mutex AgentStateRecorder::mtx;
 
 // string representations of enum values, can easily be accessed using array[(int) enum_value]
 const std::string gazeTypes[] = {"NONE", "ScanGlance", "ControlGlance", "ObserveGlance"};
@@ -168,8 +169,8 @@ void AgentStateRecorder::WriteOutputFile() {
 }
 
 void AgentStateRecorder::BufferSimulationOutput() {
+    std::lock_guard<std::mutex> lock(mtx);
     simulationOutut.put("SimulationOutput.<xmlattr>.SchemaVersion", "0.3.0");
-
     if (!infrastructureDataWritten) {
         simulationOutut.add_child("SimulationOutput.InfrastructureData", AddInfrastructureData());
         infrastructureDataWritten = true;
