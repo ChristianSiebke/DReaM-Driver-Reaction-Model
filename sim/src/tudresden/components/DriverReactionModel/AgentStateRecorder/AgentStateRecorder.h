@@ -12,6 +12,7 @@
 #include <boost/property_tree/xml_parser.hpp>
 #include <iostream>
 #include <map>
+#include <mutex>
 #include <sstream>
 #include <thread>
 
@@ -128,6 +129,7 @@ private:
     boost::property_tree::ptree AddInfrastructureData() const;
 
     static std::shared_ptr<AgentStateRecorder> instance;
+    static std::mutex mtx;
     static boost::property_tree::ptree simulationOutut;
     static std::string resultPath;
     Record record;
