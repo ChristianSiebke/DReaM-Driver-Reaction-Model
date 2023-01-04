@@ -44,11 +44,38 @@ enum class DistanceUnit {
 };
 
 // fixation area of interests
-enum class ScanAOI { NONE, Right, Straight, Left, Rear, Dashboard, Other };
+enum class ScanAOI { NONE, Right, Straight, Left, InnerRVM, OuterLeftRVM, OuterRightRVM, Dashboard, Other };
 enum class ControlAOI { NONE, Right, Left, Oncoming };
 enum class GazeType { NONE, ScanGlance, ObserveGlance, ControlGlance };
+enum class TrafficDensity { NONE, LOW, MODERATE, HIGH };
 
 enum class TJunctionLayout { LeftRight, LeftStraight, StraightRight };
+
+struct Distribution {
+    double mean;
+    double std_deviation;
+    double min;
+    double max;
+
+    Distribution() {
+    }
+    Distribution(double m, double stdd, double min, double max) : mean(m), std_deviation(stdd), min(min), max(max) {
+    }
+};
+
+struct DriverGaze {
+    double direction;
+    double openingAngle;
+    Distribution fixationDuration;
+};
+
+struct MirrorGaze {
+    double direction;
+    double openingAngle;
+    Distribution fixationDuration;
+
+    Common::Vector2d pos;
+};
 
 struct FixationTarget {
     Common::Vector2d fixationPoint{-999, -999};
@@ -63,6 +90,9 @@ struct GazeState {
     double openingAngle{-999};
     double viewDistance{100}; // TODO calculate
     int fixationDuration{-999};
+
+    bool mirrorGaze = false;
+    Common::Vector2d mirrorPos{0, 0};
 };
 
 [[deprecated]] struct SpeedLimit {

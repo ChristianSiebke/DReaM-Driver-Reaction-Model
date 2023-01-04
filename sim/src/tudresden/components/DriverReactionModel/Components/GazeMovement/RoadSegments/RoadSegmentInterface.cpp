@@ -40,38 +40,34 @@ double RoadSegmentInterface::UpdateUFOVAngle(GazeState currentGazeState) {
 }
 
 double RoadSegmentInterface::ScanUFOVAngle(ScanAOI aoi) {
-    double ufovAngle = 0;
-    switch (aoi) {
-    case ScanAOI::Left:
-        ufovAngle += 30 * (M_PI / 180);
-        break;
-    case ScanAOI::Straight:
-        ufovAngle += 0 * (M_PI / 180);
-        break;
-    case ScanAOI::Right:
-        ufovAngle -= 30 * (M_PI / 180);
-        break;
-    case ScanAOI::Rear:
-        ufovAngle += 180 * (M_PI / 180);
-        break;
-    case ScanAOI::Other:
-        [[fallthrough]];
-    case ScanAOI::Dashboard:
-        ufovAngle += 0;
-        break;
-    default:
-        std::string message = __FILE__ " Line: " + std::to_string(__LINE__) + "can not set Gaze State!";
-        throw std::runtime_error(message);
+    bool mirrorGaze = false;
+    double ufovAngle;
+    if (behaviourData.gmBehaviour.scanAOIs.driverAOIs.find(aoi) != behaviourData.gmBehaviour.scanAOIs.driverAOIs.end()) {
+        ufovAngle = behaviourData.gmBehaviour.scanAOIs.driverAOIs.at(aoi).direction * (M_PI / 180);
     }
-    // TODO: as input in BehaviourXML: look  2 seconds ahead
-    double foresightDistance = worldRepresentation.egoAgent->GetVelocity() * 2;
-    double minForesightDistance = 5;
+    else if (behaviourData.gmBehaviour.scanAOIs.mirrorAOIs.find(aoi) != behaviourData.gmBehaviour.scanAOIs.mirrorAOIs.end()) {
+        ufovAngle = behaviourData.gmBehaviour.scanAOIs.mirrorAOIs.at(aoi).direction * (M_PI / 180);
+        mirrorGaze = true;
+    }
+    else {
+        ufovAngle = 0;
+    }
+
+    double foresightDistance = worldRepresentation.egoAgent->GetVelocity() * behaviourData.gmBehaviour.foresightTime;
+    double minForesightDistance = behaviourData.gmBehaviour.minForesightDistance;
     if (foresightDistance < minForesightDistance) {
         foresightDistance = minForesightDistance;
     }
-    // The agent aligns his head axis to the orientation point in
-    // foresightDistance on his lane.
-    auto headVector = CalculateForesightVector(foresightDistance);
+
+    Common::Vector2d headVector{1, 0};
+    if (mirrorGaze) {
+        headVector.Rotate(worldRepresentation.egoAgent->GetYawAngle());
+    }
+    else {
+        // The agent aligns his head axis to the orientation point in
+        // foresightDistance on his lane.
+        headVector = CalculateForesightVector(foresightDistance);
+    }
 
     // Determine whether the agent turn his head to the left or right
     double headAngle = CalculateGlobalViewingAngle(headVector);
@@ -115,8 +111,10 @@ GazeState RoadSegmentInterface::AgentObserveGlance(int agentId) {
 
     gazeState.fixationState = {GazeType::ObserveGlance, static_cast<int>(oAOI)};
     gazeState.target.fixationAgent = agentId;
-    gazeState.openingAngle = 100 * (M_PI / 180); // TODO replace by realistic behaviour
-    gazeState.fixationDuration = 800;            // TODO realistic distribution
+    gazeState.openingAngle = behaviourData.gmBehaviour.observe_openingAngle;
+    DistributionEntry *de = behaviourData.gmBehaviour.observe_fixationDuration.get();
+    double dist = stochastics->GetNormalDistributed(de->mean, de->std_deviation);
+    gazeState.fixationDuration = Common::ValueInBounds(de->min, dist, de->max);
     return gazeState;
 }
 
@@ -131,9 +129,25 @@ GazeState RoadSegmentInterface::ScanGlance(CrossingPhase phase) {
     }
     GazeState gazeState;
 
+    if (behaviourData.gmBehaviour.scanAOIs.driverAOIs.find(aoi) != behaviourData.gmBehaviour.scanAOIs.driverAOIs.end()) {
+        gazeState.openingAngle = behaviourData.gmBehaviour.scanAOIs.driverAOIs.at(aoi).openingAngle;
+        Distribution de = behaviourData.gmBehaviour.scanAOIs.driverAOIs.at(aoi).fixationDuration;
+        double dist = stochastics->GetNormalDistributed(de.mean, de.std_deviation);
+        gazeState.fixationDuration = Common::ValueInBounds(de.min, dist, de.max);
+    }
+    else if (behaviourData.gmBehaviour.scanAOIs.mirrorAOIs.find(aoi) != behaviourData.gmBehaviour.scanAOIs.mirrorAOIs.end()) {
+        gazeState.openingAngle = behaviourData.gmBehaviour.scanAOIs.mirrorAOIs.at(aoi).openingAngle;
+        gazeState.mirrorGaze = true;
+        Distribution de = behaviourData.gmBehaviour.scanAOIs.mirrorAOIs.at(aoi).fixationDuration;
+        double dist = stochastics->GetNormalDistributed(de.mean, de.std_deviation);
+        gazeState.fixationDuration = Common::ValueInBounds(de.min, dist, de.max);
+    }
+    else {
+        gazeState.openingAngle = 0;
+        gazeState.viewDistance = 0;
+    }
+
     gazeState.fixationState = {GazeType::ScanGlance, static_cast<int>(aoi)};
-    gazeState.openingAngle = 100 * (M_PI / 180); // TODO replace by realistic behaviour
-    gazeState.fixationDuration = 400;            // TODO realistic distribution
 
     if (aoi == ScanAOI::Other || aoi == ScanAOI::Dashboard) {
         // no agents visible, opening angle too

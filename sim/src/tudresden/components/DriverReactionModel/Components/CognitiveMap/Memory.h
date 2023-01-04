@@ -28,7 +28,8 @@ class Memory {
         : cycletime{static_cast<double>(cycletime)}, behaviourData{behaviourData},
           reactionTime(behaviourData.cmBehaviour.initialPerceptionTime, behaviourData.cmBehaviour.perceptionLatency, cycletime,
                        stochastics) {
-        trafficSignalMemory = std::make_unique<TrafficSignalMemory::TrafficSignalMemory>();
+        trafficSignalMemory = std::make_unique<TrafficSignalMemory::TrafficSignalMemory>(
+            behaviourData.cmBehaviour.trafficSig_memoryCapacity, behaviourData.cmBehaviour.trafficSig_memorytime);
     }
     Memory(const Memory&) = delete;
     Memory(Memory&&) = delete;
