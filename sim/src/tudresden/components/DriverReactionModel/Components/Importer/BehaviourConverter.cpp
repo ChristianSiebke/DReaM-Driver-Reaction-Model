@@ -394,6 +394,7 @@ void BehaviourConverter::ConvertGazeMovementParameters(const StatisticsGroup& ma
         tmp.insert({CrossingPhase::Crossing_Straight, {}});
         tmp.insert({CrossingPhase::Crossing_Left_ONE, {}});
         tmp.insert({CrossingPhase::Crossing_Left_TWO, {}});
+        tmp.insert({CrossingPhase::Exit, {}});
 
         std::map<TrafficDensity, std::map<CrossingPhase, std::map<ScanAOI, std::shared_ptr<DistributionEntry>>>> tmp2;
         tmp2.insert({TrafficDensity::LOW, tmp});
