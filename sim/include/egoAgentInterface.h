@@ -314,6 +314,7 @@ public:
         std::sort(indizes.begin(), indizes.end() , [&](size_t i, size_t j){return sort(std::make_pair(std::get<std::vector<QueryPack>>(results).at(i), std::get<std::vector<QueryPack>>(results).at(j))...);});
         return indizes;
     }
+    virtual RoadGraphVertex GetRootOfWayToTargetGraph() const = 0;
 
 protected:
 

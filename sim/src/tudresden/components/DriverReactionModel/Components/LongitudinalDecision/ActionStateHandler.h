@@ -5,18 +5,14 @@
  *                       Vincent   Adam
  *                       Jan       Sommer
  *
- * This program and the accompanying materials are made
- * available under the terms of the Eclipse Public License 2.0
- * which is available at https://www.eclipse.org/legal/epl-2.0/
- *
- * SPDX-License-Identifier: EPL-2.0
+ * for further information please visit:  https://www.driver-model.de
  *****************************************************************************/
 #ifndef ACTIONSTATE_H
 #define ACTIONSTATE_H
 
 #include "Common/Helper.h"
 
-enum class ActionState { Start = 0, Collision = 1, Following = 2, IntersectionSituation = 3, End = 4 };
+enum class ActionState { Start = 0, CollisionImminent = 1, Following = 2, IntersectionSituation = 3, End = 4 };
 
 class ActionStateHandler {
   public:

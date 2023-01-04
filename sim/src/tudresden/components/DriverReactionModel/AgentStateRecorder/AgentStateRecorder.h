@@ -1,9 +1,18 @@
-
+/******************************************************************************
+ * Copyright (c) 2019 TU Dresden
+ * scientific assistant: Christian Siebke
+ * student assistants:   Christian Gärber
+ *                       Vincent   Adam
+ *                       Jan       Sommer
+ *
+ * for further information please visit:  https://www.driver-model.de
+ *****************************************************************************/
 #pragma once
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/xml_parser.hpp>
 #include <iostream>
 #include <map>
+#include <mutex>
 #include <sstream>
 #include <thread>
 
@@ -73,20 +82,18 @@ public:
     }
 
     static void ResetAgentStateRecorder() {
-        std::cout << "AgentStateRecorder count: " << instance.use_count() << std::endl;
         instance.reset();
     }
 
+    static void SetRunId(int invocation) {
+        runId = invocation;
+    }
+
     ~AgentStateRecorder() {
-        WriteOutputFile();
-        std::cout << "AgentStateRecorder destroyed" << std::endl;
+        BufferSimulationOutput();
+        std::cout << " AgentStateRecorder destroyed" << std::endl;
     }
 
-private:
-    AgentStateRecorder(std::string resultPath) : resultPath(resultPath) {
-    }
-
-public:
     AgentStateRecorder(AgentStateRecorder const &) = delete;
     AgentStateRecorder &operator=(AgentStateRecorder const &) = delete;
 
@@ -110,10 +117,24 @@ public:
 
     void AddTrafficSignals(int time, int id, std::unordered_map<DReaMId, MemorizedTrafficSignal> *);
 
+    //! All information saved in the agentStateRecorder is written into an xml file
+    static void WriteOutputFile();
+
 private:
+    AgentStateRecorder(std::string inResultPath) {
+        resultPath = inResultPath;
+    }
+
+    void BufferSimulationOutput();
+    boost::property_tree::ptree AddInfrastructureData() const;
+
     static std::shared_ptr<AgentStateRecorder> instance;
-    std::string resultPath;
+    static std::mutex mtx;
+    static boost::property_tree::ptree simulationOutut;
+    static std::string resultPath;
     Record record;
+    static int runId;
+    static bool infrastructureDataWritten;
 
     /*!
      * \brief Generates a string containing all information for one timestep
@@ -129,8 +150,5 @@ private:
 
     //! Generates a header matching and discribing the recorded datasets
     std::string GenerateHeader();
-
-    //! All information saved in the agentStateRecorder is written into an xml file
-    void WriteOutputFile();
 };
 } // namespace agentRecordState

@@ -1,15 +1,11 @@
 /******************************************************************************
- * Copyright (c) 2020 TU Dresden
+ * Copyright (c) 2019 TU Dresden
  * scientific assistant: Christian Siebke
  * student assistants:   Christian Gärber
  *                       Vincent   Adam
  *                       Jan       Sommer
  *
- * This program and the accompanying materials are made
- * available under the terms of the Eclipse Public License 2.0
- * which is available at https://www.eclipse.org/legal/epl-2.0/
- *
- * SPDX-License-Identifier: EPL-2.0
+ * for further information please visit:  https://www.driver-model.de
  *****************************************************************************/
 #include "Memory.h"
 #include <functional>
@@ -49,25 +45,26 @@ const AmbientAgentRepresentations* Memory::UpdateAmbientAgentRepresentations() {
     };
     auto agentIsOutdated = std::bind(anyOfCollectionHasSameID, std::ref(newMemoryAgents), std::placeholders::_1);
     auto agentOnInvalidLane = [](const auto& agent) { return agent->GetLane() == nullptr; };
-    auto agentExceedLifeTime = [this](const auto& agent) { return (agent->GetLifeTime() > behaviourData.cmBehaviour.memorytime); };
+    auto agentExceedLifeTime = [this](const auto &agent) { return (agent->GetLifeTime() > behaviourData.cmBehaviour.memorytime); };
     auto extrapolationFailed = [this](const auto& agent) {
         return !agent->FindNewPositionInDistance(agent->ExtrapolateDistanceAlongLane(cycletime / 1000));
     };
     auto agentIsInvalide = [=](auto& oldMemoryAgent) {
         return agentOnInvalidLane(oldMemoryAgent) || agentExceedLifeTime(oldMemoryAgent) || extrapolationFailed(oldMemoryAgent);
     };
-    auto eraseAgent = [=](auto& oldMemoryAgent) {
+    auto eraseAgent = [=](auto &oldMemoryAgent) {
         oldMemoryAgent->IncrementLifeTimeTicker(cycletime);
         return agentIsOutdated(oldMemoryAgent->GetID()) || agentIsInvalide(oldMemoryAgent);
     };
-    // delete agents
-    agentMemory.erase(std::remove_if(agentMemory.begin(), agentMemory.end(), eraseAgent), agentMemory.end());
 
-    for (const auto& agent : agentMemory) {
+    for (const auto &agent : agentMemory) {
         if (agentIsInvalide(agent)) {
             reactionTime.EraseAgent(agent->GetID());
         }
     }
+
+    // delete agents
+    agentMemory.erase(std::remove_if(agentMemory.begin(), agentMemory.end(), eraseAgent), agentMemory.end());
 
     // extrapolate agents when no new visual information is perceived
     std::for_each(agentMemory.begin(), agentMemory.end(), [this](std::unique_ptr<AmbientAgentRepresentation>& memoryAgent) {
@@ -106,7 +103,7 @@ std::unique_ptr<AmbientAgentRepresentation> Memory::ExtrapolateAmbientAgent(cons
         data.distanceOnJunction = junctionDistance.distanceOnJunction;
         data.distanceToNextJunction = junctionDistance.distanceToNextJunction;
 
-        return std::make_unique<AmbientAgentRepresentation>(std::make_shared<AgentPerception>(data));
+        return std::make_unique<AmbientAgentRepresentation>(std::make_shared<AgentPerception>(data), agent->GetLifeTime());
     } catch (std::out_of_range error) {
         auto msg = __FILE__ " Line: " + std::to_string(__LINE__) + error.what() + " Extrapolation failed ";
         throw std::logic_error(msg);

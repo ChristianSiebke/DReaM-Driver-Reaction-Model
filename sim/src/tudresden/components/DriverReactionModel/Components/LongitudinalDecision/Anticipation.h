@@ -5,11 +5,7 @@
  *                       Vincent   Adam
  *                       Jan       Sommer
  *
- * This program and the accompanying materials are made
- * available under the terms of the Eclipse Public License 2.0
- * which is available at https://www.eclipse.org/legal/epl-2.0/
- *
- * SPDX-License-Identifier: EPL-2.0
+ * for further information please visit:  https://www.driver-model.de
  *****************************************************************************/
 
 #pragma once
@@ -67,12 +63,13 @@ class Anticipation {
 
     TimeToConflictArea CalculateTimeToConflictAreaEgo(DistanceToConflictArea distance, double velocity) const;
 
-    TimeToConflictArea CalculateTimeToConflictAreaObserved(DistanceToConflictArea distance, double acceleration, double velocity) const;
+    TimeToConflictArea CalculateTimeToConflictAreaObserved(const ConflictSituation &situation,
+                                                           const AmbientAgentRepresentation *oAgent) const;
 
     double TravelTimeEgo(double distance, double velocity, double vTarget) const;
-    double TravelTimeObserved(double distance, double acceleration, double velocity) const;
+    double TravelTimeObserved(double distance, bool egoInsideConflictArea, const AmbientAgentRepresentation *oAgent) const;
 
-    double CalculateDeceleration(double sFrontEgo, double tEndObserved, bool egoAgentRightOfWay) const;
+    double CalculateDeceleration(double sFrontEgo, double tEndObserved, const AgentInterpretation *observedAgent) const;
 
     const BehaviourData& GetBehaviourData() const { return behaviourData; }
 

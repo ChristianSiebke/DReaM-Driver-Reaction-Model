@@ -1,15 +1,11 @@
 /******************************************************************************
- * Copyright (c) 2020 TU Dresden
+ * Copyright (c) 2019 TU Dresden
  * scientific assistant: Christian Siebke
  * student assistants:   Christian Gärber
  *                       Vincent   Adam
  *                       Jan       Sommer
  *
- * This program and the accompanying materials are made
- * available under the terms of the Eclipse Public License 2.0
- * which is available at https://www.eclipse.org/legal/epl-2.0/
- *
- * SPDX-License-Identifier: EPL-2.0
+ * for further information please visit:  https://www.driver-model.de
  *****************************************************************************/
 
 #pragma once
@@ -24,10 +20,12 @@ class ReactionTime {
   public:
     ReactionTime(DistributionEntry inPercTime, DistributionEntry percLatency, double cycleTime, StochasticsInterface* stochastics)
         : cycleTime{cycleTime} {
-        double drawnInPercTime = stochastics->GetLogNormalDistributed(inPercTime.mean, inPercTime.std_deviation);
+        double drawnInPercTime = inPercTime.mean <= 0 ? 0 : stochastics->GetLogNormalDistributed(inPercTime.mean, inPercTime.std_deviation);
         initialPerceptionTime = Common::ValueInBounds(inPercTime.min, drawnInPercTime, inPercTime.max);
 
-        double drawnPercLatency = stochastics->GetLogNormalDistributed(percLatency.mean, percLatency.std_deviation);
+        double drawnPercLatency =
+            percLatency.mean <= 0 ? 0 : stochastics->GetLogNormalDistributed(percLatency.mean, percLatency.std_deviation);
+
         perceptionLatency = Common::ValueInBounds(percLatency.min, drawnPercLatency, percLatency.max);
 
         auto bufferTime = inPercTime.max > percLatency.max ? inPercTime.max : percLatency.max;

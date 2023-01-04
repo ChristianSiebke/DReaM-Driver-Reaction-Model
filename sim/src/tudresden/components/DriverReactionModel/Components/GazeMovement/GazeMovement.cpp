@@ -5,11 +5,7 @@
  *                       Vincent   Adam
  *                       Jan       Sommer
  *
- * This program and the accompanying materials are made
- * available under the terms of the Eclipse Public License 2.0
- * which is available at https://www.eclipse.org/legal/epl-2.0/
- *
- * SPDX-License-Identifier: EPL-2.0
+ * for further information please visit:  https://www.driver-model.de
  *****************************************************************************/
 
 #include "GazeMovement.h"
@@ -79,9 +75,7 @@ void GazeMovement::DetermineGazeState() {
 }
 
 void GazeMovement::UpdateRoadSegment() {
-    if ((worldRepresentation.egoAgent->GetDistanceToNextJunction() <= 75 &&
-         worldRepresentation.egoAgent->GetDistanceToNextJunction() >= 0) ||
-        worldRepresentation.egoAgent->GetDistanceOnJunction() > 0) {
+    if (worldInterpretation.crossingInfo.phase >= CrossingPhase::Approach) {
         auto NextJunction = worldRepresentation.egoAgent->NextJunction();
         if (NextJunction != nullptr) {
             if (NextJunction->GetIncomingRoads().size() == 4) {
@@ -90,7 +84,7 @@ void GazeMovement::UpdateRoadSegment() {
                     currentSegmentType = SegmentType::XJunction;
                 }
             }
-            if (NextJunction->GetIncomingRoads().size() == 3) {
+            else if (NextJunction->GetIncomingRoads().size() == 3) {
                 NextDirectionLanes nextLanes;
                 // assumption movingInLaneDirection = true for now
                 if (auto nextLanesPtr = InfrastructurePerception::NextLanes(true, worldRepresentation.egoAgent->GetLane())) {
