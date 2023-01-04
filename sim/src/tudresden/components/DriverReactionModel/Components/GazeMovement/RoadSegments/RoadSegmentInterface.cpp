@@ -134,13 +134,15 @@ GazeState RoadSegmentInterface::ScanGlance(CrossingPhase phase) {
     else if (behaviourData.gmBehaviour.scanAOIs.mirrorAOIs.find(aoi) != behaviourData.gmBehaviour.scanAOIs.mirrorAOIs.end()) {
         gazeState.openingAngle = behaviourData.gmBehaviour.scanAOIs.mirrorAOIs.at(aoi).openingAngle;
         gazeState.mirrorGaze = true;
+        gazeState.mirrorPos = behaviourData.gmBehaviour.scanAOIs.mirrorAOIs.at(aoi).pos;
         Distribution de = behaviourData.gmBehaviour.scanAOIs.mirrorAOIs.at(aoi).fixationDuration;
         double dist = stochastics->GetNormalDistributed(de.mean, de.std_deviation);
         gazeState.fixationDuration = Common::ValueInBounds(de.min, dist, de.max);
     }
     else {
         gazeState.openingAngle = 0;
-        gazeState.viewDistance = 0;
+        gazeState.godMode = true;
+        gazeState.viewDistance = 100;
     }
 
     gazeState.fixationState = {GazeType::ScanGlance, static_cast<int>(aoi)};

@@ -87,6 +87,8 @@ struct GazeState {
     double viewDistance{100}; // TODO calculate
     int fixationDuration{-999};
 
+    bool godMode = false;
+
     bool mirrorGaze = false;
     Common::Vector2d mirrorPos{0, 0};
 };
