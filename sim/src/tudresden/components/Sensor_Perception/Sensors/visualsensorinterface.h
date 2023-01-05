@@ -24,7 +24,8 @@ public:
     }
     virtual ~VisualSensorInterface() = default;
 
-    virtual void Trigger(int timestamp, double direction, double distance, double opening) = 0;
+    virtual void Trigger(int timestamp, double direction, double distance, double opening, std::optional<Common::Vector2d> mirrorPos,
+                         bool godMode) = 0;
 
     virtual std::vector<T> GetVisible() = 0;
 };

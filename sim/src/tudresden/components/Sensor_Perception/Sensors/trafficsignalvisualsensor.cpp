@@ -9,10 +9,24 @@
  *****************************************************************************/
 #include "trafficsignalvisualsensor.h"
 
-void TrafficSignalVisualSensor::Trigger(int timestamp, double fovAngle, double distance, double opening) {
+void TrafficSignalVisualSensor::Trigger(int timestamp, double fovAngle, double distance, double opening,
+                                        std::optional<Common::Vector2d> mirrorPos, bool godMode) {
+    sensorDirection = fovAngle;
     driverPos = Common::Vector2d(egoAgent->GetPositionX(), egoAgent->GetPositionY());
-    minViewAngle = -opening / 2.0;
-    maxViewAngle = opening / 2.0;
+    if (mirrorPos.has_value()) {
+        auto relMirrorPos = mirrorPos.value();
+        relMirrorPos.Rotate(egoAgent->GetYaw());
+        driverPos.Add(relMirrorPos);
+    }
+
+    if (godMode) {
+        minViewAngle = -M_PI;
+        maxViewAngle = M_PI;
+    }
+    else {
+        minViewAngle = -opening / 2.0;
+        maxViewAngle = opening / 2.0;
+    }
     viewDistance = distance;
 
     aabbTree = aabbTreeHandler->GetCurrentAABBTree(timestamp);
