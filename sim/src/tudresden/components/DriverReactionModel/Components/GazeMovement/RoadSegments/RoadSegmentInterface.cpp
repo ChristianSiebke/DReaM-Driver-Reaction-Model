@@ -39,13 +39,16 @@ double RoadSegmentInterface::ScanUFOVAngle(ScanAOI aoi) {
     bool mirrorGaze = false;
     double ufovAngle;
     if (behaviourData.gmBehaviour.scanAOIs.driverAOIs.find(aoi) != behaviourData.gmBehaviour.scanAOIs.driverAOIs.end()) {
+        std::cout << "driver aoi found" << std::endl;
         ufovAngle = behaviourData.gmBehaviour.scanAOIs.driverAOIs.at(aoi).direction * (M_PI / 180);
     }
     else if (behaviourData.gmBehaviour.scanAOIs.mirrorAOIs.find(aoi) != behaviourData.gmBehaviour.scanAOIs.mirrorAOIs.end()) {
+        std::cout << "mirror aoi found" << std::endl;
         ufovAngle = behaviourData.gmBehaviour.scanAOIs.mirrorAOIs.at(aoi).direction * (M_PI / 180);
         mirrorGaze = true;
     }
     else {
+        std::cout << "aoi not found" << std::endl;
         ufovAngle = 0;
     }
 
@@ -126,12 +129,14 @@ GazeState RoadSegmentInterface::ScanGlance(CrossingPhase phase) {
     GazeState gazeState;
 
     if (behaviourData.gmBehaviour.scanAOIs.driverAOIs.find(aoi) != behaviourData.gmBehaviour.scanAOIs.driverAOIs.end()) {
+        std::cout << "driver aoi found" << std::endl;
         gazeState.openingAngle = behaviourData.gmBehaviour.scanAOIs.driverAOIs.at(aoi).openingAngle;
         Distribution de = behaviourData.gmBehaviour.scanAOIs.driverAOIs.at(aoi).fixationDuration;
         double dist = stochastics->GetNormalDistributed(de.mean, de.std_deviation);
         gazeState.fixationDuration = Common::ValueInBounds(de.min, dist, de.max);
     }
     else if (behaviourData.gmBehaviour.scanAOIs.mirrorAOIs.find(aoi) != behaviourData.gmBehaviour.scanAOIs.mirrorAOIs.end()) {
+        std::cout << "mirror aoi found" << std::endl;
         gazeState.openingAngle = behaviourData.gmBehaviour.scanAOIs.mirrorAOIs.at(aoi).openingAngle;
         gazeState.mirrorGaze = true;
         gazeState.mirrorPos = behaviourData.gmBehaviour.scanAOIs.mirrorAOIs.at(aoi).pos;
@@ -140,14 +145,17 @@ GazeState RoadSegmentInterface::ScanGlance(CrossingPhase phase) {
         gazeState.fixationDuration = Common::ValueInBounds(de.min, dist, de.max);
     }
     else {
+        std::cout << "aoi not found" << std::endl;
         gazeState.openingAngle = 0;
         gazeState.godMode = true;
         gazeState.viewDistance = 100;
+        gazeState.fixationDuration = 400;
     }
 
     gazeState.fixationState = {GazeType::ScanGlance, static_cast<int>(aoi)};
 
     if (aoi == ScanAOI::Other || aoi == ScanAOI::Dashboard) {
+        std::cout << "aoi other/dash" << std::endl;
         // no agents visible, opening angle too
         gazeState.openingAngle = 0;
         gazeState.viewDistance = 0;
