@@ -18,12 +18,14 @@
 
 #pragma once
 
-#include "common/opMath.h"
+#include <array>
 #include <list>
 #include <map>
 #include <string>
 #include <tuple>
 #include <vector>
+
+#include "common/opMath.h"
 
 // the following is a temporary workaround until the contribution is merged into osi
 #if defined(_WIN32) && !defined(NODLL)
@@ -102,11 +104,7 @@ namespace openpass::utils {
 
 /// @brief constexpr map for transforming the a corresponding enumeration into
 ///        a string representation: try to_cstr(EnumType) or to_string(EnumType)
-static constexpr std::array<const char *, 4> AgentCategoryMapping{
-    "Ego",
-    "Scenario",
-    "Common",
-    "Any"};
+static constexpr std::array<const char *, 4> AgentCategoryMapping{"Ego", "Scenario", "Common", "Any"};
 
 constexpr const char *to_cstr(AgentCategory agentCategory)
 {

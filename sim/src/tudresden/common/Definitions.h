@@ -39,6 +39,11 @@ enum class DistanceUnit {
     Mile // land mile
 };
 
+namespace DReaMDefinitions {
+enum class AgentVehicleType { NONE = -2, Undefined = -1, Car = 0, Pedestrian, Motorbike, Bicycle, Truck };
+
+}
+
 // fixation area of interests
 enum class ScanAOI { NONE, Right, Straight, Left, Rear, Dashboard, Other };
 enum class ControlAOI { NONE, Right, Left, Oncoming };

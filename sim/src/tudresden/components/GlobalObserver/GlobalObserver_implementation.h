@@ -10,7 +10,7 @@
 
 #pragma once
 
-#include "WorldData.h" *
+#include "WorldData.h"
 #include "common/complexSignals.h"
 #include "common/primitiveSignals.h"
 #include "include/modelInterface.h"

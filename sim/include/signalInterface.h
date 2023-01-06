@@ -13,6 +13,7 @@
 
 #include <map>
 #include <string>
+#include <array>
 
 enum class ComponentState
 {

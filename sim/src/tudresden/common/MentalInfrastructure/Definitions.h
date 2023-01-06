@@ -81,4 +81,27 @@ enum class TrafficLightType {
     TwoLightsPedestrianBicycle,
 };
 
+enum class LaneType {
+    Undefined = 0,
+    Shoulder,
+    Border,
+    Driving,
+    Stop,
+    None,
+    Restricted,
+    Parking,
+    Median,
+    Biking,
+    Sidewalk,
+    Curb,
+    Exit,
+    Entry,
+    OnRamp,
+    OffRamp,
+    ConnectingRamp,
+    Tram,
+    RoadWorks,
+    Bidirectional
+};
+
 } // namespace MentalInfrastructure

@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright (c) 2019 TU Dresden
+ * Copyright (c) 2022 TU Dresden
  * scientific assistant: Christian Siebke
  * student assistants:   Christian Gärber
  *                       Vincent   Adam
@@ -10,6 +10,7 @@
 #pragma once
 
 #include <algorithm>
+#include <limits>
 #include <unordered_map>
 
 #include "Common/vector2d.h"
@@ -21,109 +22,120 @@
 
 struct InfrastructurePerception;
 struct DynamicInfrastructurePerception;
+
+/**
+ * @brief Generic perception data of an object
+ *
+ */
 struct ObjectPerception {
     virtual ~ObjectPerception() = default;
 
-    int id{-999};
-    double yawAngle{-999};
-    double width{-999};
-    double length{-999};
-    Common::Vector2d refPosition{-999, -999};
+    int id = std::numeric_limits<int>::min();
+    double yaw = std::numeric_limits<double>::min();
+    double width = std::numeric_limits<double>::min();
+    double length = std::numeric_limits<double>::min();
+    Common::Vector2d refPosition{std::numeric_limits<double>::min(), std::numeric_limits<double>::min()};
 };
 
-struct PositionAlongRoad {
-    const MentalInfrastructure::Lane *newLane = nullptr;
-    double newSCoordinate = -999;
+/**
+ * @brief Represents a position on a lane
+ *
+ */
+struct LanePosition {
+    const MentalInfrastructure::Lane *lane = nullptr;
+    double sCoordinate = std::numeric_limits<double>::min();
 };
 
+/**
+ * @brief Distance to a next junction and on a current junction. Negative value mean no junction present.
+ *
+ */
 struct JunctionDistance {
-    double distanceOnJunction = -1;
-    double distanceToNextJunction = -1;
+    double on = std::numeric_limits<double>::min();
+    double toNext = std::numeric_limits<double>::min();
 };
 
+/**
+ * @brief Wrapper for the next lanes an agent might take.
+ *
+ */
 struct NextDirectionLanes {
     std::vector<const MentalInfrastructure::Lane *> rightLanes;
     std::vector<const MentalInfrastructure::Lane *> leftLanes;
     std::vector<const MentalInfrastructure::Lane *> straightLanes;
 };
 
-struct AgentPerception : ObjectPerception {
-    virtual ~AgentPerception() override = default;
+/**
+ * @brief Wrapper for data collected at the main locator point (front of the vehicle / agent).
+ *
+ */
+struct MainLocatorInformation {
+    const MentalInfrastructure::Lane *mainLocatorLane = nullptr;
+    double lateralDisplacement = std::numeric_limits<double>::min();
+    double curvature = std::numeric_limits<double>::min();
+    double heading = std::numeric_limits<double>::min();
+};
 
-    /*!
-     * \brief Return Position in distance on lane
+/**
+ * @brief General information collected about an agent. Will be passed to other agents and contains "public" data.
+ *
+ */
+struct GeneralAgentPerception : ObjectPerception {
+    // vehicle information [static]
+    DReaMDefinitions::AgentVehicleType vehicleType = DReaMDefinitions::AgentVehicleType::NONE;
+    double distanceReferencePointToLeadingEdge = std::numeric_limits<double>::min();
+
+    // movement information
+    double acceleration = std::numeric_limits<double>::min();
+    double velocity = std::numeric_limits<double>::min();
+    bool movingInLaneDirection = false;
+
+    // light status
+    bool brakeLight = true;
+    IndicatorState indicatorState = IndicatorState::IndicatorState_Warn;
+
+    // positional information (at reference point)
+    LanePosition lanePosition{};
+    const MentalInfrastructure::Lane *nextLane;
+    JunctionDistance junctionDistance{};
+
+public:
+    /**
+     * @brief Calculates position on a lane in a given distance
      *
-     * @param[in]     distance              distance from the current S-coordniate to the searched position
-     *
-     * @return        Position if lane is present in distance
+     * @param distance distance from the current S-coordniate to the searched position
+     * @return Position if lane is present in distance
      */
-    virtual std::optional<PositionAlongRoad> FindNewPositionInDistance(double distance) const;
+    virtual std::optional<LanePosition> FindNewPositionInDistance(double distance) const;
 
-    /*!
-     * \brief  check if agent is moving in lane direction
-     * @param[in]     agentLane
+    /**
+     * @brief Calculates a set of values for distance on and to next junction
      *
-     * @return        true if agent is moving in lane direction
-     */
-    // REWORK move out of AgentPerception class
-    // see CalculateJunctionDistance
-    // could also be used to automatically set the corresponding bool --> then the metho would make sense at this point
-    static bool IsMovingInLaneDirection(const MentalInfrastructure::Lane *agentLane, double yawAngle, double sCoordinate, double velocitz);
-
-    /*!
-     * \brief  calculates distance to next junction
-     * @param[in]     agentRoad
-     * @param[in]     agentLane
-     *
-     * @return        distance on/to junction
+     * @param agentRoad
+     * @param agentLane
+     * @return JunctionDistance
      */
     // REWORK move out of the AgentPerception class (maybe static)
     // VA: this code is not tied to the AgentPerception and should therefor not be tied to this class, it is more of a helper function
     JunctionDistance CalculateJunctionDistance(const MentalInfrastructure::Road *agentRoad,
                                                const MentalInfrastructure::Lane *agentLane) const;
-
-    AgentVehicleType vehicleType{AgentVehicleType::NONE};
-
-    double acceleration{-999};
-    double velocity{-999};
-
-    double distanceReferencePointToLeadingEdge{-999};
-
-    bool brakeLight{true};
-    IndicatorState indicatorState{IndicatorState::IndicatorState_Warn};
-    // measured at reference point
-    double sCoordinate{-999};
-    LaneType laneType{LaneType::Undefined};
-    bool movingInLaneDirection{false};
-    // measured at reference point
-    const MentalInfrastructure::Road *road;
-    // measured at reference point
-    const MentalInfrastructure::Lane *lane;
-    // measured at reference point
-    const MentalInfrastructure::Lane *nextLane;
-
-    double distanceToNextJunction{-999};
-    double distanceOnJunction{-999};
 };
 
-struct EgoPerception : AgentPerception {
-    ~EgoPerception() override = default;
+/**
+ * @brief Detailed information collected on an agent. Will only be passed to the respective agent this data belongs to.
+ *
+ */
+struct DetailedAgentPerception : GeneralAgentPerception {
+    // position of the driver in the vehicle (global coordinate)
+    Common::Vector2d globalDriverPosition{std::numeric_limits<double>::min(), std::numeric_limits<double>::min()};
 
-    //! position of the driver in the vehicle (global coordinate)
-    Common::Vector2d driverPosition{-999, -999};
+    // additional vehicle information
+    double steeringWheelAngle = std::numeric_limits<double>::min();
 
-    //! additional vehicle information
-    double steeringWheelAngle{-999};
+    // additional road information
+    double laneWidth = std::numeric_limits<double>::min();
+    MainLocatorInformation mainLocatorInformation{};
 
-    //! additional road information
-    double laneWidth{-999};
-
-    //! measured at mainLocaterPoint (vehicle front)
-    const MentalInfrastructure::Lane *mainLocatorLane;
-    // lateral deviation measured at mainLocaterPoint (vehicle front)
-    double lateralDisplacement{-999};
-    double curvature{-999};
-    double heading{-999};
     DReaMRoute::Waypoints route{};
 };
 
