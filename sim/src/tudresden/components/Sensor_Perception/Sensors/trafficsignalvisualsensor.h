@@ -29,7 +29,7 @@ public:
         }
     }
 
-    void Trigger(int timestamp, double direction, double distance, double opening) override;
+    void Trigger(int timestamp, double direction, double distance, double opening, std::optional<Common::Vector2d> mirrorPos, bool godMode) override;
 
     std::vector<const MentalInfrastructure::TrafficSignal *> GetVisible() override {
         return perceived;

@@ -48,7 +48,8 @@ class SensorPerceptionLogic {
     ///
     /// \brief Starts the calculation of Infrastructure, DriverPerception and VisualPerception.
     ///
-    void Trigger(int timestamp, double directionAngle, double sensorDistance, double sensorOpeningAngle, std::vector<InternWaypoint> route);
+    void Trigger(int timestamp, double directionAngle, double sensorDistance, double sensorOpeningAngle,
+                 std::optional<Common::Vector2d> mirrorPos, bool godMode, std::vector<InternWaypoint> route);
 
     ///
     /// \brief Returns a pointer to the visual sensor, no calculation is performed.

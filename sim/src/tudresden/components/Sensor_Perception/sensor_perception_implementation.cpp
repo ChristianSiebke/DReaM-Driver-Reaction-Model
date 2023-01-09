@@ -81,7 +81,15 @@ void Sensor_Perception_Implementation::UpdateOutput(int localLinkId, std::shared
 
 void Sensor_Perception_Implementation::Trigger(int time) {
     UpdateGraphPosition();
-    sensorPerceptionLogic.Trigger(time, currentGazeState.ufovAngle, currentGazeState.viewDistance, currentGazeState.openingAngle, route);
+    std::optional<Common::Vector2d> mPos;
+    if (currentGazeState.mirrorGaze) {
+        mPos.emplace(currentGazeState.mirrorPos);
+    }
+    else {
+        mPos.reset();
+    }
+    sensorPerceptionLogic.Trigger(time, currentGazeState.ufovAngle, currentGazeState.viewDistance, currentGazeState.openingAngle, mPos,
+                                  currentGazeState.godMode, route);
 }
 
 void Sensor_Perception_Implementation::UpdateGraphPosition() {

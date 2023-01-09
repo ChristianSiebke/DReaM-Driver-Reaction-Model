@@ -34,6 +34,11 @@ public:
     }
     virtual ~DistributionEntry() {
     }
+
+    Distribution toDistribution() {
+        Distribution d(mean, std_deviation, min, max);
+        return d;
+    }
 };
 
 class StandardDoubleEntry : public StatisticsEntry {
@@ -83,9 +88,24 @@ struct CognitiveMapBehaviour {
     int memorytime;
     DistributionEntry initialPerceptionTime{0, 0, 0, 0};
     DistributionEntry perceptionLatency{0, 0, 0, 0};
+
+    unsigned int trafficSig_memoryCapacity;
+    int trafficSig_memorytime;
+};
+
+struct ScanAreasOfInterest {
+    std::map<ScanAOI, DriverGaze> driverAOIs;
+    std::map<ScanAOI, MirrorGaze> mirrorAOIs;
 };
 
 struct GazeMovementBehaviour {
+    double foresightTime;
+    double minForesightDistance;
+    double observe_openingAngle;
+    std::shared_ptr<DistributionEntry> observe_fixationDuration;
+
+    ScanAreasOfInterest scanAOIs;
+
     double std_probabilityFixateLeadCar;
     double std_probabilityControlGlance;
     std::map<ScanAOI, std::shared_ptr<DistributionEntry>> std_scanAOIProbabilities;
@@ -94,6 +114,11 @@ struct GazeMovementBehaviour {
     double XInt_probabilityControlGlance;
     double XInt_viewingDepthIntoRoad;
     std::map<CrossingPhase, std::map<ControlAOI, double>> XInt_controlAOIProbabilities;
+    std::map<IndicatorState, std::map<TrafficDensity, std::map<CrossingPhase, std::map<ScanAOI, std::shared_ptr<DistributionEntry>>>>>
+        XInt_scanAOIProbabilities;
+
+    double XInt_controlOpeningAngle;
+    std::shared_ptr<DistributionEntry> XInt_controlFixationDuration;
 };
 
 struct BehaviourData {

@@ -164,6 +164,19 @@ void BehaviourConverter::ConvertCognitiveMapParameters(const StatisticsGroup& ma
             throw std::logic_error(" initialPerceptionTime max must be a positive value! ");
         if (behaviourData->cmBehaviour.initialPerceptionTime.min < 0)
             throw std::logic_error(" initialPerceptionTime min must be a positive value! ");
+
+        key = "TrafficSignalMemoryParameters";
+        const StatisticsSet &tsParams = main.sets.at(key);
+        key = "memorytime";
+        behaviourData.get()->cmBehaviour.trafficSig_memorytime =
+            static_cast<int>(std::static_pointer_cast<StandardDoubleEntry>(tsParams.entries.at(key))->value);
+        if (behaviourData->cmBehaviour.trafficSig_memorytime < 0)
+            throw std::logic_error(" memorytime must be a positive value! ");
+        key = "memoryCapacity";
+        behaviourData.get()->cmBehaviour.trafficSig_memoryCapacity =
+            static_cast<int>(std::static_pointer_cast<StandardDoubleEntry>(tsParams.entries.at(key))->value);
+        if (behaviourData->cmBehaviour.trafficSig_memoryCapacity < 0)
+            throw std::logic_error(" memoryCapacity must be a positive value! ");
     } catch (const std::out_of_range& oor) {
         std::string message = "File: " + static_cast<std::string>(__FILE__) + " Line: " + std::to_string(__LINE__) +
                               " ConfigFile: Missing BehaviourParameter/s in Behaviour config file: cannot find " + key + " | " + oor.what();
@@ -187,6 +200,81 @@ void BehaviourConverter::ConvertGazeMovementParameters(const StatisticsGroup& ma
 
     std::string key;
     try {
+        key = "ScanAreasOfInterest";
+        StatisticsGroup scanAOIs = main.groups.at(key);
+        key = "DriverGaze";
+        StatisticsGroup driverGaze = scanAOIs.groups.at(key);
+        for (auto &set : driverGaze.sets) {
+            ScanAOI scan;
+            if (set.first == "Left") {
+                scan = ScanAOI::Left;
+            }
+            else if (set.first == "Straight") {
+                scan = ScanAOI::Straight;
+            }
+            else if (set.first == "Right") {
+                scan = ScanAOI::Right;
+            }
+            else {
+                continue;
+            }
+            DriverGaze dr;
+            dr.direction = std::static_pointer_cast<StandardDoubleEntry>(set.second.entries.at("direction"))->value;
+            dr.openingAngle = std::static_pointer_cast<StandardDoubleEntry>(set.second.entries.at("openingAngle"))->value;
+            if (dr.openingAngle < 0)
+                throw std::logic_error(" DriverGaze -> openingAngle must be a positive value! ");
+            dr.fixationDuration = std::static_pointer_cast<DistributionEntry>(set.second.entries.at("fixationDuration"))->toDistribution();
+
+            behaviourData->gmBehaviour.scanAOIs.driverAOIs.insert(std::make_pair(scan, dr));
+        }
+
+        key = "MirrorGaze";
+        StatisticsGroup mirrorGaze = scanAOIs.groups.at(key);
+        for (auto &set : mirrorGaze.sets) {
+            ScanAOI scan;
+            if (set.first == "Left") {
+                scan = ScanAOI::OuterLeftRVM;
+            }
+            else if (set.first == "Inside") {
+                scan = ScanAOI::InnerRVM;
+            }
+            else if (set.first == "Right") {
+                scan = ScanAOI::OuterRightRVM;
+            }
+            else {
+                continue;
+            }
+            MirrorGaze mir;
+            mir.direction = std::static_pointer_cast<StandardDoubleEntry>(set.second.entries.at("direction"))->value;
+            mir.openingAngle = std::static_pointer_cast<StandardDoubleEntry>(set.second.entries.at("openingAngle"))->value;
+            if (mir.openingAngle < 0)
+                throw std::logic_error(" MirrorGaze -> openingAngle must be a positive value! ");
+            mir.pos.x = std::static_pointer_cast<StandardDoubleEntry>(set.second.entries.at("mirrorPosX"))->value;
+            mir.pos.y = std::static_pointer_cast<StandardDoubleEntry>(set.second.entries.at("mirrorPosY"))->value;
+            mir.fixationDuration = std::static_pointer_cast<DistributionEntry>(set.second.entries.at("fixationDuration"))->toDistribution();
+
+            behaviourData->gmBehaviour.scanAOIs.mirrorAOIs.insert(std::make_pair(scan, mir));
+        }
+
+        key = "BaseParameters";
+        StatisticsSet base = main.sets.at(key);
+        behaviourData->gmBehaviour.foresightTime = std::static_pointer_cast<StandardDoubleEntry>(base.entries.at("foresightTime"))->value;
+        if (behaviourData->gmBehaviour.XInt_controlOpeningAngle < 0)
+            throw std::logic_error(" GazeMovement -> foresightTime must be a positive value! ");
+        behaviourData->gmBehaviour.minForesightDistance =
+            std::static_pointer_cast<StandardDoubleEntry>(base.entries.at("minForesightDistance"))->value;
+        if (behaviourData->gmBehaviour.XInt_controlOpeningAngle < 0)
+            throw std::logic_error(" GazeMovement ->  minForesightDistance must be a positive value! ");
+
+        key = "AgentObserveParameters";
+        StatisticsSet obs = main.sets.at(key);
+        behaviourData->gmBehaviour.observe_openingAngle =
+            std::static_pointer_cast<StandardDoubleEntry>(obs.entries.at("openingAngle"))->value;
+        if (behaviourData->gmBehaviour.XInt_controlOpeningAngle < 0)
+            throw std::logic_error(" GazeMovement -> AgentObserveParameters -> openingAngle must be a positive value! ");
+        behaviourData->gmBehaviour.observe_fixationDuration =
+            std::static_pointer_cast<DistributionEntry>(obs.entries.at("fixationDuration"));
+
         key = "Standard Road";
         StatisticsGroup standardRoad = main.groups.at(key);
         key = "XJunction";
@@ -220,6 +308,15 @@ void BehaviourConverter::ConvertGazeMovementParameters(const StatisticsGroup& ma
         if (behaviourData->gmBehaviour.XInt_viewingDepthIntoRoad < 0)
             throw std::logic_error(" XJunction -> viewingDepthIntoRoad must be a positive value! ");
 
+        key = "ControlGlanceParameters";
+        StatisticsSet ctrl = XJunction.sets.at(key);
+        behaviourData->gmBehaviour.XInt_controlOpeningAngle =
+            std::static_pointer_cast<StandardDoubleEntry>(ctrl.entries.at("openingAngle"))->value;
+        if (behaviourData->gmBehaviour.XInt_controlOpeningAngle < 0)
+            throw std::logic_error(" XJunction -> ControlGlanceParameters -> openingAngle must be a positive value! ");
+        behaviourData->gmBehaviour.XInt_controlFixationDuration =
+            std::static_pointer_cast<DistributionEntry>(ctrl.entries.at("fixationDuration"));
+
         key = "ScanAOIProbabilities";
         StatisticsSet std_scan = standardRoad.sets.at(key);
 
@@ -247,7 +344,6 @@ void BehaviourConverter::ConvertGazeMovementParameters(const StatisticsGroup& ma
             if (std::static_pointer_cast<DistributionEntry>(entry.second)->min < 0)
                 throw std::logic_error(" gaze state scan AOI distribution min must be a positive value! ");
         }
-
 
         key = "ControlAOIProbabilities";
         StatisticsGroup XInt_control = XJunction.groups.at(key);
@@ -290,7 +386,118 @@ void BehaviourConverter::ConvertGazeMovementParameters(const StatisticsGroup& ma
             }
         }
 
+        std::map<CrossingPhase, std::map<ScanAOI, std::shared_ptr<DistributionEntry>>> tmp;
+        tmp.insert({CrossingPhase::Approach, {}});
+        tmp.insert({CrossingPhase::Deceleration_ONE, {}});
+        tmp.insert({CrossingPhase::Deceleration_TWO, {}});
+        tmp.insert({CrossingPhase::Crossing_Right, {}});
+        tmp.insert({CrossingPhase::Crossing_Straight, {}});
+        tmp.insert({CrossingPhase::Crossing_Left_ONE, {}});
+        tmp.insert({CrossingPhase::Crossing_Left_TWO, {}});
+        tmp.insert({CrossingPhase::Exit, {}});
 
+        std::map<TrafficDensity, std::map<CrossingPhase, std::map<ScanAOI, std::shared_ptr<DistributionEntry>>>> tmp2;
+        tmp2.insert({TrafficDensity::LOW, tmp});
+        tmp2.insert({TrafficDensity::MODERATE, tmp});
+        tmp2.insert({TrafficDensity::HIGH, tmp});
+
+        behaviourData->gmBehaviour.XInt_scanAOIProbabilities.insert({IndicatorState::IndicatorState_Left, tmp2});
+        behaviourData->gmBehaviour.XInt_scanAOIProbabilities.insert({IndicatorState::IndicatorState_Off, tmp2});
+        behaviourData->gmBehaviour.XInt_scanAOIProbabilities.insert({IndicatorState::IndicatorState_Right, tmp2});
+
+        key = "ScanAOIProbabilities";
+        StatisticsGroup XInt_scan = XJunction.groups.at(key);
+
+        for (auto &indicatorGroup : XInt_scan.groups) {
+            IndicatorState ind;
+            if (indicatorGroup.first == "IndicatorLeft") {
+                ind = IndicatorState::IndicatorState_Left;
+            }
+            else if (indicatorGroup.first == "IndicatorOff") {
+                ind = IndicatorState::IndicatorState_Off;
+            }
+            else if (indicatorGroup.first == "IndicatorRight") {
+                ind = IndicatorState::IndicatorState_Right;
+            }
+            else {
+                continue;
+            }
+            for (auto &densityGroup : indicatorGroup.second.groups) {
+                TrafficDensity dens;
+                if (densityGroup.first == "Density Low") {
+                    dens = TrafficDensity::LOW;
+                }
+                else if (densityGroup.first == "Density Moderate") {
+                    dens = TrafficDensity::MODERATE;
+                }
+                else if (densityGroup.first == "Density High") {
+                    dens = TrafficDensity::HIGH;
+                }
+                else {
+                    continue;
+                }
+                for (auto &phaseSet : densityGroup.second.sets) {
+                    CrossingPhase cr;
+                    if (phaseSet.first == "Phase APP") {
+                        cr = CrossingPhase::Approach;
+                    }
+                    else if (phaseSet.first == "Phase DEC1") {
+                        cr = CrossingPhase::Deceleration_ONE;
+                    }
+                    else if (phaseSet.first == "Phase DEC2") {
+                        cr = CrossingPhase::Deceleration_TWO;
+                    }
+                    else if (phaseSet.first == "Phase CR_S") {
+                        cr = CrossingPhase::Crossing_Straight;
+                    }
+                    else if (phaseSet.first == "Phase CR_R") {
+                        cr = CrossingPhase::Crossing_Right;
+                    }
+                    else if (phaseSet.first == "Phase CR_L1") {
+                        cr = CrossingPhase::Crossing_Left_ONE;
+                    }
+                    else if (phaseSet.first == "Phase CR_L2") {
+                        cr = CrossingPhase::Crossing_Left_TWO;
+                    }
+                    else if (phaseSet.first == "Phase EX") {
+                        cr = CrossingPhase::Exit;
+                    }
+                    else {
+                        continue;
+                    }
+
+                    for (auto &entry : phaseSet.second.entries) {
+                        ScanAOI sc;
+                        if (entry.first == "Scan Dashboard") {
+                            sc = ScanAOI::Dashboard;
+                        }
+                        else if (entry.first == "Scan Straight") {
+                            sc = ScanAOI::Straight;
+                        }
+                        else if (entry.first == "Scan Left") {
+                            sc = ScanAOI::Left;
+                        }
+                        else if (entry.first == "Scan Right") {
+                            sc = ScanAOI::Right;
+                        }
+                        else if (entry.first == "Scan Other") {
+                            sc = ScanAOI::Other;
+                        }
+                        else {
+                            continue;
+                        }
+                        behaviourData->gmBehaviour.XInt_scanAOIProbabilities.at(ind).at(dens).at(cr).insert(
+                            std::make_pair(sc, std::static_pointer_cast<DistributionEntry>(entry.second)));
+                        if (std::static_pointer_cast<DistributionEntry>(entry.second)->mean < 0)
+                            throw std::logic_error(" gaze state scan AOI distribution mean must be a positive value! ");
+                        if (std::static_pointer_cast<DistributionEntry>(entry.second)->max < 0)
+                            throw std::logic_error(" gaze state scan AOI distribution max must be a positive value! ");
+                        if (std::static_pointer_cast<DistributionEntry>(entry.second)->min < 0)
+                            throw std::logic_error(" gaze state scan AOI distribution min must be a positive value! ");
+                    }
+                }
+            }
+        }
     } catch (const std::out_of_range& oor) {
         std::string message = "File: " + static_cast<std::string>(__FILE__) + " Line: " + std::to_string(__LINE__) +
                               " ConfigFile: Missing BehaviourParameter/s in Behaviour config file: cannot find " + key + " | " + oor.what();

@@ -30,7 +30,7 @@ public:
         }
     }
 
-    void Trigger(int timestamp, double direction, double distance, double opening) override;
+    void Trigger(int timestamp, double direction, double distance, double opening, std::optional<Common::Vector2d> mirrorPos, bool godMode) override;
 
     std::vector<std::shared_ptr<AgentPerception>> GetVisible() override {
         return perceived.RetrieveData();

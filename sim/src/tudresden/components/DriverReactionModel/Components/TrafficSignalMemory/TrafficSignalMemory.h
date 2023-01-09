@@ -16,7 +16,7 @@ namespace TrafficSignalMemory {
 
 class TrafficSignalMemory {
 public:
-    TrafficSignalMemory() {
+    TrafficSignalMemory(unsigned int maxElements, int maxTime) : maximumElementsInMemory{maxElements}, maximumTimeInMemoryMs{maxTime} {
         visibleTrafficSignals = std::make_unique<VisibleTrafficSignals>();
     }
 
@@ -30,9 +30,8 @@ private:
     std::unordered_map<DReaMId, MemorizedTrafficSignal> memory;
     std::unique_ptr<VisibleTrafficSignals> visibleTrafficSignals;
 
-    // TODO load these values from the config
-    const unsigned int maximumElementsInMemory = 20;
-    const int maximumTimeInMemoryMs = 20000;
+    const unsigned int maximumElementsInMemory;
+    const int maximumTimeInMemoryMs;
 };
 
 } // namespace TrafficSignalMemory
