@@ -17,17 +17,18 @@
 namespace RoadSegments {
 namespace Node {
 
-// template <TJunctionLayout T>
 class TJunction : public Junction {
 public:
     TJunction(const WorldRepresentation &worldRepresentation, StochasticsInterface *stochastics, const BehaviourData &behaviourData,
               TJunctionLayout layout);
 
-    ~TJunction() override = default;
+    virtual ~TJunction() override = default;
 
     virtual GazeState ControlGlance(CrossingPhase phase) override;
 
 protected:
+    virtual std::vector<Common::Vector2d> CalculateControlFixPointsOnJunction() const override;
+
     virtual AOIProbabilities LookUpScanAOIProbability(CrossingPhase phase) override;
 
     virtual AOIProbabilities LookUpControlAOIProbability(CrossingPhase phase) override;
@@ -53,16 +54,8 @@ protected:
                                                           ControlAOI aoi);
     const Common::Vector2d *FixationPointForCGOnRoad(const std::vector<Common::Vector2d> &controlFixPoints, ControlAOI aoi);
 
-    void CalculateControlFixPointsOnTJunction();
-    void CalculateControlFixPointsOnRoads();
-
 private:
-    double viewingDepthIntoRoad; // how far the driver see along the road.
-
     TJunctionLayout layout;
-
-    std::vector<Common::Vector2d> controlFixPointsOnTJunction;
-    std::vector<Common::Vector2d> controlFixPointsOnRoads;
 };
 } // namespace Node
 } // namespace RoadSegments

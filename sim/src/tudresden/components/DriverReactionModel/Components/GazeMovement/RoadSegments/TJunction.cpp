@@ -21,20 +21,20 @@ namespace Node {
 
 TJunction::TJunction(const WorldRepresentation &worldRepresentation, StochasticsInterface *stochastics, const BehaviourData &behaviourData,
                      TJunctionLayout layout) :
-    layout{layout}, Junction(worldRepresentation, stochastics, behaviourData) {
-    probabilityFixateLeadCar = behaviourData.gmBehaviour.XInt_probabilityFixateLeadCar;
-    probabilityControlGlance = behaviourData.gmBehaviour.XInt_probabilityControlGlance;
-    viewingDepthIntoRoad = behaviourData.gmBehaviour.XInt_viewingDepthIntoRoad;
-    CalculateControlFixPointsOnTJunction();
-    CalculateControlFixPointsOnRoads();
-
-    controlFixationPoints.insert(controlFixationPoints.begin(), controlFixPointsOnTJunction.begin(), controlFixPointsOnTJunction.end());
-    controlFixationPoints.insert(controlFixationPoints.end(), controlFixPointsOnRoads.begin(), controlFixPointsOnRoads.end());
+    Junction(worldRepresentation, stochastics, behaviourData), layout{layout} {
+    controlFixPointsOnJunction = CalculateControlFixPointsOnJunction();
+    if (controlFixPointsOnRoads.size() != 2) {
+        std::string message = __FILE__ " Line: " + std::to_string(__LINE__) +
+                              "the number of control fixation points on incoming roads (T-Junction) is incorrect";
+        throw std::runtime_error(message);
+    }
 }
 
-void TJunction::CalculateControlFixPointsOnTJunction() {
+std::vector<Common::Vector2d> TJunction::CalculateControlFixPointsOnJunction() const {
+    std::vector<Common::Vector2d> controlFixPointsOnTJunction;
     auto nextJunction = worldRepresentation.egoAgent->NextJunction();
-    auto cornerSidewalkLanes = CornerSidewalkLanesOfJunction(nextJunction);
+    auto sidewalkLanes = SidewalkLanesOfJunction(nextJunction);
+    auto cornerSidewalkLanes = CornerSidewalkLanesOfJunction(sidewalkLanes);
 
     for (auto sidewalkLane : cornerSidewalkLanes) {
         auto halfLength = sidewalkLane->GetLength() / 2;
@@ -42,32 +42,58 @@ void TJunction::CalculateControlFixPointsOnTJunction() {
         auto point = sidewalkLane->InterpolatePoint(sCoordniate + halfLength);
         controlFixPointsOnTJunction.push_back({point.x, point.y});
     }
+    if (controlFixPointsOnTJunction.size() == 0) {
+        return controlFixPointsOnTJunction;
+    }
+    std::vector<const MentalInfrastructure::Lane *> straightSidewalkLanes;
+    std::copy_if(sidewalkLanes.begin(), sidewalkLanes.end(), std::back_inserter(straightSidewalkLanes),
+                 [&sidewalkLanes](const MentalInfrastructure::Lane *lane) {
+                     return std::none_of(sidewalkLanes.begin(), sidewalkLanes.end(), [lane](auto element) { return element == lane; });
+                 });
 
+    if (straightSidewalkLanes.size() != 1 && controlFixPointsOnTJunction.size() == 2) {
+        std::string message = __FILE__ " Line: " + std::to_string(__LINE__) + "invalid T-Junction - geometry is not considered";
+        throw std::runtime_error(message);
+        return controlFixPointsOnTJunction;
+    }
+    Common::Vector2d firstStraightSidewalkPoint =
+        (straightSidewalkLanes.front()->GetFirstPoint()->x, straightSidewalkLanes.front()->GetFirstPoint()->y);
+    Common::Vector2d lastStraightSidewalkPoint =
+        (straightSidewalkLanes.front()->GetLastPoint()->x, straightSidewalkLanes.front()->GetLastPoint()->y);
+    auto directionStraightSidwalk = lastStraightSidewalkPoint - firstStraightSidewalkPoint;
+    Common::Vector2d orthogonalStraightSidwalk = (-directionStraightSidwalk.y, directionStraightSidwalk.x);
+
+    auto point1 = Common::IntersectionPoint(firstStraightSidewalkPoint, lastStraightSidewalkPoint, controlFixPointsOnTJunction.at(0),
+                                            (controlFixPointsOnTJunction.at(0) + orthogonalStraightSidwalk));
+    auto point2 = Common::IntersectionPoint(firstStraightSidewalkPoint, lastStraightSidewalkPoint, controlFixPointsOnTJunction.at(1),
+                                            (controlFixPointsOnTJunction.at(1) + orthogonalStraightSidwalk));
+
+    if (!point1 || !point2) {
+        std::string message = __FILE__ " Line: " + std::to_string(__LINE__) + "invalid T-Junction - geometry is not considered";
+        throw std::runtime_error(message);
+    }
+    controlFixPointsOnTJunction.push_back(*point1);
+    controlFixPointsOnTJunction.push_back(*point2);
     auto straightConLane = OncomingStraightConnectionLane(nextJunction);
     if (straightConLane) {
         if (layout == TJunctionLayout::LeftRight) {
             std::string message =
                 __FILE__ " Line: " + std::to_string(__LINE__) + "invalid T-Junction Layout specified - unexpected oncoming lane found";
             throw std::runtime_error(message);
-            return;
         }
         // calculate oncoming point
         Common::Vector2d startPoinStraightConLane = {(straightConLane->GetFirstPoint())->x, (straightConLane->GetFirstPoint())->y};
         double direction = (straightConLane->GetFirstPoint())->hdg;
         auto oncomingPoint = Common::CreatPointInDistance(viewingDepthIntoRoad, startPoinStraightConLane, direction + M_PI);
-        auto oncomingPoint1 = Common::CreatPointInDistance(viewingDepthIntoRoad, startPoinStraightConLane, direction + M_PI - .1);
-        auto oncomingPoint2 = Common::CreatPointInDistance(viewingDepthIntoRoad, startPoinStraightConLane, direction + M_PI + .1);
         controlFixPointsOnTJunction.push_back(oncomingPoint);
-        controlFixPointsOnTJunction.push_back(oncomingPoint1);
-        controlFixPointsOnTJunction.push_back(oncomingPoint2);
     }
     else {
         if (layout != TJunctionLayout::LeftRight) {
             std::string message =
                 __FILE__ " Line: " + std::to_string(__LINE__) + "invalid T-Junction Layout specified - no oncoming lane found";
             throw std::runtime_error(message);
-            return;
         }
+
         SortControlFixPoints(controlFixPointsOnTJunction);
         Common::Vector2d mid1 =
             controlFixPointsOnTJunction.at(0) + (controlFixPointsOnTJunction.at(2) - controlFixPointsOnTJunction.at(0)) * 0.5;
@@ -87,54 +113,22 @@ void TJunction::CalculateControlFixPointsOnTJunction() {
 
     // sketch of sorted junction fixation points (Straight-Right Layout)
     //         |x2| |        x2  oncoming point [x2==x3==x4]
-    //         |    x1-----  A   Agent
+    //         x3   x1-----  A   Agent
     //         |    -------
-    //         |    x0-----
+    //         x4   x0-----
     //         | |A |
     //
 
     // sketch of sorted junction fixation points (Left-Straight Layout)
     //         |x2| |        x2  oncoming point [x0==x1==x2]
-    //   -----x3    |        A   Agent
+    //   -----x3    x1       A   Agent
     //   ------     |
-    //   -----x4    |
+    //   -----x4    x0
     //         | |A |
     //
     SortControlFixPoints(controlFixPointsOnTJunction);
+    return controlFixPointsOnTJunction;
 };
-
-void TJunction::CalculateControlFixPointsOnRoads() {
-    auto NextJunction = worldRepresentation.egoAgent->NextJunction();
-    const auto &IncomingJunctionRoadIds = NextJunction->GetIncomingRoads();
-    for (auto incomingRoad : IncomingJunctionRoadIds) {
-        if (worldRepresentation.egoAgent->GetRoad() == incomingRoad) {
-            continue;
-        }
-        auto conRoads = NextJunction->GetConnectionRoads(incomingRoad);
-        auto conRoad = conRoads.front();
-        auto startConRoad = conRoad->GetStartPosition();
-
-        auto viewVector = Common::CreatPointInDistance(viewingDepthIntoRoad, startConRoad, conRoad->GetStartHeading() + M_PI);
-        controlFixPointsOnRoads.push_back(viewVector);
-    }
-
-    // sketch of sorted junction fixation points
-    //        | x1 |   |
-    //        |    |   |             x fixation points in roads
-    //   -----         -----
-    //                    x0         A   Agent
-    //   -----         -------
-    //    x2
-    //   -----         -----
-    //        |   |A  |
-    //        |   |   |
-    SortControlFixPoints(controlFixPointsOnRoads);
-    if (controlFixPointsOnRoads.size() != 2) {
-        std::string message = __FILE__ " Line: " + std::to_string(__LINE__) +
-                              "the number of control fixation points on incoming roads (T-Junction) is incorrect";
-        throw std::runtime_error(message);
-    }
-}
 
 GazeState TJunction::ControlGlance(CrossingPhase phase) {
     AOIProbabilities scaledAOIProbs = LookUpControlAOIProbability(phase);
@@ -151,7 +145,7 @@ GazeState TJunction::ControlGlance(CrossingPhase phase) {
     else {
         // control gazes while approaching an junction
         double rand = stochastics->GetUniformDistributed(0, 1);
-        if (rand < 0.20) {
+        if (rand < 0.20 && controlFixPointsOnJunction.size() == 5) {
             return ControlGlanceOnTJunction(aoi, phase);
         }
         else {
@@ -219,7 +213,7 @@ const Common::Vector2d *TJunction::FixationPointForCGOnRoad(const std::vector<Co
 GazeState TJunction::ControlGlanceOnTJunction(ControlAOI aoi, CrossingPhase phase) {
     GazeState gazeState;
 
-    auto fixationPoint = FixationPointForCGOnTJunction(controlFixPointsOnTJunction, phase, aoi);
+    auto fixationPoint = FixationPointForCGOnTJunction(controlFixPointsOnJunction, phase, aoi);
     gazeState.fixationState = {GazeType::ControlGlance, static_cast<int>(aoi)};
     gazeState.target.fixationPoint = *fixationPoint;
     gazeState.openingAngle = 100 * (M_PI / 180); // TODO replace by realistic behaviour

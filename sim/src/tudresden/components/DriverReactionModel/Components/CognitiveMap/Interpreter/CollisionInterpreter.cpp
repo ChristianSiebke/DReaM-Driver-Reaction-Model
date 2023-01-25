@@ -73,10 +73,10 @@ std::optional<CollisionPoint> CollisionInterpreter::CalculationCollisionPoint(co
         // no agent move --> no crash
         return std::nullopt;
     }
-    double endTime = GetBehaviourData().adBehaviour.collisionImminentMargin;
+    double maxTime = GetBehaviourData().adBehaviour.collisionImminentMargin;
     unsigned int numberThreads = 8;
-    for (double startTime = 0; startTime < endTime; startTime += endTime / numberThreads) {
-        double endTime = startTime + endTime / numberThreads;
+    for (double startTime = 0; startTime < maxTime; startTime += maxTime / numberThreads) {
+        double endTime = startTime + maxTime / numberThreads;
         futures.push_back(std::async(std::launch::async, &CollisionInterpreter::PerformCollisionPointCalculation, this, startTime, endTime,
                                      representation, observedAgent));
     }

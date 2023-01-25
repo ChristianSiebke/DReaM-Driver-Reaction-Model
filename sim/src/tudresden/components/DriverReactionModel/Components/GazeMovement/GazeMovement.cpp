@@ -85,21 +85,24 @@ void GazeMovement::UpdateRoadSegment() {
                 }
             }
             else if (NextJunction->GetIncomingRoads().size() == 3) {
-                NextDirectionLanes nextLanes;
-                // assumption movingInLaneDirection = true for now
-                if (auto nextLanesPtr = InfrastructurePerception::NextLanes(true, worldRepresentation.egoAgent->GetLane())) {
-                    if (nextLanesPtr.has_value()) {
-                        nextLanes = nextLanesPtr.value();
-                    }
+                auto nextLanes = InfrastructurePerception::NextLanes(worldRepresentation.egoAgent->IsMovingInLaneDirection(),
+                                                                     worldRepresentation.egoAgent->GetLane());
+                if (nextLanes == std::nullopt) {
+                    std::string message = __FILE__ " Line: " + std::to_string(__LINE__) + "unknown successor lanes";
+                    throw std::runtime_error(message);
                 }
+
+
+
+
                 TJunctionLayout layout;
-                if (nextLanes.leftLanes.size() > 0 && nextLanes.straightLanes.size() > 0 && nextLanes.rightLanes.size() == 0) {
+                if (nextLanes->leftLanes.size() > 0 && nextLanes->straightLanes.size() > 0 && nextLanes->rightLanes.size() == 0) {
                     layout = TJunctionLayout::LeftStraight;
                 }
-                else if (nextLanes.leftLanes.size() > 0 && nextLanes.straightLanes.size() == 0 && nextLanes.rightLanes.size() > 0) {
+                else if (nextLanes->leftLanes.size() > 0 && nextLanes->straightLanes.size() == 0 && nextLanes->rightLanes.size() > 0) {
                     layout = TJunctionLayout::LeftRight;
                 }
-                else if (nextLanes.leftLanes.size() == 0 && nextLanes.straightLanes.size() > 0 && nextLanes.rightLanes.size() > 0) {
+                else if (nextLanes->leftLanes.size() == 0 && nextLanes->straightLanes.size() > 0 && nextLanes->rightLanes.size() > 0) {
                     layout = TJunctionLayout::StraightRight;
                 }
                 else {

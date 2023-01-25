@@ -15,22 +15,11 @@ namespace RoadSegments {
 
 namespace Node {
 
-XJunction::XJunction(const WorldRepresentation &worldRepresentation, StochasticsInterface *stochastics,
-                     const BehaviourData &behaviourData) :
-    Junction(worldRepresentation, stochastics, behaviourData) {
-    probabilityFixateLeadCar = behaviourData.gmBehaviour.XInt_probabilityFixateLeadCar;
-    probabilityControlGlance = behaviourData.gmBehaviour.XInt_probabilityControlGlance;
-    viewingDepthIntoRoad = behaviourData.gmBehaviour.XInt_viewingDepthIntoRoad;
-    CalculateControlFixPointsOnXJunction();
-    CalculateControlFixPointsOnRoads();
-
-    controlFixationPoints.insert(controlFixationPoints.begin(), controlFixPointsOnXJunction.begin(), controlFixPointsOnXJunction.end());
-    controlFixationPoints.insert(controlFixationPoints.end(), controlFixPointsOnRoads.begin(), controlFixPointsOnRoads.end());
-}
-
-void XJunction::CalculateControlFixPointsOnXJunction() {
+std::vector<Common::Vector2d> XJunction::CalculateControlFixPointsOnJunction() const {
+    std::vector<Common::Vector2d> controlFixPointsOnXJunction;
     auto nextJunction = worldRepresentation.egoAgent->NextJunction();
-    auto cornerSidewalkLanes = CornerSidewalkLanesOfJunction(nextJunction);
+    auto sidewalkLanes = SidewalkLanesOfJunction(nextJunction);
+    auto cornerSidewalkLanes = CornerSidewalkLanesOfJunction(sidewalkLanes);
 
     for (auto sidewalkLane : cornerSidewalkLanes) {
         auto halfLength = sidewalkLane->GetLength() / 2;
@@ -54,40 +43,8 @@ void XJunction::CalculateControlFixPointsOnXJunction() {
     //         | |A |
     //
     SortControlFixPoints(controlFixPointsOnXJunction);
+    return controlFixPointsOnXJunction;
 };
-
-void XJunction::CalculateControlFixPointsOnRoads() {
-    auto NextJunction = worldRepresentation.egoAgent->NextJunction();
-    const auto &IncomingJunctionRoadIds = NextJunction->GetIncomingRoads();
-    for (auto incomingRoad : IncomingJunctionRoadIds) {
-        if (worldRepresentation.egoAgent->GetRoad() == incomingRoad) {
-            continue;
-        }
-        auto conRoads = NextJunction->GetConnectionRoads(incomingRoad);
-        auto conRoad = conRoads.front();
-        auto startConRoad = conRoad->GetStartPosition();
-
-        auto viewVector = Common::CreatPointInDistance(viewingDepthIntoRoad, startConRoad, conRoad->GetStartHeading() + M_PI);
-        controlFixPointsOnRoads.push_back(viewVector);
-    }
-
-    // sketch of sorted junction fixation points
-    //        | x1 |   |
-    //        |    |   |             x fixation points in roads
-    //   -----         -----
-    //                    x0         A   Agent
-    //   -----         -------
-    //    x2
-    //   -----         -----
-    //        |   |A  |
-    //        |   |   |
-    SortControlFixPoints(controlFixPointsOnRoads);
-    if (controlFixPointsOnRoads.size() != 3) {
-        std::string message = __FILE__ " Line: " + std::to_string(__LINE__) +
-                              "the number of control fixation points on incoming roads (X-Junction) is incorrect";
-        throw std::runtime_error(message);
-    }
-}
 
 GazeState XJunction::ControlGlance(CrossingPhase phase) {
     AOIProbabilities scaledAOIProbs = LookUpControlAOIProbability(phase);
@@ -104,7 +61,7 @@ GazeState XJunction::ControlGlance(CrossingPhase phase) {
     else {
         // control gazes while approaching an junction
         double rand = stochastics->GetUniformDistributed(0, 1);
-        if (rand < 0.20) {
+        if (rand < 0.20 && controlFixPointsOnJunction.size() == 5) {
             return ControlGlanceOnXJunction(aoi, phase);
         }
         else {
@@ -145,7 +102,7 @@ const Common::Vector2d *XJunction::FixationPointForCGOnRoad(const std::vector<Co
 GazeState XJunction::ControlGlanceOnXJunction(ControlAOI aoi, CrossingPhase phase) {
     GazeState gazeState;
 
-    auto fixationPoint = FixationPointForCGOnXJunction(controlFixPointsOnXJunction, phase, aoi);
+    auto fixationPoint = FixationPointForCGOnXJunction(controlFixPointsOnJunction, phase, aoi);
     gazeState.fixationState = {GazeType::ControlGlance, static_cast<int>(aoi)};
     gazeState.target.fixationPoint = *fixationPoint;
     gazeState.openingAngle = 100 * (M_PI / 180); // TODO replace by realistic behaviour

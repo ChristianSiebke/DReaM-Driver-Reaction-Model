@@ -91,7 +91,6 @@ public:
 
     ~AgentStateRecorder() {
         BufferSimulationOutput();
-        std::cout << " AgentStateRecorder destroyed" << std::endl;
     }
 
     AgentStateRecorder(AgentStateRecorder const &) = delete;

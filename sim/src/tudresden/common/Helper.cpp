@@ -206,4 +206,29 @@ double AngleBetween2d(const Vector2d &vectorA, const Vector2d &vectorB) {
     return std::acos(cosAngle);
 }
 
+std::optional<Vector2d> IntersectionPoint(Vector2d p1, Vector2d p2, Vector2d q1, Vector2d q2) {
+    double m1 = (p2.y - p1.y) / (p2.x - p1.x);
+    double n1 = ((p1.y * p2.x) - (p2.y * p1.x)) / (p2.x - p1.x);
+    double m2 = (q2.y - q1.y) / (q2.x - q1.x);
+    double n2 = ((q1.y * q2.x) - (q2.y * q1.x)) / (q2.x - q1.x);
+    if (p1 == q1) {
+        return std::optional<Vector2d>{{p1.x, p1.y}};
+    }
+    else if (p1 == q2) {
+        return std::optional<Vector2d>{{p1.x, p1.y}};
+    }
+    else if (p2 == q1) {
+        return std::optional<Vector2d>{{p2.x, p2.y}};
+    }
+    else if (p2 == q2) {
+        return std::optional<Vector2d>{{p2.x, p2.y}};
+    }
+
+    if (m1 - m2 == 0.0)
+        return std::nullopt;
+    double x = (n2 - n1) / (m1 - m2);
+    double y = m1 * x + n1;
+    return std::optional<Vector2d>{{x, y}};
+}
+
 } // namespace Common

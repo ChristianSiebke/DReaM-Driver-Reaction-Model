@@ -188,7 +188,7 @@ double Anticipation::TravelTimeObserved(double distance, bool egoInsideConflictA
     double acceleration = oAgent->GetAcceleration();
     double velocity = oAgent->GetVelocity();
     if ((acceleration == 0.0 && velocity == 0.0) && !egoInsideConflictArea) {
-        // ego anticipate  observed vehicle could accselerate unless ego is inside conflict area
+        // ego anticipate  observed vehicle could accelerate unless ego is inside conflict area
         acceleration = GetBehaviourData().adBehaviour.maxAcceleration;
     }
 

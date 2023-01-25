@@ -15,13 +15,22 @@ namespace Node {
 
 class XJunction : public Junction {
 public:
-    XJunction(const WorldRepresentation &worldRepresentation, StochasticsInterface *stochastics, const BehaviourData &behaviourData);
-
+    XJunction(const WorldRepresentation &worldRepresentation, StochasticsInterface *stochastics, const BehaviourData &behaviourData) :
+        Junction(worldRepresentation, stochastics, behaviourData) {
+        controlFixPointsOnJunction = CalculateControlFixPointsOnJunction();
+        if (controlFixPointsOnRoads.size() != 3) {
+            std::string message = __FILE__ " Line: " + std::to_string(__LINE__) +
+                                  "the number of control fixation points on incoming roads (X-Junction) is incorrect";
+            throw std::runtime_error(message);
+        }
+    };
     ~XJunction() override = default;
 
     virtual GazeState ControlGlance(CrossingPhase phase) override;
 
 protected:
+    virtual std::vector<Common::Vector2d> CalculateControlFixPointsOnJunction() const override;
+
     virtual AOIProbabilities LookUpScanAOIProbability(CrossingPhase phase) override;
 
     virtual AOIProbabilities LookUpControlAOIProbability(CrossingPhase phase) override;
@@ -46,15 +55,6 @@ protected:
     const Common::Vector2d *FixationPointForCGOnXJunction(const std::vector<Common::Vector2d> &controlFixPoints, CrossingPhase phase,
                                                           ControlAOI aoi);
     const Common::Vector2d *FixationPointForCGOnRoad(const std::vector<Common::Vector2d> &controlFixPoints, ControlAOI aoi);
-
-    void CalculateControlFixPointsOnXJunction();
-    void CalculateControlFixPointsOnRoads();
-
-private:
-    double viewingDepthIntoRoad; // how far the driver see along the road.
-
-    std::vector<Common::Vector2d> controlFixPointsOnXJunction;
-    std::vector<Common::Vector2d> controlFixPointsOnRoads;
 };
 } // namespace Node
 } // namespace RoadSegments
