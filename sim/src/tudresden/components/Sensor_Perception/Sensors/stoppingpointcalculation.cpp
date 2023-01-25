@@ -88,10 +88,10 @@ bool StoppingPointCalculation::CalcCrossingLines(const MentalInfrastructure::Lan
             lastLane = lane;
             continue;
         }
-        if (lastLane->GetType() != LaneType::Driving && lane->GetType() == LaneType::Driving) {
+        if (lastLane->GetType() != MentalInfrastructure::LaneType::Driving && lane->GetType() == MentalInfrastructure::LaneType::Driving) {
             rightmostDrivingLane = lane;
         }
-        if (lastLane->GetType() == LaneType::Driving && lane->GetType() != LaneType::Driving) {
+        if (lastLane->GetType() == MentalInfrastructure::LaneType::Driving && lane->GetType() != MentalInfrastructure::LaneType::Driving) {
             leftmostDrivingLane = lastLane;
         }
         if (std::stoi(lastLane->GetOpenDriveId()) < 0 && std::stoi(lane->GetOpenDriveId()) > 0) {
@@ -307,12 +307,12 @@ StoppingPoint StoppingPointCalculation::DummyStoppingPoint() {
     return stoppingPoint;
 }
 
-SP_ROW_Data StoppingPointCalculation::DetermineROWData(LaneType type) {
+SP_ROW_Data StoppingPointCalculation::DetermineROWData(MentalInfrastructure::LaneType type) {
     SP_ROW_Data rowData;
 
     switch (type) {
-    case LaneType::Sidewalk:
-    case LaneType::Biking:
+    case MentalInfrastructure::LaneType::Sidewalk:
+    case MentalInfrastructure::LaneType::Biking:
         rowData.calcPedLeft = false;
         rowData.calcPedRight = false;
         rowData.calcPedCross1 = false;
@@ -320,7 +320,7 @@ SP_ROW_Data StoppingPointCalculation::DetermineROWData(LaneType type) {
         rowData.calcVehicleLeft = false;
         rowData.calcVehicleCross = true;
         break;
-    case LaneType::Driving:
+    case MentalInfrastructure::LaneType::Driving:
     default:
         rowData.calcPedLeft = true;
         rowData.calcPedRight = true;

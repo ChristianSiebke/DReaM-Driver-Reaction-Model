@@ -48,9 +48,9 @@ void AgentStateRecorder::AddCrossingInfos(int time, int id, CrossingInfo info) {
     record.crossingInfos.at(time).insert(std::make_pair(id, info));
 }
 
-void AgentStateRecorder::AddOtherAgents(int time, int id, std::vector<AgentPerception> agents) {
+void AgentStateRecorder::AddOtherAgents(int time, int id, std::vector<GeneralAgentPerception> agents) {
     if (record.observedAgents.find(time) == record.observedAgents.end()) {
-        std::map<agentID, std::vector<AgentPerception>> idMap;
+        std::map<agentID, std::vector<GeneralAgentPerception>> idMap;
         record.observedAgents.insert(std::make_pair(time, idMap));
     }
     record.observedAgents.at(time).insert(std::make_pair(id, agents));
@@ -98,7 +98,7 @@ std::string AgentStateRecorder::GenerateDataSet(int time, int agentId) {
         outputLine += std::to_string(agent.id) += " | ";
         outputLine += std::to_string(agent.refPosition.x) += " | ";
         outputLine += std::to_string(agent.refPosition.y) += " | ";
-        outputLine += std::to_string(agent.yawAngle) += "}";
+        outputLine += std::to_string(agent.yaw) += "}";
     }
     outputLine += "],";
 

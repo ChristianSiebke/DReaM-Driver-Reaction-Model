@@ -29,11 +29,13 @@ class DriverPerception : public AgentPerceptionInterface {
     ///
     void CalculatePerception(const AgentInterface *agent, std::vector<InternWaypoint> route) override;
 
-    std::shared_ptr<EgoPerception> GetEgoPerception() { return egoPerception; }
+    std::shared_ptr<DetailedAgentPerception> GetEgoPerception() {
+        return egoPerception;
+    }
 
   private:
       Common::Vector2d GetDriverPosition();
-      std::shared_ptr<EgoPerception> egoPerception;
+      std::shared_ptr<DetailedAgentPerception> egoPerception;
 };
 
 #endif // DRIVERPERCEPTION_H

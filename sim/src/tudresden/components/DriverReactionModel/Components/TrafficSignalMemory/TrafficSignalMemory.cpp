@@ -8,9 +8,9 @@ struct VectorCompare {
     }
 };
 
-void UpdateSpeedLimits(VisibleTrafficSignals *visibleTrafficSignals, EgoPerception *ego) {
+void UpdateSpeedLimits(VisibleTrafficSignals *visibleTrafficSignals, DetailedAgentPerception *ego) {
     // updating the current speed limit
-    auto laneId = ego->lane->GetDReaMId();
+    auto laneId = ego->lanePosition.lane->GetDReaMId();
     auto signsOnLane = visibleTrafficSignals->GetSignsForLane(laneId);
 
     // sort the signs based on s coordinate
@@ -25,14 +25,14 @@ void UpdateSpeedLimits(VisibleTrafficSignals *visibleTrafficSignals, EgoPercepti
     if (signsOnLane.size() > 1) {
         for (int i = 0; i < signsOnLane.size() - 1; i++) {
             if (ego->movingInLaneDirection) {
-                if (signsOnLane[i]->GetS() < ego->sCoordinate && signsOnLane[i + 1]->GetS() > ego->sCoordinate &&
+                if (signsOnLane[i]->GetS() < ego->lanePosition.sCoordinate && signsOnLane[i + 1]->GetS() > ego->lanePosition.sCoordinate &&
                     (int)signsOnLane[i]->GetType() > 100) {
                     lastPassedSpeedLimitSign = signsOnLane[i];
                     break;
                 }
             }
             else {
-                if (signsOnLane[i]->GetS() > ego->sCoordinate && signsOnLane[i + 1]->GetS() < ego->sCoordinate &&
+                if (signsOnLane[i]->GetS() > ego->lanePosition.sCoordinate && signsOnLane[i + 1]->GetS() < ego->lanePosition.sCoordinate &&
                     (int)signsOnLane[i]->GetType() > 100) {
                     lastPassedSpeedLimitSign = signsOnLane[i];
                     break;
@@ -41,9 +41,9 @@ void UpdateSpeedLimits(VisibleTrafficSignals *visibleTrafficSignals, EgoPercepti
         }
     }
     else if (signsOnLane.size() == 1) {
-        if (ego->movingInLaneDirection && ego->sCoordinate > signsOnLane[0]->GetS())
+        if (ego->movingInLaneDirection && ego->lanePosition.sCoordinate > signsOnLane[0]->GetS())
             lastPassedSpeedLimitSign = signsOnLane[0];
-        else if (!ego->movingInLaneDirection && ego->sCoordinate < signsOnLane[0]->GetS())
+        else if (!ego->movingInLaneDirection && ego->lanePosition.sCoordinate < signsOnLane[0]->GetS())
             lastPassedSpeedLimitSign = signsOnLane[0];
     }
 
@@ -56,7 +56,7 @@ void UpdateSpeedLimits(VisibleTrafficSignals *visibleTrafficSignals, EgoPercepti
 }
 
 VisibleTrafficSignals *TrafficSignalMemory::Update(int timestamp, std::vector<const MentalInfrastructure::TrafficSignal *> input,
-                                                   EgoPerception *ego) {
+                                                   DetailedAgentPerception *ego) {
     for (const auto &trafficSignal : input) {
         if (memory.find(trafficSignal->GetDReaMId()) == memory.end()) {
             // the sign has its first appearance

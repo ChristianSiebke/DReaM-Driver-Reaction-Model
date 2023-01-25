@@ -107,7 +107,7 @@ void TJunction::CalculateControlFixPointsOnRoads() {
     auto NextJunction = worldRepresentation.egoAgent->NextJunction();
     const auto &IncomingJunctionRoadIds = NextJunction->GetIncomingRoads();
     for (auto incomingRoad : IncomingJunctionRoadIds) {
-        if (worldRepresentation.egoAgent->GetRoad() == incomingRoad) {
+        if (worldRepresentation.egoAgent->GetLanePosition().lane->GetRoad() == incomingRoad) {
             continue;
         }
         auto conRoads = NextJunction->GetConnectionRoads(incomingRoad);
@@ -140,11 +140,11 @@ GazeState TJunction::ControlGlance(CrossingPhase phase) {
     AOIProbabilities scaledAOIProbs = LookUpControlAOIProbability(phase);
     auto aoi = static_cast<ControlAOI>(Sampler::Sample(scaledAOIProbs, stochastics));
 
-    if (worldRepresentation.egoAgent->GetDistanceOnJunction() > 0 && (phase > CrossingPhase::Deceleration_TWO)) {
+    if (worldRepresentation.egoAgent->GetJunctionDistance().on > 0 && (phase > CrossingPhase::Deceleration_TWO)) {
         // control gazes on junction
         return ControlGlanceOnTJunction(aoi, phase);
     }
-    else if (worldRepresentation.egoAgent->GetDistanceToNextJunction() > 0 && phase < CrossingPhase::Deceleration_TWO) {
+    else if (worldRepresentation.egoAgent->GetJunctionDistance().toNext > 0 && phase < CrossingPhase::Deceleration_TWO) {
         // control gazes in front of junction
         return ControlGlanceOnRoad(aoi);
     }

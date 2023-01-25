@@ -12,17 +12,17 @@
 #include <algorithm>
 namespace CognitiveMap {
 
-std::optional<PositionAlongRoad> AgentRepresentation::FindNewPositionInDistance(double distance) const {
+std::optional<LanePosition> AgentRepresentation::FindNewPositionInDistance(double distance) const {
     return internalData->FindNewPositionInDistance(distance);
 }
 
 bool AgentRepresentation::ObservedVehicleCameFromRight(const AgentRepresentation& oAgentPerceptionData) const {
-    const auto laneEgoAgent = GetLane();
-    const auto laneOAgent = oAgentPerceptionData.GetLane();
+    const auto laneEgoAgent = GetLanePosition().lane;
+    const auto laneOAgent = oAgentPerceptionData.GetLanePosition().lane;
     Common::Vector2d referenceVec;
     Common::Vector2d directionVec;
-    const auto egoRoad = GetRoad();
-    const auto oAgentRoad = oAgentPerceptionData.GetRoad();
+    const auto egoRoad = laneEgoAgent->GetRoad();
+    const auto oAgentRoad = laneOAgent->GetRoad();
     const auto& listOfPoints = laneEgoAgent->GetLanePoints();
     auto msg = __FILE__ " Line: " + std::to_string(__LINE__) + " No junction situation ";
 
@@ -71,8 +71,8 @@ bool AgentRepresentation::ObservedVehicleCameFromRight(const AgentRepresentation
 }
 
 const MentalInfrastructure::Junction *AgentRepresentation::NextJunction() const {
-    const auto& currentLane = GetLane();
-    const auto& currentRoad = GetRoad();
+    const auto &currentLane = GetLanePosition().lane;
+    const auto &currentRoad = GetLanePosition().lane->GetRoad();
     const MentalInfrastructure::Junction *nextJunction = nullptr;
 
     if (currentLane->IsInRoadDirection()) {
@@ -100,8 +100,8 @@ const MentalInfrastructure::Junction *AgentRepresentation::NextJunction() const 
 }
 
 std::optional<MentalInfrastructure::TrafficSign> AgentRepresentation::NextROWSign() const {
-    const auto& egoRoad = GetRoad();
-    const auto& egoLane = GetLane();
+    const auto &egoLane = GetLanePosition().lane;
+    const auto &egoRoad = GetLanePosition().lane->GetRoad();
     bool egoIsMovingInLaneDirection = IsMovingInLaneDirection();
     bool egoLaneInRoadDirection = egoLane->IsInRoadDirection();
 

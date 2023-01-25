@@ -28,10 +28,10 @@ void FollowingInterpreter::Update(WorldInterpretation* interpretation, const Wor
 
 std::optional<double> FollowingInterpreter::CalculateFollowingDistance(const AgentRepresentation& agent,
                                                                        const WorldRepresentation& representation) {
-    auto egoLane = representation.egoAgent->GetLane();
-    double egoS = representation.egoAgent->GetSCoordinate();
-    auto observedLane = agent.GetLane();
-    double observedS = agent.GetSCoordinate();
+    auto egoLane = representation.egoAgent->GetLanePosition().lane;
+    double egoS = representation.egoAgent->GetLanePosition().sCoordinate;
+    auto observedLane = agent.GetLanePosition().lane;
+    double observedS = agent.GetLanePosition().sCoordinate;
 
     std::cout << " !!!!!!!!!!!!!!!sCoordinate: " << egoS << std::endl;
 

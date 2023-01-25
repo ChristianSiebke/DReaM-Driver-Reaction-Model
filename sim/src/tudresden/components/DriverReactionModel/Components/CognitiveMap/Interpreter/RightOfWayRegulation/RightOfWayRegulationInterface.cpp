@@ -42,12 +42,13 @@ RightOfWay RightOfWayRegulationInterface::RightOfWayDetermination(const AgentRep
 }
 
 template <typename T> bool RightOfWayRegulationInterface::IsVehicle(const T& agentdata) {
-    return (agentdata.GetVehicleType() == AgentVehicleType::Car || agentdata.GetVehicleType() == AgentVehicleType::Truck ||
-            agentdata.GetVehicleType() == AgentVehicleType::Bicycle);
+    return (agentdata.GetVehicleType() == DReaMDefinitions::AgentVehicleType::Car ||
+            agentdata.GetVehicleType() == DReaMDefinitions::AgentVehicleType::Truck ||
+            agentdata.GetVehicleType() == DReaMDefinitions::AgentVehicleType::Bicycle);
 }
 
 template <typename T> bool RightOfWayRegulationInterface::IsPedestrian(const T& agentdata) {
-    return (agentdata.GetVehicleType() == AgentVehicleType::Pedestrian);
+    return (agentdata.GetVehicleType() == DReaMDefinitions::AgentVehicleType::Pedestrian);
 }
 
 bool RightOfWayRegulationInterface::PedestrianVsVehicleROW(const AgentRepresentation& pedestrianAgent,
@@ -61,9 +62,9 @@ bool RightOfWayRegulationInterface::PedestrianVsVehicleROW(const AgentRepresenta
     if (vehicleAgent.GetIndicatorState() == IndicatorState::IndicatorState_Off) {
         return false;
     }
-    const auto vehicleLane = vehicleAgent.GetLane();
+    const auto vehicleLane = vehicleAgent.GetLanePosition().lane;
     const auto vehicleRoad = vehicleLane->GetRoad();
-    const auto pedestrianLane = pedestrianAgent.GetLane();
+    const auto pedestrianLane = pedestrianAgent.GetLanePosition().lane;
     const auto pedestrianRoad = pedestrianLane->GetRoad();
     double vehicleLaneHDG;
     double pedestrianLaneHDG;

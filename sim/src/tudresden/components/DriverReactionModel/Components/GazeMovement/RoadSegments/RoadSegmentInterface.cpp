@@ -20,13 +20,14 @@ double RoadSegmentInterface::UpdateUFOVAngle(GazeState currentGazeState) {
         break;
     case GazeType::ObserveGlance:
         if (auto oAgent = Common::FindAgentById(currentGazeState.target.fixationAgent, *worldRepresentation.agentMemory)) {
-            ufovAngle = CalculateGlobalViewingAngle(oAgent->GetRefPosition() - worldRepresentation.egoAgent->GetDriverPosition());
+            ufovAngle = CalculateGlobalViewingAngle(oAgent->GetRefPosition() - worldRepresentation.egoAgent->GetGlobalDriverPosition());
         } else {
             ufovAngle = currentGazeState.ufovAngle;
         }
         break;
     case GazeType::ControlGlance:
-        ufovAngle = CalculateGlobalViewingAngle(currentGazeState.target.fixationPoint - worldRepresentation.egoAgent->GetDriverPosition());
+        ufovAngle =
+            CalculateGlobalViewingAngle(currentGazeState.target.fixationPoint - worldRepresentation.egoAgent->GetGlobalDriverPosition());
         break;
     default:
         std::string message = __FILE__ " Line: " + std::to_string(__LINE__) + " UFOVAngle cannot be updated";
@@ -78,9 +79,9 @@ Common::Vector2d RoadSegmentInterface::CalculateForesightVector(double foresight
     Common::Vector2d headVector{1, 0};
     foresightDistance = worldRepresentation.egoAgent->IsMovingInLaneDirection() ? foresightDistance : -foresightDistance;
     if (auto position = worldRepresentation.egoAgent->FindNewPositionInDistance(foresightDistance)) {
-        MentalInfrastructure::LanePoint foresightPoint((*position).newLane->InterpolatePoint(position->newSCoordinate));
+        MentalInfrastructure::LanePoint foresightPoint((*position).lane->InterpolatePoint(position->sCoordinate));
         headVector = {foresightPoint.x, foresightPoint.y};
-        headVector.Sub(worldRepresentation.egoAgent->GetDriverPosition());
+        headVector.Sub(worldRepresentation.egoAgent->GetGlobalDriverPosition());
     } else {
         // look straight ahead when agent is at the end of the road network
         headVector.Rotate(worldRepresentation.egoAgent->GetYawAngle());
@@ -186,7 +187,7 @@ Junction::CornerSidewalkLanesOfJunction(const MentalInfrastructure::Junction *cu
     std::vector<const MentalInfrastructure::Lane*> cornerSidewalkLanes;
     for (const auto &junctionRoad : junctionRoads) {
         for (auto lane : junctionRoad->GetLanes()) {
-            if (lane->GetType() == LaneType::Sidewalk) {
+            if (lane->GetType() == MentalInfrastructure::LaneType::Sidewalk) {
                 double hdgFirstPoint = (lane->GetFirstPoint())->hdg;
                 double hdgLastPoint = (lane->GetLastPoint())->hdg;
                 if (std::fabs(hdgFirstPoint - hdgLastPoint) > 50 * M_PI / 180) {
@@ -200,10 +201,11 @@ Junction::CornerSidewalkLanesOfJunction(const MentalInfrastructure::Junction *cu
 
 const MentalInfrastructure::Lane *Junction::OncomingStraightConnectionLane(const MentalInfrastructure::Junction *currentJunction) {
     // first straight oncoming junction connection lane
-    auto conRoadsToCurrentRoad = currentJunction->PredecessorConnectionRoads(worldRepresentation.egoAgent->GetRoad());
+    auto conRoadsToCurrentRoad =
+        currentJunction->PredecessorConnectionRoads(worldRepresentation.egoAgent->GetLanePosition().lane->GetRoad());
     for (auto conRoad : conRoadsToCurrentRoad) {
         for (auto conLane : conRoad->GetLanes()) {
-            if (conLane->GetType() != LaneType::Sidewalk) {
+            if (conLane->GetType() != MentalInfrastructure::LaneType::Sidewalk) {
                 Common::Vector2d directionVec = {(conLane->GetFirstPoint())->x, (conLane->GetFirstPoint())->y};
                 Common::Vector2d LaneEndPoint = {(conLane->GetLastPoint()->x), (conLane->GetLastPoint())->y};
                 directionVec.Sub(LaneEndPoint);
@@ -227,7 +229,7 @@ void Junction::SortControlFixPoints(std::vector<Common::Vector2d> &controlFixPoi
     std::transform(controlFixPointsOnXJunction.begin(), controlFixPointsOnXJunction.end(), std::back_inserter(unsortedViewVec),
                    [this](const Common::Vector2d element) {
                        auto result = element;
-                       result.Sub(worldRepresentation.egoAgent->GetDriverPosition());
+                       result.Sub(worldRepresentation.egoAgent->GetGlobalDriverPosition());
                        return result;
                    });
 

@@ -54,12 +54,16 @@ class SensorPerceptionLogic {
     ///
     /// \brief Returns a pointer to the visual sensor, no calculation is performed.
     ///
-    std::shared_ptr<VisualSensorInterface<std::shared_ptr<AgentPerception>>> GetVisualSensor() const { return visualSensor; }
+    std::shared_ptr<VisualSensorInterface<std::shared_ptr<GeneralAgentPerception>>> GetVisualSensor() const {
+        return visualSensor;
+    }
 
     ///
     /// \brief Returns a pointer to the driver perception, no calculation is performed.
     ///
-    std::shared_ptr<EgoPerception> GetEgoPerception() const { return driverPerception->GetEgoPerception(); }
+    std::shared_ptr<DetailedAgentPerception> GetEgoPerception() const {
+        return driverPerception->GetEgoPerception();
+    }
 
     ///
     /// \brief Returns a pointer to the Infrastructure, no calculation is performed.
@@ -69,7 +73,9 @@ class SensorPerceptionLogic {
     ///
     /// \brief Returns the list of currently visible agents, no calculation is performed.
     ///
-    const std::vector<std::shared_ptr<AgentPerception>> GetAgentPerception() const { return perceivedAgents; }
+    const std::vector<std::shared_ptr<GeneralAgentPerception>> GetGeneralAgentPerception() const {
+        return perceivedAgents;
+    }
 
     ///
     /// \brief Returns the list of currently visible traffic signs, no calculation is performed.
@@ -79,18 +85,18 @@ class SensorPerceptionLogic {
     }
 
   private:
-    std::shared_ptr<VisualSensorInterface<std::shared_ptr<AgentPerception>>> visualSensor;
-    std::shared_ptr<VisualSensorInterface<const MentalInfrastructure::TrafficSignal *>> trafficSignalVisualSensor;
-    std::shared_ptr<AABBTreeHandler> aabbTreeHandler;
+      std::shared_ptr<VisualSensorInterface<std::shared_ptr<GeneralAgentPerception>>> visualSensor;
+      std::shared_ptr<VisualSensorInterface<const MentalInfrastructure::TrafficSignal *>> trafficSignalVisualSensor;
+      std::shared_ptr<AABBTreeHandler> aabbTreeHandler;
 
-    std::shared_ptr<DriverPerception> driverPerception;
-    std::shared_ptr<RoadNetworkSensor> roadNetworkSensor;
+      std::shared_ptr<DriverPerception> driverPerception;
+      std::shared_ptr<RoadNetworkSensor> roadNetworkSensor;
 
-    std::vector<std::shared_ptr<AgentPerception>> perceivedAgents;
-    std::vector<const MentalInfrastructure::TrafficSignal *> perceivedTrafficSignals;
+      std::vector<std::shared_ptr<GeneralAgentPerception>> perceivedAgents;
+      std::vector<const MentalInfrastructure::TrafficSignal *> perceivedTrafficSignals;
 
-    AgentInterface* driver;
-    WorldInterface* world;
+      AgentInterface *driver;
+      WorldInterface *world;
 };
 
 #endif // SENSORPERCEPTIONLOGIC_H

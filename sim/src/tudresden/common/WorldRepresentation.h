@@ -125,10 +125,13 @@ struct WorldInterpretation {
 
 namespace CognitiveMap {
 
+// TODO maybe make this class a child of GeneralAgentPerception and override the relevant fields / add getter methods for extrapolated
+// fields
 class AgentRepresentation {
   public:
     AgentRepresentation() {}
-    AgentRepresentation(std::shared_ptr<AgentPerception> perceptionData) : internalData(perceptionData) {}
+    AgentRepresentation(std::shared_ptr<GeneralAgentPerception> perceptionData) : internalData(perceptionData) {
+    }
     virtual ~AgentRepresentation() = default;
 
     /*!
@@ -139,7 +142,7 @@ class AgentRepresentation {
      * @return        Position if lane is present in distance
      *
      */
-    std::optional<PositionAlongRoad> FindNewPositionInDistance(double distance) const;
+    std::optional<LanePosition> FindNewPositionInDistance(double distance) const;
 
     /*!
      * \brief Checks if the observed vehicle came from a road that is to the right of the ego agent
@@ -176,31 +179,33 @@ class AgentRepresentation {
     double ExtrapolateDistanceAlongLane(double timeStep) const;
 
     //*********Get-functions****//
-    virtual const AgentPerception& GetInternalData() const { return *internalData; }
+    virtual const GeneralAgentPerception &GetInternalData() const {
+        return *internalData;
+    }
 
     int GetID() const { return internalData->id; }
 
-    double GetYawAngle() const { return internalData->yawAngle; }
+    double GetYawAngle() const {
+        return internalData->yaw;
+    }
 
     double GetWidth() const { return internalData->width; }
     double GetLength() const { return internalData->length; }
     Common::Vector2d GetRefPosition() const { return internalData->refPosition; }
-    AgentVehicleType GetVehicleType() const { return internalData->vehicleType; }
+    DReaMDefinitions::AgentVehicleType GetVehicleType() const {
+        return internalData->vehicleType;
+    }
     double GetAcceleration() const { return internalData->acceleration; }
     double GetVelocity() const { return internalData->velocity; }
     double GetDistanceReferencePointToLeadingEdge() const { return internalData->distanceReferencePointToLeadingEdge; }
     bool GetBrakeLight() const { return internalData->brakeLight; }
     IndicatorState GetIndicatorState() const { return internalData->indicatorState; }
-    double GetSCoordinate() const { return internalData->sCoordinate; }
-    LaneType GetLaneType() const { return internalData->laneType; }
-    const MentalInfrastructure::Road* GetRoad() const { return internalData->road; }
-    const MentalInfrastructure::Lane* GetLane() const { return internalData->lane; }
-    const MentalInfrastructure::Lane* GetNextLane() const { return internalData->nextLane; }
-    double GetDistanceToNextJunction() const {
-        return internalData->distanceToNextJunction;
+    LanePosition GetLanePosition() const {
+        return internalData->lanePosition;
     }
-    double GetDistanceOnJunction() const {
-        return internalData->distanceOnJunction;
+    const MentalInfrastructure::Lane* GetNextLane() const { return internalData->nextLane; }
+    JunctionDistance GetJunctionDistance() const {
+        return internalData->junctionDistance;
     }
     virtual bool IsMovingInLaneDirection() const { return internalData->movingInLaneDirection; }
 
@@ -216,12 +221,12 @@ class AgentRepresentation {
         const;
 
     //! the internal information of the agent representation
-    std::shared_ptr<AgentPerception> internalData;
+    std::shared_ptr<GeneralAgentPerception> internalData;
 };
 
 class AmbientAgentRepresentation : public AgentRepresentation {
   public:
-      AmbientAgentRepresentation(std::shared_ptr<AgentPerception> perceptionData, double lifetime = 0) :
+      AmbientAgentRepresentation(std::shared_ptr<GeneralAgentPerception> perceptionData, double lifetime = 0) :
           AgentRepresentation(perceptionData), lifetime{lifetime} {
       }
     virtual ~AmbientAgentRepresentation() = default;
@@ -240,38 +245,40 @@ class EgoAgentRepresentation : public AgentRepresentation {
     EgoAgentRepresentation() {}
     virtual ~EgoAgentRepresentation() = default;
 
-    void UpdateInternalData(std::shared_ptr<EgoPerception> perceptionData) { internalData = perceptionData; }
+    void UpdateInternalData(std::shared_ptr<DetailedAgentPerception> perceptionData) {
+        internalData = perceptionData;
+    }
 
-    Common::Vector2d GetDriverPosition() const {
-        auto egoInternalData = std::static_pointer_cast<EgoPerception>(internalData);
-        return egoInternalData->driverPosition;
+    Common::Vector2d GetGlobalDriverPosition() const {
+        auto egoInternalData = std::static_pointer_cast<DetailedAgentPerception>(internalData);
+        return egoInternalData->globalDriverPosition;
     }
     double GetSteeringWheelAngle() const {
-        auto egoInternalData = std::static_pointer_cast<EgoPerception>(internalData);
+        auto egoInternalData = std::static_pointer_cast<DetailedAgentPerception>(internalData);
         return egoInternalData->steeringWheelAngle;
     }
     double GetLaneWidth() const {
-        auto egoInternalData = std::static_pointer_cast<EgoPerception>(internalData);
+        auto egoInternalData = std::static_pointer_cast<DetailedAgentPerception>(internalData);
         return egoInternalData->laneWidth;
     }
     const MentalInfrastructure::Lane *GetMainLocatorLane() const {
-        auto egoInternalData = std::static_pointer_cast<EgoPerception>(internalData);
-        return egoInternalData->mainLocatorLane;
+        auto egoInternalData = std::static_pointer_cast<DetailedAgentPerception>(internalData);
+        return egoInternalData->mainLocatorInformation.mainLocatorLane;
     }
     double GetLateralDisplacement() const {
-        auto egoInternalData = std::static_pointer_cast<EgoPerception>(internalData);
-        return egoInternalData->lateralDisplacement;
+        auto egoInternalData = std::static_pointer_cast<DetailedAgentPerception>(internalData);
+        return egoInternalData->mainLocatorInformation.lateralDisplacement;
     }
     double GetCurvature() const {
-        auto egoInternalData = std::static_pointer_cast<EgoPerception>(internalData);
-        return egoInternalData->curvature;
+        auto egoInternalData = std::static_pointer_cast<DetailedAgentPerception>(internalData);
+        return egoInternalData->mainLocatorInformation.curvature;
     }
     double GetHeading() const {
-        auto egoInternalData = std::static_pointer_cast<EgoPerception>(internalData);
-        return egoInternalData->heading;
+        auto egoInternalData = std::static_pointer_cast<DetailedAgentPerception>(internalData);
+        return egoInternalData->mainLocatorInformation.heading;
     }
     DReaMRoute::Waypoints GetRoute() const {
-        auto egoInternalData = std::static_pointer_cast<EgoPerception>(internalData);
+        auto egoInternalData = std::static_pointer_cast<DetailedAgentPerception>(internalData);
         return egoInternalData->route;
     }
 };

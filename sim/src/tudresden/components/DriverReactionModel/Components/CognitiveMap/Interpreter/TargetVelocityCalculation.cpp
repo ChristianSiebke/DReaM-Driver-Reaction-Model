@@ -15,8 +15,8 @@ namespace Interpreter {
 
 double TargetVelocityCalculation::Update(const WorldRepresentation &worldRepresentation, CrossingPhase phase) {
     try {
-        if (currentRoad != worldRepresentation.egoAgent->GetRoad()) {
-            currentRoad = worldRepresentation.egoAgent->GetRoad();
+        if (currentRoad != worldRepresentation.egoAgent->GetLanePosition().lane->GetRoad()) {
+            currentRoad = worldRepresentation.egoAgent->GetLanePosition().lane->GetRoad();
             phaseVelocities.clear();
             CalculatePhaseVelocities(worldRepresentation);
         }
@@ -32,11 +32,11 @@ double TargetVelocityCalculation::Update(const WorldRepresentation &worldReprese
 double TargetVelocityCalculation::CalculateTargetVelocity(const WorldRepresentation &worldRepresentation, CrossingPhase phase) const {
     double targetVelocity;
 
-    auto mmLane = worldRepresentation.egoAgent->GetLane();
+    auto mmLane = worldRepresentation.egoAgent->GetLanePosition().lane;
 
-    if (worldRepresentation.egoAgent->GetVehicleType() == AgentVehicleType::Car ||
-        worldRepresentation.egoAgent->GetVehicleType() == AgentVehicleType::Motorbike ||
-        worldRepresentation.egoAgent->GetVehicleType() == AgentVehicleType::Truck) {
+    if (worldRepresentation.egoAgent->GetVehicleType() == DReaMDefinitions::AgentVehicleType::Car ||
+        worldRepresentation.egoAgent->GetVehicleType() == DReaMDefinitions::AgentVehicleType::Motorbike ||
+        worldRepresentation.egoAgent->GetVehicleType() == DReaMDefinitions::AgentVehicleType::Truck) {
         if (phase != CrossingPhase::NONE) {
             targetVelocity = phaseVelocities.at(phase);
         }
@@ -54,10 +54,10 @@ double TargetVelocityCalculation::CalculateTargetVelocity(const WorldRepresentat
             }
         }
     }
-    else if (worldRepresentation.egoAgent->GetVehicleType() == AgentVehicleType::Pedestrian) {
+    else if (worldRepresentation.egoAgent->GetVehicleType() == DReaMDefinitions::AgentVehicleType::Pedestrian) {
         targetVelocity = 3.6;
     }
-    else if (worldRepresentation.egoAgent->GetVehicleType() == AgentVehicleType::Bicycle) {
+    else if (worldRepresentation.egoAgent->GetVehicleType() == DReaMDefinitions::AgentVehicleType::Bicycle) {
         targetVelocity = 9.0;
     }
     else {

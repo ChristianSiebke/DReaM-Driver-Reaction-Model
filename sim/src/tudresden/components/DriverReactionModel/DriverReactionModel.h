@@ -28,7 +28,8 @@ class DriverReactionModel {
       DriverReactionModel &operator=(DriverReactionModel &&) = delete;
       ~DriverReactionModel() = default;
 
-      void UpdateDReaM(int time, std::shared_ptr<EgoPerception> egoAgent, std::vector<std::shared_ptr<AgentPerception>> ambientAgents,
+      void UpdateDReaM(int time, std::shared_ptr<DetailedAgentPerception> egoAgent,
+                       std::vector<std::shared_ptr<GeneralAgentPerception>> ambientAgents,
                        std::shared_ptr<InfrastructurePerception> infrastructure,
                        std::vector<const MentalInfrastructure::TrafficSignal *> trafficSignals);
       double GetAcceleration();
@@ -39,7 +40,8 @@ class DriverReactionModel {
       const WorldInterpretation &GetWorldInterpretation();
 
   private:
-      void UpdateInput(int time, std::shared_ptr<EgoPerception> egoAgent, std::vector<std::shared_ptr<AgentPerception>> ambientAgents,
+      void UpdateInput(int time, std::shared_ptr<DetailedAgentPerception> egoAgent,
+                       std::vector<std::shared_ptr<GeneralAgentPerception>> ambientAgents,
                        std::shared_ptr<InfrastructurePerception> infrastructure,
                        std::vector<const MentalInfrastructure::TrafficSignal *> trafficSignals);
       void UpdateComponents();

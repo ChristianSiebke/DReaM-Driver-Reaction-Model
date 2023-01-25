@@ -126,7 +126,7 @@ public:
     /**
      * @brief DetermineROWData - determining which SPs should be calculated according to RightOfWay situation
      */
-    SP_ROW_Data DetermineROWData(LaneType type);
+    SP_ROW_Data DetermineROWData(MentalInfrastructure::LaneType type);
 
     /**
      * @brief DetermineStoppingPoints - determining all stopping points on an

@@ -33,10 +33,11 @@ void DriverPerception::CalculatePerception(const AgentInterface *driver, std::ve
     auto referenceLane =
         &helper.GetLaneByOdId(actualEgoAgent.GetReferencePointPosition()->roadId, actualEgoAgent.GetReferencePointPosition()->laneId,
                               actualEgoAgent.GetReferencePointPosition()->roadPosition.s);
+    auto referenceLaneDReaM = infrastructurePerception->lookupTableRoadNetwork.lanes.at(referenceLane->GetId());
     auto mainLocatorLane =
         &helper.GetLaneByOdId(actualEgoAgent.GetMainLocatePosition().roadId, actualEgoAgent.GetMainLocatePosition().laneId,
                               actualEgoAgent.GetMainLocatePosition().roadPosition.s);
-    auto indicator = driver->GetIndicatorState();
+    auto mainLocatorLaneDReaM = infrastructurePerception->lookupTableRoadNetwork.lanes.at(mainLocatorLane->GetId());
     DReaMRoute::Waypoints dreamRoute;
 
     std::transform(route.begin(), route.end(), std::back_inserter(dreamRoute), [this](auto element) {
@@ -47,36 +48,45 @@ void DriverPerception::CalculatePerception(const AgentInterface *driver, std::ve
         return result;
     });
 
-    EgoPerception data;
-    data.route = dreamRoute;
-    data.id = driver->GetId();
-    data.refPosition = Common::Vector2d(driver->GetPositionX(), driver->GetPositionY());
-    data.distanceReferencePointToLeadingEdge = driver->GetDistanceReferencePointToLeadingEdge();
-    data.lane = infrastructurePerception->lookupTableRoadNetwork.lanes.at(referenceLane->GetId());
-    data.road = data.lane->GetRoad();
-    data.mainLocatorLane = infrastructurePerception->lookupTableRoadNetwork.lanes.at(mainLocatorLane->GetId());
-    data.laneType = referenceLane->GetLaneType();
-    data.velocity = driver->GetVelocity(VelocityScope::Absolute);
-    data.acceleration = driver->GetAcceleration();
-    data.brakeLight = driver->GetBrakeLight();
-    data.indicatorState = indicator;
-    data.vehicleType = driver->GetVehicleModelParameters().vehicleType;
-    data.yawAngle = driver->GetYaw();
-    data.width = driver->GetWidth();
-    data.length = driver->GetLength();
-    data.laneWidth = actualEgoAgent.GetLaneWidth();
-    data.steeringWheelAngle = driver->GetSteeringWheelAngle();
-    data.sCoordinate = data.lane->IsInRoadDirection() ? actualEgoAgent.GetReferencePointPosition()->roadPosition.s
-                                                      : data.lane->GetLength() - actualEgoAgent.GetReferencePointPosition()->roadPosition.s;
-    data.movingInLaneDirection = AgentPerception::IsMovingInLaneDirection(data.lane, data.yawAngle, data.sCoordinate, data.velocity);
-    auto junctionDistance = data.CalculateJunctionDistance(data.road, data.lane);
-    data.distanceOnJunction = junctionDistance.distanceOnJunction;
-    data.distanceToNextJunction = junctionDistance.distanceToNextJunction;
-    data.nextLane = InfrastructurePerception::NextLane(data.indicatorState, data.movingInLaneDirection, data.lane);
-    data.driverPosition = GetDriverPosition();
-    data.heading = data.movingInLaneDirection ? actualEgoAgent.GetRelativeYaw() : -actualEgoAgent.GetRelativeYaw();
-    data.lateralDisplacement = data.movingInLaneDirection ? actualEgoAgent.GetPositionLateral() : -actualEgoAgent.GetPositionLateral();
-    data.curvature = actualEgoAgent.GetLaneCurvature();
+    DetailedAgentPerception perceptionData;
 
-    egoPerception = std::make_shared<EgoPerception>(data);
+    // object information
+    perceptionData.id = driver->GetId();
+    perceptionData.yaw = driver->GetYaw();
+    perceptionData.width = driver->GetWidth();
+    perceptionData.length = driver->GetLength();
+    perceptionData.refPosition = Common::Vector2d(driver->GetPositionX(), driver->GetPositionY());
+
+    // general agent information
+    perceptionData.vehicleType = (DReaMDefinitions::AgentVehicleType)driver->GetVehicleModelParameters().vehicleType;
+    perceptionData.distanceReferencePointToLeadingEdge = driver->GetDistanceReferencePointToLeadingEdge();
+    perceptionData.acceleration = driver->GetAcceleration();
+    perceptionData.velocity = driver->GetVelocity(VelocityScope::Absolute);
+    perceptionData.movingInLaneDirection = GeneralAgentPerception::IsMovingInLaneDirection(
+        perceptionData.lanePosition.lane, perceptionData.yaw, perceptionData.lanePosition.sCoordinate, perceptionData.velocity);
+    perceptionData.brakeLight = driver->GetBrakeLight();
+    perceptionData.indicatorState = driver->GetIndicatorState();
+    perceptionData.lanePosition = {referenceLaneDReaM, referenceLaneDReaM->IsInRoadDirection()
+                                                           ? actualEgoAgent.GetReferencePointPosition()->roadPosition.s
+                                                           : perceptionData.lanePosition.lane->GetLength() -
+                                                                 actualEgoAgent.GetReferencePointPosition()->roadPosition.s};
+    perceptionData.nextLane = InfrastructurePerception::NextLane(perceptionData.indicatorState, perceptionData.movingInLaneDirection,
+                                                                 perceptionData.lanePosition.lane);
+    perceptionData.junctionDistance = GeneralAgentPerception::CalculateJunctionDistance(
+        perceptionData, perceptionData.lanePosition.lane->GetRoad(), perceptionData.lanePosition.lane);
+
+    // detailed agent information
+    perceptionData.globalDriverPosition = GetDriverPosition();
+    perceptionData.steeringWheelAngle = driver->GetSteeringWheelAngle();
+    perceptionData.laneWidth = actualEgoAgent.GetLaneWidth();
+    perceptionData.mainLocatorInformation = {
+        mainLocatorLaneDReaM, // lane ptr
+        perceptionData.movingInLaneDirection ? actualEgoAgent.GetPositionLateral()
+                                             : -actualEgoAgent.GetPositionLateral(),                              // lateralDisplacement
+        actualEgoAgent.GetLaneCurvature(),                                                                        // curvature
+        perceptionData.movingInLaneDirection ? actualEgoAgent.GetRelativeYaw() : -actualEgoAgent.GetRelativeYaw() // heading
+    };
+    perceptionData.route = dreamRoute;
+
+    egoPerception = std::make_shared<DetailedAgentPerception>(perceptionData);
 }

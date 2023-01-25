@@ -32,7 +32,7 @@ class ReactionTime {
         bufferSize = static_cast<unsigned int>(std::round(bufferTime / (cycleTime / 1000))) + 1;
     }
 
-    void Update(std::vector<std::shared_ptr<AgentPerception>> agents);
+    void Update(std::vector<std::shared_ptr<GeneralAgentPerception>> agents);
     void EraseAgent(int agentId);
 
     /*!
@@ -41,17 +41,17 @@ class ReactionTime {
      *  return the  processed agents
      *
      */
-    std::vector<std::shared_ptr<AgentPerception>> PerceivedAgents();
+    std::vector<std::shared_ptr<GeneralAgentPerception>> PerceivedAgents();
 
-  private:
+private:
     // buffer the perceived agents to simulate processing time
-    std::deque<std::vector<std::shared_ptr<AgentPerception>>> perceivedAgentBuffer;
-    // buffer the perceived agents to simulate processing time
-    std::unordered_map<int, double> processingAgentBuffer;
-    unsigned int bufferSize;
-    double cycleTime;
-    double initialPerceptionTime;
-    double perceptionLatency;
-    StochasticsInterface* stochastics;
+      std::deque<std::vector<std::shared_ptr<GeneralAgentPerception>>> perceivedAgentBuffer;
+      // buffer the perceived agents to simulate processing time
+      std::unordered_map<int, double> processingAgentBuffer;
+      unsigned int bufferSize;
+      double cycleTime;
+      double initialPerceptionTime;
+      double perceptionLatency;
+      StochasticsInterface *stochastics;
 };
 } // namespace CognitiveMap

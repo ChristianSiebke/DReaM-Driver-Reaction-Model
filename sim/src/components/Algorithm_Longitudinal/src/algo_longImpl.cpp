@@ -79,8 +79,8 @@ void AlgorithmLongitudinalImplementation::UpdateInput(int localLinkId, const std
             currentVelocity = signal->GetOwnVehicleInformation().absoluteVelocity;
             initializedSensorDriverData = true;
         }
-        else if (std::shared_ptr<structSignal<std::shared_ptr<EgoPerception>> const> signal =
-                     std::dynamic_pointer_cast<structSignal<std::shared_ptr<EgoPerception>> const>(data)) {
+        else if (std::shared_ptr<structSignal<std::shared_ptr<DetailedAgentPerception>> const> signal =
+                     std::dynamic_pointer_cast<structSignal<std::shared_ptr<DetailedAgentPerception>> const>(data)) {
             initializedSensorDriverData = true;
             currentVelocity = signal->value->velocity;
         }

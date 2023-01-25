@@ -20,8 +20,8 @@ void CrossingInfoInterpreter::Update(WorldInterpretation* interpretation, const 
 
 void CrossingInfoInterpreter::UpdateStoppingPoints(const WorldRepresentation& representation) {
     auto egoJunction = representation.egoAgent->NextJunction();
-    auto egoRoad = representation.egoAgent->GetRoad();
-    auto egoLane = representation.egoAgent->GetLane();
+    auto egoLane = representation.egoAgent->GetLanePosition().lane;
+    auto egoRoad = egoLane->GetRoad();
 
     // setting stopping points
     if (crossingInfo.phase != CrossingPhase::NONE && crossingInfo.egoStoppingPoints.empty()) {
@@ -38,7 +38,7 @@ void CrossingInfoInterpreter::UpdateStoppingPoints(const WorldRepresentation& re
 
     for (auto &agent : *representation.agentMemory) {
         auto junction = agent->NextJunction();
-        auto lane = agent->GetLane();
+        auto lane = agent->GetLanePosition().lane;
 
         if (junction && crossingInfo.phase != CrossingPhase::NONE) {
             if (crossingInfo.otherStoppingpoints.find(agent->GetID()) == crossingInfo.otherStoppingpoints.end()) {
@@ -62,37 +62,38 @@ void CrossingInfoInterpreter::Localize(const WorldRepresentation &representation
 void CrossingInfoInterpreter::DetermineCrossingType(const WorldRepresentation &representation) {
     // assigning Crossing Type  until entrance intersecion
     if (representation.egoAgent->NextJunction()) {
-        if (representation.egoAgent->GetVehicleType() == AgentVehicleType::Car) {
+        if (representation.egoAgent->GetVehicleType() == DReaMDefinitions::AgentVehicleType::Car) {
             if (representation.egoAgent->GetIndicatorState() == IndicatorState::IndicatorState_Left) {
                 crossingInfo.type = CrossingType::Left;
             }
-            else if (representation.egoAgent->GetIndicatorState() == IndicatorState::IndicatorState_Right) {
+            else if (representation.egoAgent->GetIndicatorState() ==
+                     IndicatorState::IndicatorState_Right) { // TODO move indicatorstate to DReaMDefinitions
                 crossingInfo.type = CrossingType::Right;
             }
             else {
                 crossingInfo.type = CrossingType::Straight;
             }
         }
-        else if (representation.egoAgent->GetVehicleType() == AgentVehicleType::Pedestrian ||
-                 representation.egoAgent->GetVehicleType() == AgentVehicleType::Bicycle) {
+        else if (representation.egoAgent->GetVehicleType() == DReaMDefinitions::AgentVehicleType::Pedestrian ||
+                 representation.egoAgent->GetVehicleType() == DReaMDefinitions::AgentVehicleType::Bicycle) {
             crossingInfo.type = CrossingType::Straight;
         }
     }
 }
 
 void CrossingInfoInterpreter::DetermineCrossingPhase(const WorldRepresentation &representation) {
-    auto road = representation.egoAgent->GetRoad();
+    auto road = representation.egoAgent->GetLanePosition().lane->GetRoad();
     auto refToFront = representation.egoAgent->GetDistanceReferencePointToLeadingEdge();
-    auto sPositionFront = representation.egoAgent->GetSCoordinate() + refToFront;
-    bool frontExceedCurrentLane = sPositionFront > representation.egoAgent->GetRoad()->GetLength();
-    sPositionFront = frontExceedCurrentLane ? sPositionFront - representation.egoAgent->GetRoad()->GetLength() : sPositionFront;
+    auto sPositionFront = representation.egoAgent->GetLanePosition().sCoordinate + refToFront;
+    bool frontExceedCurrentLane = sPositionFront > road->GetLength();
+    sPositionFront = frontExceedCurrentLane ? sPositionFront - road->GetLength() : sPositionFront;
     auto nextJunction = representation.egoAgent->NextJunction();
 
-    if ((nextJunction && representation.egoAgent->GetDistanceToNextJunction() - refToFront < 75) && !frontExceedCurrentLane) {
-        if (representation.egoAgent->GetDistanceToNextJunction() - refToFront < 25) {
+    if ((nextJunction && representation.egoAgent->GetJunctionDistance().toNext - refToFront < 75) && !frontExceedCurrentLane) {
+        if (representation.egoAgent->GetJunctionDistance().toNext - refToFront < 25) {
             crossingInfo.phase = CrossingPhase::Deceleration_TWO;
         }
-        else if (representation.egoAgent->GetDistanceToNextJunction() - refToFront < 50) {
+        else if (representation.egoAgent->GetJunctionDistance().toNext - refToFront < 50) {
             crossingInfo.phase = CrossingPhase::Deceleration_ONE;
         }
         else {
@@ -118,7 +119,7 @@ void CrossingInfoInterpreter::DetermineCrossingPhase(const WorldRepresentation &
             throw std::runtime_error(message);
         }
 
-        if (representation.egoAgent->GetDistanceOnJunction() + refToFront > exit.sOffset) {
+        if (representation.egoAgent->GetJunctionDistance().on + refToFront > exit.sOffset) {
             crossingInfo.phase = CrossingPhase::Exit;
         }
         else if (sPositionFront < entry.sOffset) {
@@ -152,9 +153,9 @@ void CrossingInfoInterpreter::SetDistanceSP(const AgentRepresentation *agent, St
         return;
     }
     auto refToFront = agent->GetDistanceReferencePointToLeadingEdge();
-    auto sPositionFront = agent->GetSCoordinate() + refToFront;
-    bool frontExceedCurrentLane = sPositionFront > agent->GetRoad()->GetLength();
-    sPositionFront = frontExceedCurrentLane ? sPositionFront - agent->GetRoad()->GetLength() : sPositionFront;
+    auto sPositionFront = agent->GetLanePosition().sCoordinate + refToFront;
+    bool frontExceedCurrentLane = sPositionFront > agent->GetLanePosition().lane->GetRoad()->GetLength();
+    sPositionFront = frontExceedCurrentLane ? sPositionFront - agent->GetLanePosition().lane->GetRoad()->GetLength() : sPositionFront;
     auto nextJunction = agent->NextJunction();
     for (auto &sp : stoppingpoints) {
         if (sp.second.type == StoppingPointType::NONE) {
@@ -162,9 +163,9 @@ void CrossingInfoInterpreter::SetDistanceSP(const AgentRepresentation *agent, St
         }
 
         if (nextJunction && !frontExceedCurrentLane) {
-            sp.second.distanceToEgoFront = sp.second.sOffset + (agent->GetRoad()->GetLength() - sPositionFront);
+            sp.second.distanceToEgoFront = sp.second.sOffset + (agent->GetLanePosition().lane->GetRoad()->GetLength() - sPositionFront);
         }
-        else if (agent->GetRoad()->IsOnJunction() || (nextJunction && frontExceedCurrentLane)) {
+        else if (agent->GetLanePosition().lane->GetRoad()->IsOnJunction() || (nextJunction && frontExceedCurrentLane)) {
             sp.second.distanceToEgoFront = sp.second.sOffset - sPositionFront;
         }
     }

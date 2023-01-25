@@ -15,7 +15,7 @@
 
 using AOIProbabilities = std::vector<std::pair<int, double>>;
 
-using ObservationAOI = AgentVehicleType;
+using ObservationAOI = DReaMDefinitions::AgentVehicleType;
 
 namespace RoadSegments {
 

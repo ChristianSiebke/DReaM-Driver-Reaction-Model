@@ -39,7 +39,8 @@ class Memory {
      */
     void UpdateWorldRepresentation(WorldRepresentation& worldRepresentation);
 
-    void UpdateSensorInput(int time, std::shared_ptr<EgoPerception> egoAgent, std::vector<std::shared_ptr<AgentPerception>> agents,
+    void UpdateSensorInput(int time, std::shared_ptr<DetailedAgentPerception> egoAgent,
+                           std::vector<std::shared_ptr<GeneralAgentPerception>> agents,
                            std::shared_ptr<InfrastructurePerception> infrastruct,
                            std::vector<const MentalInfrastructure::TrafficSignal *> s) {
         timestamp = time;
@@ -70,7 +71,7 @@ class Memory {
 
     // perceived data
     std::shared_ptr<InfrastructurePerception> infrastructurePerception;
-    std::shared_ptr<EgoPerception> egoAgentPerception;
+    std::shared_ptr<DetailedAgentPerception> egoAgentPerception;
     std::vector<const MentalInfrastructure::TrafficSignal *> lastSeenTrafficSignals;
 
     // current active data

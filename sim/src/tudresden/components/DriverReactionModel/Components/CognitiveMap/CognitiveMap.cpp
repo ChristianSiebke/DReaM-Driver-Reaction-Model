@@ -44,8 +44,8 @@ void CognitiveMap::Update() {
     worldInterpreter.ExecuteTasks(&worldInterpretation, worldRepresentation);
 };
 
-void CognitiveMap::UpdateInput(int time, std::shared_ptr<EgoPerception> egoAgent,
-                               std::vector<std::shared_ptr<AgentPerception>> ambientAgents,
+void CognitiveMap::UpdateInput(int time, std::shared_ptr<DetailedAgentPerception> egoAgent,
+                               std::vector<std::shared_ptr<GeneralAgentPerception>> ambientAgents,
                                std::shared_ptr<InfrastructurePerception> infrastructure,
                                std::vector<const MentalInfrastructure::TrafficSignal *> trafficSignals) {
     memory.UpdateSensorInput(time, egoAgent, ambientAgents, infrastructure, trafficSignals);

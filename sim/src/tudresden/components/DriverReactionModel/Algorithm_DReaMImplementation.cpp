@@ -30,8 +30,8 @@ void AlgorithmDReaMImplementation::UpdateInput(int localLinkId, const std::share
     Q_UNUSED(time)
 
     if (localLinkId == 0) {
-        std::shared_ptr<ContainerSignal<std::vector<std::shared_ptr<AgentPerception>>> const> signal =
-            std::dynamic_pointer_cast<ContainerSignal<std::vector<std::shared_ptr<AgentPerception>>> const>(data);
+        std::shared_ptr<ContainerSignal<std::vector<std::shared_ptr<GeneralAgentPerception>>> const> signal =
+            std::dynamic_pointer_cast<ContainerSignal<std::vector<std::shared_ptr<GeneralAgentPerception>>> const>(data);
 
         if (!signal) {
             const std::string msg = COMPONENTNAME + " invalid signaltype (localLinkId 0 = AgentPerception)";
@@ -42,8 +42,8 @@ void AlgorithmDReaMImplementation::UpdateInput(int localLinkId, const std::share
         ambientAgents = signal->value;
     }
     else if (localLinkId == 1) {
-        std::shared_ptr<structSignal<std::shared_ptr<EgoPerception>> const> signal =
-            std::dynamic_pointer_cast<structSignal<std::shared_ptr<EgoPerception>> const>(data);
+        std::shared_ptr<structSignal<std::shared_ptr<DetailedAgentPerception>> const> signal =
+            std::dynamic_pointer_cast<structSignal<std::shared_ptr<DetailedAgentPerception>> const>(data);
 
         if (!signal) {
             const std::string msg = COMPONENTNAME + " invalid signaltype (localLinkId 1 = EgoPerception)";

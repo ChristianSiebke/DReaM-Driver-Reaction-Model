@@ -31,8 +31,8 @@ void Sensor_Perception_Implementation::UpdateOutput(int localLinkId, std::shared
 
     if (localLinkId == 0) {
         try {
-            data = std::make_shared<ContainerSignal<std::vector<std::shared_ptr<AgentPerception>>> const>(
-                sensorPerceptionLogic.GetAgentPerception());
+            data = std::make_shared<ContainerSignal<std::vector<std::shared_ptr<GeneralAgentPerception>>> const>(
+                sensorPerceptionLogic.GetGeneralAgentPerception());
         }
         catch (const std::bad_alloc &) {
             const std::string msg = COMPONENTNAME + " could not instantiate signal (localLinkId 0 = AgentPerception)";
@@ -42,7 +42,7 @@ void Sensor_Perception_Implementation::UpdateOutput(int localLinkId, std::shared
     }
     else if (localLinkId == 1) {
         try {
-            data = std::make_shared<structSignal<std::shared_ptr<EgoPerception>> const>(sensorPerceptionLogic.GetEgoPerception());
+            data = std::make_shared<structSignal<std::shared_ptr<DetailedAgentPerception>> const>(sensorPerceptionLogic.GetEgoPerception());
         }
         catch (const std::bad_alloc &) {
             const std::string msg = COMPONENTNAME + " could not instantiate signal (localLinkId 1 = EgoPerception)";

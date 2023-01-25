@@ -11,9 +11,9 @@
 #include <list>
 #include <unordered_map>
 
+#include "Definitions.h"
 #include "Element.h"
 #include "common/vector2d.h"
-#include "common/worldDefinitions.h"
 
 namespace MentalInfrastructure {
 
@@ -101,8 +101,7 @@ public:
     ///
     /// \brief Returns the type of the lane.
     ///
-    LaneType GetType() const
-    {
+    MentalInfrastructure::LaneType GetType() const {
         return type;
     }
 

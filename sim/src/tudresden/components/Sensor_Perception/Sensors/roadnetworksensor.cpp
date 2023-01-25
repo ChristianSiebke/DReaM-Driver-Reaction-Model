@@ -47,9 +47,12 @@ bool ConflictAreaCalculator::PotentialConflictAreaExist(const std::shared_ptr<co
         return false;
     if (currentLane->GetConflictAreaWithLane(intersectionLane.get()))
         return false;
-    if ((currentLane->GetType() == LaneType::Shoulder || intersectionLane->GetType() == LaneType::Shoulder) ||
-        (currentLane->GetType() == LaneType::Border || intersectionLane->GetType() == LaneType::Border) ||
-        (currentLane->GetType() == LaneType::Parking || intersectionLane->GetType() == LaneType::Parking))
+    if ((currentLane->GetType() == MentalInfrastructure::LaneType::Shoulder ||
+         intersectionLane->GetType() == MentalInfrastructure::LaneType::Shoulder) ||
+        (currentLane->GetType() == MentalInfrastructure::LaneType::Border ||
+         intersectionLane->GetType() == MentalInfrastructure::LaneType::Border) ||
+        (currentLane->GetType() == MentalInfrastructure::LaneType::Parking ||
+         intersectionLane->GetType() == MentalInfrastructure::LaneType::Parking))
         return false;
     if (LanesDoNotIntersect(currentLane.get(), intersectionLane.get()))
         return false;
@@ -261,7 +264,7 @@ MentalInfrastructure::Lane *RoadNetworkSensor::ConvertLane(const OWL::Lane *lane
     auto openDriveId = std::to_string(lane->GetOdId());
 
     auto newLane = std::make_shared<MentalInfrastructure::Lane>(openDriveId, GenerateUniqueId(), laneId, lane->GetLength(),
-                                                                lane->GetLaneType(), lane->GetOdId() < 0);
+                                                                (MentalInfrastructure::LaneType)lane->GetLaneType(), lane->GetOdId() < 0);
     perceptionData->lanes.push_back(newLane);
 
     double width = lane->GetWidth(0);
@@ -574,7 +577,9 @@ StoppingPointData RoadNetworkSensor::CreateStoppingPoints(std::vector<std::share
                     road->IsSuccessorJunction() && road->GetSuccessor()->GetOpenDriveId() == junctionId && !lane->IsInRoadDirection()) {
                     continue;
                 }
-                if (lane->GetType() != LaneType::Driving && lane->GetType() != LaneType::Sidewalk && lane->GetType() != LaneType::Biking) {
+                if (lane->GetType() != MentalInfrastructure::LaneType::Driving &&
+                    lane->GetType() != MentalInfrastructure::LaneType::Sidewalk &&
+                    lane->GetType() != MentalInfrastructure::LaneType::Biking) {
                     continue;
                 }
                 std::unordered_map<StoppingPointType, StoppingPoint> sps =

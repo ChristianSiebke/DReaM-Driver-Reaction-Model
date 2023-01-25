@@ -109,8 +109,8 @@ std::optional<CollisionPoint> CollisionInterpreter::PerformCollisionPointCalcula
             return std::nullopt;
         }
 
-        auto ego = positionEgoAgent->newLane->InterpolatePoint(positionEgoAgent->newSCoordinate);
-        auto observed = positionObservedAgent->newLane->InterpolatePoint(positionObservedAgent->newSCoordinate);
+        auto ego = positionEgoAgent->lane->InterpolatePoint(positionEgoAgent->sCoordinate);
+        auto observed = positionObservedAgent->lane->InterpolatePoint(positionObservedAgent->sCoordinate);
 
         double hdgEgo = representation.egoAgent->IsMovingInLaneDirection() ? ego.hdg : ego.hdg + M_PI;
         double hdgObserved = observedAgent.IsMovingInLaneDirection() ? observed.hdg : observed.hdg + M_PI;
@@ -136,12 +136,12 @@ std::optional<CollisionPoint> CollisionInterpreter::PerformCollisionPointCalcula
 
 polygon_t CollisionInterpreter::ConstructAgentPolygonRepresentation(const AgentRepresentation &data, const Common::Vector2d pos,
                                                                     const double hdg) const {
-    switch (data.GetVehicleType()) {
-    case AgentVehicleType::Car:
+    switch (data.GetVehicleType()) { // TODO it just constructs a polygon, why the switch?
+    case DReaMDefinitions::AgentVehicleType::Car:
         return ConstructPolygonRepresentation(data, pos, hdg);
-    case AgentVehicleType::Truck:
+    case DReaMDefinitions::AgentVehicleType::Truck:
         return ConstructPolygonRepresentation(data, pos, hdg);
-    case AgentVehicleType::Pedestrian:
+    case DReaMDefinitions::AgentVehicleType::Pedestrian:
         return ConstructPolygonRepresentation(data, pos, hdg);
     default:
         std::string message = __FILE__ " Line: " + std::to_string(__LINE__) + "AgentType does not exist";

@@ -87,7 +87,7 @@ void GazeMovement::UpdateRoadSegment() {
             else if (NextJunction->GetIncomingRoads().size() == 3) {
                 NextDirectionLanes nextLanes;
                 // assumption movingInLaneDirection = true for now
-                if (auto nextLanesPtr = InfrastructurePerception::NextLanes(true, worldRepresentation.egoAgent->GetLane())) {
+                if (auto nextLanesPtr = InfrastructurePerception::NextLanes(true, worldRepresentation.egoAgent->GetLanePosition().lane)) {
                     if (nextLanesPtr.has_value()) {
                         nextLanes = nextLanesPtr.value();
                     }

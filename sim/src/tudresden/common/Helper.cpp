@@ -144,11 +144,11 @@ double GetDistanceStoppingPoint(const AgentRepresentation *ego, const AgentInter
                 sp = worldInterpretation.crossingInfo.egoStoppingPoints.at(StoppingPointType::Vehicle_Crossroad);
             }
         }
-        else if ((IsVehicle(ego) && observedAgent->agent->GetVehicleType() == AgentVehicleType::Pedestrian) &&
+        else if ((IsVehicle(ego) && observedAgent->agent->GetVehicleType() == DReaMDefinitions::AgentVehicleType::Pedestrian) &&
                  observedAgent->rightOfWay.ego) {
             sp = worldInterpretation.crossingInfo.egoStoppingPoints.at(StoppingPointType::Pedestrian_Crossing_ONE);
         }
-        else if ((IsVehicle(ego) && observedAgent->agent->GetVehicleType() == AgentVehicleType::Pedestrian) &&
+        else if ((IsVehicle(ego) && observedAgent->agent->GetVehicleType() == DReaMDefinitions::AgentVehicleType::Pedestrian) &&
                  (observedAgent->rightOfWay.observed && ego->GetIndicatorState() == IndicatorState::IndicatorState_Left)) {
             sp = worldInterpretation.crossingInfo.egoStoppingPoints.at(StoppingPointType::Pedestrian_Left);
         }
@@ -161,8 +161,8 @@ double GetDistanceStoppingPoint(const AgentRepresentation *ego, const AgentInter
         if (IsVehicle(ego) && IsVehicle(observedAgent->agent)) {
             sp = worldInterpretation.crossingInfo.egoStoppingPoints.at(StoppingPointType::Vehicle_Left);
         }
-        else if (IsVehicle(ego) &&
-                 (observedAgent->agent->GetVehicleType() == AgentVehicleType::Pedestrian && observedAgent->rightOfWay.observed)) {
+        else if (IsVehicle(ego) && (observedAgent->agent->GetVehicleType() == DReaMDefinitions::AgentVehicleType::Pedestrian &&
+                                    observedAgent->rightOfWay.observed)) {
             sp = worldInterpretation.crossingInfo.egoStoppingPoints.at(StoppingPointType::Pedestrian_Left);
         }
         else {
@@ -192,8 +192,9 @@ double GetDistanceStoppingPoint(const AgentRepresentation *ego, const AgentInter
 }
 
 bool IsVehicle(const AgentRepresentation *agent) {
-    return agent->GetVehicleType() == AgentVehicleType::Car || agent->GetVehicleType() == AgentVehicleType::Truck ||
-           agent->GetVehicleType() == AgentVehicleType::Motorbike;
+    return agent->GetVehicleType() == DReaMDefinitions::AgentVehicleType::Car ||
+           agent->GetVehicleType() == DReaMDefinitions::AgentVehicleType::Truck ||
+           agent->GetVehicleType() == DReaMDefinitions::AgentVehicleType::Motorbike;
 }
 
 double AngleBetween2d(const Vector2d &vectorA, const Vector2d &vectorB) {

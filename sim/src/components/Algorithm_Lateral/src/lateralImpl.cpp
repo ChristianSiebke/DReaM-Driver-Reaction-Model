@@ -81,8 +81,8 @@ void AlgorithmLateralImplementation::UpdateInput(int localLinkId, const std::sha
             steeringController.SetVelocityAndSteeringWheelAngle(signal->GetOwnVehicleInformation().absoluteVelocity,
                                                                 signal->GetOwnVehicleInformation().steeringWheelAngle);
         }
-        else if (std::shared_ptr<structSignal<std::shared_ptr<EgoPerception>> const> signal =
-                     std::dynamic_pointer_cast<structSignal<std::shared_ptr<EgoPerception>> const>(data)) {
+        else if (std::shared_ptr<structSignal<std::shared_ptr<DetailedAgentPerception>> const> signal =
+                     std::dynamic_pointer_cast<structSignal<std::shared_ptr<DetailedAgentPerception>> const>(data)) {
             steeringController.SetVelocityAndSteeringWheelAngle(signal->value->velocity, signal->value->steeringWheelAngle);
         }
         else {

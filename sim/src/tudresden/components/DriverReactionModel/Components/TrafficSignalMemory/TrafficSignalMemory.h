@@ -20,7 +20,8 @@ public:
         visibleTrafficSignals = std::make_unique<VisibleTrafficSignals>();
     }
 
-    VisibleTrafficSignals *Update(int timestamp, std::vector<const MentalInfrastructure::TrafficSignal *> input, EgoPerception *ego);
+    VisibleTrafficSignals *Update(int timestamp, std::vector<const MentalInfrastructure::TrafficSignal *> input,
+                                  DetailedAgentPerception *ego);
 
 private:
     void EraseFromVisibleTrafficSignals(const MentalInfrastructure::TrafficSignal *sign);

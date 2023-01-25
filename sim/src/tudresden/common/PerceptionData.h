@@ -117,8 +117,11 @@ public:
      */
     // REWORK move out of the AgentPerception class (maybe static)
     // VA: this code is not tied to the AgentPerception and should therefor not be tied to this class, it is more of a helper function
-    JunctionDistance CalculateJunctionDistance(const MentalInfrastructure::Road *agentRoad,
-                                               const MentalInfrastructure::Lane *agentLane) const;
+    static JunctionDistance CalculateJunctionDistance(GeneralAgentPerception perception, const MentalInfrastructure::Road *agentRoad,
+                                                      const MentalInfrastructure::Lane *agentLane);
+
+    // TODO documentation
+    static bool IsMovingInLaneDirection(const MentalInfrastructure::Lane *agentLane, double yawAngle, double sCoordinate, double velocity);
 };
 
 /**

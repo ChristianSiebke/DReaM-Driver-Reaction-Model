@@ -94,7 +94,7 @@ bool LateralDecision::AgentIsTurningOnJunction() const {
 
 IndicatorState LateralDecision::SetIndicatorAtJunction(const MentalInfrastructure::Lane *targetLane) const {
     try {
-        auto currentLane = worldRepresentation.egoAgent->GetLane();
+        auto currentLane = worldRepresentation.egoAgent->GetLanePosition().lane;
         auto currentLanePoints = currentLane->GetLanePoints();
         auto secondLast = std::prev(currentLanePoints.end(), 2);
         Common::Vector2d CurrentDirection((currentLane->GetLastPoint()->x) - (secondLast->x),

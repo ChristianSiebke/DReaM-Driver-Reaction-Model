@@ -35,8 +35,8 @@ DriverReactionModel::DriverReactionModel(std::string behaviourConfigPath, std::s
     agentStateRecorder = AgentStateRecorder::AgentStateRecorder::GetInstance(resultPath);
 }
 
-void DriverReactionModel::UpdateDReaM(int time, std::shared_ptr<EgoPerception> egoAgent,
-                                      std::vector<std::shared_ptr<AgentPerception>> ambientAgents,
+void DriverReactionModel::UpdateDReaM(int time, std::shared_ptr<DetailedAgentPerception> egoAgent,
+                                      std::vector<std::shared_ptr<GeneralAgentPerception>> ambientAgents,
                                       std::shared_ptr<InfrastructurePerception> infrastructure,
                                       std::vector<const MentalInfrastructure::TrafficSignal *> trafficSignals) {
     UpdateInput(time, egoAgent, ambientAgents, infrastructure, trafficSignals);
@@ -44,8 +44,8 @@ void DriverReactionModel::UpdateDReaM(int time, std::shared_ptr<EgoPerception> e
     UpdateAgentStateRecorder(time, egoAgent->id, infrastructure);
 }
 
-void DriverReactionModel::UpdateInput(int time, std::shared_ptr<EgoPerception> egoAgent,
-                                      std::vector<std::shared_ptr<AgentPerception>> ambientAgents,
+void DriverReactionModel::UpdateInput(int time, std::shared_ptr<DetailedAgentPerception> egoAgent,
+                                      std::vector<std::shared_ptr<GeneralAgentPerception>> ambientAgents,
                                       std::shared_ptr<InfrastructurePerception> infrastructure,
                                       std::vector<const MentalInfrastructure::TrafficSignal *> trafficSignals) {
     cognitiveMap->UpdateInput(time, egoAgent, ambientAgents, infrastructure, trafficSignals);
@@ -67,7 +67,7 @@ void DriverReactionModel::UpdateComponents() {
 }
 
 void DriverReactionModel::UpdateAgentStateRecorder(int time, int id, std::shared_ptr<InfrastructurePerception> infrastructure) {
-    std::vector<AgentPerception> observedAgents;
+    std::vector<GeneralAgentPerception> observedAgents;
     for (const auto &oAgent : *(GetWorldRepresentation().agentMemory)) {
         observedAgents.push_back(oAgent->GetInternalData());
     }

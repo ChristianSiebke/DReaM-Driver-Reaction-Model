@@ -17,7 +17,7 @@
 #include "roadnetworksensor.h"
 #include "visualsensorinterface.h"
 
-class BasicVisualSensor : public VisualSensorInterface<std::shared_ptr<AgentPerception>> {
+class BasicVisualSensor : public VisualSensorInterface<std::shared_ptr<GeneralAgentPerception>> {
 public:
     BasicVisualSensor(AgentInterface *egoAgent, WorldInterface *world, std::shared_ptr<InfrastructurePerception> infrastructurePerception) :
         VisualSensorInterface(egoAgent, world), infrastructurePerception(infrastructurePerception) {
@@ -32,7 +32,7 @@ public:
 
     void Trigger(int timestamp, double direction, double distance, double opening, std::optional<Common::Vector2d> mirrorPos, bool godMode) override;
 
-    std::vector<std::shared_ptr<AgentPerception>> GetVisible() override {
+    std::vector<std::shared_ptr<GeneralAgentPerception>> GetVisible() override {
         return perceived.RetrieveData();
     }
 
@@ -41,46 +41,48 @@ private:
     void AgentPerceptionThread(unsigned startIndex, unsigned endIndex);
 
     void ConvertAgent(const AgentInterface *agent) {
-        AgentPerception data;
-        const auto &actualEgoAgent = const_cast<AgentInterface *>(agent)->GetEgoAgent();
         auto worldData = static_cast<OWL::WorldData *>(world->GetWorldData());
+        const auto &actualEgoAgent = const_cast<AgentInterface *>(agent)->GetEgoAgent();
         WorldDataQuery helper(*worldData);
         auto referenceLane =
             &helper.GetLaneByOdId(actualEgoAgent.GetReferencePointPosition()->roadId, actualEgoAgent.GetReferencePointPosition()->laneId,
                                   actualEgoAgent.GetReferencePointPosition()->roadPosition.s);
-        auto indicator = agent->GetIndicatorState();
+        auto referenceLaneDReaM = infrastructurePerception->lookupTableRoadNetwork.lanes.at(referenceLane->GetId());
 
-        data.id = agent->GetId();
-        data.refPosition = Common::Vector2d(agent->GetPositionX(), agent->GetPositionY());
-        data.distanceReferencePointToLeadingEdge = agent->GetDistanceReferencePointToLeadingEdge();
-        data.laneType = referenceLane->GetLaneType();
-        data.lane = infrastructurePerception->lookupTableRoadNetwork.lanes.at(referenceLane->GetId());
-        data.road = data.lane->GetRoad();
-        data.velocity = agent->GetVelocity(VelocityScope::Absolute);
-        data.acceleration = agent->GetAcceleration();
-        data.brakeLight = agent->GetBrakeLight();
-        data.indicatorState = indicator;
-        data.vehicleType = agent->GetVehicleModelParameters().vehicleType;
-        data.yawAngle = agent->GetYaw();
-        data.width = agent->GetWidth();
-        data.length = agent->GetLength();
-        data.sCoordinate = data.lane->IsInRoadDirection()
-                               ? actualEgoAgent.GetReferencePointPosition()->roadPosition.s
-                               : data.lane->GetLength() - actualEgoAgent.GetReferencePointPosition()->roadPosition.s;
-        data.movingInLaneDirection = AgentPerception::IsMovingInLaneDirection(data.lane, data.yawAngle, data.sCoordinate, data.velocity);
-        auto junctionDistance = data.CalculateJunctionDistance(data.road, data.lane);
-        data.distanceOnJunction = junctionDistance.distanceOnJunction;
-        data.distanceToNextJunction = junctionDistance.distanceToNextJunction;
-        data.nextLane = InfrastructurePerception::NextLane(data.indicatorState, data.movingInLaneDirection, data.lane);
+        GeneralAgentPerception perceptionData;
+        // object information
+        perceptionData.id = agent->GetId();
+        perceptionData.yaw = agent->GetYaw();
+        perceptionData.width = agent->GetWidth();
+        perceptionData.length = agent->GetLength();
+        perceptionData.refPosition = Common::Vector2d(agent->GetPositionX(), agent->GetPositionY());
 
-        perceived.InsertElement(std::make_shared<AgentPerception>(data));
+        // general agent information
+        perceptionData.vehicleType = (DReaMDefinitions::AgentVehicleType)agent->GetVehicleModelParameters().vehicleType;
+        perceptionData.distanceReferencePointToLeadingEdge = agent->GetDistanceReferencePointToLeadingEdge();
+        perceptionData.acceleration = agent->GetAcceleration();
+        perceptionData.velocity = agent->GetVelocity(VelocityScope::Absolute);
+        perceptionData.movingInLaneDirection = GeneralAgentPerception::IsMovingInLaneDirection(
+            perceptionData.lanePosition.lane, perceptionData.yaw, perceptionData.lanePosition.sCoordinate, perceptionData.velocity);
+        perceptionData.brakeLight = agent->GetBrakeLight();
+        perceptionData.indicatorState = agent->GetIndicatorState();
+        perceptionData.lanePosition = {referenceLaneDReaM, referenceLaneDReaM->IsInRoadDirection()
+                                                               ? actualEgoAgent.GetReferencePointPosition()->roadPosition.s
+                                                               : perceptionData.lanePosition.lane->GetLength() -
+                                                                     actualEgoAgent.GetReferencePointPosition()->roadPosition.s};
+        perceptionData.nextLane = InfrastructurePerception::NextLane(perceptionData.indicatorState, perceptionData.movingInLaneDirection,
+                                                                     perceptionData.lanePosition.lane);
+        perceptionData.junctionDistance = GeneralAgentPerception::CalculateJunctionDistance(
+            perceptionData, perceptionData.lanePosition.lane->GetRoad(), perceptionData.lanePosition.lane);
+
+        perceived.InsertElement(std::make_shared<GeneralAgentPerception>(perceptionData));
     }
 
 private:
     OWL::WorldData *worldData;
     std::shared_ptr<AABBTreeHandler> aabbTreeHandler;
     std::shared_ptr<AABBTree> aabbTree;
-    ThreadSafeVector<std::shared_ptr<AgentPerception>> perceived;
+    ThreadSafeVector<std::shared_ptr<GeneralAgentPerception>> perceived;
     std::shared_ptr<InfrastructurePerception> infrastructurePerception;
     DynamicInfrastructurePerception dynamicInfrastructurePerception;
 

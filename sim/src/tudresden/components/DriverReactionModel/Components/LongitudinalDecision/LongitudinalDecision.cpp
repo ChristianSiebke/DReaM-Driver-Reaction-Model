@@ -162,19 +162,19 @@ bool LongitudinalDecision::EgoHasRightOfWay(const std::unique_ptr<AgentInterpret
 }
 
 bool LongitudinalDecision::observedAgentIsbehindEgoAgent(const std::unique_ptr<AgentInterpretation> &oAgent) const {
-    return (oAgent->agent->GetNextLane() == worldRepresentation.egoAgent->GetLane() &&
+    return (oAgent->agent->GetNextLane() == worldRepresentation.egoAgent->GetLanePosition().lane &&
             oAgent->agent->IsMovingInLaneDirection() == worldRepresentation.egoAgent->IsMovingInLaneDirection()) ||
            ((oAgent->agent->IsMovingInLaneDirection() == true && worldRepresentation.egoAgent->IsMovingInLaneDirection() == true) &&
-            (oAgent->agent->GetRoad() == worldRepresentation.egoAgent->GetRoad() &&
-             oAgent->agent->GetSCoordinate() < worldRepresentation.egoAgent->GetSCoordinate())) ||
+            (oAgent->agent->GetLanePosition().lane->GetRoad() == worldRepresentation.egoAgent->GetLanePosition().lane->GetRoad() &&
+             oAgent->agent->GetLanePosition().sCoordinate < worldRepresentation.egoAgent->GetLanePosition().sCoordinate)) ||
            ((oAgent->agent->IsMovingInLaneDirection() == false && worldRepresentation.egoAgent->IsMovingInLaneDirection() == false) &&
-            (oAgent->agent->GetRoad() == worldRepresentation.egoAgent->GetRoad() &&
-             oAgent->agent->GetSCoordinate() > worldRepresentation.egoAgent->GetSCoordinate()));
+            (oAgent->agent->GetLanePosition().lane->GetRoad() == worldRepresentation.egoAgent->GetLanePosition().lane->GetRoad() &&
+             oAgent->agent->GetLanePosition().sCoordinate > worldRepresentation.egoAgent->GetLanePosition().sCoordinate));
 }
 
 bool LongitudinalDecision::CloseToConlictArea(const std::unique_ptr<AgentInterpretation> &oAgent) const {
-    return oAgent->agent->GetDistanceOnJunction() > 0 ||
-           (oAgent->agent->GetDistanceToNextJunction() > -1 && oAgent->agent->GetDistanceToNextJunction() < 5);
+    return oAgent->agent->GetJunctionDistance().on > 0 ||
+           (oAgent->agent->GetJunctionDistance().toNext > -1 && oAgent->agent->GetJunctionDistance().toNext < 5);
 }
 
 } // namespace LongitudinalDecision

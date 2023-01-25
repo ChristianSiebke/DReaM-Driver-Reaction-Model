@@ -134,13 +134,13 @@ class AlgorithmDReaMImplementation : public AlgorithmInterface {
     void Trigger(int time);
 
     //! All visual perception information of sensor_DriverPerception
-    std::vector<std::shared_ptr<AgentPerception>> ambientAgents;
+    std::vector<std::shared_ptr<GeneralAgentPerception>> ambientAgents;
 
     //! All perceived traffic signs
     std::vector<const MentalInfrastructure::TrafficSignal*> trafficSignals;
 
     //! Ego perception information of sensor_DriverPerception
-    std::shared_ptr<EgoPerception> egoPerception;
+    std::shared_ptr<DetailedAgentPerception> egoPerception;
 
     //! All infrastructure perception information of sensor_DriverPerception
     std::shared_ptr<InfrastructurePerception> infrastructurePerception;

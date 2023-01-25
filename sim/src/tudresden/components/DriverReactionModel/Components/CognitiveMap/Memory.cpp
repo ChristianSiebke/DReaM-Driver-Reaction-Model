@@ -36,7 +36,7 @@ const AmbientAgentRepresentations* Memory::UpdateAmbientAgentRepresentations() {
     AmbientAgentRepresentations newMemoryAgents;
     auto perceivedAgents = reactionTime.PerceivedAgents();
 
-    std::for_each(perceivedAgents.rbegin(), perceivedAgents.rend(), [=, &newMemoryAgents](std::shared_ptr<AgentPerception> agent) {
+    std::for_each(perceivedAgents.rbegin(), perceivedAgents.rend(), [=, &newMemoryAgents](std::shared_ptr<GeneralAgentPerception> agent) {
         // initial processing time
         newMemoryAgents.push_back(std::make_unique<AmbientAgentRepresentation>(agent));
     });
@@ -44,7 +44,7 @@ const AmbientAgentRepresentations* Memory::UpdateAmbientAgentRepresentations() {
         return std::any_of(collection.begin(), collection.end(), [id](const auto& agent) { return agent->GetID() == id; });
     };
     auto agentIsOutdated = std::bind(anyOfCollectionHasSameID, std::ref(newMemoryAgents), std::placeholders::_1);
-    auto agentOnInvalidLane = [](const auto& agent) { return agent->GetLane() == nullptr; };
+    auto agentOnInvalidLane = [](const auto &agent) { return agent->GetLanePosition().lane == nullptr; };
     auto agentExceedLifeTime = [this](const auto &agent) { return (agent->GetLifeTime() > behaviourData.cmBehaviour.memorytime); };
     auto extrapolationFailed = [this](const auto& agent) {
         return !agent->FindNewPositionInDistance(agent->ExtrapolateDistanceAlongLane(cycletime / 1000));
@@ -77,10 +77,10 @@ const AmbientAgentRepresentations* Memory::UpdateAmbientAgentRepresentations() {
 }
 
 std::unique_ptr<AmbientAgentRepresentation> Memory::ExtrapolateAmbientAgent(const AmbientAgentRepresentation* agent) {
-    auto position = agent->FindNewPositionInDistance(agent->ExtrapolateDistanceAlongLane(cycletime / 1000));
+    auto newPosition = agent->FindNewPositionInDistance(agent->ExtrapolateDistanceAlongLane(cycletime / 1000));
     try {
-        AgentPerception data = agent->GetInternalData();
-        const auto newRoad = position->newLane->GetRoad();
+        GeneralAgentPerception data = agent->GetInternalData();
+        const auto newRoad = newPosition->lane->GetRoad();
         auto nextVelocity = data.velocity + data.acceleration * cycletime / 1000;
         if (data.velocity * nextVelocity <= 0.0 && data.velocity != 0.0) {
             // agent change moving direction -->stop
@@ -88,22 +88,19 @@ std::unique_ptr<AmbientAgentRepresentation> Memory::ExtrapolateAmbientAgent(cons
             data.velocity = 0;
         }
         // extrapolate internal_Data
-        data.sCoordinate = position->newSCoordinate;
+        // TODO check if agentperception in agentrepresentation is a copy or the same object
+        data.lanePosition.sCoordinate = newPosition->sCoordinate;
         double diffAngle = data.movingInLaneDirection ? 0 : M_PI;
-        auto newPoint = position->newLane->InterpolatePoint(position->newSCoordinate);
+        auto newPoint = newPosition->lane->InterpolatePoint(newPosition->sCoordinate);
         data.refPosition.x = newPoint.x;
         data.refPosition.y = newPoint.y;
-        data.yawAngle = std::fmod(newPoint.hdg + diffAngle, (2 * M_PI));
+        data.yaw = std::fmod(newPoint.hdg + diffAngle, (2 * M_PI));
         data.velocity += data.acceleration * cycletime / 1000;
-        data.laneType = position->newLane->GetType();
-        data.road = newRoad;
-        data.lane = position->newLane;
-        data.nextLane = InfrastructureRepresentation::NextLane(data.indicatorState, data.movingInLaneDirection, data.lane);
-        auto junctionDistance = data.CalculateJunctionDistance(newRoad, position->newLane);
-        data.distanceOnJunction = junctionDistance.distanceOnJunction;
-        data.distanceToNextJunction = junctionDistance.distanceToNextJunction;
+        data.lanePosition.lane = newPosition->lane;
+        data.nextLane = InfrastructureRepresentation::NextLane(data.indicatorState, data.movingInLaneDirection, data.lanePosition.lane);
+        data.junctionDistance = GeneralAgentPerception::CalculateJunctionDistance(data, newRoad, newPosition->lane);
 
-        return std::make_unique<AmbientAgentRepresentation>(std::make_shared<AgentPerception>(data), agent->GetLifeTime());
+        return std::make_unique<AmbientAgentRepresentation>(std::make_shared<GeneralAgentPerception>(data), agent->GetLifeTime());
     } catch (std::out_of_range error) {
         auto msg = __FILE__ " Line: " + std::to_string(__LINE__) + error.what() + " Extrapolation failed ";
         throw std::logic_error(msg);

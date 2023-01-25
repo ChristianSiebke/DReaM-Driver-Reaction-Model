@@ -57,41 +57,51 @@ std::optional<LanePosition> GeneralAgentPerception::FindNewPositionInDistance(do
     return position;
 }
 
-JunctionDistance GeneralAgentPerception::CalculateJunctionDistance(const MentalInfrastructure::Road *agentRoad,
-                                                                   const MentalInfrastructure::Lane *agentLane) const {
+bool GeneralAgentPerception::IsMovingInLaneDirection(const MentalInfrastructure::Lane *agentLane, double yawAngle, double sCoordinate,
+                                                     double velocity) {
+    auto pointHDG = agentLane->InterpolatePoint(sCoordinate).hdg;
+    auto normRad = std::fabs(std::fmod(yawAngle - pointHDG, (2 * M_PI)));
+    auto absDiffDeg = std::min((2 * M_PI) - normRad, normRad);
+    bool direction = M_PI_2 >= absDiffDeg ? true : false;
+    return velocity >= 0 ? direction : !direction;
+}
+
+JunctionDistance GeneralAgentPerception::CalculateJunctionDistance(GeneralAgentPerception perception,
+                                                                   const MentalInfrastructure::Road *agentRoad,
+                                                                   const MentalInfrastructure::Lane *agentLane) {
     JunctionDistance distance;
 
     if (agentRoad->IsOnJunction() && (agentRoad->IsPredecessorJunction() || agentRoad->IsSuccessorJunction())) {
         throw std::logic_error(__FILE__ " Line: " + std::to_string(__LINE__) + " Junctions must be connected via roads ");
     }
 
-    if (movingInLaneDirection) {
+    if (perception.movingInLaneDirection) {
         if (agentRoad->IsOnJunction()) {
-            distance.on = lanePosition.sCoordinate;
+            distance.on = perception.lanePosition.sCoordinate;
         }
         if (agentLane->IsInRoadDirection()) {
             if (agentRoad->IsSuccessorJunction()) {
-                distance.toNext = agentRoad->GetLength() - lanePosition.sCoordinate;
+                distance.toNext = agentRoad->GetLength() - perception.lanePosition.sCoordinate;
             }
         }
         else {
             if (agentRoad->IsPredecessorJunction()) {
-                distance.toNext = agentRoad->GetLength() - lanePosition.sCoordinate;
+                distance.toNext = agentRoad->GetLength() - perception.lanePosition.sCoordinate;
             }
         }
     }
     else {
         if (agentRoad->IsOnJunction()) {
-            distance.on = agentRoad->GetLength() - lanePosition.sCoordinate;
+            distance.on = agentRoad->GetLength() - perception.lanePosition.sCoordinate;
         }
         if (agentLane->IsInRoadDirection()) {
             if (agentRoad->IsPredecessorJunction()) {
-                distance.toNext = lanePosition.sCoordinate;
+                distance.toNext = perception.lanePosition.sCoordinate;
             }
         }
         else {
             if (agentRoad->IsSuccessorJunction()) {
-                distance.toNext = lanePosition.sCoordinate;
+                distance.toNext = perception.lanePosition.sCoordinate;
             }
         }
     }

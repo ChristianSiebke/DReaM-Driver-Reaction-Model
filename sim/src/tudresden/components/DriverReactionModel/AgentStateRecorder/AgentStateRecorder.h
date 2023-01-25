@@ -61,7 +61,7 @@ struct Record {
     std::shared_ptr<InfrastructurePerception> infrastructurePerception;
 
     //! For each timestep, maps a map containing the Id and position of other known agents for each agent, to the associated timestep
-    std::map<time, std::map<agentID, std::vector<AgentPerception>>> observedAgents;
+    std::map<time, std::map<agentID, std::vector<GeneralAgentPerception>>> observedAgents;
 
     //! For each timestep, stores the traffic signals currently in memory of an agent
     std::map<time, std::map<agentID, std::vector<OdId>>> trafficSignalMemory;
@@ -109,7 +109,7 @@ public:
      */
     void AddGazeStates(int time, int id, GazeState);
 
-    void AddOtherAgents(int time, int id, std::vector<AgentPerception>);
+    void AddOtherAgents(int time, int id, std::vector<GeneralAgentPerception>);
 
     void AddCrossingInfos(int time, int id, CrossingInfo);
 

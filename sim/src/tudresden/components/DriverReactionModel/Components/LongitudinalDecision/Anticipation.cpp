@@ -17,7 +17,7 @@ namespace LongitudinalDecision {
 double Anticipation::IntersectionGap(const std::unique_ptr<AgentInterpretation> &observedAgent) {
     auto oAgent = observedAgent->agent;
     std::cout << "observed velocity: " << oAgent->GetVelocity() << " | observed Acceleration " << oAgent->GetAcceleration()
-              << " | observed sCoordinate: " << oAgent->GetSCoordinate() << " | distanceToStartCA "
+              << " | observed sCoordinate: " << oAgent->GetLanePosition().sCoordinate << " | distanceToStartCA "
               << observedAgent->conflictSituation->oAgentDistance.vehicleFrontToCAStart << " | distanceToENDCA "
               << observedAgent->conflictSituation->oAgentDistance.vehicleBackToCAEnd << std::endl;
     auto oAgentID = oAgent->GetID();
@@ -259,17 +259,16 @@ double Anticipation::CalculatePhaseAcceleration() const {
     double velTarget = worldInterpretation.targetVelocity;
     double distance;
     double distanceToIntersection =
-        worldRepresentation.egoAgent->GetDistanceToNextJunction() - worldRepresentation.egoAgent->GetDistanceReferencePointToLeadingEdge();
+        worldRepresentation.egoAgent->GetJunctionDistance().toNext - worldRepresentation.egoAgent->GetDistanceReferencePointToLeadingEdge();
     auto refToFront = worldRepresentation.egoAgent->GetDistanceReferencePointToLeadingEdge();
-    auto sPositionFront = worldRepresentation.egoAgent->GetSCoordinate() + refToFront;
+    auto sPositionFront = worldRepresentation.egoAgent->GetLanePosition().sCoordinate + refToFront;
 
-    bool frontExceedCurrentRoad = sPositionFront > worldRepresentation.egoAgent->GetRoad()->GetLength();
-
+    auto egoAgentRoad = worldRepresentation.egoAgent->GetLanePosition().lane->GetRoad();
+    bool frontExceedCurrentRoad = sPositionFront > egoAgentRoad->GetLength();
     auto distanceRefPointToEndOfRoad =
-        frontExceedCurrentRoad && !worldRepresentation.egoAgent->GetRoad()->IsOnJunction()
-            ? worldRepresentation.egoAgent->GetRoad()->GetLength() - worldRepresentation.egoAgent->GetSCoordinate() +
-                  worldRepresentation.egoAgent->GetNextLane()->GetRoad()->GetLength()
-            : worldRepresentation.egoAgent->GetRoad()->GetLength() - worldRepresentation.egoAgent->GetSCoordinate();
+        frontExceedCurrentRoad && !egoAgentRoad->IsOnJunction()
+            ? egoAgentRoad->GetLength() - worldRepresentation.egoAgent->GetLanePosition().sCoordinate + egoAgentRoad->GetLength()
+            : egoAgentRoad->GetLength() - worldRepresentation.egoAgent->GetLanePosition().sCoordinate;
 
     if (CrossingPhase::Approach <= worldInterpretation.crossingInfo.phase && distanceToIntersection >= 0) {
         std::cout << "jup" << std::endl;
