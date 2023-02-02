@@ -62,14 +62,15 @@ private:
         perceptionData.distanceReferencePointToLeadingEdge = agent->GetDistanceReferencePointToLeadingEdge();
         perceptionData.acceleration = agent->GetAcceleration();
         perceptionData.velocity = agent->GetVelocity(VelocityScope::Absolute);
-        perceptionData.movingInLaneDirection = GeneralAgentPerception::IsMovingInLaneDirection(
-            perceptionData.lanePosition.lane, perceptionData.yaw, perceptionData.lanePosition.sCoordinate, perceptionData.velocity);
-        perceptionData.brakeLight = agent->GetBrakeLight();
-        perceptionData.indicatorState = agent->GetIndicatorState();
         perceptionData.lanePosition = {referenceLaneDReaM, referenceLaneDReaM->IsInRoadDirection()
                                                                ? actualEgoAgent.GetReferencePointPosition()->roadPosition.s
                                                                : perceptionData.lanePosition.lane->GetLength() -
                                                                      actualEgoAgent.GetReferencePointPosition()->roadPosition.s};
+        perceptionData.movingInLaneDirection = GeneralAgentPerception::IsMovingInLaneDirection(
+            perceptionData.lanePosition.lane, perceptionData.yaw, perceptionData.lanePosition.sCoordinate, perceptionData.velocity);
+        perceptionData.brakeLight = agent->GetBrakeLight();
+        perceptionData.indicatorState = agent->GetIndicatorState();
+
         perceptionData.nextLane = InfrastructurePerception::NextLane(perceptionData.indicatorState, perceptionData.movingInLaneDirection,
                                                                      perceptionData.lanePosition.lane);
         perceptionData.junctionDistance = GeneralAgentPerception::CalculateJunctionDistance(

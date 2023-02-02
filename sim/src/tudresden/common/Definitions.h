@@ -98,7 +98,7 @@ struct GazeState {
     Common::Vector2d mirrorPos{0, 0};
 };
 
-[[deprecated]] struct SpeedLimit {
+struct SpeedLimit {
     double maxAllowedSpeed{0};
     SpeedUnit unit{SpeedUnit::MetersPerSecond};
 

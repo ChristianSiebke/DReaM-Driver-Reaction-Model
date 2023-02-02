@@ -62,14 +62,14 @@ void DriverPerception::CalculatePerception(const AgentInterface *driver, std::ve
     perceptionData.distanceReferencePointToLeadingEdge = driver->GetDistanceReferencePointToLeadingEdge();
     perceptionData.acceleration = driver->GetAcceleration();
     perceptionData.velocity = driver->GetVelocity(VelocityScope::Absolute);
-    perceptionData.movingInLaneDirection = GeneralAgentPerception::IsMovingInLaneDirection(
-        perceptionData.lanePosition.lane, perceptionData.yaw, perceptionData.lanePosition.sCoordinate, perceptionData.velocity);
-    perceptionData.brakeLight = driver->GetBrakeLight();
-    perceptionData.indicatorState = driver->GetIndicatorState();
     perceptionData.lanePosition = {referenceLaneDReaM, referenceLaneDReaM->IsInRoadDirection()
                                                            ? actualEgoAgent.GetReferencePointPosition()->roadPosition.s
                                                            : perceptionData.lanePosition.lane->GetLength() -
                                                                  actualEgoAgent.GetReferencePointPosition()->roadPosition.s};
+    perceptionData.movingInLaneDirection = GeneralAgentPerception::IsMovingInLaneDirection(
+        perceptionData.lanePosition.lane, perceptionData.yaw, perceptionData.lanePosition.sCoordinate, perceptionData.velocity);
+    perceptionData.brakeLight = driver->GetBrakeLight();
+    perceptionData.indicatorState = driver->GetIndicatorState();
     perceptionData.nextLane = InfrastructurePerception::NextLane(perceptionData.indicatorState, perceptionData.movingInLaneDirection,
                                                                  perceptionData.lanePosition.lane);
     perceptionData.junctionDistance = GeneralAgentPerception::CalculateJunctionDistance(

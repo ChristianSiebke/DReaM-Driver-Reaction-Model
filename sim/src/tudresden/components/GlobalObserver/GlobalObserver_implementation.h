@@ -10,9 +10,12 @@
 
 #pragma once
 
+#include "GlobalObserver_main.h"
+#include "Routes/RouteImporter.h"
 #include "WorldData.h"
 #include "common/complexSignals.h"
 #include "common/primitiveSignals.h"
+#include "core/opSimulation/framework/commandLineParser.h"
 #include "include/modelInterface.h"
 #include "include/observationInterface.h"
 
@@ -24,7 +27,20 @@ public:
                                   StochasticsInterface *stochastics, WorldInterface *world, const ParameterInterface *parameters,
                                   PublisherInterface *const publisher, const CallbackInterface *callbacks, AgentInterface *agent) :
         SensorInterface(componentName, isInit, priority, offsetTime, responseTime, cycleTime, stochastics, world, parameters, publisher,
-                        callbacks, agent) {
+                        callbacks, agent),
+        routeConverter(world) {
+        globalObserverMain = GlobalObserver::Main::GetInstance(world, stochastics);
+
+        // TODO: waypoints/Route must be passed via the openPASS framework.
+        // So far the openPASS framework (AgentInterface/egoAgent) has no function to get the waypoints/route --> redundant import
+        auto arguments = QCoreApplication::arguments();
+        auto parsedArguments = CommandLineParser::Parse(arguments);
+        std::string scenarioConfigPath =
+            QCoreApplication::applicationDirPath().toStdString() + "\\" + parsedArguments.configsPath + "\\" + "Scenario.xosc";
+        GlobalObserver::Routes::RouteImporter routeImporter(scenarioConfigPath);
+        auto routeImport = routeImporter.GetDReaMRoute(GetAgent()->GetScenarioName());
+        auto route = routeConverter.Convert(routeImport);
+        globalObserverMain->SetInitialRoute(GetAgent()->GetId(), route);
     }
     ~GlobalObserver_Implementation() {
     }
@@ -56,4 +72,12 @@ public:
     //! @param[in]     time           Current scheduling time
     //-----------------------------------------------------------------------------
     virtual void Trigger(int time);
+
+private:
+    std::shared_ptr<GlobalObserver::Main> globalObserverMain;
+
+    std::vector<int> visibleTrafficSigns;
+    std::vector<int> visibleAgents;
+
+    GlobalObserver::Routes::RouteConverter routeConverter;
 };

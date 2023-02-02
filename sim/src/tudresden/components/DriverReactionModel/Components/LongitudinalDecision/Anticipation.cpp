@@ -271,7 +271,7 @@ double Anticipation::CalculatePhaseAcceleration() const {
             : egoAgentRoad->GetLength() - worldRepresentation.egoAgent->GetLanePosition().sCoordinate;
 
     if (CrossingPhase::Approach <= worldInterpretation.crossingInfo.phase && distanceToIntersection >= 0) {
-        std::cout << "jup" << std::endl;
+        std::cout << "jup" << std::endl; // FIXME remove
         distance = distanceToIntersection;
     }
     else if (CrossingPhase::Deceleration_TWO <= worldInterpretation.crossingInfo.phase &&

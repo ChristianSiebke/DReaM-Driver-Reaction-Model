@@ -18,8 +18,9 @@ public:
     }
 
     void PrintStatistics() {
-        for (const auto &[name, startTime] : openPoints) {
-            EndTimePoint(name);
+        auto map = openPoints;
+        for (const auto &[name, startTime] : map) {
+            EndTimePoint(std::move(name));
         }
 
         std::cout << "TIME MEASUREMENT [" << name << "]" << std::endl;
