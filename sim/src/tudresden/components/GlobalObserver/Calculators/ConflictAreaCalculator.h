@@ -3,12 +3,22 @@
 #include "common/PerceptionData.h"
 
 namespace GlobalObserver::Calculators {
+
+/**
+ * @brief Class for handling the calculation of conflict areas in an already created internal infrastructure format.
+ *
+ */
 class ConflictAreaCalculator {
 public:
     ConflictAreaCalculator(std::shared_ptr<InfrastructurePerception> infrastructurePerception) :
         infrastructurePerception(infrastructurePerception) {
     }
 
+    /**
+     * @brief Triggers the internal conversion logic and populates the InfrastructurePerception. Checks whether the conversion was already
+     * performed to avoid double conversion.
+     *
+     */
     void Populate();
 
 private:

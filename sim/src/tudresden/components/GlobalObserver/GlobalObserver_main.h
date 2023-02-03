@@ -37,6 +37,11 @@
 
 namespace GlobalObserver {
 
+/**
+ * @brief Singleton shared by all agents, provides the core GlobalObserver functionality. Will update internal components as needed
+ * whenever the \code Trigger() \endcode method is invoked.
+ *
+ */
 class EXPORT Main {
 public:
     static std::shared_ptr<Main> GetInstance(WorldInterface *world, StochasticsInterface *stochastics) {
@@ -52,15 +57,53 @@ public:
     Main(Main const &) = delete;
     Main &operator=(Main const &) = delete;
 
+    /**
+     * @brief Triggers an update of the internally stored shared representations as well as the logic for detecting and categorizing crash
+     * events.
+     *
+     * @param time current time in the simulation
+     */
     void Trigger(int time);
 
+    /**
+     * @brief Triggers ONLY the conversion of parts of the road network that are required for performing route conversion.
+     *
+     */
     void TriggerRoadNetworkConversion();
 
+    /**
+     * @brief Returns a detailed AgentPerception used for representing the driver (all information is available to the driver).
+     *
+     * @param agentId id of the agent (driver) to return detailed information on
+     */
     std::shared_ptr<DetailedAgentPerception> GetDetailedAgentPerception(int agentId);
+
+    /**
+     * @brief Returns a list of general AgentPerceptions used for representing agents surrounding a driver.
+     *
+     * @param agentIds list of ids of agents that are visible to the driver
+     */
     std::vector<std::shared_ptr<GeneralAgentPerception>> GetGeneralAgentPerception(std::vector<int> agentIds);
+
+    /**
+     * @brief Returns the perceived (converted) infrastructure.
+     *
+     */
     std::shared_ptr<InfrastructurePerception> GetInfrastructurePerception();
+
+    /**
+     * @brief Returns a list of converted traffic signals.
+     *
+     * @param ids list of ids of traffic signals that are visible to the driver
+     */
     std::vector<const MentalInfrastructure::TrafficSignal *> GetVisibleTrafficSignals(std::vector<OdId> ids);
 
+    /**
+     * @brief Set the initial route for an agent, will pass through to AgentPerceptionConverter::SetInitialRoute.
+     *
+     * @param agentId the agent for which to set the initial route
+     * @param route the route that this agent should / will take
+     */
     void SetInitialRoute(int agentId, std::vector<GlobalObserver::Routes::InternWaypoint> route);
 
 private:

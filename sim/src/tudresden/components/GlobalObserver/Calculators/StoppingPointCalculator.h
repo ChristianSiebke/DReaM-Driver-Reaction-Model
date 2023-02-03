@@ -66,6 +66,11 @@ struct SP_ROW_Data {
 };
 
 namespace GlobalObserver::Calculators {
+
+/**
+ * @brief Class for handling the calculation of stopping points from an already created internal infrastructure format.
+ *
+ */
 class StoppingPointCalculator {
 public:
     StoppingPointCalculator(std::shared_ptr<InfrastructurePerception> infrastructurePerception) :
@@ -73,6 +78,11 @@ public:
     }
     ~StoppingPointCalculator() = default;
 
+    /**
+     * @brief Triggers the internal conversion logic and populates the InfrastructurePerception. Checks whether the conversion was already
+     * performed to avoid double conversion.
+     *
+     */
     void Populate();
 
     /**
