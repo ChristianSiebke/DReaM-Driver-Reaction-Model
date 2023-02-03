@@ -6,6 +6,7 @@
 
 void GlobalObserver_Implementation::UpdateInput(int localLinkId, const std::shared_ptr<SignalInterface const> &data, int time) {
     Q_UNUSED(time);
+
     if (localLinkId == 0) {
         std::shared_ptr<ContainerSignal<std::vector<int>> const> signal =
             std::dynamic_pointer_cast<ContainerSignal<std::vector<int>> const>(data);

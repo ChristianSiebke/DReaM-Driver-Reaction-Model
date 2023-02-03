@@ -3,10 +3,13 @@
 namespace GlobalObserver {
 
 std::shared_ptr<Main> Main::instance = nullptr;
+int Main::runId = 0;
 
 void Main::Trigger(int time) {
     if (time == lastConversionTime)
         return;
+    // tracking the timestamp to avoid doubling of conversion
+    lastConversionTime = time;
 
     // converting the infrastructure
     rnConverter.Populate();
@@ -21,9 +24,6 @@ void Main::Trigger(int time) {
 
     // converting all agents
     apConverter.Populate();
-
-    // tracking the timestamp to avoid doubling of conversion
-    lastConversionTime = time;
 }
 
 void Main::TriggerRoadNetworkConversion() {
