@@ -143,7 +143,7 @@ private:
     WorldInterface *world;
     StochasticsInterface *stochastics;
     std::shared_ptr<InfrastructurePerception> infrastructurePerception;
-    int lastConversionTime;
+    int lastConversionTime = -1;
 
     // infrastructure related fields
     GlobalObserver::Converters::RoadNetworkConverter rnConverter;
