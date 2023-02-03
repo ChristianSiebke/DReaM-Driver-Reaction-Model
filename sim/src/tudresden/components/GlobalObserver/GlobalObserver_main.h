@@ -54,9 +54,12 @@ public:
 
     void Trigger(int time);
 
+    void TriggerRoadNetworkConversion();
+
     std::shared_ptr<DetailedAgentPerception> GetDetailedAgentPerception(int agentId);
     std::vector<std::shared_ptr<GeneralAgentPerception>> GetGeneralAgentPerception(std::vector<int> agentIds);
     std::shared_ptr<InfrastructurePerception> GetInfrastructurePerception();
+    std::vector<const MentalInfrastructure::TrafficSignal *> GetVisibleTrafficSignals(std::vector<OdId> ids);
 
     void SetInitialRoute(int agentId, std::vector<GlobalObserver::Routes::InternWaypoint> route);
 
@@ -64,12 +67,12 @@ private:
     Main(WorldInterface *world, StochasticsInterface *stochastics) :
         world(world),
         stochastics(stochastics),
+        infrastructurePerception(std::make_shared<InfrastructurePerception>()),
         rnConverter(world, infrastructurePerception),
         caCalculator(infrastructurePerception),
         rgCalculator(infrastructurePerception),
         spCalculator(infrastructurePerception),
         apConverter(world, stochastics, infrastructurePerception, agentPerceptions) {
-        infrastructurePerception = std::make_shared<InfrastructurePerception>();
     }
 
 private:

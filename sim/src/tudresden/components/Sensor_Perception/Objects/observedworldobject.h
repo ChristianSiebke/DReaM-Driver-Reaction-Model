@@ -7,8 +7,7 @@
  *
  * for further information please visit:  https://www.driver-model.de
  *****************************************************************************/
-#ifndef OBSERVEDWORLDOBJECT_H
-#define OBSERVEDWORLDOBJECT_H
+#pragma once
 
 #include "AABBTree/aabbInterface.h"
 #include "boost/geometry/geometries/point_xy.hpp"
@@ -125,5 +124,3 @@ public:
 private:
     AABB aabb;
 };
-
-#endif // OBSERVEDWORLDOBJECT_H

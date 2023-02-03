@@ -9,9 +9,8 @@
  *****************************************************************************/
 #include "trafficsignalvisualsensor.h"
 
-void TrafficSignalVisualSensor::Trigger(int timestamp, double fovAngle, double distance, double opening,
-                                        std::optional<Common::Vector2d> mirrorPos, bool godMode) {
-    sensorDirection = fovAngle;
+void TrafficSignalVisualSensor::Trigger(int timestamp, GazeState gazeState, std::optional<Common::Vector2d> mirrorPos) {
+    sensorDirection = gazeState.ufovAngle;
     driverPos = Common::Vector2d(egoAgent->GetPositionX(), egoAgent->GetPositionY());
     if (mirrorPos.has_value()) {
         auto relMirrorPos = mirrorPos.value();
@@ -19,22 +18,22 @@ void TrafficSignalVisualSensor::Trigger(int timestamp, double fovAngle, double d
         driverPos.Add(relMirrorPos);
     }
 
-    if (godMode) {
+    if (gazeState.godMode) {
         minViewAngle = -M_PI;
         maxViewAngle = M_PI;
     }
     else {
-        minViewAngle = -opening / 2.0;
-        maxViewAngle = opening / 2.0;
+        minViewAngle = -gazeState.openingAngle / 2.0;
+        maxViewAngle = gazeState.openingAngle / 2.0;
     }
-    viewDistance = distance;
+    viewDistance = gazeState.viewDistance;
 
     aabbTree = aabbTreeHandler->GetCurrentAABBTree(timestamp);
     DynamicInfrastructurePerceptionMethod();
 }
 
 void TrafficSignalVisualSensor::DynamicInfrastructurePerceptionMethod() {
-    perceived.clear();
+    visible.clear();
 
     for (const auto &trafficSignal : aabbTreeHandler->trafficSignals) {
         auto rayDirection = trafficSignal->referencePosition - driverPos;
@@ -84,41 +83,6 @@ void TrafficSignalVisualSensor::DynamicInfrastructurePerceptionMethod() {
         const auto &tmp2 = std::dynamic_pointer_cast<ObservedTrafficSignal>(closest);
         auto signalId = aabbTreeHandler->trafficSignalsMappingReversed.at(tmp2);
 
-        if (tmp2->objectType == ObservedObjectType::TrafficSign) {
-            auto pointerIter = infrastructurePerception->lookupTableRoadNetwork.trafficSigns.find(signalId);
-            if (pointerIter != infrastructurePerception->lookupTableRoadNetwork.trafficSigns.end()) {
-                perceived.push_back(pointerIter->second);
-            }
-        }
-        else if (tmp2->objectType == ObservedObjectType::TrafficLight) {
-            auto pointerIter = infrastructurePerception->lookupTableRoadNetwork.trafficLights.find(signalId);
-            if (pointerIter != infrastructurePerception->lookupTableRoadNetwork.trafficLights.end()) {
-                perceived.push_back(pointerIter->second);
-            }
-        }
-
-        // auto pointerFind = infrastructurePerception->trafficSigns.
-
-        // TODO umstellen auf pointer lookup (raw pointer)
-
-        //        MentalInfrastructure::TrafficSign newTrafficSign(
-        //            owlTrafficSign->GetId(), owlTrafficSign->GetOpenDriveId(), owlTrafficSign->GetValue(), owlTrafficSign->GetT(),
-        //            owlTrafficSign->GetS(),
-        //            Common::Vector2d(owlTrafficSign->GetReferencePointPosition().x, owlTrafficSign->GetReferencePointPosition().y),
-        //            owlTrafficSign->GetType());
-
-        //        auto owlTrafficSignRoadId = owlTrafficSign->GetRoadId();
-        //        auto it = std::find_if(infrastructurePerception->roads.begin(), infrastructurePerception->roads.end(),
-        //                               [&owlTrafficSignRoadId](const std::shared_ptr<const MentalInfrastructure::Road>& road) {
-        //                                   return road->GetId() == owlTrafficSignRoadId;
-        //                               });
-
-        //        if (it == infrastructurePerception->roads.end())
-        //            continue;
-
-        //        auto tmp = *it;
-        //        newTrafficSign.SetRoad(const_cast<MentalInfrastructure::Road*>(tmp.get()));
-
-        //        perceived.push_back(std::make_shared<MentalInfrastructure::TrafficSign>(newTrafficSign));
+        visible.push_back(signalId);
     }
 }

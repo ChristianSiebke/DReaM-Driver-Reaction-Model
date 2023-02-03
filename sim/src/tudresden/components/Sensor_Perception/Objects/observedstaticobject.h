@@ -7,8 +7,7 @@
  *
  * for further information please visit:  https://www.driver-model.de
  *****************************************************************************/
-#ifndef OBSERVEDSTATICOBJECT_H
-#define OBSERVEDSTATICOBJECT_H
+#pragma once
 
 #include "include/roadInterface/roadElementTypes.h"
 #include "observedworldobject.h"
@@ -23,5 +22,3 @@ struct ObservedStaticObject : ObservedWorldObject
     ///
     RoadObjectType type;
 };
-
-#endif // OBSERVEDSTATICOBJECT_H

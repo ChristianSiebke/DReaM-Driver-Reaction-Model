@@ -20,12 +20,14 @@ void Main::Trigger(int time) {
     }
 
     // converting all agents
-    if (!agentPerceptionsCreated) {
-        agentPerceptionsCreated = true;
-    }
+    apConverter.Populate();
 
     // tracking the timestamp to avoid doubling of conversion
     lastConversionTime = time;
+}
+
+void Main::TriggerRoadNetworkConversion() {
+    rnConverter.Populate();
 }
 
 void Main::SetInitialRoute(int agentId, std::vector<GlobalObserver::Routes::InternWaypoint> route) {
@@ -48,4 +50,19 @@ std::shared_ptr<InfrastructurePerception> Main::GetInfrastructurePerception() {
     return infrastructurePerception;
 }
 
+std::vector<const MentalInfrastructure::TrafficSignal *> Main::GetVisibleTrafficSignals(std::vector<OdId> ids) {
+    std::vector<const MentalInfrastructure::TrafficSignal *> toReturn;
+    for (const auto &id : ids) {
+        if (infrastructurePerception->lookupTableRoadNetwork.trafficSigns.find(id) !=
+            infrastructurePerception->lookupTableRoadNetwork.trafficSigns.end()) {
+            toReturn.push_back(infrastructurePerception->lookupTableRoadNetwork.trafficSigns.at(id));
+            continue;
+        }
+        if (infrastructurePerception->lookupTableRoadNetwork.trafficLights.find(id) !=
+            infrastructurePerception->lookupTableRoadNetwork.trafficLights.end()) {
+            toReturn.push_back(infrastructurePerception->lookupTableRoadNetwork.trafficLights.at(id));
+        }
+    }
+    return toReturn;
+}
 }

@@ -7,8 +7,7 @@
  *
  * for further information please visit:  https://www.driver-model.de
  *****************************************************************************/
-#ifndef SIMPLESENSORINTERFACE_H
-#define SIMPLESENSORINTERFACE_H
+#pragma once
 
 #include "Objects/observedworldobject.h"
 #include "include/agentInterface.h"
@@ -27,5 +26,3 @@ protected:
     const AgentInterface *egoAgent;
     WorldInterface *world;
 };
-
-#endif // SIMPLESENSORINTERFACE_H

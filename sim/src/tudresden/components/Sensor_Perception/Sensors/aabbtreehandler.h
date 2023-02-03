@@ -7,8 +7,7 @@
  *
  * for further information please visit:  https://www.driver-model.de
  *****************************************************************************/
-#ifndef AABBTREEHANDLER_H
-#define AABBTREEHANDLER_H
+#pragma once
 
 #include <unordered_map>
 
@@ -146,5 +145,3 @@ private:
     bool firstExecution = true;
     std::shared_ptr<AABBTree> aabbTree;
 };
-
-#endif // AABBTREEHANDLER_H

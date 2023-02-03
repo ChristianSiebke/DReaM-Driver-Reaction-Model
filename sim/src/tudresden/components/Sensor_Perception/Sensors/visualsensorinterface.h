@@ -7,8 +7,7 @@
  *
  * for further information please visit:  https://www.driver-model.de
  *****************************************************************************/
-#ifndef VISUALSENSORINTERFACE_H
-#define VISUALSENSORINTERFACE_H
+#pragma once
 
 #include <bits/stl_list.h>
 #include <bits/stl_map.h>
@@ -24,10 +23,7 @@ public:
     }
     virtual ~VisualSensorInterface() = default;
 
-    virtual void Trigger(int timestamp, double direction, double distance, double opening, std::optional<Common::Vector2d> mirrorPos,
-                         bool godMode) = 0;
+    virtual void Trigger(int timestamp, GazeState gazeState, std::optional<Common::Vector2d> mirrorPos) = 0;
 
     virtual std::vector<T> GetVisible() = 0;
 };
-
-#endif

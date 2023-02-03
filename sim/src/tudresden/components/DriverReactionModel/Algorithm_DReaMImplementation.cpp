@@ -70,7 +70,7 @@ void AlgorithmDReaMImplementation::UpdateInput(int localLinkId, const std::share
             std::dynamic_pointer_cast<ContainerSignal<std::vector<const MentalInfrastructure::TrafficSignal *>> const>(data);
 
         if (!signal) {
-            const std::string msg = COMPONENTNAME + " invalid signaltype (localLinkId 4 = TrafficSigns)";
+            const std::string msg = COMPONENTNAME + " invalid signaltype (localLinkId 3 = TrafficSigns)";
             LOG(CbkLogLevel::Debug, msg);
             throw std::runtime_error(msg);
         }

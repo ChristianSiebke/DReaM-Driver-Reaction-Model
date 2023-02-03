@@ -48,6 +48,9 @@ DynamicAgentTypeGenerator& DynamicAgentTypeGenerator::GatherDriverComponents()
         GatherComponentWithParameters(driverModule.value(), agentBuildInformation.agentType, driverParameters);
     }
 
+    auto globalObserverModule = openpass::parameter::Get<std::string>(driverParameters, "GlobalObserver");
+    GatherComponent(globalObserverModule.value(), agentBuildInformation.agentType);
+
     auto sensorDriverModule = openpass::parameter::Get<std::string>(driverParameters, "SensorDriverModule");
     GatherComponent(sensorDriverModule.value_or("Sensor_Driver"), agentBuildInformation.agentType);
 

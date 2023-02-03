@@ -7,19 +7,15 @@
  *
  * for further information please visit:  https://www.driver-model.de
  *****************************************************************************/
-#ifndef TRAFFICSIGNVISUALSENSOR_H
-#define TRAFFICSIGNVISUALSENSOR_H
+#pragma once
 
 #include "aabbtreehandler.h"
 #include "include/agentInterface.h"
-#include "roadnetworksensor.h"
 #include "visualsensorinterface.h"
 
-class TrafficSignalVisualSensor : public VisualSensorInterface<const MentalInfrastructure::TrafficSignal *> {
+class TrafficSignalVisualSensor : public VisualSensorInterface<OdId> {
 public:
-    TrafficSignalVisualSensor(AgentInterface *egoAgent, WorldInterface *world,
-                              std::shared_ptr<InfrastructurePerception> infrastructurePerception) :
-        VisualSensorInterface(egoAgent, world), infrastructurePerception(infrastructurePerception) {
+    TrafficSignalVisualSensor(AgentInterface *egoAgent, WorldInterface *world) : VisualSensorInterface(egoAgent, world) {
         aabbTreeHandler = AABBTreeHandler::GetInstance(world);
         worldData = static_cast<OWL::WorldData *>(world->GetWorldData());
     }
@@ -29,10 +25,10 @@ public:
         }
     }
 
-    void Trigger(int timestamp, double direction, double distance, double opening, std::optional<Common::Vector2d> mirrorPos, bool godMode) override;
+    void Trigger(int timestamp, GazeState gazeState, std::optional<Common::Vector2d> mirrorPos) override;
 
-    std::vector<const MentalInfrastructure::TrafficSignal *> GetVisible() override {
-        return perceived;
+    std::vector<OdId> GetVisible() override {
+        return visible;
     }
 
 private:
@@ -42,8 +38,7 @@ private:
     OWL::WorldData *worldData;
     std::shared_ptr<AABBTreeHandler> aabbTreeHandler;
     std::shared_ptr<AABBTree> aabbTree;
-    std::vector<const MentalInfrastructure::TrafficSignal *> perceived;
-    std::shared_ptr<InfrastructurePerception> infrastructurePerception;
+    std::vector<OdId> visible;
 
     double sensorDirection;
     double minViewAngle;
@@ -51,5 +46,3 @@ private:
     double viewDistance;
     Common::Vector2d driverPos;
 };
-
-#endif // TRAFFICSIGNVISUALSENSOR_H

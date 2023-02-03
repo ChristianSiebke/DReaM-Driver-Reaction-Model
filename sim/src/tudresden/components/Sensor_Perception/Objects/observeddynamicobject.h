@@ -7,9 +7,7 @@
  *
  * for further information please visit:  https://www.driver-model.de
  *****************************************************************************/
-#ifndef OBSERVEDDYNAMICOBJECT_H
-#define OBSERVEDDYNAMICOBJECT_H
-
+#pragma once
 #include "observedworldobject.h"
 
 ///
@@ -31,5 +29,3 @@ struct ObservedDynamicObject : ObservedWorldObject {
     ///
     double acceleration;
 };
-
-#endif // OBSERVEDDYNAMICOBJECT_H

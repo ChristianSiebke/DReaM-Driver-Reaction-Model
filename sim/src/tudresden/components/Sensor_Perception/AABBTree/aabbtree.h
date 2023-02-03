@@ -7,8 +7,7 @@
  *
  * for further information please visit:  https://www.driver-model.de
  *****************************************************************************/
-#ifndef AABBTREE_H
-#define AABBTREE_H
+#pragma once
 
 #include "aabb.h"
 #include "aabbInterface.h"
@@ -71,5 +70,3 @@ class AABBTree {
     std::map<std::shared_ptr<AABBInterface>, unsigned> objectNodeIndexMap;
     std::vector<AABBNode> nodes;
 };
-
-#endif // AABBTREE_H

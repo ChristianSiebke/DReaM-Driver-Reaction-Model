@@ -17,12 +17,11 @@
 #include <chrono>
 #endif
 
-void BasicVisualSensor::Trigger(int timestamp, double fovAngle, double distance, double opening, std::optional<Common::Vector2d> mirrorPos,
-                                bool godMode) {
+void BasicVisualSensor::Trigger(int timestamp, GazeState gazeState, std::optional<Common::Vector2d> mirrorPos) {
     // use threads for operations
     bool useThreads = true;
 
-    sensorDirection = fovAngle;
+    sensorDirection = gazeState.ufovAngle;
     driverPos = Common::Vector2d(egoAgent->GetPositionX(), egoAgent->GetPositionY());
     if (mirrorPos.has_value()) {
         auto relMirrorPos = mirrorPos.value();
@@ -30,18 +29,18 @@ void BasicVisualSensor::Trigger(int timestamp, double fovAngle, double distance,
         driverPos.Add(relMirrorPos);
     }
 
-    if (godMode) {
+    if (gazeState.godMode) {
         minViewAngle = -M_PI;
         maxViewAngle = M_PI;
     }
     else {
-        minViewAngle = -opening / 2.0;
-        maxViewAngle = opening / 2.0;
+        minViewAngle = -gazeState.openingAngle / 2.0;
+        maxViewAngle = gazeState.openingAngle / 2.0;
     }
-    viewDistance = distance;
+    viewDistance = gazeState.viewDistance;
 
     aabbTree = aabbTreeHandler->GetCurrentAABBTree(timestamp); // this updates the aabb tree (if needed)
-    perceived.Clear();
+    visible.Clear();
 
     ThreadedAgentPerception(useThreads);
 }
@@ -157,7 +156,7 @@ void BasicVisualSensor::AgentPerceptionThread(unsigned startIndex, unsigned endI
 
         if (hitAgent) {
             // add it to the output list
-            ConvertAgent(agent);
+            visible.InsertElement(agent->GetId());
         }
     }
 }

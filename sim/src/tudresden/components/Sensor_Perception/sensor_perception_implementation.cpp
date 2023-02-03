@@ -31,43 +31,20 @@ void Sensor_Perception_Implementation::UpdateOutput(int localLinkId, std::shared
 
     if (localLinkId == 0) {
         try {
-            data = std::make_shared<ContainerSignal<std::vector<std::shared_ptr<GeneralAgentPerception>>> const>(
-                sensorPerceptionLogic.GetGeneralAgentPerception());
+            data = std::make_shared<ContainerSignal<std::vector<int>> const>(sensorPerceptionLogic.GetVisibleAgents());
         }
         catch (const std::bad_alloc &) {
-            const std::string msg = COMPONENTNAME + " could not instantiate signal (localLinkId 0 = AgentPerception)";
+            const std::string msg = COMPONENTNAME + " could not instantiate signal (localLinkId 0 = visible agents)";
             LOG(CbkLogLevel::Debug, msg);
             throw std::runtime_error(msg);
         }
     }
     else if (localLinkId == 1) {
         try {
-            data = std::make_shared<structSignal<std::shared_ptr<DetailedAgentPerception>> const>(sensorPerceptionLogic.GetEgoPerception());
+            data = std::make_shared<ContainerSignal<std::vector<OdId>> const>(sensorPerceptionLogic.GetVisibleTrafficSignals());
         }
         catch (const std::bad_alloc &) {
-            const std::string msg = COMPONENTNAME + " could not instantiate signal (localLinkId 1 = EgoPerception)";
-            LOG(CbkLogLevel::Debug, msg);
-            throw std::runtime_error(msg);
-        }
-    }
-    else if (localLinkId == 2) {
-        try {
-            data =
-                std::make_shared<structSignal<std::shared_ptr<InfrastructurePerception>> const>(sensorPerceptionLogic.GetInfrastructure());
-        }
-        catch (const std::bad_alloc &) {
-            const std::string msg = COMPONENTNAME + " could not instantiate signal (localLinkId 2 = InfrastructurePerception)";
-            LOG(CbkLogLevel::Debug, msg);
-            throw std::runtime_error(msg);
-        }
-    }
-    else if (localLinkId == 3) {
-        try {
-            data = std::make_shared<ContainerSignal<std::vector<const MentalInfrastructure::TrafficSignal *>> const>(
-                sensorPerceptionLogic.GetTrafficSignalPerception());
-        }
-        catch (const std::bad_alloc &) {
-            const std::string msg = COMPONENTNAME + " could not instantiate signal (localLinkId 3 = TrafficSignals)";
+            const std::string msg = COMPONENTNAME + " could not instantiate signal (localLinkId 0 = visible traffic signals)";
             LOG(CbkLogLevel::Debug, msg);
             throw std::runtime_error(msg);
         }
@@ -80,101 +57,11 @@ void Sensor_Perception_Implementation::UpdateOutput(int localLinkId, std::shared
 }
 
 void Sensor_Perception_Implementation::Trigger(int time) {
-    UpdateGraphPosition();
     std::optional<Common::Vector2d> mPos;
-    if (currentGazeState.mirrorGaze) {
+    if (currentGazeState.mirrorGaze)
         mPos.emplace(currentGazeState.mirrorPos);
-    }
-    else {
+    else
         mPos.reset();
-    }
-    sensorPerceptionLogic.Trigger(time, currentGazeState.ufovAngle, currentGazeState.viewDistance, currentGazeState.openingAngle, mPos,
-                                  currentGazeState.godMode, route);
-}
 
-void Sensor_Perception_Implementation::UpdateGraphPosition() {
-    auto worldData = static_cast<OWL::WorldData *>(GetWorld()->GetWorldData());
-    WorldDataQuery helper(*worldData);
-
-    auto referenceLane = &helper.GetLaneByOdId(GetAgent()->GetEgoAgent().GetMainLocatePosition().roadId,
-                                               GetAgent()->GetEgoAgent().GetMainLocatePosition().laneId,
-                                               GetAgent()->GetEgoAgent().GetMainLocatePosition().roadPosition.s);
-
-    auto normRad = std::fabs(std::fmod(GetAgent()->GetYaw() - GetAgent()->GetEgoAgent().GetLaneDirection(), (2 * M_PI)));
-    auto absDiffDeg = std::min((2 * M_PI) - normRad, normRad);
-    bool direction = M_PI_2 >= absDiffDeg ? true : false;
-    direction = GetAgent()->GetVelocity() >= 0 ? direction : !direction;
-    auto nextLanes = direction ? referenceLane->GetNext() : referenceLane->GetPrevious();
-
-    if ((!GetAgent()->GetEgoAgent().HasValidRoute()) ||
-        (GetAgent()->GetEgoAgent().GetRootOfWayToTargetGraph() == 0 && nextLanes.size() > 0)) {
-        GetNewRoute();
-    }
-}
-
-void Sensor_Perception_Implementation::GetNewRoute() {
-    constexpr int maxDepth = 10;
-    const auto &roadIds = GetAgent()->GetRoads(MeasurementPoint::Front);
-    if (roadIds.empty()) {
-        return;
-    }
-    auto [branchedGraph, root] = GetWorld()->GetRoadGraph(
-        CommonHelper::GetRoadWithLowestHeading(GetAgent()->GetObjectPosition().referencePoint, *GetWorld()), maxDepth);
-    std::map<RoadGraph::edge_descriptor, double> weights = GetWorld()->GetEdgeWeights(branchedGraph);
-    auto targetVertex = RouteCalculation::SampleRoute(branchedGraph, root, weights, *GetStochastics());
-
-    auto straightRouteGraph = RoadGraph{};
-    RoadGraphVertex wayPoint = targetVertex;
-    auto vertex1 = add_vertex(get(RouteElement(), branchedGraph, wayPoint), straightRouteGraph);
-    auto newTarget = vertex1;
-    RoadGraphVertex vertex2;
-    while (wayPoint != root) {
-        for (auto [edge, edgesEnd] = edges(branchedGraph); edge != edgesEnd; ++edge) {
-            if (target(*edge, branchedGraph) == wayPoint) {
-                wayPoint = source(*edge, branchedGraph);
-                vertex2 = add_vertex(get(RouteElement(), branchedGraph, wayPoint), straightRouteGraph);
-                add_edge(vertex2, vertex1, straightRouteGraph);
-                vertex1 = vertex2;
-                break;
-            }
-        }
-    }
-    auto newRoot = vertex2;
-
-    auto worldData = static_cast<OWL::WorldData *>(world->GetWorldData());
-    auto roads = worldData->GetRoads();
-    WorldDataQuery helper(*worldData);
-
-    auto [begin, end] = vertices(straightRouteGraph);
-    auto rbegin = std::make_reverse_iterator(end);
-    auto rend = std::make_reverse_iterator(begin);
-
-    std::vector<InternWaypoint> newRoute;
-    auto currentLaneId = GetAgent()->GetEgoAgent().GetReferencePointPosition()->laneId;
-
-    std::transform(rbegin, rend, std::back_inserter(newRoute),
-                   [&straightRouteGraph = straightRouteGraph, roads, &currentLaneId](auto element) {
-                       InternWaypoint newRoute;
-                       newRoute.roadId = get(RouteElement(), straightRouteGraph, element).roadId;
-                       newRoute.s = 0;
-                       auto road = roads.at(get(RouteElement(), straightRouteGraph, element).roadId);
-                       auto section = road->GetSections().front();
-                       auto laneId = 0;
-                       if (get(RouteElement(), straightRouteGraph, element).inOdDirection) {
-                           laneId = currentLaneId < 0 ? -1 : 1;
-                           auto iter = std::find_if(section->GetLanes().begin(), section->GetLanes().end(),
-                                                    [laneId](auto element) { return element->GetOdId() == laneId; });
-                           newRoute.lane = (*iter)->GetId();
-                       }
-                       else {
-                           laneId = currentLaneId < 0 ? 1 : -1;
-                           auto iter = std::find_if(section->GetLanes().begin(), section->GetLanes().end(),
-                                                    [laneId](auto element) { return element->GetOdId() == laneId; });
-                           newRoute.lane = (*iter)->GetId();
-                       }
-                       currentLaneId = laneId;
-                       return newRoute;
-                   });
-    route = newRoute;
-    GetAgent()->GetEgoAgent().SetRoadGraph(std::move(straightRouteGraph), newRoot, newTarget);
+    sensorPerceptionLogic.Trigger(time, currentGazeState, mPos);
 }

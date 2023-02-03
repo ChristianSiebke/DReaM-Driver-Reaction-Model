@@ -40,7 +40,9 @@ public:
         GlobalObserver::Routes::RouteImporter routeImporter(scenarioConfigPath);
         auto routeImport = routeImporter.GetDReaMRoute(GetAgent()->GetScenarioName());
         auto route = routeConverter.Convert(routeImport);
-        globalObserverMain->SetInitialRoute(GetAgent()->GetId(), route);
+
+        globalObserverMain->TriggerRoadNetworkConversion();              // ensure that a partially converted road network exists
+        globalObserverMain->SetInitialRoute(GetAgent()->GetId(), route); // forwarding the initial route of this agent
     }
     ~GlobalObserver_Implementation() {
     }
@@ -76,7 +78,7 @@ public:
 private:
     std::shared_ptr<GlobalObserver::Main> globalObserverMain;
 
-    std::vector<int> visibleTrafficSigns;
+    std::vector<OdId> visibleTrafficSignals;
     std::vector<int> visibleAgents;
 
     GlobalObserver::Routes::RouteConverter routeConverter;
