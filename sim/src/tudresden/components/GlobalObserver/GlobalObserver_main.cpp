@@ -35,13 +35,15 @@ void Main::SetInitialRoute(int agentId, std::vector<GlobalObserver::Routes::Inte
 }
 
 std::shared_ptr<DetailedAgentPerception> Main::GetDetailedAgentPerception(int agentId) {
-    return agentPerceptions[agentId];
+    return agentPerceptions.at(agentId);
 }
 
 std::vector<std::shared_ptr<GeneralAgentPerception>> Main::GetGeneralAgentPerception(std::vector<int> agentIds) {
     std::vector<std::shared_ptr<GeneralAgentPerception>> toReturn;
     for (const auto &id : agentIds) {
-        toReturn.push_back(std::static_pointer_cast<GeneralAgentPerception>(agentPerceptions[id]));
+        if (agentPerceptions.find(id) != agentPerceptions.end()) {
+            toReturn.push_back(std::static_pointer_cast<GeneralAgentPerception>(agentPerceptions.at(id)));
+        }
     }
     return toReturn;
 }

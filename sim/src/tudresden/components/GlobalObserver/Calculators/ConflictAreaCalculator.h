@@ -1,6 +1,7 @@
 #pragma once
 
 #include "common/PerceptionData.h"
+#include "common/Helper.h"
 
 namespace GlobalObserver::Calculators {
 

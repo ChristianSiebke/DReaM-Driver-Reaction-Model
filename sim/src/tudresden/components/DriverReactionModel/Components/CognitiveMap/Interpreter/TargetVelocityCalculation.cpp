@@ -26,6 +26,7 @@ double TargetVelocityCalculation::Update(const WorldRepresentation &worldReprese
         std::string message =
             "File: " + static_cast<std::string>(__FILE__) + " Line: " + std::to_string(__LINE__) + " error in update target velocity";
         Log(message, error);
+        throw std::logic_error(message);
     }
 };
 

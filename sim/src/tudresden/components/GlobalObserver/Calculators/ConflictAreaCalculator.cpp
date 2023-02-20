@@ -71,10 +71,6 @@ bool ConflictAreaCalculator::LanesDoNotIntersect(const MentalInfrastructure::Lan
         (roadA->GetPredecessor() == roadB->GetJunction() && roadA->GetPredecessor() != nullptr)) {
         return true;
     }
-    // coming from same lane
-    if (roadA->GetPredecessor() == roadB->GetPredecessor() && roadA->GetPredecessor() != nullptr) {
-        return true;
-    }
     // junction between lanes
     if ((roadA->IsSuccessorJunction() && roadB->IsSuccessorJunction()) ||
         (roadA->IsSuccessorJunction() && roadB->IsPredecessorJunction()) ||
@@ -102,24 +98,18 @@ bool ConflictAreaCalculator::LanesHavePotentialConfliceArea(const MentalInfrastr
 std::optional<std::pair<MentalInfrastructure::LanePoint, MentalInfrastructure::LanePoint>>
 ConflictAreaCalculator::IntersectionPoints(const MentalInfrastructure::LanePoint *p1, const MentalInfrastructure::LanePoint *p2,
                                            const MentalInfrastructure::LanePoint *q1, const MentalInfrastructure::LanePoint *q2) const {
-    double threshold = 0.3;
-    double m1 = (p2->y - p1->y) / (p2->x - p1->x);
-    double n1 = ((p1->y * p2->x) - (p2->y * p1->x)) / (p2->x - p1->x);
-    double m2 = (q2->y - q1->y) / (q2->x - q1->x);
-    double n2 = ((q1->y * q2->x) - (q2->y * q1->x)) / (q2->x - q1->x);
-
-    if (m1 - m2 == 0.0)
+    auto point = Common::IntersectionPoint({p1->x, p1->y}, {p2->x, p2->y}, {q1->x, q1->y}, {q2->x, q2->y});
+    if (!point) {
         return std::nullopt;
-
-    double x = (n2 - n1) / (m1 - m2);
-    double y = m1 * x + n1;
-    if (((std::min(p1->x, p2->x) <= x + threshold && std::max(p1->x, p2->x) >= x - threshold) &&
-         ((std::min(p1->y, p2->y) <= y + threshold && std::max(p1->y, p2->y) >= y - threshold))) &&
-        ((std::min(q1->x, q2->x) <= x + threshold && std::max(q1->x, q2->x) >= x - threshold) &&
-         ((std::min(q1->y, q2->y) <= y + threshold && std::max(q1->y, q2->y) >= y - threshold)))) {
-        auto pS = std::sqrt((std::pow((x - p1->x), 2)) + (std::pow((y - p1->y), 2)));
-        auto qS = std::sqrt((std::pow((x - q1->x), 2)) + (std::pow((y - q1->y), 2)));
-        return {{{x, y, p1->hdg, p1->sOffset + pS}, {x, y, q1->hdg, q1->sOffset + qS}}};
+    }
+    double threshold = 0.3;
+    if (((std::min(p1->x, p2->x) <= point->x + threshold && std::max(p1->x, p2->x) >= point->x - threshold) &&
+         ((std::min(p1->y, p2->y) <= point->y + threshold && std::max(p1->y, p2->y) >= point->y - threshold))) &&
+        ((std::min(q1->x, q2->x) <= point->x + threshold && std::max(q1->x, q2->x) >= point->x - threshold) &&
+         ((std::min(q1->y, q2->y) <= point->y + threshold && std::max(q1->y, q2->y) >= point->y - threshold)))) {
+        auto pS = std::sqrt((std::pow((point->x - p1->x), 2)) + (std::pow((point->y - p1->y), 2)));
+        auto qS = std::sqrt((std::pow((point->x - q1->x), 2)) + (std::pow((point->y - q1->y), 2)));
+        return {{{point->x, point->y, p1->hdg, p1->sOffset + pS}, {point->x, point->y, q1->hdg, q1->sOffset + qS}}};
     }
     return std::nullopt;
 }

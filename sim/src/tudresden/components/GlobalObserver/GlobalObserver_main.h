@@ -154,7 +154,7 @@ private:
 
     // agent perception related fields
     GlobalObserver::Converters::AgentPerceptionConverter apConverter;
-    std::vector<std::shared_ptr<DetailedAgentPerception>> agentPerceptions;
+    std::unordered_map<int, std::shared_ptr<DetailedAgentPerception>> agentPerceptions;
     bool agentPerceptionsCreated = false;
 };
 

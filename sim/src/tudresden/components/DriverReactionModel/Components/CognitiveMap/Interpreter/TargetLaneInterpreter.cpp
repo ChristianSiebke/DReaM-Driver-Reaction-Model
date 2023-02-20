@@ -11,7 +11,15 @@
 namespace Interpreter {
 
 void TargetLaneInterpreter::Update(WorldInterpretation *interpretation, const WorldRepresentation &representation) {
-    interpretation->targetLane = TargetLane(representation);
+    try {
+        interpretation->targetLane = TargetLane(representation);
+    }
+    catch (...) {
+        std::string message =
+            "File: " + static_cast<std::string>(__FILE__) + " Line: " + std::to_string(__LINE__) + " Update targetLaneInterpreter failed";
+        Log(message, error);
+        throw std::logic_error(message);
+    }
 }
 
 std::optional<const MentalInfrastructure::Lane *> TargetLaneInterpreter::TargetLane(const WorldRepresentation &representation) {

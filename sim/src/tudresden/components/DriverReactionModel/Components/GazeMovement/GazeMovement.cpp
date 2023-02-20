@@ -76,30 +76,33 @@ void GazeMovement::DetermineGazeState() {
 
 void GazeMovement::UpdateRoadSegment() {
     if (worldInterpretation.crossingInfo.phase >= CrossingPhase::Approach) {
-        auto NextJunction = worldRepresentation.egoAgent->NextJunction();
-        if (NextJunction != nullptr) {
-            if (NextJunction->GetIncomingRoads().size() == 4) {
+        auto nextJunction = worldRepresentation.egoAgent->NextJunction();
+        if (nextJunction != nullptr) {
+            if (nextJunction->GetIncomingRoads().size() == 4) {
                 if (currentSegmentType != SegmentType::XJunction) {
                     roadSegment = std::make_unique<XJunction>(worldRepresentation, GetStochastic(), GetBehaviourData());
                     currentSegmentType = SegmentType::XJunction;
                 }
             }
-            else if (NextJunction->GetIncomingRoads().size() == 3) {
-                NextDirectionLanes nextLanes;
-                // assumption movingInLaneDirection = true for now
-                if (auto nextLanesPtr = InfrastructurePerception::NextLanes(true, worldRepresentation.egoAgent->GetLanePosition().lane)) {
-                    if (nextLanesPtr.has_value()) {
-                        nextLanes = nextLanesPtr.value();
-                    }
+            else if (nextJunction->GetIncomingRoads().size() == 3) {
+                auto nextLanes = InfrastructurePerception::NextLanes(worldRepresentation.egoAgent->IsMovingInLaneDirection(),
+                                                                     worldRepresentation.egoAgent->GetLanePosition().lane);
+                if (nextLanes == std::nullopt) {
+                    std::string message = __FILE__ " Line: " + std::to_string(__LINE__) + "unknown successor lanes";
+                    throw std::runtime_error(message);
                 }
+
+
+
+
                 TJunctionLayout layout;
-                if (nextLanes.leftLanes.size() > 0 && nextLanes.straightLanes.size() > 0 && nextLanes.rightLanes.size() == 0) {
+                if (nextLanes->leftLanes.size() > 0 && nextLanes->straightLanes.size() > 0 && nextLanes->rightLanes.size() == 0) {
                     layout = TJunctionLayout::LeftStraight;
                 }
-                else if (nextLanes.leftLanes.size() > 0 && nextLanes.straightLanes.size() == 0 && nextLanes.rightLanes.size() > 0) {
+                else if (nextLanes->leftLanes.size() > 0 && nextLanes->straightLanes.size() == 0 && nextLanes->rightLanes.size() > 0) {
                     layout = TJunctionLayout::LeftRight;
                 }
-                else if (nextLanes.leftLanes.size() == 0 && nextLanes.straightLanes.size() > 0 && nextLanes.rightLanes.size() > 0) {
+                else if (nextLanes->leftLanes.size() == 0 && nextLanes->straightLanes.size() > 0 && nextLanes->rightLanes.size() > 0) {
                     layout = TJunctionLayout::StraightRight;
                 }
                 else {
@@ -111,6 +114,11 @@ void GazeMovement::UpdateRoadSegment() {
                     roadSegment = std::make_unique<TJunction>(worldRepresentation, GetStochastic(), GetBehaviourData(), layout);
                     currentSegmentType = SegmentType::TJunction;
                 }
+            }
+            else if (nextJunction->GetIncomingRoads().size() == 2) {
+                // connection of two roads
+                roadSegment = std::make_unique<StandardRoad>(worldRepresentation, GetStochastic(), GetBehaviourData());
+                currentSegmentType = SegmentType::StandardRoad;
             }
             else {
                 std::string message = __FILE__ " Line: " + std::to_string(__LINE__) + "unknown node segment";

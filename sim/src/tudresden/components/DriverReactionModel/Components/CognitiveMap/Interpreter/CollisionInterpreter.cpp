@@ -29,8 +29,17 @@ const int CIRCLE_POLYGON_PRECISION = 8;
 const bool DEBUG_OUT = true;
 
 void CollisionInterpreter::Update(WorldInterpretation *interpretation, const WorldRepresentation &representation) {
-    DetermineCollisionPoints(interpretation, representation);
-};
+    try {
+        DetermineCollisionPoints(interpretation, representation);
+    }
+    catch (...) {
+        std::string message =
+            "File: " + static_cast<std::string>(__FILE__) + " Line: " + std::to_string(__LINE__) + " Update collision points failed";
+        Log(message, error);
+        throw std::logic_error(message);
+
+    }
+}
 
 void CollisionInterpreter::DetermineCollisionPoints(WorldInterpretation *interpretation, const WorldRepresentation &representation) {
     try {
@@ -73,10 +82,10 @@ std::optional<CollisionPoint> CollisionInterpreter::CalculationCollisionPoint(co
         // no agent move --> no crash
         return std::nullopt;
     }
-    double endTime = GetBehaviourData().adBehaviour.collisionImminentMargin;
+    double maxTime = GetBehaviourData().adBehaviour.collisionImminentMargin;
     unsigned int numberThreads = 8;
-    for (double startTime = 0; startTime < endTime; startTime += endTime / numberThreads) {
-        double endTime = startTime + endTime / numberThreads;
+    for (double startTime = 0; startTime < maxTime; startTime += maxTime / numberThreads) {
+        double endTime = startTime + maxTime / numberThreads;
         futures.push_back(std::async(std::launch::async, &CollisionInterpreter::PerformCollisionPointCalculation, this, startTime, endTime,
                                      representation, observedAgent));
     }

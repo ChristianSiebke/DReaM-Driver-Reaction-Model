@@ -8,10 +8,10 @@
  * for further information please visit:  https://www.driver-model.de
  *****************************************************************************/
 #pragma once
+#include "Common/BehaviourData.h"
+#include "Common/Definitions.h"
 #include "Common/Helper.h"
 #include "core/opSimulation/framework/sampler.h"
-#include "Common/Definitions.h"
-#include "Common/BehaviourData.h"
 
 using AOIProbabilities = std::vector<std::pair<int, double>>;
 
@@ -54,7 +54,7 @@ class RoadSegmentInterface {
     virtual Common::Vector2d CalculateForesightVector(double foresightRange);
 
     double ScanUFOVAngle(ScanAOI aoi);
-    double CalculateGlobalViewingAngle(Common::Vector2d viewVector);
+    double CalculateGlobalViewingAngle(Common::Vector2d viewVector) const;
 
     // have to be set by subclasses!
     double probabilityFixateLeadCar = 0;
@@ -72,14 +72,22 @@ namespace Node {
 
 class Junction : public RoadSegmentInterface {
 public:
-    using RoadSegmentInterface::RoadSegmentInterface;
+    Junction(const WorldRepresentation &worldRepresentation, StochasticsInterface *stochastics, const BehaviourData &behaviourData);
     virtual ~Junction() = default;
 
 protected:
-    std::vector<const MentalInfrastructure::Lane *> CornerSidewalkLanesOfJunction(const MentalInfrastructure::Junction *currentJunction);
+    virtual std::vector<Common::Vector2d> CalculateControlFixPointsOnRoads() const;
+    virtual std::vector<Common::Vector2d> CalculateControlFixPointsOnJunction() const = 0;
+    std::vector<const MentalInfrastructure::Lane *> SidewalkLanesOfJunction(const MentalInfrastructure::Junction *currentJunction) const;
+    std::vector<const MentalInfrastructure::Lane *>
+    CornerSidewalkLanesOfJunction(std::vector<const MentalInfrastructure::Lane *> sidewalkLanes) const;
 
-    const MentalInfrastructure::Lane *OncomingStraightConnectionLane(const MentalInfrastructure::Junction *currentJunction);
-    void SortControlFixPoints(std::vector<Common::Vector2d> &controlFixPointsOnXJunction);
+    const MentalInfrastructure::Lane *OncomingStraightConnectionLane(const MentalInfrastructure::Junction *currentJunction) const;
+    void SortControlFixPoints(std::vector<Common::Vector2d> &controlFixPointsOnXJunction) const;
+
+    double viewingDepthIntoRoad; // how far the driver see along the road.
+    std::vector<Common::Vector2d> controlFixPointsOnJunction;
+    std::vector<Common::Vector2d> controlFixPointsOnRoads;
 };
 } // namespace Node
 

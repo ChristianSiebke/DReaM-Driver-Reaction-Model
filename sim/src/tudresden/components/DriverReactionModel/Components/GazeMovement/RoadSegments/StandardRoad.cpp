@@ -28,17 +28,6 @@ AOIProbabilities StandardRoad::LookUpScanAOIProbability(CrossingPhase phase) {
             double value = Common::ValueInBounds(de->min, dist, de->max);
             aoiProbs.push_back(std::make_pair(static_cast<int>(prob.first), value));
         }
-//        // gaze fixation for straight road or far away from intersection
-//        aoiProbs.insert(std::make_pair(static_cast<int>(ScanAOI::Dashboard),
-//                                       stochastics->GetNormalDistributed(0.0128205128205128, 0.0653720450460614)));
-//        aoiProbs.insert(
-//            std::make_pair(static_cast<int>(ScanAOI::Straight), stochastics->GetNormalDistributed(0.581440781440782, 0.308863771383145)));
-//        aoiProbs.insert(
-//            std::make_pair(static_cast<int>(ScanAOI::Left), stochastics->GetNormalDistributed(0.163827838827839, 0.198461222393695)));
-//        aoiProbs.insert(
-//            std::make_pair(static_cast<int>(ScanAOI::Right), stochastics->GetNormalDistributed(0.187881562881563, 0.220783615269782)));
-//        aoiProbs.insert(
-//            std::make_pair(static_cast<int>(ScanAOI::Other), stochastics->GetNormalDistributed(0.054029304029304, 0.114768364233879)));
     } else {
         std::string message =
             __FILE__ " Line: " + std::to_string(__LINE__) + "Gaze probabilities can not calculated invalide CrossingPhase!";

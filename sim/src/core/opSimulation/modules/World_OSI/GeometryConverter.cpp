@@ -68,49 +68,45 @@ void GeometryConverter::CalculateSection(OWL::Interfaces::WorldData& worldData,
                                          const RoadInterface* road,
                                          const RoadLaneSectionInterface *roadSection)
  {
-     double roadMarkStart = 0;
-     SampledGeometry sampledGeometries;
-     bool firstRoadMark{true};
+    //  double roadMarkStart = 0;
+    //  SampledGeometry sampledGeometries;
+    //  bool firstRoadMark{true};
+    //
+    //  while (roadMarkStart + roadSectionStart < roadSectionEnd)
+    //  {
+    //      double roadMarkEnd = std::numeric_limits<double>::max();
+    //      for (const auto& roadLane : roadSection->GetLanes())
+    //      {
+    //          for (const auto& roadMark : roadLane.second->GetRoadMarks())
+    //          {
+    //              double sOffset = roadMark->GetSOffset();
+    //              if (sOffset > roadMarkStart && sOffset < roadMarkEnd)
+    //              {
+    //                  roadMarkEnd = sOffset;
+    //              }
+    //          }
+    //      }
+    //      auto sampledGeometry = CalculateSectionBetweenRoadMarkChanges(
+    //          roadSectionStart, std::min(roadSectionStart + roadMarkEnd, roadSectionEnd), road, roadSection);
+    //      if (firstRoadMark)
+    //      {
+    //          sampledGeometries = sampledGeometry;
+    //          firstRoadMark = false;
+    //      }
+    //      else
+    //      {
+    //          sampledGeometries.Combine(sampledGeometry);
+    //      }
+    //
+    //      roadMarkStart = roadMarkEnd;
+    //  }
+    //
+    auto sampledGeometry = CalculateSectionBetweenRoadMarkChanges(roadSectionStart, roadSectionEnd, road, roadSection);
 
-     while (roadMarkStart + roadSectionStart < roadSectionEnd)
-     {
-         double roadMarkEnd = std::numeric_limits<double>::max();
-         for (const auto& roadLane : roadSection->GetLanes())
-         {
-             for (const auto& roadMark : roadLane.second->GetRoadMarks())
-             {
-                 double sOffset = roadMark->GetSOffset();
-                 if (sOffset > roadMarkStart && sOffset < roadMarkEnd)
-                 {
-                     roadMarkEnd = sOffset;
-                 }
-             }
-         }
+    JointsBuilder jointsBuilder{sampledGeometry};
+    jointsBuilder.CalculatePoints().CalculateHeadings().CalculateCurvatures();
 
-         auto sampledGeometry = CalculateSectionBetweenRoadMarkChanges(roadSectionStart + roadMarkStart,
-                                                                       std::min(roadSectionStart + roadMarkEnd, roadSectionEnd),
-                                                                       road,
-                                                                       roadSection);
-         if (firstRoadMark)
-         {
-             sampledGeometries = sampledGeometry;
-             firstRoadMark = false;
-         }
-         else
-         {
-             sampledGeometries.Combine(sampledGeometry);
-         }
-
-         roadMarkStart = roadMarkEnd;
-     }
-
-     JointsBuilder jointsBuilder{sampledGeometries};
-
-     jointsBuilder.CalculatePoints()
-                  .CalculateHeadings()
-                  .CalculateCurvatures();
-
-     AddPointsToWorld(worldData, jointsBuilder.GetJoints());
+    AddPointsToWorld(worldData, jointsBuilder.GetJoints());
  }
 
 SampledGeometry GeometryConverter::CalculateSectionBetweenRoadMarkChanges(double roadSectionStart,

@@ -21,8 +21,10 @@ void FollowingInterpreter::Update(WorldInterpretation* interpretation, const Wor
         }
     } catch (...) {
         std::string message =
-            "File: " + static_cast<std::string>(__FILE__) + " Line: " + std::to_string(__LINE__) + " Update right of way failed";
+            "File: " + static_cast<std::string>(__FILE__) + " Line: " + std::to_string(__LINE__) + " Update followingInterpreter failed";
         Log(message, error);
+        throw std::logic_error(message);
+
     }
 };
 
@@ -32,8 +34,6 @@ std::optional<double> FollowingInterpreter::CalculateFollowingDistance(const Age
     double egoS = representation.egoAgent->GetLanePosition().sCoordinate;
     auto observedLane = agent.GetLanePosition().lane;
     double observedS = agent.GetLanePosition().sCoordinate;
-
-    std::cout << " !!!!!!!!!!!!!!!sCoordinate: " << egoS << std::endl;
 
     double oAgentDistanceBackToReference = agent.GetLength() - agent.GetDistanceReferencePointToLeadingEdge();
     double egoAgentDistanceReferenceToFront = representation.egoAgent->GetDistanceReferencePointToLeadingEdge();
@@ -62,7 +62,8 @@ std::optional<double> FollowingInterpreter::CalculateFollowingDistance(const Age
                distanceReferenceToEdges;
     }
 
-    // agents have conflict area and same successor --> merging manoeuvre
+    //  agents have conflict area and same successor --> merging manoeuvre
+    //  agents have conflict area and same predecessor --> splitting manoeuvre
     auto conflictAreaOL = observedLane->GetConflictAreaWithLane(egoLane);
     auto conflictAreaEL = egoLane->GetConflictAreaWithLane(observedLane);
     egoS = conflictAreaEL ? egoS : -(egoLane->GetLength() - egoS);
@@ -72,15 +73,19 @@ std::optional<double> FollowingInterpreter::CalculateFollowingDistance(const Age
         conflictAreaEL = conflictAreaEL ? conflictAreaEL : nextEgoLane->GetConflictAreaWithLane(observedLane);
 
     if (conflictAreaOL &&
-        (Common::anyElementOfCollectionIsElementOfOtherCollection(egoLane->GetSuccessors(), observedLane->GetSuccessors()) ||
-         Common::anyElementOfCollectionIsElementOfOtherCollection(representation.egoAgent->GetNextLane()->GetSuccessors(),
-                                                                  observedLane->GetSuccessors()))) {
+        ((Common::anyElementOfCollectionIsElementOfOtherCollection(egoLane->GetSuccessors(), observedLane->GetSuccessors()) ||
+          Common::anyElementOfCollectionIsElementOfOtherCollection(representation.egoAgent->GetNextLane()->GetSuccessors(),
+                                                                   observedLane->GetSuccessors())) ||
+         Common::anyElementOfCollectionIsElementOfOtherCollection(egoLane->GetPredecessors(), observedLane->GetPredecessors()))) {
         auto distanceOAgentToEndCA = conflictAreaOL->end.sOffset - observedS;
+        if (distanceOAgentToEndCA + oAgentDistanceBackToReference <= 0) {
+            // observed agent leaves confict area
+            return std::nullopt;
+        }
         auto distanceEgoToEndCA = conflictAreaEL->end.sOffset - egoS;
         double followingDistance = distanceEgoToEndCA - distanceOAgentToEndCA - distanceReferenceToEdges;
         return followingDistance > 0 ? std::optional<double>(followingDistance) : std::nullopt;
     }
-
     return std::nullopt;
 }
 } // namespace Interpreter

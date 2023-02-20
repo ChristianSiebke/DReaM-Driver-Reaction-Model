@@ -19,7 +19,7 @@ class AgentPerceptionConverter {
 public:
     AgentPerceptionConverter(WorldInterface *world, StochasticsInterface *stochastics,
                              std::shared_ptr<InfrastructurePerception> infrastructurePerception,
-                             std::vector<std::shared_ptr<DetailedAgentPerception>> &agentPerceptions) :
+                             std::unordered_map<int, std::shared_ptr<DetailedAgentPerception>> &agentPerceptions) :
         world(world), stochastics(stochastics), infrastructurePerception(infrastructurePerception), agentPerceptions(agentPerceptions) {
     }
 
@@ -81,8 +81,7 @@ private:
     StochasticsInterface *stochastics;
     std::shared_ptr<InfrastructurePerception> infrastructurePerception;
 
-    std::vector<std::shared_ptr<DetailedAgentPerception>> &agentPerceptions;
-    std::map<int, std::shared_ptr<DetailedAgentPerception>> idMapping;
+    std::unordered_map<int, std::shared_ptr<DetailedAgentPerception>> &agentPerceptions;
     std::map<int, DReaMRoute::Waypoints> routeMapping;
 };
 } // namespace GlobalObserver::Converters

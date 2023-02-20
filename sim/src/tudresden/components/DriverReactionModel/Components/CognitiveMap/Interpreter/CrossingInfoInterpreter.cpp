@@ -12,10 +12,23 @@
 namespace Interpreter {
 
 void CrossingInfoInterpreter::Update(WorldInterpretation* interpretation, const WorldRepresentation& representation) {
-    Localize(representation);
-    UpdateStoppingPoints(representation);
-    interpretation->crossingInfo = crossingInfo;
-    interpretation->targetVelocity = targetVelocityCalculation.Update(representation, crossingInfo.phase);
+    try {
+        Localize(representation);
+        UpdateStoppingPoints(representation);
+        interpretation->crossingInfo = crossingInfo;
+        interpretation->targetVelocity = targetVelocityCalculation.Update(representation, crossingInfo.phase);
+    }
+    catch (std::logic_error e) {
+        std::string message = e.what();
+        Log(message, error);
+        throw std::logic_error(message);
+    }
+    catch (...) {
+        std::string message =
+            "File: " + static_cast<std::string>(__FILE__) + " Line: " + std::to_string(__LINE__) + " Update CrossingInfo failed";
+        Log(message, error);
+        throw std::logic_error(message);
+    };
 }
 
 void CrossingInfoInterpreter::UpdateStoppingPoints(const WorldRepresentation& representation) {
@@ -56,13 +69,17 @@ void CrossingInfoInterpreter::UpdateStoppingPoints(const WorldRepresentation& re
 void CrossingInfoInterpreter::Localize(const WorldRepresentation &representation) {
     DetermineCrossingType(representation);
     DetermineCrossingPhase(representation);
-    int i = 0;
 }
 
 void CrossingInfoInterpreter::DetermineCrossingType(const WorldRepresentation &representation) {
     // assigning Crossing Type  until entrance intersecion
-    if (representation.egoAgent->NextJunction()) {
-        if (representation.egoAgent->GetVehicleType() == DReaMDefinitions::AgentVehicleType::Car) {
+    auto nextJunction = representation.egoAgent->NextJunction();
+    auto road = representation.egoAgent->GetLanePosition().lane->GetRoad();
+
+    if ((nextJunction && nextJunction->GetIncomingRoads().size() > 2) ||
+        (road->IsOnJunction() && road->GetJunction()->GetIncomingRoads().size() > 2)) {
+        if (representation.egoAgent->GetVehicleType() == DReaMDefinitions::AgentVehicleType::Car ||
+            representation.egoAgent->GetVehicleType() == DReaMDefinitions::AgentVehicleType::Bicycle) {
             if (representation.egoAgent->GetIndicatorState() == IndicatorState::IndicatorState_Left) {
                 crossingInfo.type = CrossingType::Left;
             }
@@ -79,6 +96,9 @@ void CrossingInfoInterpreter::DetermineCrossingType(const WorldRepresentation &r
             crossingInfo.type = CrossingType::Straight;
         }
     }
+    else {
+        crossingInfo.type = CrossingType::NA;
+    }
 }
 
 void CrossingInfoInterpreter::DetermineCrossingPhase(const WorldRepresentation &representation) {
@@ -88,8 +108,12 @@ void CrossingInfoInterpreter::DetermineCrossingPhase(const WorldRepresentation &
     bool frontExceedCurrentLane = sPositionFront > road->GetLength();
     sPositionFront = frontExceedCurrentLane ? sPositionFront - road->GetLength() : sPositionFront;
     auto nextJunction = representation.egoAgent->NextJunction();
-
-    if ((nextJunction && representation.egoAgent->GetJunctionDistance().toNext - refToFront < 75) && !frontExceedCurrentLane) {
+    if ((nextJunction && nextJunction->GetIncomingRoads().size() == 2) ||
+        (road->IsOnJunction() && road->GetJunction()->GetIncomingRoads().size() == 2)) {
+        // connection of two roads
+        crossingInfo.phase = CrossingPhase::NONE;
+    }
+    else if ((nextJunction && representation.egoAgent->GetJunctionDistance().toNext - refToFront < 75) && !frontExceedCurrentLane) {
         if (representation.egoAgent->GetJunctionDistance().toNext - refToFront < 25) {
             crossingInfo.phase = CrossingPhase::Deceleration_TWO;
         }
@@ -116,7 +140,7 @@ void CrossingInfoInterpreter::DetermineCrossingPhase(const WorldRepresentation &
         }
         else {
             std::string message = __FILE__ " Line: " + std::to_string(__LINE__) + "can not determine StoppingPointType!";
-            throw std::runtime_error(message);
+            throw std::logic_error(message);
         }
 
         if (representation.egoAgent->GetJunctionDistance().on + refToFront > exit.sOffset) {
@@ -139,12 +163,11 @@ void CrossingInfoInterpreter::DetermineCrossingPhase(const WorldRepresentation &
         }
         else {
             std::string message = __FILE__ " Line: " + std::to_string(__LINE__) + "can not determine CrossingPhase!";
-            throw std::runtime_error(message);
+            throw std::logic_error(message);
         }
     }
     else {
         crossingInfo.phase = CrossingPhase::NONE;
-        crossingInfo.type = CrossingType::NA;
     }
 }
 

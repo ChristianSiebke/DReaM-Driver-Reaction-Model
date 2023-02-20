@@ -89,7 +89,7 @@ Common::Vector2d RoadSegmentInterface::CalculateForesightVector(double foresight
     return headVector;
 }
 
-double RoadSegmentInterface::CalculateGlobalViewingAngle(Common::Vector2d viewVector) {
+double RoadSegmentInterface::CalculateGlobalViewingAngle(Common::Vector2d viewVector) const {
     Common::Vector2d forwardVectorVehicle{1, 0};
     forwardVectorVehicle.Rotate(worldRepresentation.egoAgent->GetYawAngle());
     // Determine whether the agent view to the left or right
@@ -180,26 +180,73 @@ AOIProbabilities RoadSegmentInterface::ScaleProbabilitiesToOneAndEliminateNegati
 
 namespace Node {
 
+Junction::Junction(const WorldRepresentation &worldRepresentation, StochasticsInterface *stochastics, const BehaviourData &behaviourData) :
+    RoadSegmentInterface(worldRepresentation, stochastics, behaviourData) {
+    probabilityFixateLeadCar = behaviourData.gmBehaviour.XInt_probabilityFixateLeadCar;
+    probabilityControlGlance = behaviourData.gmBehaviour.XInt_probabilityControlGlance;
+    viewingDepthIntoRoad = behaviourData.gmBehaviour.XInt_viewingDepthIntoRoad;
+    controlFixPointsOnRoads = CalculateControlFixPointsOnRoads();
+    controlFixationPoints.insert(controlFixationPoints.begin(), controlFixPointsOnJunction.begin(), controlFixPointsOnJunction.end());
+    controlFixationPoints.insert(controlFixationPoints.end(), controlFixPointsOnRoads.begin(), controlFixPointsOnRoads.end());
+}
+
+std::vector<Common::Vector2d> Junction::CalculateControlFixPointsOnRoads() const {
+    std::vector<Common::Vector2d> controlFixPointsOnRoads;
+    auto NextJunction = worldRepresentation.egoAgent->NextJunction();
+    const auto &IncomingJunctionRoadIds = NextJunction->GetIncomingRoads();
+    for (auto incomingRoad : IncomingJunctionRoadIds) {
+        if (worldRepresentation.egoAgent->GetLanePosition().lane->GetRoad() == incomingRoad) {
+            continue;
+        }
+        auto conRoads = NextJunction->GetConnectionRoads(incomingRoad);
+        auto conLane = conRoads.front()->GetLanes().front();
+        Common::Vector2d startConLane{conLane->GetFirstPoint()->x, conLane->GetFirstPoint()->y};
+        auto viewVector = Common::CreatPointInDistance(viewingDepthIntoRoad, startConLane, conLane->GetFirstPoint()->hdg + M_PI);
+        controlFixPointsOnRoads.push_back(viewVector);
+    }
+    SortControlFixPoints(controlFixPointsOnRoads);
+    return controlFixPointsOnRoads;
+
+    // sketch of sorted junction fixation points
+    //
+    //                               x fixation points in roads
+    //   ---------------------
+    //                    x0         A   Agent
+    //   -----         -------
+    //    x2
+    //   -----         -----
+    //        |   |A  |
+    //        |   |   |
+}
+
 std::vector<const MentalInfrastructure::Lane *>
-Junction::CornerSidewalkLanesOfJunction(const MentalInfrastructure::Junction *currentJunction) {
+Junction::SidewalkLanesOfJunction(const MentalInfrastructure::Junction *currentJunction) const {
     auto junctionRoads = currentJunction->GetAllRoadsOnJunction();
 
-    std::vector<const MentalInfrastructure::Lane*> cornerSidewalkLanes;
+    std::vector<const MentalInfrastructure::Lane *> sidewalkLanes;
     for (const auto &junctionRoad : junctionRoads) {
         for (auto lane : junctionRoad->GetLanes()) {
             if (lane->GetType() == MentalInfrastructure::LaneType::Sidewalk) {
-                double hdgFirstPoint = (lane->GetFirstPoint())->hdg;
-                double hdgLastPoint = (lane->GetLastPoint())->hdg;
-                if (std::fabs(hdgFirstPoint - hdgLastPoint) > 50 * M_PI / 180) {
-                    cornerSidewalkLanes.push_back(lane);
-                }
+                sidewalkLanes.push_back(lane);
             }
         }
     }
+    return sidewalkLanes;
+}
+
+std::vector<const MentalInfrastructure::Lane *>
+Junction::CornerSidewalkLanesOfJunction(std::vector<const MentalInfrastructure::Lane *> sidewalkLanes) const {
+    std::vector<const MentalInfrastructure::Lane *> cornerSidewalkLanes;
+    std::copy_if(sidewalkLanes.begin(), sidewalkLanes.end(), std::back_inserter(cornerSidewalkLanes),
+                 [](const MentalInfrastructure::Lane *lane) {
+                     double hdgFirstPoint = (lane->GetFirstPoint())->hdg;
+                     double hdgLastPoint = (lane->GetLastPoint())->hdg;
+                     return std::fabs(hdgFirstPoint - hdgLastPoint) > 50 * M_PI / 180;
+                 });
     return cornerSidewalkLanes;
 }
 
-const MentalInfrastructure::Lane *Junction::OncomingStraightConnectionLane(const MentalInfrastructure::Junction *currentJunction) {
+const MentalInfrastructure::Lane *Junction::OncomingStraightConnectionLane(const MentalInfrastructure::Junction *currentJunction) const {
     // first straight oncoming junction connection lane
     auto conRoadsToCurrentRoad =
         currentJunction->PredecessorConnectionRoads(worldRepresentation.egoAgent->GetLanePosition().lane->GetRoad());
@@ -224,7 +271,7 @@ const MentalInfrastructure::Lane *Junction::OncomingStraightConnectionLane(const
     return nullptr;
 }
 
-void Junction::SortControlFixPoints(std::vector<Common::Vector2d> &controlFixPointsOnXJunction) {
+void Junction::SortControlFixPoints(std::vector<Common::Vector2d> &controlFixPointsOnXJunction) const {
     std::vector<Common::Vector2d> unsortedViewVec;
     std::transform(controlFixPointsOnXJunction.begin(), controlFixPointsOnXJunction.end(), std::back_inserter(unsortedViewVec),
                    [this](const Common::Vector2d element) {

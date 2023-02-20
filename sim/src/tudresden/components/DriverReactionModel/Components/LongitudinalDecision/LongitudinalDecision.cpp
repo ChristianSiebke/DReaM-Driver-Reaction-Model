@@ -105,7 +105,10 @@ double LongitudinalDecision::DetermineAccelerationWish() {
             //-----
             break;
         case ActionState::Following:
-
+            if ((agent->conflictSituation && agent->conflictSituation->oAgentDistance.vehicleFrontToCAStart > 0) &&
+                (agent->agent->GetVelocity() == 0)) {
+                break;
+            }
             accelerations.push_back(anticipation.MaximumAccelerationWish(
                 worldInterpretation.targetVelocity, worldRepresentation.egoAgent->GetVelocity() - agent->agent->GetVelocity(),
                 *agent->followingDistanceToLeadingVehicle));

@@ -8,8 +8,7 @@ void AgentPerceptionConverter::Populate() {
     agentPerceptions.clear();
     for (const auto &[id, agent] : world->GetAgents()) {
         auto converted = ConvertAgent(agent);
-        agentPerceptions.push_back(converted);
-        idMapping.insert_or_assign(id, converted);
+        agentPerceptions.insert({converted->id, converted});
     }
 }
 
