@@ -482,9 +482,9 @@ StoppingPointCalculator::DetermineStoppingPoints(const MentalInfrastructure::Jun
         stoppingPoints.insert(std::make_pair(type, CalculateStoppingPoint(straightSuccLane->GetRoad(), straightSuccLane,
                                                                           crossLineMap.at(ApproachDirection::Right).innerLeftLine, type)));
     }
-    else if (rowData.calcVehicleCross && rightSuccLane && crossLineMap.at(ApproachDirection::Right).appDir != ApproachDirection::Invalid) {
+    else if (rowData.calcVehicleCross && leftSuccLane && crossLineMap.at(ApproachDirection::Right).appDir != ApproachDirection::Invalid) {
         StoppingPointType type = StoppingPointType::Vehicle_Crossroad;
-        stoppingPoints.insert(std::make_pair(type, CalculateStoppingPoint(rightSuccLane->GetRoad(), rightSuccLane,
+        stoppingPoints.insert(std::make_pair(type, CalculateStoppingPoint(leftSuccLane->GetRoad(), leftSuccLane,
                                                                           crossLineMap.at(ApproachDirection::Right).innerLeftLine, type)));
     }
     else {

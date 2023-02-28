@@ -136,6 +136,10 @@ double GetDistanceStoppingPoint(const AgentRepresentation *ego, const AgentInter
         if (IsVehicle(ego) && IsVehicle(observedAgent->agent)) {
             if (ego->GetIndicatorState() == IndicatorState::IndicatorState_Left) {
                 sp = worldInterpretation.crossingInfo.egoStoppingPoints.at(StoppingPointType::Vehicle_Left);
+                if (sp.type == StoppingPointType::NONE) {
+                    // for T-Intersection
+                    sp = worldInterpretation.crossingInfo.egoStoppingPoints.at(StoppingPointType::Vehicle_Crossroad);
+                }
             }
             else if (ego->GetIndicatorState() == IndicatorState::IndicatorState_Right) {
                 sp = worldInterpretation.crossingInfo.egoStoppingPoints.at(StoppingPointType::Pedestrian_Right);
@@ -160,6 +164,9 @@ double GetDistanceStoppingPoint(const AgentRepresentation *ego, const AgentInter
     else if (worldInterpretation.crossingInfo.phase == CrossingPhase::Crossing_Left_ONE) {
         if (IsVehicle(ego) && IsVehicle(observedAgent->agent)) {
             sp = worldInterpretation.crossingInfo.egoStoppingPoints.at(StoppingPointType::Vehicle_Left);
+            if (sp.type == StoppingPointType::NONE) {
+                sp = worldInterpretation.crossingInfo.egoStoppingPoints.at(StoppingPointType::Vehicle_Crossroad);
+            }
         }
         else if (IsVehicle(ego) && (observedAgent->agent->GetVehicleType() == DReaMDefinitions::AgentVehicleType::Pedestrian &&
                                     observedAgent->rightOfWay.observed)) {

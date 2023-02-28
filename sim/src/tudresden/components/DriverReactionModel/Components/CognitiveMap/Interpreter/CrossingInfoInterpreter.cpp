@@ -16,6 +16,7 @@ void CrossingInfoInterpreter::Update(WorldInterpretation* interpretation, const 
         Localize(representation);
         UpdateStoppingPoints(representation);
         interpretation->crossingInfo = crossingInfo;
+
         interpretation->targetVelocity = targetVelocityCalculation.Update(representation, crossingInfo.phase);
     }
     catch (std::logic_error e) {
@@ -37,14 +38,10 @@ void CrossingInfoInterpreter::UpdateStoppingPoints(const WorldRepresentation& re
     auto egoRoad = egoLane->GetRoad();
 
     // setting stopping points
-    if (crossingInfo.phase != CrossingPhase::NONE && crossingInfo.egoStoppingPoints.empty()) {
+    if (egoJunction && crossingInfo.phase <= CrossingPhase::Deceleration_TWO) {
         crossingInfo.egoStoppingPoints =
             representation.infrastructure->GetStoppingPoints(egoJunction->GetOpenDriveId(), egoLane->GetOwlId());
         crossingInfo.junctionOdId = egoJunction->GetOpenDriveId();
-    }
-    else if (crossingInfo.phase == CrossingPhase::NONE && !crossingInfo.egoStoppingPoints.empty()) {
-        crossingInfo.egoStoppingPoints.clear();
-        crossingInfo.otherStoppingpoints.clear();
     }
 
     SetDistanceSP(representation.egoAgent, crossingInfo.egoStoppingPoints);
@@ -127,6 +124,10 @@ void CrossingInfoInterpreter::DetermineCrossingPhase(const WorldRepresentation &
     else if (road->IsOnJunction() || (nextJunction && frontExceedCurrentLane)) {
         StoppingPoint entry = crossingInfo.egoStoppingPoints.at(StoppingPointType::Pedestrian_Crossing_ONE);
         StoppingPoint vehicle_oncoming_left = crossingInfo.egoStoppingPoints.at(StoppingPointType::Vehicle_Left);
+        if (vehicle_oncoming_left.type == StoppingPointType::NONE && crossingInfo.type == CrossingType::Left) {
+            // for T-intersections
+            vehicle_oncoming_left = crossingInfo.egoStoppingPoints.at(StoppingPointType::Vehicle_Crossroad);
+        }
         StoppingPoint exit;
 
         if (crossingInfo.type == CrossingType::Left) {

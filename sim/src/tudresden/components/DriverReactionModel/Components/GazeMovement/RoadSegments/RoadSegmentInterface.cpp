@@ -120,13 +120,15 @@ GazeState RoadSegmentInterface::AgentObserveGlance(int agentId) {
 
 GazeState RoadSegmentInterface::ScanGlance(CrossingPhase phase) {
     AOIProbabilities aoiProbs = LookUpScanAOIProbability(phase);
+
     ScanAOI aoi;
-    try {
-        aoi = static_cast<ScanAOI>(Sampler::Sample(aoiProbs, stochastics));
-    } catch (std::logic_error e) {
-        // If all AOIs have a probability of 0%
+    if (std::all_of(aoiProbs.begin(), aoiProbs.end(), [](auto element) { return element.second == 0; })) {
         aoi = ScanAOI::Other;
     }
+    else {
+        aoi = static_cast<ScanAOI>(Sampler::Sample(aoiProbs, stochastics));
+    }
+
     GazeState gazeState;
 
     if (behaviourData.gmBehaviour.scanAOIs.driverAOIs.find(aoi) != behaviourData.gmBehaviour.scanAOIs.driverAOIs.end()) {
@@ -173,7 +175,9 @@ AOIProbabilities RoadSegmentInterface::ScaleProbabilitiesToOneAndEliminateNegati
         }
         sum += element.second;
     }
-
+    if (sum == 0) {
+        return aoiProbs;
+    }
     std::for_each(aoiProbs.begin(), aoiProbs.end(), [sum](std::pair<int, double> &element) { element.second = element.second / sum; });
     return aoiProbs;
 }
