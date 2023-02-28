@@ -50,7 +50,7 @@ void CrossingInfoInterpreter::UpdateStoppingPoints(const WorldRepresentation& re
         auto junction = agent->NextJunction();
         auto lane = agent->GetLanePosition().lane;
 
-        if (junction && crossingInfo.phase != CrossingPhase::NONE) {
+        if (junction) {
             if (crossingInfo.otherStoppingpoints.find(agent->GetID()) == crossingInfo.otherStoppingpoints.end()) {
                 auto &stoppingpoints = representation.infrastructure->GetStoppingPoints(junction->GetOpenDriveId(), lane->GetOwlId());
                 crossingInfo.otherStoppingpoints.insert(std::make_pair(agent->GetID(), stoppingpoints));

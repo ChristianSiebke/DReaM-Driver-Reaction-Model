@@ -51,8 +51,8 @@ struct LanePosition {
  *
  */
 struct JunctionDistance {
-    double on = std::numeric_limits<double>::min();
-    double toNext = std::numeric_limits<double>::min();
+    double on = -1;
+    double toNext = -1;
 };
 
 /**

@@ -40,16 +40,13 @@ double RoadSegmentInterface::ScanUFOVAngle(ScanAOI aoi) {
     bool mirrorGaze = false;
     double ufovAngle;
     if (behaviourData.gmBehaviour.scanAOIs.driverAOIs.find(aoi) != behaviourData.gmBehaviour.scanAOIs.driverAOIs.end()) {
-        std::cout << "driver aoi found" << std::endl;
         ufovAngle = behaviourData.gmBehaviour.scanAOIs.driverAOIs.at(aoi).direction * (M_PI / 180);
     }
     else if (behaviourData.gmBehaviour.scanAOIs.mirrorAOIs.find(aoi) != behaviourData.gmBehaviour.scanAOIs.mirrorAOIs.end()) {
-        std::cout << "mirror aoi found" << std::endl;
         ufovAngle = behaviourData.gmBehaviour.scanAOIs.mirrorAOIs.at(aoi).direction * (M_PI / 180);
         mirrorGaze = true;
     }
     else {
-        std::cout << "aoi not found" << std::endl;
         ufovAngle = 0;
     }
 

@@ -32,7 +32,9 @@
 
 #include "osi3/osi_groundtruth.pb.h"
 #include "WorldObjectAdapter.h"
-
+typedef bg::model::point<double, 2, bg::cs::cartesian> point_type;
+namespace trans = boost::geometry::strategy::transform;
+namespace bg = boost::geometry;
 namespace OWL {
 
 template <typename OsiObject>
@@ -1196,15 +1198,28 @@ double MovingObject::GetAbsVelocityDouble() const
 
     double velocityAngle = std::atan2(velocity.vy, velocity.vx);
 
-    if (std::abs(velocity.vx) == 0.0 && std::abs(velocity.vy) == 0.0)
-    {
+    if (std::abs(velocity.vx) == 0.0 && std::abs(velocity.vy) == 0.0) {
         velocityAngle = 0.0;
     }
 
-    double angleBetween = velocityAngle - orientation.yaw;
+    double xPos = 1;
+    double yPos = 0;
+    point_type p(xPos, yPos);
+    point_type pV;
+    point_type pYaw;
 
-    if (std::abs(angleBetween) > M_PI_2 && std::abs(angleBetween) < 3 * M_PI_2)
-    {
+    // boost rotates in mathematically negative direction -->  (- angle)!
+    trans::rotate_transformer<bg::radian, double, 2, 2> rotateV(-velocityAngle);
+    bg::transform(p, pV, rotateV);
+    trans::rotate_transformer<bg::radian, double, 2, 2> rotateYaw(-orientation.yaw);
+    bg::transform(p, pYaw, rotateYaw);
+
+    Common::Vector2d vectorV(bg::get<0>(pV), bg::get<1>(pV));
+    Common::Vector2d vectorYaw(bg::get<0>(pYaw), bg::get<1>(pYaw));
+
+    auto angleBetween = vectorV.AngleBetween(vectorYaw);
+
+    if ((std::abs(angleBetween) - M_PI_2) > 0) {
         sign = -1.0;
     }
 
@@ -1253,15 +1268,28 @@ double MovingObject::GetAbsAccelerationDouble() const
 
     double accAngle = std::atan2(acceleration.ay, acceleration.ax);
 
-    if (std::abs(acceleration.ax) == 0.0 && std::abs(acceleration.ay) == 0.0)
-    {
+    if (std::abs(acceleration.ax) == 0.0 && std::abs(acceleration.ay) == 0.0) {
         accAngle = 0.0;
     }
 
-    double angleBetween = accAngle - orientation.yaw;
+    double xPos = 1;
+    double yPos = 0;
+    point_type p(xPos, yPos);
+    point_type pA;
+    point_type pYaw;
 
-    if ((std::abs(angleBetween) - M_PI_2) > 0)
-    {
+    // boost rotates in mathematically negative direction -->  (- angle)!
+    trans::rotate_transformer<bg::radian, double, 2, 2> rotateV(-accAngle);
+    bg::transform(p, pA, rotateV);
+    trans::rotate_transformer<bg::radian, double, 2, 2> rotateYaw(-orientation.yaw);
+    bg::transform(p, pYaw, rotateYaw);
+
+    Common::Vector2d vectorA(bg::get<0>(pA), bg::get<1>(pA));
+    Common::Vector2d vectorYaw(bg::get<0>(pYaw), bg::get<1>(pYaw));
+
+    auto angleBetween = vectorA.AngleBetween(vectorYaw);
+
+    if ((std::abs(angleBetween) - M_PI_2) > 0) {
         sign = -1.0;
     }
 
