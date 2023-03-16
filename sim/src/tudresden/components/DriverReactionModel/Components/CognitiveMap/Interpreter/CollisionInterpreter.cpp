@@ -18,7 +18,9 @@
 namespace Interpreter {
 
 // time step size for collision detection (s)
-const double TIME_STEP = 0.1;
+const double TIME_STEP = 0.2;
+// max extrapolation time (s)
+const double MAX_TIME = 5;
 // maximum amounts of lanes an agent will look into
 // only works with a maximum of 2 lanes!
 const int MAX_LANES_AHEAD = 2;
@@ -82,10 +84,9 @@ std::optional<CollisionPoint> CollisionInterpreter::CalculationCollisionPoint(co
         // no agent move --> no crash
         return std::nullopt;
     }
-    double maxTime = GetBehaviourData().adBehaviour.collisionImminentMargin;
     unsigned int numberThreads = 8;
-    for (double startTime = 0; startTime < maxTime; startTime += maxTime / numberThreads) {
-        double endTime = startTime + maxTime / numberThreads;
+    for (double startTime = 0; startTime < MAX_TIME; startTime += MAX_TIME / numberThreads) {
+        double endTime = startTime + MAX_TIME / numberThreads;
         futures.push_back(std::async(std::launch::async, &CollisionInterpreter::PerformCollisionPointCalculation, this, startTime, endTime,
                                      representation, observedAgent));
     }

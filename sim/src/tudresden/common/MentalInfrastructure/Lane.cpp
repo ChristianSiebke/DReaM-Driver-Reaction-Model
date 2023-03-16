@@ -172,9 +172,8 @@ LanePoint Lane::InterpolatePoint(double sLaneCoordinate) const
     return detectedPoint;
 }
 
-bool Lane::SLaneCoordinateOutOfLane(double sLaneCoordniate) const
-{
-    return sLaneCoordniate > GetLastPoint()->sOffset || sLaneCoordniate < GetFirstPoint()->sOffset;
+bool Lane::SLaneCoordinateOutOfLane(double sLaneCoordinate) const {
+    return GetLastPoint()->sOffset - sLaneCoordinate < -0.001 || -0.001 > sLaneCoordinate - GetFirstPoint()->sOffset;
 };
 
 std::optional<ConflictArea> Lane::GetConflictAreaWithLane(const Lane *lane) const

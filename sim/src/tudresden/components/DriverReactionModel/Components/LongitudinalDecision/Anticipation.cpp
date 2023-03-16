@@ -37,7 +37,7 @@ double Anticipation::IntersectionGap(const std::unique_ptr<AgentInterpretation> 
     std::cout << " t observed back to CA end: " << tObserved.vehicleBackToCAEnd << std::endl;
     //  check whether ego (if he has right of way) can pass
     if ((oAgent->GetAcceleration() == 0.0 && oAgent->GetVelocity() == 0.0) && observedAgent->rightOfWay.ego) {
-        if (observedAgent->collisionPoint || observedAgent->conflictSituation->oAgentDistance.vehicleFrontToCAStart <= 0) {
+        if (observedAgent->collisionPoint) {
             return CalculateDeceleration(conflictSituation->egoDistance.vehicleFrontToCAStart, tObserved.vehicleBackToCAEnd,
                                          observedAgent.get());
         }
@@ -276,6 +276,12 @@ double Anticipation::CalculatePhaseAcceleration() const {
     else if (CrossingPhase::Deceleration_TWO <= worldInterpretation.crossingInfo.phase &&
              worldInterpretation.crossingInfo.phase <= CrossingPhase::Exit) {
         distance = distanceRefPointToEndOfRoad;
+    }
+    else if (worldInterpretation.crossingInfo.type == CrossingType::Straight &&
+             worldRepresentation.egoAgent->GetIndicatorState() != IndicatorState::IndicatorState_Off) {
+        distance = worldRepresentation.egoAgent->GetLanePosition().lane->GetLength() -
+                   (worldRepresentation.egoAgent->GetLanePosition().sCoordinate + refToFront) +
+                   worldRepresentation.egoAgent->GetNextLane()->GetLength();
     }
     else {
         distance = std::numeric_limits<double>::infinity();

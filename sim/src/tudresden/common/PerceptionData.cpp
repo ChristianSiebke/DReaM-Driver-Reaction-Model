@@ -111,6 +111,9 @@ JunctionDistance GeneralAgentPerception::CalculateJunctionDistance(GeneralAgentP
 const MentalInfrastructure::Lane *InfrastructurePerception::NextLane(IndicatorState indicatorState, bool movingInLaneDirection,
                                                                      const MentalInfrastructure::Lane *currentLane) {
     try {
+        if (!currentLane) {
+            return nullptr;
+        }
         auto nextLanePointers = currentLane->GetSuccessors();
         if (!movingInLaneDirection) {
             nextLanePointers = currentLane->GetPredecessors();

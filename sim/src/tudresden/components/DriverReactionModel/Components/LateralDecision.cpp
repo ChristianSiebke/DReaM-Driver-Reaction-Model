@@ -85,8 +85,9 @@ bool LateralDecision::NewLaneIsFree() const {
     return true;
 }
 bool LateralDecision::TurningAtJunction() const {
-    return worldRepresentation.egoAgent->NextJunction() != nullptr &&
-           worldInterpretation.crossingInfo.phase == CrossingPhase::Deceleration_TWO;
+    return (worldRepresentation.egoAgent->NextJunction() != nullptr &&
+            worldInterpretation.crossingInfo.phase == CrossingPhase::Deceleration_TWO) ||
+           worldInterpretation.crossingInfo.phase == CrossingPhase::Crossing_Straight;
 }
 bool LateralDecision::AgentIsTurningOnJunction() const {
     return worldInterpretation.crossingInfo.phase >= CrossingPhase::Deceleration_TWO;
@@ -94,31 +95,46 @@ bool LateralDecision::AgentIsTurningOnJunction() const {
 
 IndicatorState LateralDecision::SetIndicatorAtJunction(const MentalInfrastructure::Lane *targetLane) const {
     try {
-        auto currentLane = worldRepresentation.egoAgent->GetLanePosition().lane;
-        auto currentLanePoints = currentLane->GetLanePoints();
-        auto secondLast = std::prev(currentLanePoints.end(), 2);
-        Common::Vector2d CurrentDirection((currentLane->GetLastPoint()->x) - (secondLast->x),
-                                          (currentLane->GetLastPoint()->y) - (secondLast)->y);
-        auto nextLanePoints = targetLane->GetLanePoints();
-        auto pointNL = std::prev((nextLanePoints).end(), 2);
-        Common::Vector2d NextLaneDirection(targetLane->GetLastPoint()->x - pointNL->x, targetLane->GetLastPoint()->y - pointNL->y);
+        auto lanesPtr = worldRepresentation.infrastructure->NextLanes(worldRepresentation.egoAgent->IsMovingInLaneDirection(),
+                                                                      worldRepresentation.egoAgent->GetLanePosition().lane);
+        if (lanesPtr) {
+            if (std::any_of(lanesPtr->leftLanes.begin(), lanesPtr->leftLanes.end(),
+                            [targetLane](auto element) { return element == targetLane; })) {
+                return IndicatorState::IndicatorState_Left;
+            }
+            else if (std::any_of(lanesPtr->rightLanes.begin(), lanesPtr->rightLanes.end(),
+                                 [targetLane](auto element) { return element == targetLane; })) {
+                return IndicatorState::IndicatorState_Right;
+            }
+            else if (std::any_of(lanesPtr->straightLanes.begin(), lanesPtr->straightLanes.end(),
+                                 [targetLane](auto element) { return element == targetLane; })) {
+                auto route = worldRepresentation.egoAgent->GetRoute();
+                auto laneIter = std::find_if(route.begin(), route.end(),
+                                             [targetLane](DReaMRoute::Waypoint element) { return element.lane == targetLane; });
+                std::advance(laneIter, 1);
 
-        auto angleDeg = AngleBetween2d(CurrentDirection, NextLaneDirection) * (180 / M_PI);
+                if (route.end() == laneIter) {
+                    return IndicatorState::IndicatorState_Off;
+                }
 
-        if (10 >= angleDeg || std::fabs(angleDeg - 180) < 10) {
-            return IndicatorState::IndicatorState_Off;
-        }
-        else if (10 < angleDeg && CurrentDirection.Cross(NextLaneDirection) > 0) {
-            return IndicatorState::IndicatorState_Left;
-        }
-        else if (10 < angleDeg && CurrentDirection.Cross(NextLaneDirection) < 0) {
-            return IndicatorState::IndicatorState_Right;
-        }
-        else {
-            const std::string msg =
-                static_cast<std::string>(__FILE__) + std::to_string(__LINE__) + " error during route calculation: cannot set CrossingType";
-            Log(msg, error);
-            throw std::runtime_error(msg);
+                lanesPtr =
+                    worldRepresentation.infrastructure->NextLanes(worldRepresentation.egoAgent->IsMovingInLaneDirection(), targetLane);
+                if (targetLane->GetLength() + (worldRepresentation.egoAgent->GetLanePosition().lane->GetLength() -
+                                               (worldRepresentation.egoAgent->GetLanePosition().sCoordinate +
+                                                worldRepresentation.egoAgent->GetDistanceReferencePointToLeadingEdge())) <=
+                    DecelerationTWODistance) {
+                    if (std::any_of(lanesPtr->leftLanes.begin(), lanesPtr->leftLanes.end(),
+                                    [laneIter](auto element) { return element == (*laneIter).lane; })) {
+                        return IndicatorState::IndicatorState_Left;
+                    }
+                    else if (std::any_of(lanesPtr->rightLanes.begin(), lanesPtr->rightLanes.end(),
+                                         [laneIter](auto element) { return element == (*laneIter).lane; })) {
+                        return IndicatorState::IndicatorState_Right;
+                    }
+                }
+
+                return IndicatorState::IndicatorState_Off;
+            }
         }
     }
     catch (std::runtime_error e) {

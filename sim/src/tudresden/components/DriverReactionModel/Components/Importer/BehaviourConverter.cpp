@@ -78,66 +78,125 @@ void BehaviourConverter::ConvertActionDecisionParameters(const StatisticsGroup& 
     }
 }
 
-void BehaviourConverter::ConvertActionDecisionStatistics(const StatisticsGroup& main) {
-    behaviourData->adBehaviour.velocityStatistics.insert({IndicatorState::IndicatorState_Off, {}});
-    behaviourData->adBehaviour.velocityStatistics.insert({IndicatorState::IndicatorState_Left, {}});
-    behaviourData->adBehaviour.velocityStatistics.insert({IndicatorState::IndicatorState_Right, {}});
-
-    for (auto& set : main.sets) {
-        if (set.first == "default") {
-            behaviourData->adBehaviour.maxEmergencyDeceleration =
-                *std::static_pointer_cast<DistributionEntry>(set.second.entries.at("default"));
-            continue;
-        }
+void BehaviourConverter::ConvertActionDecisionStatistics(const StatisticsGroup &main) {
+    std::map<IntersectionSpot, std::shared_ptr<DistributionEntry>> intersectionSpotMap;
+    TurningVelocitis indicatorMap;
+    std::map<RoadID, TurningVelocitis> approachRoadMap;
+    for (auto &group : main.groups) {
         IndicatorState ind;
-        if (set.first == "IndicatorOff") {
-            ind = IndicatorState::IndicatorState_Off;
-        } else if (set.first == "IndicatorLeft") {
-            ind = IndicatorState::IndicatorState_Left;
-        } else if (set.first == "IndicatorRight") {
-            ind = IndicatorState::IndicatorState_Right;
-        } else {
-            continue;
+        IntersectionSpot interEntry;
+        if (group.first == "IntersectionID") {
+            for (const auto &group2 : group.second.groups) {
+                if (group2.first == "default") {
+                    for (const auto &set : group2.second.sets) {
+                        if (set.first == "IndicatorOff") {
+                            ind = IndicatorState::IndicatorState_Off;
+                        }
+                        else if (set.first == "IndicatorLeft") {
+                            ind = IndicatorState::IndicatorState_Left;
+                        }
+                        else if (set.first == "IndicatorRight") {
+                            ind = IndicatorState::IndicatorState_Right;
+                        }
+                        for (const auto &entry : set.second.entries) {
+                            if (entry.first == "IntersectionEntry") {
+                                interEntry = IntersectionSpot::IntersectionEntry;
+                            }
+                            else if (entry.first == "IntersectionExit") {
+                                interEntry = IntersectionSpot::IntersectionExit;
+                            }
+                            intersectionSpotMap.insert({interEntry, std::static_pointer_cast<DistributionEntry>(entry.second)});
+                            if (std::static_pointer_cast<DistributionEntry>(entry.second)->mean < 0)
+                                throw std::logic_error(" action decision distribution mean velocity must be a positive value! ");
+                            if (std::static_pointer_cast<DistributionEntry>(entry.second)->max < 0)
+                                throw std::logic_error(" action decision distribution max velocity must be a positive value! ");
+                            if (std::static_pointer_cast<DistributionEntry>(entry.second)->min < 0)
+                                throw std::logic_error(" action decision distribution min velocity must be a positive value! ");
+                        }
+                        indicatorMap.insert({ind, intersectionSpotMap});
+                        intersectionSpotMap.clear();
+                    }
+                    approachRoadMap.insert({"default", indicatorMap});
+                    indicatorMap.clear();
+                    behaviourData->adBehaviour.velocityStatisticsIntersection.insert({"default", approachRoadMap});
+                    approachRoadMap.clear();
+                }
+                else {
+                    IntersectionID interID = group2.first;
+                    for (const auto &group3 : group2.second.groups) {
+                        for (const auto &group4 : group3.second.groups) {
+                            RoadID roadID = group4.first;
+                            for (const auto &set : group4.second.sets) {
+                                if (set.first == "IndicatorOff") {
+                                    ind = IndicatorState::IndicatorState_Off;
+                                }
+                                else if (set.first == "IndicatorLeft") {
+                                    ind = IndicatorState::IndicatorState_Left;
+                                }
+                                else if (set.first == "IndicatorRight") {
+                                    ind = IndicatorState::IndicatorState_Right;
+                                }
+                                for (const auto &entry : set.second.entries) {
+                                    if (entry.first == "IntersectionEntry") {
+                                        interEntry = IntersectionSpot::IntersectionEntry;
+                                    }
+                                    else if (entry.first == "IntersectionExit") {
+                                        interEntry = IntersectionSpot::IntersectionExit;
+                                    }
+                                    intersectionSpotMap.insert({interEntry, std::static_pointer_cast<DistributionEntry>(entry.second)});
+                                    if (std::static_pointer_cast<DistributionEntry>(entry.second)->mean < 0)
+                                        throw std::logic_error(" action decision distribution mean velocity must be a positive value! ");
+                                    if (std::static_pointer_cast<DistributionEntry>(entry.second)->max < 0)
+                                        throw std::logic_error(" action decision distribution max velocity must be a positive value! ");
+                                    if (std::static_pointer_cast<DistributionEntry>(entry.second)->min < 0)
+                                        throw std::logic_error(" action decision distribution min velocity must be a positive value! ");
+                                }
+                                indicatorMap.insert({ind, intersectionSpotMap});
+                                intersectionSpotMap.clear();
+                            }
+                            approachRoadMap.insert({roadID, indicatorMap});
+                            indicatorMap.clear();
+                        }
+                    }
+                    behaviourData->adBehaviour.velocityStatisticsIntersection.insert({interID, approachRoadMap});
+                    approachRoadMap.clear();
+                }
+            }
         }
-
-        for (auto& entry : set.second.entries) {
-            CrossingPhase cr;
-            if (entry.first == "Phase APP") {
-                cr = CrossingPhase::Approach;
-            } else if (entry.first == "Phase DEC1") {
-                cr = CrossingPhase::Deceleration_ONE;
-            } else if (entry.first == "Phase DEC2") {
-                cr = CrossingPhase::Deceleration_TWO;
-            } else if (entry.first == "Phase CR_S") {
-                cr = CrossingPhase::Crossing_Straight;
-            } else if (entry.first == "Phase CR_R") {
-                cr = CrossingPhase::Crossing_Right;
-            } else if (entry.first == "Phase CR_L1") {
-                cr = CrossingPhase::Crossing_Left_ONE;
-            } else if (entry.first == "Phase CR_L2") {
-                cr = CrossingPhase::Crossing_Left_TWO;
-            } else if (entry.first == "Phase EX") {
-                cr = CrossingPhase::Exit;
-            } else {
+        for (const auto &set : main.sets) {
+            if (set.first == "default") {
+                behaviourData->adBehaviour.defaultVelocity = *std::static_pointer_cast<DistributionEntry>(set.second.entries.at("default"));
+                if (behaviourData->adBehaviour.defaultVelocity.mean < 0)
+                    throw std::logic_error(" action decision distribution mean default velocity must be a positive value! ");
+                if (behaviourData->adBehaviour.defaultVelocity.max < 0)
+                    throw std::logic_error(" action decision distribution max default velocity must be a positive value! ");
+                if (behaviourData->adBehaviour.defaultVelocity.min < 0)
+                    throw std::logic_error(" action decision distribution min default velocity must be a positive value! ");
                 continue;
             }
-            behaviourData->adBehaviour.velocityStatistics.at(ind).insert(
-                std::make_pair(cr, std::static_pointer_cast<DistributionEntry>(entry.second)));
-            if (std::static_pointer_cast<DistributionEntry>(entry.second)->mean < 0)
-                throw std::logic_error(" action decision distribution mean must be a positive value! ");
-            if (std::static_pointer_cast<DistributionEntry>(entry.second)->max < 0)
-                throw std::logic_error(" action decision distribution max must be a positive value! ");
-            if (std::static_pointer_cast<DistributionEntry>(entry.second)->min < 0)
-                throw std::logic_error(" action decision distribution min must be a positive value! ");
+
+            for (const auto &entry : set.second.entries) {
+                if (set.first == "SpecificRoads") {
+                    behaviourData->adBehaviour.velocityStatisticsSpecificRoads.insert(
+                        {entry.first, std::static_pointer_cast<DistributionEntry>(entry.second)});
+                    if (std::static_pointer_cast<DistributionEntry>(entry.second)->mean < 0)
+                        throw std::logic_error(" mean velocity for specific road must be a positive value! ");
+                    if (std::static_pointer_cast<DistributionEntry>(entry.second)->max < 0)
+                        throw std::logic_error(" max velocity for specific road must be a positive value!  ");
+                    if (std::static_pointer_cast<DistributionEntry>(entry.second)->min < 0)
+                        throw std::logic_error(" min velocity for specific road must be a positive value!  ");
+                    continue;
+                }
+            }
         }
     }
 }
 
-void BehaviourConverter::ConvertCognitiveMapParameters(const StatisticsGroup& main) {
+void BehaviourConverter::ConvertCognitiveMapParameters(const StatisticsGroup &main) {
     std::string key;
     try {
         key = "BehaviourParameters";
-        const StatisticsSet& params = main.sets.at(key);
+        const StatisticsSet &params = main.sets.at(key);
         key = "memorytime";
         behaviourData.get()->cmBehaviour.memorytime =
             static_cast<int>(std::static_pointer_cast<StandardDoubleEntry>(params.entries.at(key))->value);
@@ -177,19 +236,21 @@ void BehaviourConverter::ConvertCognitiveMapParameters(const StatisticsGroup& ma
             static_cast<int>(std::static_pointer_cast<StandardDoubleEntry>(tsParams.entries.at(key))->value);
         if (behaviourData->cmBehaviour.trafficSig_memoryCapacity < 0)
             throw std::logic_error(" memoryCapacity must be a positive value! ");
-    } catch (const std::out_of_range& oor) {
+    }
+    catch (const std::out_of_range &oor) {
         std::string message = "File: " + static_cast<std::string>(__FILE__) + " Line: " + std::to_string(__LINE__) +
                               " ConfigFile: Missing BehaviourParameter/s in Behaviour config file: cannot find " + key + " | " + oor.what();
         Log(message, error);
         throw std::runtime_error(message);
-    } catch (const std::logic_error& er) {
+    }
+    catch (const std::logic_error &er) {
         std::string message = "File: " + static_cast<std::string>(__FILE__) + " Line: " + std::to_string(__LINE__) + " | " + er.what();
         Log(message, error);
         throw std::runtime_error(message);
     }
 }
 
-void BehaviourConverter::ConvertGazeMovementParameters(const StatisticsGroup& main) {
+void BehaviourConverter::ConvertGazeMovementParameters(const StatisticsGroup &main) {
     behaviourData->gmBehaviour.XInt_controlAOIProbabilities.insert({CrossingPhase::Approach, {}});
     behaviourData->gmBehaviour.XInt_controlAOIProbabilities.insert({CrossingPhase::Deceleration_ONE, {}});
     behaviourData->gmBehaviour.XInt_controlAOIProbabilities.insert({CrossingPhase::Deceleration_TWO, {}});
@@ -320,19 +381,24 @@ void BehaviourConverter::ConvertGazeMovementParameters(const StatisticsGroup& ma
         key = "ScanAOIProbabilities";
         StatisticsSet std_scan = standardRoad.sets.at(key);
 
-        for(auto& entry : std_scan.entries) {
+        for (auto &entry : std_scan.entries) {
             ScanAOI sc;
             if (entry.first == "Scan Dashboard") {
                 sc = ScanAOI::Dashboard;
-            } else if (entry.first == "Scan Straight") {
+            }
+            else if (entry.first == "Scan Straight") {
                 sc = ScanAOI::Straight;
-            } else if (entry.first == "Scan Left") {
+            }
+            else if (entry.first == "Scan Left") {
                 sc = ScanAOI::Left;
-            } else if (entry.first == "Scan Right") {
+            }
+            else if (entry.first == "Scan Right") {
                 sc = ScanAOI::Right;
-            } else if (entry.first == "Scan Other") {
+            }
+            else if (entry.first == "Scan Other") {
                 sc = ScanAOI::Other;
-            } else {
+            }
+            else {
                 continue;
             }
             behaviourData->gmBehaviour.std_scanAOIProbabilities.insert(
@@ -348,35 +414,45 @@ void BehaviourConverter::ConvertGazeMovementParameters(const StatisticsGroup& ma
         key = "ControlAOIProbabilities";
         StatisticsGroup XInt_control = XJunction.groups.at(key);
 
-        for (auto& set : XInt_control.sets) {
+        for (auto &set : XInt_control.sets) {
             CrossingPhase cr;
             if (set.first == "Phase APP") {
                 cr = CrossingPhase::Approach;
-            } else if (set.first == "Phase DEC1") {
+            }
+            else if (set.first == "Phase DEC1") {
                 cr = CrossingPhase::Deceleration_ONE;
-            } else if (set.first == "Phase DEC2") {
+            }
+            else if (set.first == "Phase DEC2") {
                 cr = CrossingPhase::Deceleration_TWO;
-            } else if (set.first == "Phase CR_S") {
+            }
+            else if (set.first == "Phase CR_S") {
                 cr = CrossingPhase::Crossing_Straight;
-            } else if (set.first == "Phase CR_R") {
+            }
+            else if (set.first == "Phase CR_R") {
                 cr = CrossingPhase::Crossing_Right;
-            } else if (set.first == "Phase CR_L1") {
+            }
+            else if (set.first == "Phase CR_L1") {
                 cr = CrossingPhase::Crossing_Left_ONE;
-            } else if (set.first == "Phase CR_L2") {
+            }
+            else if (set.first == "Phase CR_L2") {
                 cr = CrossingPhase::Crossing_Left_TWO;
-            } else {
+            }
+            else {
                 continue;
             }
 
-            for (auto& entry : set.second.entries) {
+            for (auto &entry : set.second.entries) {
                 ControlAOI con;
                 if (entry.first == "Control Left") {
                     con = ControlAOI::Left;
-                } else if (entry.first == "Control Oncoming") {
+                }
+                else if (entry.first == "Control Oncoming") {
                     con = ControlAOI::Oncoming;
-                } else if (entry.first == "Control Right") {
+                }
+                else if (entry.first == "Control Right") {
                     con = ControlAOI::Right;
-                } else {
+                }
+                else {
                     continue;
                 }
                 behaviourData->gmBehaviour.XInt_controlAOIProbabilities.at(cr).insert(
@@ -498,12 +574,14 @@ void BehaviourConverter::ConvertGazeMovementParameters(const StatisticsGroup& ma
                 }
             }
         }
-    } catch (const std::out_of_range& oor) {
+    }
+    catch (const std::out_of_range &oor) {
         std::string message = "File: " + static_cast<std::string>(__FILE__) + " Line: " + std::to_string(__LINE__) +
                               " ConfigFile: Missing BehaviourParameter/s in Behaviour config file: cannot find " + key + " | " + oor.what();
         Log(message, error);
         throw std::runtime_error(message);
-    } catch (const std::logic_error& er) {
+    }
+    catch (const std::logic_error &er) {
         std::string message = "File: " + static_cast<std::string>(__FILE__) + " Line: " + std::to_string(__LINE__) + " | " + er.what();
         Log(message, error);
         throw std::runtime_error(message);

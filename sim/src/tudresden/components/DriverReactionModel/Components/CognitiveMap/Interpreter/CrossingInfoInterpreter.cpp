@@ -17,7 +17,7 @@ void CrossingInfoInterpreter::Update(WorldInterpretation* interpretation, const 
         UpdateStoppingPoints(representation);
         interpretation->crossingInfo = crossingInfo;
 
-        interpretation->targetVelocity = targetVelocityCalculation.Update(representation, crossingInfo.phase);
+        interpretation->targetVelocity = targetVelocityCalculation.Update(representation, crossingInfo);
     }
     catch (std::logic_error e) {
         std::string message = e.what();
@@ -73,8 +73,7 @@ void CrossingInfoInterpreter::DetermineCrossingType(const WorldRepresentation &r
     auto nextJunction = representation.egoAgent->NextJunction();
     auto road = representation.egoAgent->GetLanePosition().lane->GetRoad();
 
-    if ((nextJunction && nextJunction->GetIncomingRoads().size() > 2) ||
-        (road->IsOnJunction() && road->GetJunction()->GetIncomingRoads().size() > 2)) {
+    if (nextJunction && nextJunction->GetIncomingRoads().size() > 2) {
         if (representation.egoAgent->GetVehicleType() == DReaMDefinitions::AgentVehicleType::Car ||
             representation.egoAgent->GetVehicleType() == DReaMDefinitions::AgentVehicleType::Bicycle) {
             if (representation.egoAgent->GetIndicatorState() == IndicatorState::IndicatorState_Left) {
@@ -93,6 +92,9 @@ void CrossingInfoInterpreter::DetermineCrossingType(const WorldRepresentation &r
             crossingInfo.type = CrossingType::Straight;
         }
     }
+    else if (road->IsOnJunction()) {
+        // crossingInfo unchanged
+    }
     else {
         crossingInfo.type = CrossingType::NA;
     }
@@ -110,11 +112,12 @@ void CrossingInfoInterpreter::DetermineCrossingPhase(const WorldRepresentation &
         // connection of two roads
         crossingInfo.phase = CrossingPhase::NONE;
     }
-    else if ((nextJunction && representation.egoAgent->GetJunctionDistance().toNext - refToFront < 75) && !frontExceedCurrentLane) {
-        if (representation.egoAgent->GetJunctionDistance().toNext - refToFront < 25) {
+    else if ((nextJunction && representation.egoAgent->GetJunctionDistance().toNext - refToFront < ApproachDistance) &&
+             !frontExceedCurrentLane) {
+        if (representation.egoAgent->GetJunctionDistance().toNext - refToFront < DecelerationTWODistance) {
             crossingInfo.phase = CrossingPhase::Deceleration_TWO;
         }
-        else if (representation.egoAgent->GetJunctionDistance().toNext - refToFront < 50) {
+        else if (representation.egoAgent->GetJunctionDistance().toNext - refToFront < DecelerationONEDistance) {
             crossingInfo.phase = CrossingPhase::Deceleration_ONE;
         }
         else {
