@@ -86,8 +86,8 @@ bool LateralDecision::NewLaneIsFree() const {
 }
 bool LateralDecision::TurningAtJunction() const {
     return (worldRepresentation.egoAgent->NextJunction() != nullptr &&
-            worldInterpretation.crossingInfo.phase == CrossingPhase::Deceleration_TWO) ||
-           worldInterpretation.crossingInfo.phase == CrossingPhase::Crossing_Straight;
+            (worldInterpretation.crossingInfo.phase == CrossingPhase::Deceleration_TWO ||
+             worldInterpretation.crossingInfo.phase == CrossingPhase::Crossing_Straight));
 }
 bool LateralDecision::AgentIsTurningOnJunction() const {
     return worldInterpretation.crossingInfo.phase >= CrossingPhase::Deceleration_TWO;
@@ -97,6 +97,37 @@ IndicatorState LateralDecision::SetIndicatorAtJunction(const MentalInfrastructur
     try {
         auto lanesPtr = worldRepresentation.infrastructure->NextLanes(worldRepresentation.egoAgent->IsMovingInLaneDirection(),
                                                                       worldRepresentation.egoAgent->GetLanePosition().lane);
+
+        std::cout << "lanesPtr= " << lanesPtr.has_value() << std::endl;
+        std::cout << "targetLane ID= " << targetLane->GetDReaMId() << "  | type=" << static_cast<int>(targetLane->GetType())
+                  << " | on junction? =" << static_cast<int>(targetLane->GetRoad()->IsOnJunction())
+                  << " |  Road id = " << targetLane->GetRoad()->GetOpenDriveId() << " | lane id= " << targetLane->GetOpenDriveId()
+                  << std::endl;
+        if (lanesPtr) {
+            if (lanesPtr->leftLanes.size() > 0)
+                std::cout << "leftLanes= " << lanesPtr->leftLanes.size() << "  |  id= " << lanesPtr->leftLanes.front()->GetDReaMId()
+                          << std::endl;
+            if (lanesPtr->rightLanes.size() > 0)
+                std::cout << "rightLanes= " << lanesPtr->rightLanes.size() << "  |  id= " << lanesPtr->rightLanes.front()->GetDReaMId()
+                          << std::endl;
+            if (lanesPtr->straightLanes.size() > 0)
+                std::cout << "straightLanes= " << lanesPtr->straightLanes.size()
+                          << "  |  id= " << lanesPtr->straightLanes.front()->GetDReaMId() << std::endl;
+        }
+        lanesPtr = worldRepresentation.infrastructure->NextLanes(worldRepresentation.egoAgent->IsMovingInLaneDirection(),
+                                                                 worldRepresentation.egoAgent->GetMainLocatorLane());
+        if (lanesPtr) {
+            std::cout << "-------------main loccator lane-----" << std::endl;
+            if (lanesPtr->leftLanes.size() > 0)
+                std::cout << "leftLanes= " << lanesPtr->leftLanes.size() << "  |  id= " << lanesPtr->leftLanes.front()->GetDReaMId()
+                          << std::endl;
+            if (lanesPtr->rightLanes.size() > 0)
+                std::cout << "rightLanes= " << lanesPtr->rightLanes.size() << "  |  id= " << lanesPtr->rightLanes.front()->GetDReaMId()
+                          << std::endl;
+            if (lanesPtr->straightLanes.size() > 0)
+                std::cout << "straightLanes= " << lanesPtr->straightLanes.size()
+                          << "  |  id= " << lanesPtr->straightLanes.front()->GetDReaMId() << std::endl;
+        }
         if (lanesPtr) {
             if (std::any_of(lanesPtr->leftLanes.begin(), lanesPtr->leftLanes.end(),
                             [targetLane](auto element) { return element == targetLane; })) {
@@ -135,9 +166,19 @@ IndicatorState LateralDecision::SetIndicatorAtJunction(const MentalInfrastructur
 
                 return IndicatorState::IndicatorState_Off;
             }
+            else {
+                const std::string msg = "File: " + static_cast<std::string>(__FILE__) + " Line: " + std::to_string(__LINE__) +
+                                        " Indicator cannot be calculated";
+                Log(msg, error);
+                throw std::logic_error(msg);
+            }
         }
+        const std::string msg =
+            "File: " + static_cast<std::string>(__FILE__) + " Line: " + std::to_string(__LINE__) + " Indicator cannot be calculated";
+        Log(msg, error);
+        throw std::logic_error(msg);
     }
-    catch (std::runtime_error e) {
+    catch (std::logic_error e) {
         const std::string msg =
             "File: " + static_cast<std::string>(__FILE__) + " Line: " + std::to_string(__LINE__) + static_cast<std::string>(e.what());
         Log(msg, error);

@@ -57,29 +57,31 @@ class Anticipation {
 
     double Deceleration(const std::unique_ptr<AgentInterpretation>& observedAgent) const;
     double GetMaxEmergencyAcceleration() const { return maxEmergencyDeceleration; }
+    double AnticipationAccelerationToAchieveVelocityInDistance(double distance, double velTarget,double currentVelocity) const ;
+    private:
+        void DeletePriorityAgent(int oAgentID);
 
-  private:
-    void DeletePriorityAgent(int oAgentID);
+        TimeToConflictArea CalculateTimeToConflictAreaEgo(DistanceToConflictArea distance, double velocity) const;
 
-    TimeToConflictArea CalculateTimeToConflictAreaEgo(DistanceToConflictArea distance, double velocity) const;
+        TimeToConflictArea CalculateTimeToConflictAreaObserved(const ConflictSituation &situation, const AmbientAgentRepresentation *oAgent)
+            const;
 
-    TimeToConflictArea CalculateTimeToConflictAreaObserved(const ConflictSituation &situation,
-                                                           const AmbientAgentRepresentation *oAgent) const;
+        double TravelTimeEgo(double distance, double velocity, double vTarget) const;
+        double TravelTimeObserved(double distance, bool egoInsideConflictArea, const AmbientAgentRepresentation *oAgent) const;
 
-    double TravelTimeEgo(double distance, double velocity, double vTarget) const;
-    double TravelTimeObserved(double distance, bool egoInsideConflictArea, const AmbientAgentRepresentation *oAgent) const;
+        double CalculateDeceleration(double sFrontEgo, double tEndObserved, const AgentInterpretation *observedAgent) const;
 
-    double CalculateDeceleration(double sFrontEgo, double tEndObserved, const AgentInterpretation *observedAgent) const;
+        const BehaviourData &GetBehaviourData() const {
+            return behaviourData;
+        }
 
-    const BehaviourData& GetBehaviourData() const { return behaviourData; }
-
-    double maxEmergencyDeceleration;
-    double comfortDeceleration;
-    std::vector<int> priorityAgents;
-    const WorldRepresentation& worldRepresentation;
-    const WorldInterpretation& worldInterpretation;
-    StochasticsInterface* stochastics;
-    const LoggerInterface* loggerInterface;
-    const BehaviourData& behaviourData;
-};
+        double maxEmergencyDeceleration;
+        double comfortDeceleration;
+        std::vector<int> priorityAgents;
+        const WorldRepresentation &worldRepresentation;
+        const WorldInterpretation &worldInterpretation;
+        StochasticsInterface *stochastics;
+        const LoggerInterface *loggerInterface;
+        const BehaviourData &behaviourData;
+    };
 } // namespace LongitudinalDecision

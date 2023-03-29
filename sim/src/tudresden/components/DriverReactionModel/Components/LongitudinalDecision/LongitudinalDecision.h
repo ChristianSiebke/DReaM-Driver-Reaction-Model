@@ -71,10 +71,7 @@ private:
     bool observedAgentIsbehindEgoAgent(const std::unique_ptr<AgentInterpretation> &oAgent) const;
 
     double AgentCrashImminent(const std::unique_ptr<AgentInterpretation> &oAgent) const;
-
-    bool CloseToConlictArea(const std::unique_ptr<AgentInterpretation> &oAgent) const;
-    bool EgoHasRightOfWay(const std::unique_ptr<AgentInterpretation> &agent) const;
-
+    
     double accelerationResult;
 
     const MentalInfrastructure::Road *currentRoad = nullptr;

@@ -12,8 +12,17 @@ void AgentPerceptionConverter::Populate() {
     }
 }
 
-void AgentPerceptionConverter::SetInitialRoute(int agentId, std::vector<GlobalObserver::Routes::InternWaypoint> route) {
-    routeMapping.insert_or_assign(agentId, ConvertRoute(route));
+void AgentPerceptionConverter::SetInitialRoute(AgentInterface *agent, std::vector<GlobalObserver::Routes::InternWaypoint> route) {
+    if (route.empty()) {
+        auto newRouteOptional = RouteUpdate(agent);
+        if (newRouteOptional.has_value()) {
+            auto dreamRoute = ConvertRoute(*newRouteOptional);
+            routeMapping.insert_or_assign(agent->GetId(), dreamRoute);
+        }
+    }
+    else {
+        routeMapping.insert_or_assign(agent->GetId(), ConvertRoute(route));
+    }
 }
 
 DReaMRoute::Waypoints AgentPerceptionConverter::ConvertRoute(std::vector<GlobalObserver::Routes::InternWaypoint> route) {

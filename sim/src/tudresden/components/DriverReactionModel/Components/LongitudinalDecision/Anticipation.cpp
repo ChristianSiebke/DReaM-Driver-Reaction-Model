@@ -286,19 +286,24 @@ double Anticipation::CalculatePhaseAcceleration() const {
     else {
         distance = std::numeric_limits<double>::infinity();
     }
+    return AnticipationAccelerationToAchieveVelocityInDistance(distance, velTarget, v);
+}
 
-    if (distance < std::numeric_limits<double>::infinity() && v >= velTarget) {
+double Anticipation::AnticipationAccelerationToAchieveVelocityInDistance(double distance, double velTarget, double currentVelocity) const {
+    if (distance < std::numeric_limits<double>::infinity() && currentVelocity >= velTarget) {
         //  IDM brake strategy
-        auto s_star =
-            GetBehaviourData().adBehaviour.minDistanceStationaryTraffic + (v * GetBehaviourData().adBehaviour.desiredFollowingTimeHeadway) +
-            ((v * (v - velTarget)) / (2.0 * std::sqrt(GetBehaviourData().adBehaviour.maxAcceleration * std::abs(comfortDeceleration))));
+        std::cout << " distance=" << distance << " | velTarget= " << velTarget << " | currentVelocity=" << currentVelocity << std::endl;
+        auto s_star = GetBehaviourData().adBehaviour.minDistanceStationaryTraffic +
+                      (currentVelocity * GetBehaviourData().adBehaviour.desiredFollowingTimeHeadway) +
+                      ((currentVelocity * (currentVelocity - velTarget)) /
+                       (2.0 * std::sqrt(GetBehaviourData().adBehaviour.maxAcceleration * std::abs(comfortDeceleration))));
 
         auto a = -GetBehaviourData().adBehaviour.maxAcceleration * ((s_star * s_star) / (distance * distance));
         return Common::ValueInBounds(GetBehaviourData().adBehaviour.comfortDeceleration.min, a,
                                      GetBehaviourData().adBehaviour.maxAcceleration);
     }
     else {
-        return ComfortAccelerationWish(velTarget, v - velTarget, std::numeric_limits<double>::infinity());
+        return ComfortAccelerationWish(velTarget, currentVelocity - velTarget, std::numeric_limits<double>::infinity());
     }
 }
 

@@ -42,12 +42,12 @@ double TargetVelocityCalculation::CalculateTargetVelocity(const WorldRepresentat
     if (worldRepresentation.egoAgent->GetVehicleType() == DReaMDefinitions::AgentVehicleType::Car ||
         worldRepresentation.egoAgent->GetVehicleType() == DReaMDefinitions::AgentVehicleType::Motorbike ||
         worldRepresentation.egoAgent->GetVehicleType() == DReaMDefinitions::AgentVehicleType::Truck) {
-        if ((crossingInfo.phase <= CrossingPhase::Deceleration_TWO && crossingInfo.phase != CrossingPhase::NONE) ||
+        if ((crossingInfo.phase <= CrossingPhase::Deceleration_TWO && crossingInfo.phase > CrossingPhase::Approach) ||
             (crossingInfo.type == CrossingType::Straight &&
              worldRepresentation.egoAgent->GetIndicatorState() != IndicatorState::IndicatorState_Off)) {
             targetVelocity = phaseVelocities.at(IntersectionSpot::IntersectionEntry);
         }
-        else if (crossingInfo.phase <= CrossingPhase::Exit && crossingInfo.phase != CrossingPhase::NONE) {
+        else if (crossingInfo.phase > CrossingPhase::Deceleration_TWO) {
             targetVelocity = phaseVelocities.at(IntersectionSpot::IntersectionExit);
         }
         else if (velocitySpecificRoad != velocityStatisticsSpecificRoads.end()) {

@@ -30,8 +30,8 @@ void Main::TriggerRoadNetworkConversion() {
     rnConverter.Populate();
 }
 
-void Main::SetInitialRoute(int agentId, std::vector<GlobalObserver::Routes::InternWaypoint> route) {
-    apConverter.SetInitialRoute(agentId, route);
+void Main::SetInitialRoute(AgentInterface *agent, std::vector<GlobalObserver::Routes::InternWaypoint> route) {
+    apConverter.SetInitialRoute(agent, route);
 }
 
 std::shared_ptr<DetailedAgentPerception> Main::GetDetailedAgentPerception(int agentId) {

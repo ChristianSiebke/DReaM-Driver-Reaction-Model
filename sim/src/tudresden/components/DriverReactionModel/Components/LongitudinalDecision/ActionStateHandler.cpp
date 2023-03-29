@@ -31,9 +31,24 @@ bool ActionStateHandler::DetermineNextState(const std::unique_ptr<AgentInterpret
         case ActionState::CollisionImminent:
             return agent->collisionPoint.has_value() && agent->collisionPoint->collisionImminent;
         case ActionState::Following:
-            return agent->followingDistanceToLeadingVehicle.has_value();
-        case ActionState::IntersectionSituation:
-            return agent->conflictSituation.has_value();
+            if (agent->relativeDistance.has_value()) {
+                if (agent->relativeDistance < 0 &&
+                    !(worldRepresentation.egoAgent->GetLanePosition().lane == agent->agent->GetLanePosition().lane)) {
+                    if (agent->conflictSituation.has_value() && !EgoHasRightOfWay(agent)) {
+                        return false;
+                    }
+                }
+                else if (agent->relativeDistance > 0 &&
+                         !(worldRepresentation.egoAgent->GetLanePosition().lane == agent->agent->GetLanePosition().lane)) {
+                    if (agent->conflictSituation.has_value() && EgoHasRightOfWay(agent)) {
+                        return false;
+                    }
+                }
+                return true;
+            }
+            return false;
+        case ActionState::ReactToIntersectionSituation:
+            return agent->conflictSituation.has_value() && (!EgoHasRightOfWay(agent) || CloseToConlictArea(agent));
         case ActionState::End:
             return true;
         }
@@ -43,6 +58,14 @@ bool ActionStateHandler::DetermineNextState(const std::unique_ptr<AgentInterpret
             "File: " + static_cast<std::string>(__FILE__) + " Line: " + std::to_string(__LINE__) + "unexpected exception ";
         throw std::logic_error(message);
     }
+}
+bool ActionStateHandler::CloseToConlictArea(const std::unique_ptr<AgentInterpretation> &oAgent) const {
+    return oAgent->agent->GetJunctionDistance().on > 0 ||
+           (oAgent->agent->GetJunctionDistance().toNext > -1 && oAgent->agent->GetJunctionDistance().toNext < 5);
+}
+
+bool ActionStateHandler::EgoHasRightOfWay(const std::unique_ptr<AgentInterpretation> &agent) const {
+    return (agent->rightOfWay.ego && !agent->rightOfWay.observed);
 }
 
 void ActionStateHandler::IncrementState() {
@@ -54,9 +77,9 @@ void ActionStateHandler::IncrementState() {
         currentState = ActionState::Following;
         break;
     case ActionState::Following:
-        currentState = ActionState::IntersectionSituation;
+        currentState = ActionState::ReactToIntersectionSituation;
         break;
-    case ActionState::IntersectionSituation:
+    case ActionState::ReactToIntersectionSituation:
         currentState = ActionState::End;
         break;
     case ActionState::End:

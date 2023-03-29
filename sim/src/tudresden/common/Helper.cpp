@@ -112,8 +112,7 @@ std::optional<int> LeadingCarID(const std::unordered_map<int, std::unique_ptr<Ag
 
         for (auto &agent : worldInterpretation)
         {
-            if (auto currentDistance = agent.second->followingDistanceToLeadingVehicle)
-            {
+            if (auto currentDistance = agent.second->relativeDistance) {
                 if (*currentDistance < distance)
                 {
                     leadingAgentId = agent.first;

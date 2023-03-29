@@ -117,10 +117,10 @@ public:
     /**
      * @brief Set the initial route for an agent, will pass through to AgentPerceptionConverter::SetInitialRoute.
      *
-     * @param agentId the agent for which to set the initial route
+     * @param agent the agent for which to set the initial route
      * @param route the route that this agent should / will take
      */
-    void SetInitialRoute(int agentId, std::vector<GlobalObserver::Routes::InternWaypoint> route);
+    void SetInitialRoute(AgentInterface *agent, std::vector<GlobalObserver::Routes::InternWaypoint> route);
 
 private:
     Main(WorldInterface *world, StochasticsInterface *stochastics) :

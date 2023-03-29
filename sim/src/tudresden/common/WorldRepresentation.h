@@ -45,7 +45,7 @@ struct AgentInterpretation {
     std::optional<CollisionPoint> collisionPoint;
     std::optional<ConflictSituation> conflictSituation;
     RightOfWay rightOfWay;
-    std::optional<double> followingDistanceToLeadingVehicle;
+    std::optional<double> relativeDistance;
 };
 
 struct MemorizedTrafficSignal {
