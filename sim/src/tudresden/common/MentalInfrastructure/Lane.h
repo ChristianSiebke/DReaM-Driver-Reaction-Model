@@ -50,6 +50,16 @@ struct ConflictArea
     LanePoint end;
 };
 
+/**
+ * @brief Wrapper for the next lanes an agent might take.
+ *
+ */
+struct NextDirectionLanes {
+    std::vector<const MentalInfrastructure::Lane *> rightLanes;
+    std::vector<const MentalInfrastructure::Lane *> leftLanes;
+    std::vector<const MentalInfrastructure::Lane *> straightLanes;
+};
+
 ///
 /// \brief Represents a lane in the road network. Lanes always belong to a Section on a road.
 ///
@@ -276,6 +286,14 @@ public:
     const Lane *GetRightLane() const {
         return rightLane;
     }
+
+    ///
+    /// \brief Return Next direction lanes
+    ///
+    std::optional<NextDirectionLanes> NextLanes(bool movingInLaneDirection) const;
+
+    const Lane *NextLane(IndicatorState indicatorState, bool movingInLaneDirection) const;
+
 
 private:
     bool SLaneCoordinateOutOfLane(double sLane_coordniate) const;

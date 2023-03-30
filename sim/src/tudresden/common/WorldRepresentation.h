@@ -146,7 +146,7 @@ class AgentRepresentation {
 
     /*!
      * \brief Checks if the observed vehicle came from a road that is to the right of the ego agent
-     *        (vehicles are only allowed to drive in lane direction close junctions)
+     *        (vehicles are only allowed to drive in lane direction)
      *
      * @param[in]     oAgentPerceptionData
      *
@@ -288,23 +288,6 @@ class InfrastructureRepresentation {
     InfrastructureRepresentation() {}
 
     void UpdateInternalData(std::shared_ptr<InfrastructurePerception> perceptionData) { infrastructure = perceptionData; }
-
-    /*!
-     * \brief Return the next lane of given lane
-     *
-     */
-    static const MentalInfrastructure::Lane* NextLane(IndicatorState indicatorState, bool movingInLaneDirection,
-                                                      const MentalInfrastructure::Lane* lane);
-
-    /*!
-     * \brief return next lanes that follow on current lane (considering moving direction of agent)
-     *
-     * @param[in]     movingInLaneDirection
-     * @param[in]     currentLane
-     *
-     * @return        next lanes
-     */
-    static const std::optional<NextDirectionLanes> NextLanes(bool movingInLaneDirection, const MentalInfrastructure::Lane* currentLane);
 
     const std::unordered_map<StoppingPointType, StoppingPoint> &GetStoppingPoints(OdId junctionId, OwlId laneId) const {
         return infrastructure->GetStoppingPoints(junctionId, laneId);

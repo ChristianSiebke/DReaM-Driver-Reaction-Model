@@ -56,16 +56,6 @@ struct JunctionDistance {
 };
 
 /**
- * @brief Wrapper for the next lanes an agent might take.
- *
- */
-struct NextDirectionLanes {
-    std::vector<const MentalInfrastructure::Lane *> rightLanes;
-    std::vector<const MentalInfrastructure::Lane *> leftLanes;
-    std::vector<const MentalInfrastructure::Lane *> straightLanes;
-};
-
-/**
  * @brief Wrapper for data collected at the main locator point (front of the vehicle / agent).
  *
  */
@@ -155,22 +145,6 @@ struct StoppingPointData {
 };
 
 struct InfrastructurePerception {
-    /*!
-     * \brief Return the next lane of given lane
-     *
-     */
-    static const MentalInfrastructure::Lane *NextLane(IndicatorState indicatorState, bool movingInLaneDirection,
-                                                      const MentalInfrastructure::Lane *lane);
-    /*!
-     * \brief return next lanes that follow on current lane (considering moving direction of agent)
-     *
-     * @param[in]     movingInLaneDirection
-     * @param[in]     currentLane
-     *
-     * @return        next lanes
-     */
-    static std::optional<NextDirectionLanes> NextLanes(bool movingInLaneDirection, const MentalInfrastructure::Lane *currentLane);
-
     const std::unordered_map<OdId, std::vector<std::pair<MentalInfrastructure::ConflictArea, MentalInfrastructure::ConflictArea>>> &
     GetConflictAreas() {
         return conflictAreas;

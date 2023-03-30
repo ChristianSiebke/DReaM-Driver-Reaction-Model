@@ -16,10 +16,6 @@ namespace LongitudinalDecision {
 
 double Anticipation::IntersectionGap(const std::unique_ptr<AgentInterpretation> &observedAgent) {
     auto oAgent = observedAgent->agent;
-    std::cout << "observed velocity: " << oAgent->GetVelocity() << " | observed Acceleration " << oAgent->GetAcceleration()
-              << " | observed sCoordinate: " << oAgent->GetLanePosition().sCoordinate << " | distanceToStartCA "
-              << observedAgent->conflictSituation->oAgentDistance.vehicleFrontToCAStart << " | distanceToENDCA "
-              << observedAgent->conflictSituation->oAgentDistance.vehicleBackToCAEnd << std::endl;
     auto oAgentID = oAgent->GetID();
     auto conflictSituation = observedAgent->conflictSituation;
     double freeAccelerationEgo = CalculatePhaseAcceleration();
@@ -292,7 +288,6 @@ double Anticipation::CalculatePhaseAcceleration() const {
 double Anticipation::AnticipationAccelerationToAchieveVelocityInDistance(double distance, double velTarget, double currentVelocity) const {
     if (distance < std::numeric_limits<double>::infinity() && currentVelocity >= velTarget) {
         //  IDM brake strategy
-        std::cout << " distance=" << distance << " | velTarget= " << velTarget << " | currentVelocity=" << currentVelocity << std::endl;
         auto s_star = GetBehaviourData().adBehaviour.minDistanceStationaryTraffic +
                       (currentVelocity * GetBehaviourData().adBehaviour.desiredFollowingTimeHeadway) +
                       ((currentVelocity * (currentVelocity - velTarget)) /

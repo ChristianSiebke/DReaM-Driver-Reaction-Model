@@ -85,9 +85,8 @@ bool LateralDecision::NewLaneIsFree() const {
     return true;
 }
 bool LateralDecision::TurningAtJunction() const {
-    return (worldRepresentation.egoAgent->NextJunction() != nullptr &&
-            (worldInterpretation.crossingInfo.phase == CrossingPhase::Deceleration_TWO ||
-             worldInterpretation.crossingInfo.phase == CrossingPhase::Crossing_Straight));
+    return (worldInterpretation.crossingInfo.phase == CrossingPhase::Deceleration_TWO ||
+            worldInterpretation.crossingInfo.phase == CrossingPhase::Crossing_Straight);
 }
 bool LateralDecision::AgentIsTurningOnJunction() const {
     return worldInterpretation.crossingInfo.phase >= CrossingPhase::Deceleration_TWO;
@@ -95,8 +94,8 @@ bool LateralDecision::AgentIsTurningOnJunction() const {
 
 IndicatorState LateralDecision::SetIndicatorAtJunction(const MentalInfrastructure::Lane *targetLane) const {
     try {
-        auto lanesPtr = worldRepresentation.infrastructure->NextLanes(worldRepresentation.egoAgent->IsMovingInLaneDirection(),
-                                                                      worldRepresentation.egoAgent->GetLanePosition().lane);
+        auto lanesPtr =
+            worldRepresentation.egoAgent->GetLanePosition().lane->NextLanes(worldRepresentation.egoAgent->IsMovingInLaneDirection());
 
         std::cout << "lanesPtr= " << lanesPtr.has_value() << std::endl;
         std::cout << "targetLane ID= " << targetLane->GetDReaMId() << "  | type=" << static_cast<int>(targetLane->GetType())
@@ -114,8 +113,7 @@ IndicatorState LateralDecision::SetIndicatorAtJunction(const MentalInfrastructur
                 std::cout << "straightLanes= " << lanesPtr->straightLanes.size()
                           << "  |  id= " << lanesPtr->straightLanes.front()->GetDReaMId() << std::endl;
         }
-        lanesPtr = worldRepresentation.infrastructure->NextLanes(worldRepresentation.egoAgent->IsMovingInLaneDirection(),
-                                                                 worldRepresentation.egoAgent->GetMainLocatorLane());
+        lanesPtr = worldRepresentation.egoAgent->GetMainLocatorLane()->NextLanes(worldRepresentation.egoAgent->IsMovingInLaneDirection());
         if (lanesPtr) {
             std::cout << "-------------main loccator lane-----" << std::endl;
             if (lanesPtr->leftLanes.size() > 0)
@@ -128,6 +126,7 @@ IndicatorState LateralDecision::SetIndicatorAtJunction(const MentalInfrastructur
                 std::cout << "straightLanes= " << lanesPtr->straightLanes.size()
                           << "  |  id= " << lanesPtr->straightLanes.front()->GetDReaMId() << std::endl;
         }
+
         if (lanesPtr) {
             if (std::any_of(lanesPtr->leftLanes.begin(), lanesPtr->leftLanes.end(),
                             [targetLane](auto element) { return element == targetLane; })) {
@@ -148,8 +147,7 @@ IndicatorState LateralDecision::SetIndicatorAtJunction(const MentalInfrastructur
                     return IndicatorState::IndicatorState_Off;
                 }
 
-                lanesPtr =
-                    worldRepresentation.infrastructure->NextLanes(worldRepresentation.egoAgent->IsMovingInLaneDirection(), targetLane);
+                lanesPtr = targetLane->NextLanes(worldRepresentation.egoAgent->IsMovingInLaneDirection());
                 if (targetLane->GetLength() + (worldRepresentation.egoAgent->GetLanePosition().lane->GetLength() -
                                                (worldRepresentation.egoAgent->GetLanePosition().sCoordinate +
                                                 worldRepresentation.egoAgent->GetDistanceReferencePointToLeadingEdge())) <=
@@ -163,7 +161,6 @@ IndicatorState LateralDecision::SetIndicatorAtJunction(const MentalInfrastructur
                         return IndicatorState::IndicatorState_Right;
                     }
                 }
-
                 return IndicatorState::IndicatorState_Off;
             }
             else {

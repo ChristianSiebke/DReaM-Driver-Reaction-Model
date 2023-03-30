@@ -169,16 +169,6 @@ double AgentRepresentation::ExtrapolateDistanceAlongLane(double timeStep) const 
     return IsMovingInLaneDirection() ? extrapolatedDistance : -extrapolatedDistance;
 }
 
-const MentalInfrastructure::Lane* InfrastructureRepresentation::NextLane(IndicatorState indicatorState, bool movingInLaneDirection,
-                                                                         const MentalInfrastructure::Lane* lane) {
-    return InfrastructurePerception::NextLane(indicatorState, movingInLaneDirection, lane);
-}
-
-const std::optional<NextDirectionLanes> InfrastructureRepresentation::NextLanes(bool movingInLaneDirection,
-                                                                                const MentalInfrastructure::Lane* currentLane) {
-    return InfrastructurePerception::NextLanes(movingInLaneDirection, currentLane);
-}
-
 const RoadmapGraph::RoadmapNode *InfrastructureRepresentation::NavigateToTargetNode(OdId targetRoadOdId, OwlId targetLaneOdId) const {
     return infrastructure->graph.NavigateToTargetNode(targetRoadOdId, targetLaneOdId);
 }

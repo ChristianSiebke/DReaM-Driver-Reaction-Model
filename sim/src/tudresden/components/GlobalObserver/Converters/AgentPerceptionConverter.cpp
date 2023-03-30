@@ -187,8 +187,8 @@ std::shared_ptr<DetailedAgentPerception> AgentPerceptionConverter::ConvertAgent(
         perceptionData.lanePosition.lane, perceptionData.yaw, perceptionData.lanePosition.sCoordinate, perceptionData.velocity);
     perceptionData.brakeLight = agent->GetBrakeLight();
     perceptionData.indicatorState = agent->GetIndicatorState();
-    perceptionData.nextLane = InfrastructurePerception::NextLane(perceptionData.indicatorState, perceptionData.movingInLaneDirection,
-                                                                 perceptionData.lanePosition.lane);
+    perceptionData.nextLane =
+        perceptionData.lanePosition.lane->NextLane(perceptionData.indicatorState, perceptionData.movingInLaneDirection);
     perceptionData.junctionDistance = GeneralAgentPerception::CalculateJunctionDistance(
         perceptionData, perceptionData.lanePosition.lane->GetRoad(), perceptionData.lanePosition.lane);
 

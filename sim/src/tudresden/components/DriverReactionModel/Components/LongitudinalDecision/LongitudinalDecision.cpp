@@ -91,6 +91,12 @@ double LongitudinalDecision::DetermineAccelerationWish() {
     minEmergencyBrakeDelay.ResetEmergencyState();
     for (auto &entry : worldInterpretation.interpretedAgents) {
         const auto &agent = entry.second;
+
+        if (agent->rightOfWay.ego && !agent->rightOfWay.observed) {
+            std::cout << "Agent: " << worldRepresentation.egoAgent->GetID() << "| HAVE RIGHT OF WAY over Agent =" << agent->agent->GetID()
+                      << std::endl;
+        }
+
         switch (actionStateHandler.GetState(agent)) {
         case ActionState::CollisionImminent:
             double deceleration;

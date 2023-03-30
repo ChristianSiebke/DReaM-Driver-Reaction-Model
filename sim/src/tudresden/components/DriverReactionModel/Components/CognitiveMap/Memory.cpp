@@ -97,7 +97,7 @@ std::unique_ptr<AmbientAgentRepresentation> Memory::ExtrapolateAmbientAgent(cons
         data.yaw = std::fmod(newPoint.hdg + diffAngle, (2 * M_PI));
         data.velocity += data.acceleration * cycletime / 1000;
         data.lanePosition.lane = newPosition->lane;
-        data.nextLane = InfrastructureRepresentation::NextLane(data.indicatorState, data.movingInLaneDirection, data.lanePosition.lane);
+        data.nextLane = data.lanePosition.lane->NextLane(data.indicatorState, data.movingInLaneDirection);
         data.junctionDistance = GeneralAgentPerception::CalculateJunctionDistance(data, newRoad, newPosition->lane);
 
         return std::make_unique<AmbientAgentRepresentation>(std::make_shared<GeneralAgentPerception>(data), agent->GetLifeTime());

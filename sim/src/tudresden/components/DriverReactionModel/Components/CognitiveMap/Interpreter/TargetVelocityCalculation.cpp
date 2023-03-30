@@ -75,9 +75,11 @@ double TargetVelocityCalculation::CalculateTargetVelocity(const WorldRepresentat
 void TargetVelocityCalculation::CalculatePhaseVelocities(const WorldRepresentation &worldRepresentation, CrossingInfo crossingInfo) {
     if (worldRepresentation.egoAgent->GetIndicatorState() != IndicatorState::IndicatorState_Warn) {
         auto nextJunction = worldRepresentation.egoAgent->NextJunction();
-        auto nextNextLane = worldRepresentation.infrastructure->NextLane(worldRepresentation.egoAgent->GetIndicatorState(),
-                                                                         worldRepresentation.egoAgent->IsMovingInLaneDirection(),
-                                                                         worldRepresentation.egoAgent->GetNextLane());
+        auto nextNextLane =
+            worldRepresentation.egoAgent->GetNextLane()
+                ? worldRepresentation.egoAgent->GetNextLane()->NextLane(worldRepresentation.egoAgent->GetIndicatorState(),
+                                                                        worldRepresentation.egoAgent->IsMovingInLaneDirection())
+                : nullptr;
         auto nextNextJunction = nextNextLane != nullptr ? nextNextLane->GetRoad()->GetJunction() : nullptr;
         std::string nextNextJunctionValue = "not exist";
         nextNextJunctionValue;
