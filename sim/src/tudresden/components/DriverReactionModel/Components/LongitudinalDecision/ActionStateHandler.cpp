@@ -32,8 +32,11 @@ bool ActionStateHandler::DetermineNextState(const std::unique_ptr<AgentInterpret
             return agent->collisionPoint.has_value() && agent->collisionPoint->collisionImminent;
         case ActionState::Following:
             if (agent->relativeDistance.has_value()) {
-                if (agent->relativeDistance < 0 &&
-                    !(worldRepresentation.egoAgent->GetLanePosition().lane == agent->agent->GetLanePosition().lane)) {
+                if (agent->conflictSituation->oAgentDistance.vehicleFrontToCAStart < 0) {
+                    return true;
+                }
+                else if (agent->relativeDistance < 0 &&
+                         !(worldRepresentation.egoAgent->GetLanePosition().lane == agent->agent->GetLanePosition().lane)) {
                     if (agent->conflictSituation.has_value() && !EgoHasRightOfWay(agent)) {
                         return false;
                     }

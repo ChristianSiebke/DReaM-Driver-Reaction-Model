@@ -277,4 +277,7 @@ const MentalInfrastructure::Lane *Lane::NextLane(IndicatorState indicatorState, 
     }
 }
 
+bool Lane::IsJunctionLane() const {
+    return this->GetRoad()->IsOnJunction();
+}
 } // namespace MentalInfrastructure

@@ -81,34 +81,15 @@ std::optional<double> FollowingInterpreter::CalculateFollowingDistance(const Age
 
     //  agents have conflict area and same successor --> merging manoeuvre
     //  agents have conflict area and same predecessor --> splitting manoeuvre
-    auto conflictAreaOL = observedLane->GetConflictAreaWithLane(egoLane);
-    auto conflictAreaEL = egoLane->GetConflictAreaWithLane(observedLane);
-    auto nextEgoLane = representation.egoAgent->GetNextLane();
-    auto nextObservedLane = agent.GetNextLane();
-    conflictAreaOL = conflictAreaOL ? conflictAreaOL : observedLane->GetConflictAreaWithLane(nextEgoLane);
-    conflictAreaEL = conflictAreaEL ? conflictAreaEL : egoLane->GetConflictAreaWithLane(nextObservedLane);
-
-    egoS = conflictAreaEL ? egoS : -(egoLane->GetLength() - egoS);
-    observedS = conflictAreaOL ? observedS : -(observedLane->GetLength() - observedS);
-
-    std::cout << " egoS: " << egoS << "  |     observedS: " << observedS << std::endl;
-    if (nextEgoLane)
-        conflictAreaEL = conflictAreaEL ? conflictAreaEL : nextEgoLane->GetConflictAreaWithLane(observedLane);
-    if (nextObservedLane)
-        conflictAreaOL = conflictAreaOL ? conflictAreaOL : nextObservedLane->GetConflictAreaWithLane(egoLane);
-
-    if (conflictAreaOL &&
-        ((Common::anyElementOfCollectionIsElementOfOtherCollection(egoLane->GetSuccessors(), observedLane->GetSuccessors()) ||
-          Common::anyElementOfCollectionIsElementOfOtherCollection(nextEgoLane->GetSuccessors(), observedLane->GetSuccessors()) ||
-          Common::anyElementOfCollectionIsElementOfOtherCollection(nextObservedLane->GetSuccessors(), egoLane->GetSuccessors())) ||
-         Common::anyElementOfCollectionIsElementOfOtherCollection(egoLane->GetPredecessors(), observedLane->GetPredecessors()))) {
-        auto distanceOAgentToEndCA = conflictAreaOL->end.sOffset - observedS;
+    auto conflictAreaDistance = MergeOrSplitManoeuvreDistanceToConflictArea(representation.egoAgent, agent);
+    if (conflictAreaDistance) {
+        auto distanceOAgentToEndCA = conflictAreaDistance->oAgentDistance.vehicleReferenceToCAEnd;
         std::cout << "distanceOAgentToEndCA=" << distanceOAgentToEndCA << std::endl;
         if (distanceOAgentToEndCA + oAgentDistanceReferenceToBack <= 0) {
             // observed agent leaves confict area
             return std::nullopt;
         }
-        auto distanceEgoToEndCA = conflictAreaEL->end.sOffset - egoS;
+        auto distanceEgoToEndCA = conflictAreaDistance->egoDistance.vehicleReferenceToCAEnd;
         double followingDistance = distanceEgoToEndCA - distanceOAgentToEndCA;
         auto finalDistance = [distanceReferenceToEdgesFollowing, distanceReferenceToEdgesLeading](double followingDistance) {
             return followingDistance > 0 ? followingDistance - distanceReferenceToEdgesFollowing
@@ -125,4 +106,29 @@ std::optional<double> FollowingInterpreter::CalculateFollowingDistance(const Age
     }
     return std::nullopt;
 }
+
+std::optional<ConflictSituation>
+FollowingInterpreter::MergeOrSplitManoeuvreDistanceToConflictArea(const EgoAgentRepresentation *ego,
+                                                                  const AgentRepresentation &observedAgent) const {
+    auto egoLane = ego->GetLanePosition().lane;
+    for (auto i = 0; i < maxNumberLanesExtrapolation; i++) {
+        auto observedLane = observedAgent.GetLanePosition().lane;
+        for (auto j = 0; j < maxNumberLanesExtrapolation; j++) {
+            if (((egoLane && observedLane) && egoLane->GetConflictAreaWithLane(observedLane)) &&
+                (Common::anyElementOfCollectionIsElementOfOtherCollection(egoLane->GetSuccessors(), observedLane->GetSuccessors()) ||
+                 Common::anyElementOfCollectionIsElementOfOtherCollection(egoLane->GetPredecessors(), observedLane->GetPredecessors()))) {
+                auto cAEgo = egoLane->GetConflictAreaWithLane(observedLane);
+                auto cAObserved = observedLane->GetConflictAreaWithLane(egoLane);
+                auto result = Common::DistanceToConflictArea({*cAEgo, egoLane->GetOwlId()}, {*cAObserved, observedLane->GetOwlId()}, ego,
+                                                              observedAgent);
+                return result;
+            }
+            observedLane =
+                observedLane ? observedLane->NextLane(observedAgent.GetIndicatorState(), observedAgent.IsMovingInLaneDirection()) : nullptr;
+        }
+        egoLane = egoLane ? egoLane->NextLane(ego->GetIndicatorState(), ego->IsMovingInLaneDirection()) : nullptr;
+    }
+    return std::nullopt;
+}
+
 } // namespace Interpreter

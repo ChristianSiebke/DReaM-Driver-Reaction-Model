@@ -291,31 +291,38 @@ public:
     /// \brief Return Next direction lanes
     ///
     std::optional<NextDirectionLanes> NextLanes(bool movingInLaneDirection) const;
-
+    ///
+    /// \brief Return Next direction lane
+    ///
     const Lane *NextLane(IndicatorState indicatorState, bool movingInLaneDirection) const;
 
+    ///
+    /// \brief Return whether lane is on junction
+    ///
+    bool IsJunctionLane() const ;
+        
 
-private:
-    bool SLaneCoordinateOutOfLane(double sLane_coordniate) const;
+    private:
+        bool SLaneCoordinateOutOfLane(double sLane_coordniate) const;
 
-    OwlId owlId;
-    double length;
-    double width;
-    LaneType type;
-    bool inRoadDirection;
+        OwlId owlId;
+        double length;
+        double width;
+        LaneType type;
+        bool inRoadDirection;
 
-    const Road *road;
-    std::list<LanePoint> lanePointsLeftSide;
-    std::list<LanePoint> lanePointsReference;
-    std::list<LanePoint> lanePointsRightSide;
+        const Road *road;
+        std::list<LanePoint> lanePointsLeftSide;
+        std::list<LanePoint> lanePointsReference;
+        std::list<LanePoint> lanePointsRightSide;
 
-    std::unordered_map<const Lane *, ConflictArea> conflictAreas;
+        std::unordered_map<const Lane *, ConflictArea> conflictAreas;
 
-    std::vector<const Lane *> predecessors;
-    std::vector<const Lane *> successors;
-    const Lane *leftLane = nullptr;
-    const Lane *rightLane = nullptr;
+        std::vector<const Lane *> predecessors;
+        std::vector<const Lane *> successors;
+        const Lane *leftLane = nullptr;
+        const Lane *rightLane = nullptr;
 
-    SpeedLimit speedLimit{maxDouble};
-};
+        SpeedLimit speedLimit{maxDouble};
+    };
 } // namespace MentalInfrastructure

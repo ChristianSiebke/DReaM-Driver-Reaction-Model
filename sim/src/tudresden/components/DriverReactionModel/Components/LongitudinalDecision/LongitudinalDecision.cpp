@@ -121,8 +121,15 @@ double LongitudinalDecision::DetermineAccelerationWish() {
             if (worldInterpretation.crossingInfo.phase > CrossingPhase::Approach) {
                 double v = worldInterpretation.targetVelocity < agent->agent->GetVelocity() ? worldInterpretation.targetVelocity
                                                                                             : agent->agent->GetVelocity();
-                accelerations.push_back(anticipation.AnticipationAccelerationToAchieveVelocityInDistance(
-                    *agent->relativeDistance, v, worldRepresentation.egoAgent->GetVelocity()));
+                if (*agent->relativeDistance < std::numeric_limits<double>::infinity() &&
+                    worldRepresentation.egoAgent->GetVelocity() >= v) {
+                    accelerations.push_back(
+                        anticipation.IDMBrakeStrategy(*agent->relativeDistance, v, worldRepresentation.egoAgent->GetVelocity()));
+                }
+                else {
+                    accelerations.push_back(
+                        anticipation.MaximumAccelerationWish(v, worldRepresentation.egoAgent->GetVelocity() - v, *agent->relativeDistance));
+                }
             }
             else {
                 accelerations.push_back(anticipation.MaximumAccelerationWish(

@@ -17,6 +17,7 @@
 
 constexpr double maxDouble = std::numeric_limits<double>::max();
 constexpr int maxInt = std::numeric_limits<int>::max();
+constexpr unsigned int maxNumberLanesExtrapolation = 4;
 
 using OdId = std::string;
 using OwlId = uint64_t;

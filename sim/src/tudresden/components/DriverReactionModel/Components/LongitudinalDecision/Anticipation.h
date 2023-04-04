@@ -57,22 +57,25 @@ class Anticipation {
 
     double Deceleration(const std::unique_ptr<AgentInterpretation>& observedAgent) const;
     double GetMaxEmergencyAcceleration() const { return maxEmergencyDeceleration; }
-    double AnticipationAccelerationToAchieveVelocityInDistance(double distance, double velTarget,double currentVelocity) const ;
-    private:
-        void DeletePriorityAgent(int oAgentID);
+    double IDMBrakeStrategy(double distance, double velTarget, double currentVelocity) const;
 
-        TimeToConflictArea CalculateTimeToConflictAreaEgo(DistanceToConflictArea distance, double velocity) const;
+private:
+     double AnticipationAccelerationToAchieveVelocityInDistance(double distance, double velTarget, double currentVelocity) const;
 
-        TimeToConflictArea CalculateTimeToConflictAreaObserved(const ConflictSituation &situation, const AmbientAgentRepresentation *oAgent)
-            const;
+    void DeletePriorityAgent(int oAgentID);
 
-        double TravelTimeEgo(double distance, double velocity, double vTarget) const;
-        double TravelTimeObserved(double distance, bool egoInsideConflictArea, const AmbientAgentRepresentation *oAgent) const;
+    TimeToConflictArea CalculateTimeToConflictAreaEgo(DistanceToConflictArea distance, double velocity) const;
 
-        double CalculateDeceleration(double sFrontEgo, double tEndObserved, const AgentInterpretation *observedAgent) const;
+    TimeToConflictArea CalculateTimeToConflictAreaObserved(const ConflictSituation &situation,
+                                                           const AmbientAgentRepresentation *oAgent) const;
 
-        const BehaviourData &GetBehaviourData() const {
-            return behaviourData;
+    double TravelTimeEgo(double distance, double velocity, double vTarget) const;
+    double TravelTimeObserved(double distance, bool egoInsideConflictArea, const AmbientAgentRepresentation *oAgent) const;
+
+    double CalculateDeceleration(double sFrontEgo, double tEndObserved, const AgentInterpretation *observedAgent) const;
+
+    const BehaviourData &GetBehaviourData() const {
+        return behaviourData;
         }
 
         double maxEmergencyDeceleration;

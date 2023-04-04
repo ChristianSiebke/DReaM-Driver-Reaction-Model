@@ -25,6 +25,8 @@ using InfrastructureRepresentation = CognitiveMap::InfrastructureRepresentation;
 enum class JunctionSituation;
 
 struct DistanceToConflictArea {
+    double vehicleReferenceToCAStart = maxDouble; // distance from the front of the vehicle to the start of the conflict area
+    double vehicleReferenceToCAEnd = maxDouble;   // distance from the back of the vehicle to the end of the conflict area
     double vehicleFrontToCAStart = maxDouble; // distance from the front of the vehicle to the start of the conflict area
     double vehicleBackToCAEnd = maxDouble;    // distance from the back of the vehicle to the end of the conflict area
 };
@@ -155,7 +157,7 @@ class AgentRepresentation {
     virtual bool ObservedVehicleCameFromRight(const AgentRepresentation& oAgentPerceptionData) const;
 
     /*!
-     * \brief  return next junction
+     * \brief  return  junction (only consider next road --> TODO: Re-implementation to go over more than one road )
      * @param[in]     infrastructure
      *
      * @return        junction
@@ -210,18 +212,20 @@ class AgentRepresentation {
     virtual bool IsMovingInLaneDirection() const { return internalData->movingInLaneDirection; }
 
   protected:
-    /*!
-     * \brief  return  right of way signs
-     * @param[in]     trafficSignMap
-     *
-     * @return         right of way signs
-     */
-    const std::unordered_map<MentalInfrastructure::TrafficSignType, std::vector<MentalInfrastructure::TrafficSign>> FilterROWTrafficSigns(
-        const std::unordered_map<MentalInfrastructure::TrafficSignType, std::vector<MentalInfrastructure::TrafficSign>>& trafficSignMap)
-        const;
+      std::optional<const MentalInfrastructure::Lane *> GetJunctionConnectionLane(const AgentRepresentation &oAgentPerceptionData) const;
 
-    //! the internal information of the agent representation
-    std::shared_ptr<GeneralAgentPerception> internalData;
+      /*!
+       * \brief  return  right of way signs
+       * @param[in]     trafficSignMap
+       *
+       * @return         right of way signs
+       */
+      const std::unordered_map<MentalInfrastructure::TrafficSignType, std::vector<MentalInfrastructure::TrafficSign>> FilterROWTrafficSigns(
+          const std::unordered_map<MentalInfrastructure::TrafficSignType, std::vector<MentalInfrastructure::TrafficSign>> &trafficSignMap)
+          const;
+
+      //! the internal information of the agent representation
+      std::shared_ptr<GeneralAgentPerception> internalData;
 };
 
 class AmbientAgentRepresentation : public AgentRepresentation {
