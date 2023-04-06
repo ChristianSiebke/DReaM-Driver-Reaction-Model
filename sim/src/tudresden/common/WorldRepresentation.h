@@ -25,8 +25,8 @@ using InfrastructureRepresentation = CognitiveMap::InfrastructureRepresentation;
 enum class JunctionSituation;
 
 struct DistanceToConflictArea {
-    double vehicleReferenceToCAStart = maxDouble; // distance from the front of the vehicle to the start of the conflict area
-    double vehicleReferenceToCAEnd = maxDouble;   // distance from the back of the vehicle to the end of the conflict area
+    double vehicleReferenceToCAStart = maxDouble; // distance from the Reference of the vehicle to the start of the conflict area
+    double vehicleReferenceToCAEnd = maxDouble;   // distance from the Reference of the vehicle to the end of the conflict area
     double vehicleFrontToCAStart = maxDouble; // distance from the front of the vehicle to the start of the conflict area
     double vehicleBackToCAEnd = maxDouble;    // distance from the back of the vehicle to the end of the conflict area
 };
@@ -37,6 +37,8 @@ struct ConflictSituation {
     ~ConflictSituation() = default;
     DistanceToConflictArea egoDistance;
     DistanceToConflictArea oAgentDistance;
+    const MentalInfrastructure::ConflictArea *egoCA;
+    const MentalInfrastructure::ConflictArea *oAgentCA;
 };
 
 struct AgentInterpretation {

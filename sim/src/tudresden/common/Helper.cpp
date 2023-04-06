@@ -238,24 +238,26 @@ std::optional<Vector2d> IntersectionPoint(Vector2d p1, Vector2d p2, Vector2d q1,
     return std::optional<Vector2d>{{x, y}};
 }
 
-ConflictSituation DistanceToConflictArea(std::pair<const MentalInfrastructure::ConflictArea &, OwlId> egoCA,
-                                         std::pair<const MentalInfrastructure::ConflictArea &, OwlId> observedCA,
+ConflictSituation DistanceToConflictArea(const std::pair<const MentalInfrastructure::ConflictArea *, OwlId> &egoCA,
+                                         const std::pair<const MentalInfrastructure::ConflictArea *, OwlId> &observedCA,
                                          const EgoAgentRepresentation *ego, const AgentRepresentation &observedAgent) {
     ConflictSituation result;
-    auto distanceEgoToStartCA = DistanceToConflictPoint(ego, egoCA.first.start, egoCA.second);
-    auto distanceEgoToEndCA = DistanceToConflictPoint(ego, egoCA.first.end, egoCA.second);
+    auto distanceEgoToStartCA = DistanceToConflictPoint(ego, egoCA.first->start, egoCA.second);
+    auto distanceEgoToEndCA = DistanceToConflictPoint(ego, egoCA.first->end, egoCA.second);
     if (!ego->IsMovingInLaneDirection()) {
         auto temp = distanceEgoToStartCA;
         distanceEgoToStartCA = distanceEgoToEndCA;
         distanceEgoToEndCA = temp;
     }
-    auto distanceObservedToStartCA = DistanceToConflictPoint(&observedAgent, observedCA.first.start, observedCA.second);
-    auto distanceObservedToEndCA = DistanceToConflictPoint(&observedAgent, observedCA.first.end, observedCA.second);
+    auto distanceObservedToStartCA = DistanceToConflictPoint(&observedAgent, observedCA.first->start, observedCA.second);
+    auto distanceObservedToEndCA = DistanceToConflictPoint(&observedAgent, observedCA.first->end, observedCA.second);
     if (!observedAgent.IsMovingInLaneDirection()) {
         auto temp = distanceObservedToStartCA;
         distanceObservedToStartCA = distanceObservedToEndCA;
         distanceObservedToEndCA = temp;
     }
+    result.egoCA = egoCA.first;
+    result.oAgentCA = observedCA.first;
     result.egoDistance.vehicleReferenceToCAStart = distanceEgoToStartCA;
     result.egoDistance.vehicleReferenceToCAEnd = distanceEgoToEndCA;
     result.oAgentDistance.vehicleReferenceToCAStart = distanceObservedToStartCA;

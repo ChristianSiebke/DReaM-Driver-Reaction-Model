@@ -54,7 +54,9 @@ double Anticipation::IntersectionGap(const std::unique_ptr<AgentInterpretation> 
         return freeAccelerationEgo;
     }
 
-    if (std::any_of(priorityAgents.begin(), priorityAgents.end(), [oAgentID](int id) { return id == oAgentID; })) {
+    if (std::any_of(priorityAgents.begin(), priorityAgents.end(), [oAgentID, conflictSituation](auto element) {
+            return element.first == oAgentID && element.second == conflictSituation->egoCA;
+        })) {
         std::cout << "Agent: " << worldRepresentation.egoAgent->GetID() << " |  let pass other agent " << std::endl;
         return CalculateDeceleration(conflictSituation->egoDistance.vehicleFrontToCAStart, tObserved.vehicleBackToCAEnd,
                                      observedAgent.get());
@@ -80,7 +82,7 @@ double Anticipation::IntersectionGap(const std::unique_ptr<AgentInterpretation> 
         return freeAccelerationEgo;
     }
     else {
-        priorityAgents.push_back(oAgentID);
+        priorityAgents.insert_or_assign(oAgentID, conflictSituation->egoCA);
         std::cout << "Agent: " << worldRepresentation.egoAgent->GetID() << " | gap too small" << std::endl;
         return CalculateDeceleration(conflictSituation->egoDistance.vehicleFrontToCAStart, tObserved.vehicleBackToCAEnd,
                                      observedAgent.get());
@@ -88,8 +90,7 @@ double Anticipation::IntersectionGap(const std::unique_ptr<AgentInterpretation> 
 }
 
 void Anticipation::DeletePriorityAgent(int oAgentID) {
-    priorityAgents.erase(std::remove_if(priorityAgents.begin(), priorityAgents.end(), [oAgentID](int id) { return id == oAgentID; }),
-                         priorityAgents.end());
+    priorityAgents.erase(oAgentID);
 }
 
 double Anticipation::Deceleration(const std::unique_ptr<AgentInterpretation>& observedAgent) const {

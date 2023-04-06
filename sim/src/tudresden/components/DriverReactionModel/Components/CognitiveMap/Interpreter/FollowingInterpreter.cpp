@@ -112,15 +112,19 @@ FollowingInterpreter::MergeOrSplitManoeuvreDistanceToConflictArea(const EgoAgent
                                                                   const AgentRepresentation &observedAgent) const {
     auto egoLane = ego->GetLanePosition().lane;
     for (auto i = 0; i < maxNumberLanesExtrapolation; i++) {
+        if (!egoLane)
+            break;
         auto observedLane = observedAgent.GetLanePosition().lane;
         for (auto j = 0; j < maxNumberLanesExtrapolation; j++) {
-            if (((egoLane && observedLane) && egoLane->GetConflictAreaWithLane(observedLane)) &&
+            if (!observedLane)
+                break;
+            auto cAEgo = egoLane->GetConflictAreaWithLane(observedLane);
+            if (cAEgo &&
                 (Common::anyElementOfCollectionIsElementOfOtherCollection(egoLane->GetSuccessors(), observedLane->GetSuccessors()) ||
                  Common::anyElementOfCollectionIsElementOfOtherCollection(egoLane->GetPredecessors(), observedLane->GetPredecessors()))) {
-                auto cAEgo = egoLane->GetConflictAreaWithLane(observedLane);
                 auto cAObserved = observedLane->GetConflictAreaWithLane(egoLane);
                 auto result = Common::DistanceToConflictArea({*cAEgo, egoLane->GetOwlId()}, {*cAObserved, observedLane->GetOwlId()}, ego,
-                                                              observedAgent);
+                                                             observedAgent);
                 return result;
             }
             observedLane =

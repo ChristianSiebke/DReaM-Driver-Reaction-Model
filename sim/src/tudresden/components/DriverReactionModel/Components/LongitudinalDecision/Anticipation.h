@@ -80,7 +80,7 @@ private:
 
         double maxEmergencyDeceleration;
         double comfortDeceleration;
-        std::vector<int> priorityAgents;
+        std::unordered_map<int, const MentalInfrastructure::ConflictArea *> priorityAgents;
         const WorldRepresentation &worldRepresentation;
         const WorldInterpretation &worldInterpretation;
         StochasticsInterface *stochastics;

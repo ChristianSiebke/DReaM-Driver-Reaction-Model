@@ -176,15 +176,14 @@ bool Lane::SLaneCoordinateOutOfLane(double sLaneCoordinate) const {
     return GetLastPoint()->sOffset - sLaneCoordinate < -0.001 || -0.001 > sLaneCoordinate - GetFirstPoint()->sOffset;
 };
 
-std::optional<ConflictArea> Lane::GetConflictAreaWithLane(const Lane *lane) const
-{
+std::optional<const ConflictArea *> Lane::GetConflictAreaWithLane(const Lane *lane) const {
     if (!lane) {
         return std::nullopt;
     }
     auto iter = conflictAreas.find(lane);
     if (iter != conflictAreas.end())
     {
-        return iter->second;
+        return &iter->second;
     }
     else
     {
@@ -264,6 +263,10 @@ const MentalInfrastructure::Lane *Lane::NextLane(IndicatorState indicatorState, 
             else {
                 // the state of the indicator does not match to the directions of the
                 // successor lanes (possibly the indicator is not yet set)
+                if (!nextLanes->straightLanes.empty()) {
+                    // assume agent goes straight
+                    return nextLanes->straightLanes.front();
+                }
                 return nullptr;
             }
         }

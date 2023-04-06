@@ -133,24 +133,21 @@ public:
     ///
     /// \brief Returns a list of all lane points making up the Reference lane.
     ///
-    const std::list<LanePoint> &GetLanePoints() const
-    {
+    const std::list<LanePoint> &GetLanePoints() const {
         return lanePointsReference;
     }
 
     ///
     /// \brief Returns a list of all lane points making up the left side of this lane.
     ///
-    const std::list<LanePoint> &GetLeftSidePoints() const
-    {
+    const std::list<LanePoint> &GetLeftSidePoints() const {
         return lanePointsLeftSide;
     }
 
     ///
     /// \brief Returns a list of all lane points making up the right side of this lane.
     ///
-    const std::list<LanePoint> &GetRightSidePoints() const
-    {
+    const std::list<LanePoint> &GetRightSidePoints() const {
         return lanePointsRightSide;
     }
 
@@ -249,13 +246,12 @@ public:
     ///\param  lane
     ///\return conflict area
     ///
-    std::optional<ConflictArea> GetConflictAreaWithLane(const Lane *lane) const;
+    std::optional<const ConflictArea *> GetConflictAreaWithLane(const Lane *lane) const;
 
     ///
     /// \brief Adds a conflict area for this lane.
     ///
-    void AddConflictArea(std::pair<const Lane *, ConflictArea> conflictArea)
-    {
+    void AddConflictArea(std::pair<const Lane *, const ConflictArea> conflictArea) {
         conflictAreas.insert(conflictArea);
     }
 
@@ -316,7 +312,7 @@ public:
         std::list<LanePoint> lanePointsReference;
         std::list<LanePoint> lanePointsRightSide;
 
-        std::unordered_map<const Lane *, ConflictArea> conflictAreas;
+        std::unordered_map<const Lane *, const ConflictArea> conflictAreas;
 
         std::vector<const Lane *> predecessors;
         std::vector<const Lane *> successors;
