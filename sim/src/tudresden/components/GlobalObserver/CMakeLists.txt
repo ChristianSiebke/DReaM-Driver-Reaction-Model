@@ -49,6 +49,8 @@ add_openpass_target(
     World_OSI
     SimulationCore
     Sensor_Perception
+    AnalysisDataRecorder
     
   LINKOSI
 )
+add_subdirectory(Analytics) 

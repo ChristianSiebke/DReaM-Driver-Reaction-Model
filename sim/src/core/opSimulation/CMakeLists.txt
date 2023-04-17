@@ -194,6 +194,7 @@ add_openpass_target(
     Common
     CoreCommon
     AgentStateRecorder
+    AnalysisDataRecorder
 )
 
 set(COMPONENT_NAME opSimulation)
