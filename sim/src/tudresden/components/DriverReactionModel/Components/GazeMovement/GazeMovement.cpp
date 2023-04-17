@@ -85,8 +85,8 @@ void GazeMovement::UpdateRoadSegment() {
                 }
             }
             else if (nextJunction->GetIncomingRoads().size() == 3) {
-                auto nextLanes = InfrastructurePerception::NextLanes(worldRepresentation.egoAgent->IsMovingInLaneDirection(),
-                                                                     worldRepresentation.egoAgent->GetLanePosition().lane);
+                auto nextLanes = worldRepresentation.egoAgent->GetLanePosition().lane->NextLanes(
+                    worldRepresentation.egoAgent->IsMovingInLaneDirection());
                 if (nextLanes == std::nullopt) {
                     std::string message = __FILE__ " Line: " + std::to_string(__LINE__) + "unknown successor lanes";
                     throw std::runtime_error(message);

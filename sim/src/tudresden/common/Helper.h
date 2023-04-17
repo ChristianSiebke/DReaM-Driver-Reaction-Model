@@ -113,5 +113,9 @@ double GetDistanceStoppingPoint(const AgentRepresentation *agent, const AgentInt
 bool IsVehicle(const AgentRepresentation *agent);
 double AngleBetween2d(const Vector2d &vectorA, const Vector2d &vectorB);
 std::optional<Vector2d> IntersectionPoint(Vector2d p1, Vector2d p2, Vector2d q1, Vector2d q2);
+ConflictSituation DistanceToConflictArea(const std::pair<const MentalInfrastructure::ConflictArea *, OwlId> &egoCA,
+                                         const std::pair<const MentalInfrastructure::ConflictArea *, OwlId> &observedCA,
+                                         const EgoAgentRepresentation *ego, const AgentRepresentation &observedAgent);
+double DistanceToConflictPoint(const AgentRepresentation *agent, const MentalInfrastructure::LanePoint &conflictAreaBorder, OwlId laneId);
 
 } // namespace Common

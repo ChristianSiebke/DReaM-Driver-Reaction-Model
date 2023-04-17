@@ -9,6 +9,7 @@
  *****************************************************************************/
 #pragma once
 #include "Common/BehaviourData.h"
+#include "Common/Helper.h"
 #include "Common/WorldRepresentation.h"
 #include "LoggerInterface.h"
 #include "include/stochasticsInterface.h"
@@ -19,6 +20,15 @@ class TargetVelocityCalculation {
 public:
     TargetVelocityCalculation(LoggerInterface *logger, const BehaviourData &behaviourData, StochasticsInterface *stochastics) :
         stochastics{stochastics}, loggerInterface{loggerInterface}, behaviourData{behaviourData} {
+        for (const auto &entry : behaviourData.adBehaviour.velocityStatisticsSpecificRoads) {
+            const auto &de = entry.second;
+            double velocity = stochastics->GetNormalDistributed(de->mean, de->std_deviation);
+            velocity = Common::ValueInBounds(de->min, velocity, de->max);
+            velocityStatisticsSpecificRoads.insert(std::make_pair(entry.first, velocity));
+        }
+        const auto &de = behaviourData.adBehaviour.defaultVelocity;
+        double velocity = stochastics->GetNormalDistributed(de.mean, de.std_deviation);
+        defaultVelocity = Common::ValueInBounds(de.min, velocity, de.max);
     }
     TargetVelocityCalculation(const TargetVelocityCalculation &) = delete;
     TargetVelocityCalculation(TargetVelocityCalculation &&) = delete;
@@ -26,17 +36,20 @@ public:
     TargetVelocityCalculation &operator=(TargetVelocityCalculation &&) = delete;
     virtual ~TargetVelocityCalculation() = default;
 
-    double Update(const WorldRepresentation &worldRepresentation, CrossingPhase phase);
+    double Update(const WorldRepresentation &worldRepresentation, CrossingInfo crossingInfo);
 
 private:
-    void CalculatePhaseVelocities(const WorldRepresentation &worldRepresentation);
-    double CalculateTargetVelocity(const WorldRepresentation &worldRepresentation, CrossingPhase phase) const;
+    void CalculatePhaseVelocities(const WorldRepresentation &worldRepresentation, CrossingInfo crossingInfo);
+    double CalculateTargetVelocity(const WorldRepresentation &worldRepresentation, CrossingInfo crossingInfo) const;
     void Log(const std::string &message, DReaMLogLevel level = info) const {
         loggerInterface->Log(message, level);
     }
 
-    std::map<CrossingPhase, double> phaseVelocities;
-    const MentalInfrastructure::Road *currentRoad = nullptr;
+    std::map<IntersectionSpot, double> phaseVelocities;
+    std::map<std::string, double> velocityStatisticsSpecificRoads;
+    double defaultVelocity;
+    const MentalInfrastructure::Road *lastRoad = nullptr;
+    IndicatorState lastIndicatorState = IndicatorState::IndicatorState_Off;
     StochasticsInterface *stochastics;
     const LoggerInterface *loggerInterface;
     const BehaviourData &behaviourData;

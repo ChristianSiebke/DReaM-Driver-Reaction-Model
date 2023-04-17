@@ -12,7 +12,7 @@
 
 #include "Common/Helper.h"
 
-enum class ActionState { Start = 0, CollisionImminent = 1, Following = 2, IntersectionSituation = 3, End = 4 };
+enum class ActionState { Start = 0, CollisionImminent = 1, Following = 2, ReactToIntersectionSituation = 3, End = 4 };
 
 class ActionStateHandler {
   public:
@@ -24,6 +24,8 @@ class ActionStateHandler {
   private:
     bool DetermineNextState(const std::unique_ptr<AgentInterpretation>& agent);
     void IncrementState();
+    bool CloseToConlictArea(const std::unique_ptr<AgentInterpretation> &oAgent) const;
+    bool EgoHasRightOfWay(const std::unique_ptr<AgentInterpretation> &agent) const;
 
     ActionState currentState;
     const WorldRepresentation& worldRepresentation;

@@ -12,8 +12,17 @@ void AgentPerceptionConverter::Populate() {
     }
 }
 
-void AgentPerceptionConverter::SetInitialRoute(int agentId, std::vector<GlobalObserver::Routes::InternWaypoint> route) {
-    routeMapping.insert_or_assign(agentId, ConvertRoute(route));
+void AgentPerceptionConverter::SetInitialRoute(AgentInterface *agent, std::vector<GlobalObserver::Routes::InternWaypoint> route) {
+    if (route.empty()) {
+        auto newRouteOptional = RouteUpdate(agent);
+        if (newRouteOptional.has_value()) {
+            auto dreamRoute = ConvertRoute(*newRouteOptional);
+            routeMapping.insert_or_assign(agent->GetId(), dreamRoute);
+        }
+    }
+    else {
+        routeMapping.insert_or_assign(agent->GetId(), ConvertRoute(route));
+    }
 }
 
 DReaMRoute::Waypoints AgentPerceptionConverter::ConvertRoute(std::vector<GlobalObserver::Routes::InternWaypoint> route) {
@@ -178,8 +187,8 @@ std::shared_ptr<DetailedAgentPerception> AgentPerceptionConverter::ConvertAgent(
         perceptionData.lanePosition.lane, perceptionData.yaw, perceptionData.lanePosition.sCoordinate, perceptionData.velocity);
     perceptionData.brakeLight = agent->GetBrakeLight();
     perceptionData.indicatorState = agent->GetIndicatorState();
-    perceptionData.nextLane = InfrastructurePerception::NextLane(perceptionData.indicatorState, perceptionData.movingInLaneDirection,
-                                                                 perceptionData.lanePosition.lane);
+    perceptionData.nextLane =
+        perceptionData.lanePosition.lane->NextLane(perceptionData.indicatorState, perceptionData.movingInLaneDirection);
     perceptionData.junctionDistance = GeneralAgentPerception::CalculateJunctionDistance(
         perceptionData, perceptionData.lanePosition.lane->GetRoad(), perceptionData.lanePosition.lane);
 

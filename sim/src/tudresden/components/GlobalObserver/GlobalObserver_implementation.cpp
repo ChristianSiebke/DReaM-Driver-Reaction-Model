@@ -4,6 +4,9 @@
 
 #include <qglobal.h>
 
+#include "Common/TimeMeasurement.hpp"
+TimeMeasurement timeMeasure("GlobalObserver.cpp");
+
 void GlobalObserver_Implementation::UpdateInput(int localLinkId, const std::shared_ptr<SignalInterface const> &data, int time) {
     Q_UNUSED(time);
 
@@ -93,5 +96,7 @@ void GlobalObserver_Implementation::UpdateOutput(int localLinkId, std::shared_pt
 }
 
 void GlobalObserver_Implementation::Trigger(int time) {
+    timeMeasure.StartTimePoint("Trigger GlobalObserver");
     globalObserverMain->Trigger(time);
+    timeMeasure.EndTimePoint();
 }

@@ -25,6 +25,8 @@ using InfrastructureRepresentation = CognitiveMap::InfrastructureRepresentation;
 enum class JunctionSituation;
 
 struct DistanceToConflictArea {
+    double vehicleReferenceToCAStart = maxDouble; // distance from the Reference of the vehicle to the start of the conflict area
+    double vehicleReferenceToCAEnd = maxDouble;   // distance from the Reference of the vehicle to the end of the conflict area
     double vehicleFrontToCAStart = maxDouble; // distance from the front of the vehicle to the start of the conflict area
     double vehicleBackToCAEnd = maxDouble;    // distance from the back of the vehicle to the end of the conflict area
 };
@@ -35,6 +37,8 @@ struct ConflictSituation {
     ~ConflictSituation() = default;
     DistanceToConflictArea egoDistance;
     DistanceToConflictArea oAgentDistance;
+    const MentalInfrastructure::ConflictArea *egoCA;
+    const MentalInfrastructure::ConflictArea *oAgentCA;
 };
 
 struct AgentInterpretation {
@@ -45,7 +49,7 @@ struct AgentInterpretation {
     std::optional<CollisionPoint> collisionPoint;
     std::optional<ConflictSituation> conflictSituation;
     RightOfWay rightOfWay;
-    std::optional<double> followingDistanceToLeadingVehicle;
+    std::optional<double> relativeDistance;
 };
 
 struct MemorizedTrafficSignal {
@@ -146,7 +150,7 @@ class AgentRepresentation {
 
     /*!
      * \brief Checks if the observed vehicle came from a road that is to the right of the ego agent
-     *        (vehicles are only allowed to drive in lane direction close junctions)
+     *        (vehicles are only allowed to drive in lane direction)
      *
      * @param[in]     oAgentPerceptionData
      *
@@ -155,7 +159,7 @@ class AgentRepresentation {
     virtual bool ObservedVehicleCameFromRight(const AgentRepresentation& oAgentPerceptionData) const;
 
     /*!
-     * \brief  return next junction
+     * \brief  return  junction (only consider next road --> TODO: Re-implementation to go over more than one road )
      * @param[in]     infrastructure
      *
      * @return        junction
@@ -210,18 +214,20 @@ class AgentRepresentation {
     virtual bool IsMovingInLaneDirection() const { return internalData->movingInLaneDirection; }
 
   protected:
-    /*!
-     * \brief  return  right of way signs
-     * @param[in]     trafficSignMap
-     *
-     * @return         right of way signs
-     */
-    const std::unordered_map<MentalInfrastructure::TrafficSignType, std::vector<MentalInfrastructure::TrafficSign>> FilterROWTrafficSigns(
-        const std::unordered_map<MentalInfrastructure::TrafficSignType, std::vector<MentalInfrastructure::TrafficSign>>& trafficSignMap)
-        const;
+      std::optional<const MentalInfrastructure::Lane *> GetJunctionConnectionLane(const AgentRepresentation &oAgentPerceptionData) const;
 
-    //! the internal information of the agent representation
-    std::shared_ptr<GeneralAgentPerception> internalData;
+      /*!
+       * \brief  return  right of way signs
+       * @param[in]     trafficSignMap
+       *
+       * @return         right of way signs
+       */
+      const std::unordered_map<MentalInfrastructure::TrafficSignType, std::vector<MentalInfrastructure::TrafficSign>> FilterROWTrafficSigns(
+          const std::unordered_map<MentalInfrastructure::TrafficSignType, std::vector<MentalInfrastructure::TrafficSign>> &trafficSignMap)
+          const;
+
+      //! the internal information of the agent representation
+      std::shared_ptr<GeneralAgentPerception> internalData;
 };
 
 class AmbientAgentRepresentation : public AgentRepresentation {
@@ -288,23 +294,6 @@ class InfrastructureRepresentation {
     InfrastructureRepresentation() {}
 
     void UpdateInternalData(std::shared_ptr<InfrastructurePerception> perceptionData) { infrastructure = perceptionData; }
-
-    /*!
-     * \brief Return the next lane of given lane
-     *
-     */
-    static const MentalInfrastructure::Lane* NextLane(IndicatorState indicatorState, bool movingInLaneDirection,
-                                                      const MentalInfrastructure::Lane* lane);
-
-    /*!
-     * \brief return next lanes that follow on current lane (considering moving direction of agent)
-     *
-     * @param[in]     movingInLaneDirection
-     * @param[in]     currentLane
-     *
-     * @return        next lanes
-     */
-    static const std::optional<NextDirectionLanes> NextLanes(bool movingInLaneDirection, const MentalInfrastructure::Lane* currentLane);
 
     const std::unordered_map<StoppingPointType, StoppingPoint> &GetStoppingPoints(OdId junctionId, OwlId laneId) const {
         return infrastructure->GetStoppingPoints(junctionId, laneId);

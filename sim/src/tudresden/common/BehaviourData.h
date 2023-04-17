@@ -69,10 +69,14 @@ struct StatisticsGroup {
 };
 
 //********** Program-specific Data **********
+typedef std::string RoadID;
+typedef std::string IntersectionID;
+typedef std::map<IndicatorState, std::map<IntersectionSpot, std::shared_ptr<DistributionEntry>>> TurningVelocitis;
 
 struct ActionDecisionBehaviour {
-    std::map<IndicatorState, std::map<CrossingPhase, std::shared_ptr<DistributionEntry>>> velocityStatistics;
-
+    std::map<IntersectionID, std::map<RoadID, TurningVelocitis>> velocityStatisticsIntersection;
+    std::map<std::string, std::shared_ptr<DistributionEntry>> velocityStatisticsSpecificRoads;
+    DistributionEntry defaultVelocity{0, 0, 0, 0};
     double collisionImminentMargin;
     double minDistanceStationaryTraffic;
     double desiredFollowingTimeHeadway;

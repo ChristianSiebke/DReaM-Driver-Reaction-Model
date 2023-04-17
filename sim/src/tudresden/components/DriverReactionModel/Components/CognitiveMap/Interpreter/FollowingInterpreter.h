@@ -26,5 +26,7 @@ class FollowingInterpreter : public InterpreterInterface {
 
   protected:
     std::optional<double> CalculateFollowingDistance(const AgentRepresentation& agent, const WorldRepresentation& representation);
+    std::optional<ConflictSituation> MergeOrSplitManoeuvreDistanceToConflictArea(const EgoAgentRepresentation *ego,
+                                                                                 const AgentRepresentation &observedAgent) const;
 };
 } // namespace Interpreter

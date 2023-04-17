@@ -19,7 +19,7 @@
 
 void BasicVisualSensor::Trigger(int timestamp, GazeState gazeState, std::optional<Common::Vector2d> mirrorPos) {
     // use threads for operations
-    bool useThreads = true;
+    bool useThreads = false;
 
     sensorDirection = gazeState.ufovAngle;
     driverPos = Common::Vector2d(egoAgent->GetPositionX(), egoAgent->GetPositionY());

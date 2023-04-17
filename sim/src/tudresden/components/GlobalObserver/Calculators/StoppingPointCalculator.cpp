@@ -367,9 +367,10 @@ StoppingPointCalculator::DetermineStoppingPoints(const MentalInfrastructure::Jun
 
     SP_ROW_Data rowData = DetermineROWData(egoLane->GetType());
 
-    NextDirectionLanes nextLanes;
+    MentalInfrastructure::NextDirectionLanes nextLanes;
     // assumption movingInLaneDirection = true for now
-    if (auto nextLanesPtr = InfrastructurePerception::NextLanes(true, egoLane)) {
+
+    if (auto nextLanesPtr = egoLane->NextLanes(true)) {
         if (nextLanesPtr.has_value()) {
             nextLanes = nextLanesPtr.value();
         }

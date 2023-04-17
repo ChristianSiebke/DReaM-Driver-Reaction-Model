@@ -25,8 +25,7 @@ void ConflictAreaCalculator::Populate() {
                     std::vector<std::pair<MentalInfrastructure::ConflictArea, MentalInfrastructure::ConflictArea>> vec{};
 
                     infrastructurePerception->conflictAreas.insert({junctionId, vec});
-                    infrastructurePerception->conflictAreas.at(junctionId)
-                        .push_back(std::make_pair(conflictAreas->first, conflictAreas->second));
+                    infrastructurePerception->conflictAreas.at(junctionId).push_back(std::move(*conflictAreas));
                 }
             }
         }

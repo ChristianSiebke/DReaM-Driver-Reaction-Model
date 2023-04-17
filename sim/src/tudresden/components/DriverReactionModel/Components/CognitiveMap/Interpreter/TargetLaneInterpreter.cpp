@@ -53,7 +53,6 @@ std::optional<const MentalInfrastructure::Lane *> TargetLaneInterpreter::TargetL
     lastTimeStepWP = targetWP;
     egoLane = egoAgent->GetMainLocatorLane();
 
-    // lane change needed to stay on path?
     auto laneIter = path.begin();
     std::advance(laneIter, 1);
     if (path.end() == laneIter) {

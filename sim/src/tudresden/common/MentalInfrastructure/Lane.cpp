@@ -172,25 +172,115 @@ LanePoint Lane::InterpolatePoint(double sLaneCoordinate) const
     return detectedPoint;
 }
 
-bool Lane::SLaneCoordinateOutOfLane(double sLaneCoordniate) const
-{
-    return sLaneCoordniate > GetLastPoint()->sOffset || sLaneCoordniate < GetFirstPoint()->sOffset;
+bool Lane::SLaneCoordinateOutOfLane(double sLaneCoordinate) const {
+    return GetLastPoint()->sOffset - sLaneCoordinate < -0.001 || -0.001 > sLaneCoordinate - GetFirstPoint()->sOffset;
 };
 
-std::optional<ConflictArea> Lane::GetConflictAreaWithLane(const Lane *lane) const
-{
+std::optional<const ConflictArea *> Lane::GetConflictAreaWithLane(const Lane *lane) const {
     if (!lane) {
         return std::nullopt;
     }
     auto iter = conflictAreas.find(lane);
     if (iter != conflictAreas.end())
     {
-        return iter->second;
+        return &iter->second;
     }
     else
     {
         return std::nullopt;
     }
 }
+std::optional<NextDirectionLanes> Lane::NextLanes(bool movingInLaneDirection) const {
+    NextDirectionLanes nextLanes;
+    auto nextLanePointers = this->GetSuccessors();
 
+    if (!movingInLaneDirection) {
+        nextLanePointers = this->GetPredecessors();
+    }
+    if (nextLanePointers.empty()) {
+        return std::nullopt;
+    }
+    if (nextLanePointers.size() == 1) {
+        nextLanes.straightLanes.push_back(nextLanePointers.front());
+        return std::move(nextLanes);
+    }
+
+    // calculate direction vector of current lane at its end
+    auto pointsCurrentLane = this->GetLanePoints();
+    auto pointCL = std::prev((pointsCurrentLane).end(), 2);
+    Common::Vector2d currentDirection(this->GetLastPoint()->x - pointCL->x, this->GetLastPoint()->y - pointCL->y);
+    if (!movingInLaneDirection) {
+        pointCL = std::next((pointsCurrentLane).begin(), 1);
+        currentDirection = {this->GetFirstPoint()->x - pointCL->x, this->GetFirstPoint()->y - pointCL->y};
+    }
+
+    for (auto nextLane : nextLanePointers) {
+        auto pointsNextLane = nextLane->GetLanePoints();
+        // calculate direction vector of successor lane
+        auto pointNL = std::prev(pointsNextLane.end(), 2);
+        Common::Vector2d successorDirection(nextLane->GetLastPoint()->x - pointNL->x, nextLane->GetLastPoint()->y - pointNL->y);
+        if (!movingInLaneDirection) {
+            pointNL = std::next(pointsNextLane.begin(), 1);
+            successorDirection = {nextLane->GetFirstPoint()->x - pointNL->x, nextLane->GetFirstPoint()->y - pointNL->y};
+        }
+
+        auto angleDeg = AngleBetween2d(currentDirection, successorDirection) * (180 / M_PI);
+        if (parallelEpsilonDeg >= angleDeg || parallelEpsilonDeg >= std::fabs(180 - angleDeg)) {
+            nextLanes.straightLanes.push_back(nextLane);
+        }
+        else if (parallelEpsilonDeg < angleDeg && currentDirection.Cross(successorDirection) > 0) {
+            nextLanes.leftLanes.push_back(nextLane);
+        }
+        else if (parallelEpsilonDeg < angleDeg && currentDirection.Cross(successorDirection) < 0) {
+            nextLanes.rightLanes.push_back(nextLane);
+        }
+    }
+    return std::move(nextLanes);
+}
+
+const MentalInfrastructure::Lane *Lane::NextLane(IndicatorState indicatorState, bool movingInLaneDirection)const {
+    try {
+        auto nextLanePointers = this->GetSuccessors();
+        if (!movingInLaneDirection) {
+            nextLanePointers = this->GetPredecessors();
+        }
+
+        if (nextLanePointers.size() == 1) {
+            return nextLanePointers.front();
+        }
+        // return FIRST lane pointing in indicator direction
+        if (auto nextLanes = this->NextLanes(movingInLaneDirection)) {
+            if (!nextLanes->straightLanes.empty() &&
+                (indicatorState == IndicatorState::IndicatorState_Off || indicatorState == IndicatorState::IndicatorState_Warn)) {
+                return nextLanes->straightLanes.front();
+            }
+            else if (!nextLanes->leftLanes.empty() && indicatorState == IndicatorState::IndicatorState_Left) {
+                return nextLanes->leftLanes.front();
+            }
+            else if (!nextLanes->rightLanes.empty() && indicatorState == IndicatorState::IndicatorState_Right) {
+                return nextLanes->rightLanes.front();
+            }
+            else {
+                // the state of the indicator does not match to the directions of the
+                // successor lanes (possibly the indicator is not yet set)
+                if (!nextLanes->straightLanes.empty()) {
+                    // assume agent goes straight
+                    return nextLanes->straightLanes.front();
+                }
+                return nullptr;
+            }
+        }
+        else {
+            // no next lane exist or next lane is invalide
+            return nullptr;
+        }
+    }
+    catch (...) {
+        throw std::runtime_error(__FILE__ " Line: " + std::to_string(__LINE__) + " successorLane can not be determined ");
+    }
+}
+
+bool Lane::IsJunctionLane() const {
+    return this->GetRoad()->IsOnJunction();
+}
 } // namespace MentalInfrastructure

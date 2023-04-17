@@ -57,8 +57,11 @@ class Anticipation {
 
     double Deceleration(const std::unique_ptr<AgentInterpretation>& observedAgent) const;
     double GetMaxEmergencyAcceleration() const { return maxEmergencyDeceleration; }
+    double IDMBrakeStrategy(double distance, double velTarget, double currentVelocity) const;
 
-  private:
+private:
+     double AnticipationAccelerationToAchieveVelocityInDistance(double distance, double velTarget, double currentVelocity) const;
+
     void DeletePriorityAgent(int oAgentID);
 
     TimeToConflictArea CalculateTimeToConflictAreaEgo(DistanceToConflictArea distance, double velocity) const;
@@ -71,15 +74,17 @@ class Anticipation {
 
     double CalculateDeceleration(double sFrontEgo, double tEndObserved, const AgentInterpretation *observedAgent) const;
 
-    const BehaviourData& GetBehaviourData() const { return behaviourData; }
+    const BehaviourData &GetBehaviourData() const {
+        return behaviourData;
+        }
 
-    double maxEmergencyDeceleration;
-    double comfortDeceleration;
-    std::vector<int> priorityAgents;
-    const WorldRepresentation& worldRepresentation;
-    const WorldInterpretation& worldInterpretation;
-    StochasticsInterface* stochastics;
-    const LoggerInterface* loggerInterface;
-    const BehaviourData& behaviourData;
-};
+        double maxEmergencyDeceleration;
+        double comfortDeceleration;
+        std::unordered_map<int, const MentalInfrastructure::ConflictArea *> priorityAgents;
+        const WorldRepresentation &worldRepresentation;
+        const WorldInterpretation &worldInterpretation;
+        StochasticsInterface *stochastics;
+        const LoggerInterface *loggerInterface;
+        const BehaviourData &behaviourData;
+    };
 } // namespace LongitudinalDecision

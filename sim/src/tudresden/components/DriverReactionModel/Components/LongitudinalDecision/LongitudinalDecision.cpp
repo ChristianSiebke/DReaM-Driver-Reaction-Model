@@ -86,12 +86,17 @@ void LongitudinalDecision::Update() {
 
 double LongitudinalDecision::DetermineAccelerationWish() {
     std::cout << "Agent: " << worldRepresentation.egoAgent->GetID() << "| START " << std::endl;
-
     std::vector<double> accelerations;
     accelerations.push_back(anticipation.CalculatePhaseAcceleration());
     minEmergencyBrakeDelay.ResetEmergencyState();
     for (auto &entry : worldInterpretation.interpretedAgents) {
         const auto &agent = entry.second;
+
+        if (agent->rightOfWay.ego && !agent->rightOfWay.observed) {
+            std::cout << "Agent: " << worldRepresentation.egoAgent->GetID() << "| HAVE RIGHT OF WAY over Agent =" << agent->agent->GetID()
+                      << std::endl;
+        }
+
         switch (actionStateHandler.GetState(agent)) {
         case ActionState::CollisionImminent:
             double deceleration;
@@ -109,25 +114,43 @@ double LongitudinalDecision::DetermineAccelerationWish() {
                 (agent->agent->GetVelocity() == 0)) {
                 break;
             }
-            accelerations.push_back(anticipation.MaximumAccelerationWish(
-                worldInterpretation.targetVelocity, worldRepresentation.egoAgent->GetVelocity() - agent->agent->GetVelocity(),
-                *agent->followingDistanceToLeadingVehicle));
-            //-----
-            std::cout << "Agent: " << worldRepresentation.egoAgent->GetID() << "| Following acceleration:" << accelerations.back()
-                      << std::endl;
-            //-----
-            break;
-        case ActionState::IntersectionSituation:
-
-            if (!EgoHasRightOfWay(agent) || CloseToConlictArea(agent)) {
-                accelerations.push_back(anticipation.IntersectionGap(agent));
+            if (*agent->relativeDistance < 0) {
+                // agent is behind ego
+                break;
+            }
+            if (worldInterpretation.crossingInfo.phase > CrossingPhase::Approach) {
+                double v = worldInterpretation.targetVelocity < agent->agent->GetVelocity() ? worldInterpretation.targetVelocity
+                                                                                            : agent->agent->GetVelocity();
+                if (*agent->relativeDistance < std::numeric_limits<double>::infinity() &&
+                    worldRepresentation.egoAgent->GetVelocity() >= v) {
+                    accelerations.push_back(
+                        anticipation.IDMBrakeStrategy(*agent->relativeDistance, v, worldRepresentation.egoAgent->GetVelocity()));
+                }
+                else {
+                    accelerations.push_back(
+                        anticipation.MaximumAccelerationWish(v, worldRepresentation.egoAgent->GetVelocity() - v, *agent->relativeDistance));
+                }
+            }
+            else {
+                accelerations.push_back(anticipation.MaximumAccelerationWish(
+                    worldInterpretation.targetVelocity, worldRepresentation.egoAgent->GetVelocity() - agent->agent->GetVelocity(),
+                    *agent->relativeDistance));
             }
             //-----
+            std::cout << "Agent: " << worldRepresentation.egoAgent->GetID() << " | relative distance=" << *agent->relativeDistance
+                      << " | Following acceleration:" << accelerations.back() << " | Observed Agent=" << agent->agent->GetID() << std::endl;
+            //-----
+            break;
+        case ActionState::ReactToIntersectionSituation:
+            accelerations.push_back(anticipation.IntersectionGap(agent));
+
+            //-----
             std::cout << "Agent: " << worldRepresentation.egoAgent->GetID()
-                      << "| IntersectionSituation  acceleration: " << accelerations.back() << std::endl;
+                      << "| ReactToIntersectionSituation  acceleration: " << accelerations.back()
+                      << " | Observed Agent=" << agent->agent->GetID() << std::endl;
             //-----
 
-            break;
+                break;
         case ActionState::End:
             break;
         default:
@@ -150,18 +173,14 @@ double LongitudinalDecision::AgentCrashImminent(const std::unique_ptr<AgentInter
                                                     worldRepresentation.egoAgent->GetVelocity() - worldInterpretation.targetVelocity,
                                                     std::numeric_limits<double>::infinity());
     }
-    else if (oAgent->followingDistanceToLeadingVehicle.has_value()) {
+    else if (oAgent->relativeDistance.has_value()) {
         return anticipation.MaximumAccelerationWish(worldInterpretation.targetVelocity,
                                                     worldRepresentation.egoAgent->GetVelocity() - oAgent->agent->GetVelocity(),
-                                                    *oAgent->followingDistanceToLeadingVehicle);
+                                                    *oAgent->relativeDistance);
     }
     else {
         return anticipation.Deceleration(oAgent);
     }
-}
-
-bool LongitudinalDecision::EgoHasRightOfWay(const std::unique_ptr<AgentInterpretation> &agent) const {
-    return (agent->rightOfWay.ego && !agent->rightOfWay.observed);
 }
 
 bool LongitudinalDecision::observedAgentIsbehindEgoAgent(const std::unique_ptr<AgentInterpretation> &oAgent) const {
@@ -173,11 +192,6 @@ bool LongitudinalDecision::observedAgentIsbehindEgoAgent(const std::unique_ptr<A
            ((oAgent->agent->IsMovingInLaneDirection() == false && worldRepresentation.egoAgent->IsMovingInLaneDirection() == false) &&
             (oAgent->agent->GetLanePosition().lane->GetRoad() == worldRepresentation.egoAgent->GetLanePosition().lane->GetRoad() &&
              oAgent->agent->GetLanePosition().sCoordinate > worldRepresentation.egoAgent->GetLanePosition().sCoordinate));
-}
-
-bool LongitudinalDecision::CloseToConlictArea(const std::unique_ptr<AgentInterpretation> &oAgent) const {
-    return oAgent->agent->GetJunctionDistance().on > 0 ||
-           (oAgent->agent->GetJunctionDistance().toNext > -1 && oAgent->agent->GetJunctionDistance().toNext < 5);
 }
 
 } // namespace LongitudinalDecision

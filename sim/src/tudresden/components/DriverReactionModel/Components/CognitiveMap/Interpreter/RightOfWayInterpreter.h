@@ -25,13 +25,14 @@ class RightOfWayInterpreter : public InterpreterInterface {
     virtual void Update(WorldInterpretation* interpretation, const WorldRepresentation& representation) override;
 
   private:
-    void UpdateRightOfWayRegulation(const WorldRepresentation& representation);
+      const MentalInfrastructure::Junction *NextJunction(const AgentRepresentation &agent) const;
+      void UpdateRightOfWayRegulation(const WorldRepresentation &representation);
 
-    RightOfWay PerformRightOfWayDetermination(const AgentRepresentation&, const WorldRepresentation& representation);
+      RightOfWay PerformRightOfWayDetermination(const AgentRepresentation &, const WorldRepresentation &representation);
 
-    std::optional<JunctionSituation> JunctionSituation(const EgoAgentRepresentation *ego, const AgentRepresentation &observedAgent) const;
-    bool IsMovingTowardsJunction(const AgentRepresentation &agent, const MentalInfrastructure::Junction *junction) const;
+      std::optional<JunctionSituation> JunctionSituation(const EgoAgentRepresentation *ego, const AgentRepresentation &observedAgent) const;
+      bool IsMovingTowardsJunction(const AgentRepresentation &agent, const MentalInfrastructure::Junction *junction) const;
 
-    std::unique_ptr<RightOfWayRegulation::RightOfWayRegulationInterface> rightOfWayRegulation{nullptr};
+      std::unique_ptr<RightOfWayRegulation::RightOfWayRegulationInterface> rightOfWayRegulation{nullptr};
 };
 } // namespace Interpreter

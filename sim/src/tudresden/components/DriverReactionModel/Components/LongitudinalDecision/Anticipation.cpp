@@ -16,10 +16,6 @@ namespace LongitudinalDecision {
 
 double Anticipation::IntersectionGap(const std::unique_ptr<AgentInterpretation> &observedAgent) {
     auto oAgent = observedAgent->agent;
-    std::cout << "observed velocity: " << oAgent->GetVelocity() << " | observed Acceleration " << oAgent->GetAcceleration()
-              << " | observed sCoordinate: " << oAgent->GetLanePosition().sCoordinate << " | distanceToStartCA "
-              << observedAgent->conflictSituation->oAgentDistance.vehicleFrontToCAStart << " | distanceToENDCA "
-              << observedAgent->conflictSituation->oAgentDistance.vehicleBackToCAEnd << std::endl;
     auto oAgentID = oAgent->GetID();
     auto conflictSituation = observedAgent->conflictSituation;
     double freeAccelerationEgo = CalculatePhaseAcceleration();
@@ -31,13 +27,17 @@ double Anticipation::IntersectionGap(const std::unique_ptr<AgentInterpretation> 
 
     auto tEgo = CalculateTimeToConflictAreaEgo(conflictSituation->egoDistance, worldRepresentation.egoAgent->GetVelocity());
     auto tObserved = CalculateTimeToConflictAreaObserved(*conflictSituation, oAgent);
-    std::cout << " t ego front to CA start: " << tEgo.vehicleFrontToCAStart << std::endl;
-    std::cout << " t ego back to CA end: " << tEgo.vehicleBackToCAEnd << std::endl;
-    std::cout << " t observed front to CA start: " << tObserved.vehicleFrontToCAStart << std::endl;
-    std::cout << " t observed back to CA end: " << tObserved.vehicleBackToCAEnd << std::endl;
+    std::cout << " t ego front to CA start: " << tEgo.vehicleFrontToCAStart
+              << " | s  =" << conflictSituation->egoDistance.vehicleFrontToCAStart << std::endl;
+    std::cout << " t ego back to CA end: " << tEgo.vehicleBackToCAEnd << " | s  =" << conflictSituation->egoDistance.vehicleBackToCAEnd
+              << std::endl;
+    std::cout << " t observed front to CA start: " << tObserved.vehicleFrontToCAStart
+              << " | s  =" << conflictSituation->oAgentDistance.vehicleFrontToCAStart << std::endl;
+    std::cout << " t observed back to CA end: " << tObserved.vehicleBackToCAEnd
+              << " | s  =" << conflictSituation->oAgentDistance.vehicleBackToCAEnd << std::endl;
     //  check whether ego (if he has right of way) can pass
     if ((oAgent->GetAcceleration() == 0.0 && oAgent->GetVelocity() == 0.0) && observedAgent->rightOfWay.ego) {
-        if (observedAgent->collisionPoint || observedAgent->conflictSituation->oAgentDistance.vehicleFrontToCAStart <= 0) {
+        if (observedAgent->collisionPoint) {
             return CalculateDeceleration(conflictSituation->egoDistance.vehicleFrontToCAStart, tObserved.vehicleBackToCAEnd,
                                          observedAgent.get());
         }
@@ -54,7 +54,9 @@ double Anticipation::IntersectionGap(const std::unique_ptr<AgentInterpretation> 
         return freeAccelerationEgo;
     }
 
-    if (std::any_of(priorityAgents.begin(), priorityAgents.end(), [oAgentID](int id) { return id == oAgentID; })) {
+    if (std::any_of(priorityAgents.begin(), priorityAgents.end(), [oAgentID, conflictSituation](auto element) {
+            return element.first == oAgentID && element.second == conflictSituation->egoCA;
+        })) {
         std::cout << "Agent: " << worldRepresentation.egoAgent->GetID() << " |  let pass other agent " << std::endl;
         return CalculateDeceleration(conflictSituation->egoDistance.vehicleFrontToCAStart, tObserved.vehicleBackToCAEnd,
                                      observedAgent.get());
@@ -80,7 +82,7 @@ double Anticipation::IntersectionGap(const std::unique_ptr<AgentInterpretation> 
         return freeAccelerationEgo;
     }
     else {
-        priorityAgents.push_back(oAgentID);
+        priorityAgents.insert_or_assign(oAgentID, conflictSituation->egoCA);
         std::cout << "Agent: " << worldRepresentation.egoAgent->GetID() << " | gap too small" << std::endl;
         return CalculateDeceleration(conflictSituation->egoDistance.vehicleFrontToCAStart, tObserved.vehicleBackToCAEnd,
                                      observedAgent.get());
@@ -88,8 +90,7 @@ double Anticipation::IntersectionGap(const std::unique_ptr<AgentInterpretation> 
 }
 
 void Anticipation::DeletePriorityAgent(int oAgentID) {
-    priorityAgents.erase(std::remove_if(priorityAgents.begin(), priorityAgents.end(), [oAgentID](int id) { return id == oAgentID; }),
-                         priorityAgents.end());
+    priorityAgents.erase(oAgentID);
 }
 
 double Anticipation::Deceleration(const std::unique_ptr<AgentInterpretation>& observedAgent) const {
@@ -277,23 +278,35 @@ double Anticipation::CalculatePhaseAcceleration() const {
              worldInterpretation.crossingInfo.phase <= CrossingPhase::Exit) {
         distance = distanceRefPointToEndOfRoad;
     }
+    else if (worldInterpretation.crossingInfo.type == CrossingType::Straight &&
+             worldRepresentation.egoAgent->GetIndicatorState() != IndicatorState::IndicatorState_Off) {
+        distance = worldRepresentation.egoAgent->GetLanePosition().lane->GetLength() -
+                   (worldRepresentation.egoAgent->GetLanePosition().sCoordinate + refToFront) +
+                   worldRepresentation.egoAgent->GetNextLane()->GetLength();
+    }
     else {
         distance = std::numeric_limits<double>::infinity();
     }
+    return AnticipationAccelerationToAchieveVelocityInDistance(distance, velTarget, v);
+}
 
-    if (distance < std::numeric_limits<double>::infinity() && v >= velTarget) {
-        //  IDM brake strategy
-        auto s_star =
-            GetBehaviourData().adBehaviour.minDistanceStationaryTraffic + (v * GetBehaviourData().adBehaviour.desiredFollowingTimeHeadway) +
-            ((v * (v - velTarget)) / (2.0 * std::sqrt(GetBehaviourData().adBehaviour.maxAcceleration * std::abs(comfortDeceleration))));
-
-        auto a = -GetBehaviourData().adBehaviour.maxAcceleration * ((s_star * s_star) / (distance * distance));
-        return Common::ValueInBounds(GetBehaviourData().adBehaviour.comfortDeceleration.min, a,
-                                     GetBehaviourData().adBehaviour.maxAcceleration);
+double Anticipation::AnticipationAccelerationToAchieveVelocityInDistance(double distance, double velTarget, double currentVelocity) const {
+    if (distance < std::numeric_limits<double>::infinity() && currentVelocity >= velTarget) {
+        return IDMBrakeStrategy(distance, velTarget, currentVelocity);
     }
     else {
-        return ComfortAccelerationWish(velTarget, v - velTarget, std::numeric_limits<double>::infinity());
+        return ComfortAccelerationWish(velTarget, currentVelocity - velTarget, std::numeric_limits<double>::infinity());
     }
+}
+
+double Anticipation::IDMBrakeStrategy(double distance, double velTarget, double currentVelocity) const {
+    auto s_star = GetBehaviourData().adBehaviour.minDistanceStationaryTraffic +
+                  (currentVelocity * GetBehaviourData().adBehaviour.desiredFollowingTimeHeadway) +
+                  ((currentVelocity * (currentVelocity - velTarget)) /
+                   (2.0 * std::sqrt(GetBehaviourData().adBehaviour.maxAcceleration * std::abs(comfortDeceleration))));
+
+    auto a = -GetBehaviourData().adBehaviour.maxAcceleration * ((s_star * s_star) / (distance * distance));
+    return Common::ValueInBounds(GetBehaviourData().adBehaviour.comfortDeceleration.min, a, GetBehaviourData().adBehaviour.maxAcceleration);
 }
 
 double Anticipation::CalculateDeceleration(double sFrontEgo, double tEndObserved, const AgentInterpretation *observedAgent) const {

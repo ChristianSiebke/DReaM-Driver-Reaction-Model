@@ -30,7 +30,6 @@ public:
                         callbacks, agent),
         routeConverter(world) {
         globalObserverMain = GlobalObserver::Main::GetInstance(world, stochastics);
-
         // TODO: waypoints/Route must be passed via the openPASS framework.
         // So far the openPASS framework (AgentInterface/egoAgent) has no function to get the waypoints/route --> redundant import
         auto arguments = QCoreApplication::arguments();
@@ -40,9 +39,8 @@ public:
         GlobalObserver::Routes::RouteImporter routeImporter(scenarioConfigPath);
         auto routeImport = routeImporter.GetDReaMRoute(GetAgent()->GetScenarioName());
         auto route = routeConverter.Convert(routeImport);
-
         globalObserverMain->TriggerRoadNetworkConversion();              // ensure that a partially converted road network exists
-        globalObserverMain->SetInitialRoute(GetAgent()->GetId(), route); // forwarding the initial route of this agent
+        globalObserverMain->SetInitialRoute(GetAgent(), route);          // forwarding the initial route of this agent
     }
     ~GlobalObserver_Implementation() {
     }

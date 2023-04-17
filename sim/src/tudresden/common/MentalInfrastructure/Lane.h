@@ -50,6 +50,16 @@ struct ConflictArea
     LanePoint end;
 };
 
+/**
+ * @brief Wrapper for the next lanes an agent might take.
+ *
+ */
+struct NextDirectionLanes {
+    std::vector<const MentalInfrastructure::Lane *> rightLanes;
+    std::vector<const MentalInfrastructure::Lane *> leftLanes;
+    std::vector<const MentalInfrastructure::Lane *> straightLanes;
+};
+
 ///
 /// \brief Represents a lane in the road network. Lanes always belong to a Section on a road.
 ///
@@ -123,24 +133,21 @@ public:
     ///
     /// \brief Returns a list of all lane points making up the Reference lane.
     ///
-    const std::list<LanePoint> &GetLanePoints() const
-    {
+    const std::list<LanePoint> &GetLanePoints() const {
         return lanePointsReference;
     }
 
     ///
     /// \brief Returns a list of all lane points making up the left side of this lane.
     ///
-    const std::list<LanePoint> &GetLeftSidePoints() const
-    {
+    const std::list<LanePoint> &GetLeftSidePoints() const {
         return lanePointsLeftSide;
     }
 
     ///
     /// \brief Returns a list of all lane points making up the right side of this lane.
     ///
-    const std::list<LanePoint> &GetRightSidePoints() const
-    {
+    const std::list<LanePoint> &GetRightSidePoints() const {
         return lanePointsRightSide;
     }
 
@@ -239,13 +246,12 @@ public:
     ///\param  lane
     ///\return conflict area
     ///
-    std::optional<ConflictArea> GetConflictAreaWithLane(const Lane *lane) const;
+    std::optional<const ConflictArea *> GetConflictAreaWithLane(const Lane *lane) const;
 
     ///
     /// \brief Adds a conflict area for this lane.
     ///
-    void AddConflictArea(std::pair<const Lane *, ConflictArea> conflictArea)
-    {
+    void AddConflictArea(std::pair<const Lane *, const ConflictArea> conflictArea) {
         conflictAreas.insert(conflictArea);
     }
 
@@ -277,27 +283,42 @@ public:
         return rightLane;
     }
 
-private:
-    bool SLaneCoordinateOutOfLane(double sLane_coordniate) const;
+    ///
+    /// \brief Return Next direction lanes
+    ///
+    std::optional<NextDirectionLanes> NextLanes(bool movingInLaneDirection) const;
+    ///
+    /// \brief Return Next direction lane
+    ///
+    const Lane *NextLane(IndicatorState indicatorState, bool movingInLaneDirection) const;
 
-    OwlId owlId;
-    double length;
-    double width;
-    LaneType type;
-    bool inRoadDirection;
+    ///
+    /// \brief Return whether lane is on junction
+    ///
+    bool IsJunctionLane() const ;
+        
 
-    const Road *road;
-    std::list<LanePoint> lanePointsLeftSide;
-    std::list<LanePoint> lanePointsReference;
-    std::list<LanePoint> lanePointsRightSide;
+    private:
+        bool SLaneCoordinateOutOfLane(double sLane_coordniate) const;
 
-    std::unordered_map<const Lane *, ConflictArea> conflictAreas;
+        OwlId owlId;
+        double length;
+        double width;
+        LaneType type;
+        bool inRoadDirection;
 
-    std::vector<const Lane *> predecessors;
-    std::vector<const Lane *> successors;
-    const Lane *leftLane = nullptr;
-    const Lane *rightLane = nullptr;
+        const Road *road;
+        std::list<LanePoint> lanePointsLeftSide;
+        std::list<LanePoint> lanePointsReference;
+        std::list<LanePoint> lanePointsRightSide;
 
-    SpeedLimit speedLimit{maxDouble};
-};
+        std::unordered_map<const Lane *, const ConflictArea> conflictAreas;
+
+        std::vector<const Lane *> predecessors;
+        std::vector<const Lane *> successors;
+        const Lane *leftLane = nullptr;
+        const Lane *rightLane = nullptr;
+
+        SpeedLimit speedLimit{maxDouble};
+    };
 } // namespace MentalInfrastructure

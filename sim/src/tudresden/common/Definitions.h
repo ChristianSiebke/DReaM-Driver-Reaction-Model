@@ -17,6 +17,7 @@
 
 constexpr double maxDouble = std::numeric_limits<double>::max();
 constexpr int maxInt = std::numeric_limits<int>::max();
+constexpr unsigned int maxNumberLanesExtrapolation = 4;
 
 using OdId = std::string;
 using OwlId = uint64_t;
@@ -147,6 +148,11 @@ class Lane;
 // the tolerance where two vectors/ angles are pointing in same direction (in degree)
 constexpr double parallelEpsilonDeg = 20;
 
+// phase distances in meter
+constexpr double ApproachDistance = 75;
+constexpr double DecelerationONEDistance = 50;
+constexpr double DecelerationTWODistance = 25;
+
 struct RightOfWay {
     RightOfWay() {
     }
@@ -155,6 +161,8 @@ struct RightOfWay {
     bool ego;
     bool observed;
 };
+
+enum class IntersectionSpot { NONE = 0, IntersectionEntry, IntersectionExit };
 
 enum class CrossingPhase {
     NONE = 0,

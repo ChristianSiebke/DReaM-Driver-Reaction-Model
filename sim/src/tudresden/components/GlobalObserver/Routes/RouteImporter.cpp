@@ -152,7 +152,11 @@ Import::RoadPosition RouteImporter::ImportRoadPosition(QDomElement positionEleme
 }
 
 std::vector<Import::Position> RouteImporter::GetDReaMRoute(std::string id) {
-    return waypointsMap.at(id);
+    auto iter = waypointsMap.find(id);
+    if (iter != waypointsMap.end()) {
+        return waypointsMap.at(id);
+    }
+    return {};
 }
 
 } // namespace GlobalObserver::Routes

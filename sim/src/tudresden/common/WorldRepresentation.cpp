@@ -8,66 +8,51 @@
  * for further information please visit:  https://www.driver-model.de
  *****************************************************************************/
 #include "WorldRepresentation.h"
-#include "Helper.h"
+
 #include <algorithm>
+
+#include "Helper.h"
 namespace CognitiveMap {
 
 std::optional<LanePosition> AgentRepresentation::FindNewPositionInDistance(double distance) const {
     return internalData->FindNewPositionInDistance(distance);
 }
 
-bool AgentRepresentation::ObservedVehicleCameFromRight(const AgentRepresentation& oAgentPerceptionData) const {
-    const auto laneEgoAgent = GetLanePosition().lane;
-    const auto laneOAgent = oAgentPerceptionData.GetLanePosition().lane;
+bool AgentRepresentation::ObservedVehicleCameFromRight(const AgentRepresentation &oAgentPerceptionData) const {
     Common::Vector2d referenceVec;
     Common::Vector2d directionVec;
-    const auto egoRoad = laneEgoAgent->GetRoad();
-    const auto oAgentRoad = laneOAgent->GetRoad();
-    const auto& listOfPoints = laneEgoAgent->GetLanePoints();
-    auto msg = __FILE__ " Line: " + std::to_string(__LINE__) + " No junction situation ";
 
-    if (egoRoad->IsOnJunction()) {
-        // Calculation of the referenceVec vector of the incoming junction road of ego
-        auto secondPoint = std::next(listOfPoints.begin(), 1);
-        referenceVec =
-            Common::Vector2d(secondPoint->x - laneEgoAgent->GetFirstPoint()->x, secondPoint->y - laneEgoAgent->GetFirstPoint()->y);
-
-        // Calculation of the direction vector to the examination point
-        if (oAgentRoad->IsOnJunction()) {
-            directionVec = Common::Vector2d(laneOAgent->GetFirstPoint()->x - laneEgoAgent->GetFirstPoint()->x,
-                                            laneOAgent->GetFirstPoint()->y - laneEgoAgent->GetFirstPoint()->y);
-        }
-        else if (oAgentRoad->IsSuccessorJunction() || oAgentRoad->IsPredecessorJunction()) {
-            directionVec = Common::Vector2d(laneOAgent->GetLastPoint()->x - laneEgoAgent->GetFirstPoint()->x,
-                                            laneOAgent->GetLastPoint()->y - laneEgoAgent->GetFirstPoint()->y);
-        }
-        else {
-            throw std::logic_error(msg);
-        }
-    }
-    else if (egoRoad->IsSuccessorJunction() || egoRoad->IsPredecessorJunction()) {
-        // Calculation of the referenceVec vector of the incoming junction road of ego
-        auto secondLastPoint = std::prev(listOfPoints.end(), 2);
-        referenceVec =
-            Common::Vector2d(laneEgoAgent->GetLastPoint()->x - secondLastPoint->x, laneEgoAgent->GetLastPoint()->y - secondLastPoint->y);
-
-        // Calculation of the direction vector to the examination point
-        if (oAgentRoad->IsOnJunction()) {
-            directionVec = Common::Vector2d(laneOAgent->GetFirstPoint()->x - laneEgoAgent->GetLastPoint()->x,
-                                            laneOAgent->GetFirstPoint()->y - laneEgoAgent->GetLastPoint()->y);
-        }
-        else if (oAgentRoad->IsSuccessorJunction() || oAgentRoad->IsPredecessorJunction()) {
-            directionVec = Common::Vector2d(laneOAgent->GetLastPoint()->x - laneEgoAgent->GetLastPoint()->x,
-                                            laneOAgent->GetLastPoint()->y - laneEgoAgent->GetLastPoint()->y);
-        }
-        else {
-            throw std::logic_error(msg);
-        }
-    }
-    else {
+    auto laneOAgent = GetJunctionConnectionLane(oAgentPerceptionData);
+    auto laneEgo = GetJunctionConnectionLane(*this);
+    if (!laneOAgent || !laneEgo) {
+        auto msg = __FILE__ " Line: " + std::to_string(__LINE__) + " No junction situation ";
         throw std::logic_error(msg);
+        return false;
     }
+    auto listOfPoints = (*laneEgo)->GetLanePoints();
+    auto secondPoint = std::next(listOfPoints.begin(), 1);
+    referenceVec = Common::Vector2d(secondPoint->x - (*laneEgo)->GetFirstPoint()->x, secondPoint->y - (*laneEgo)->GetFirstPoint()->y);
+    directionVec = Common::Vector2d((*laneOAgent)->GetFirstPoint()->x - (*laneEgo)->GetFirstPoint()->x,
+                                    (*laneOAgent)->GetFirstPoint()->y - (*laneEgo)->GetFirstPoint()->y);
+
     return referenceVec.Cross(directionVec) < 0 ? true : false;
+}
+std::optional<const MentalInfrastructure::Lane *> AgentRepresentation::GetJunctionConnectionLane(const AgentRepresentation &agent) const {
+    auto laneAgent = agent.GetLanePosition().lane;
+    auto successorLane = [&agent](const MentalInfrastructure::Lane *lane) {
+        return lane->NextLane(agent.GetIndicatorState(), agent.IsMovingInLaneDirection());
+    };
+    auto predecessorLane = [](const MentalInfrastructure::Lane *lane) { return lane->GetPredecessors().front(); };
+    auto nextLane = [&](auto lane) { return agent.IsMovingInLaneDirection() ? successorLane(lane) : predecessorLane(lane); };
+    const MentalInfrastructure::Junction *egoJunction = nullptr;
+    auto lane = laneAgent;
+    for (auto i = 0; i <= maxNumberLanesExtrapolation; i++) {
+        if (lane && lane->IsJunctionLane()) {
+            return lane;
+        }
+        lane = lane ? nextLane(lane) : nullptr;
+    }
+    return std::nullopt;
 }
 
 const MentalInfrastructure::Junction *AgentRepresentation::NextJunction() const {
@@ -167,16 +152,6 @@ double AgentRepresentation::ExtrapolateDistanceAlongLane(double timeStep) const 
         extrapolatedDistance = std::abs((GetVelocity() * GetVelocity()) / (2 * GetAcceleration()));
     }
     return IsMovingInLaneDirection() ? extrapolatedDistance : -extrapolatedDistance;
-}
-
-const MentalInfrastructure::Lane* InfrastructureRepresentation::NextLane(IndicatorState indicatorState, bool movingInLaneDirection,
-                                                                         const MentalInfrastructure::Lane* lane) {
-    return InfrastructurePerception::NextLane(indicatorState, movingInLaneDirection, lane);
-}
-
-const std::optional<NextDirectionLanes> InfrastructureRepresentation::NextLanes(bool movingInLaneDirection,
-                                                                                const MentalInfrastructure::Lane* currentLane) {
-    return InfrastructurePerception::NextLanes(movingInLaneDirection, currentLane);
 }
 
 const RoadmapGraph::RoadmapNode *InfrastructureRepresentation::NavigateToTargetNode(OdId targetRoadOdId, OwlId targetLaneOdId) const {

@@ -16,9 +16,12 @@
 #include "common/Helper.h"
 
 namespace Interpreter {
+bool use_Threads = false;
 
 // time step size for collision detection (s)
-const double TIME_STEP = 0.1;
+const double TIME_STEP = 0.2;
+// max extrapolation time (s)
+const double MAX_TIME = 5;
 // maximum amounts of lanes an agent will look into
 // only works with a maximum of 2 lanes!
 const int MAX_LANES_AHEAD = 2;
@@ -82,26 +85,35 @@ std::optional<CollisionPoint> CollisionInterpreter::CalculationCollisionPoint(co
         // no agent move --> no crash
         return std::nullopt;
     }
-    double maxTime = GetBehaviourData().adBehaviour.collisionImminentMargin;
-    unsigned int numberThreads = 8;
-    for (double startTime = 0; startTime < maxTime; startTime += maxTime / numberThreads) {
-        double endTime = startTime + maxTime / numberThreads;
-        futures.push_back(std::async(std::launch::async, &CollisionInterpreter::PerformCollisionPointCalculation, this, startTime, endTime,
-                                     representation, observedAgent));
-    }
-
-    for (auto &f : futures) {
-        auto cp = f.get();
-        if (cp) {
-            resultCP.push_back(*cp);
+    if (use_Threads) {
+        unsigned nb_threads_hint = std::thread::hardware_concurrency();
+        unsigned nb_threads = nb_threads_hint == 0 ? 8 : (nb_threads_hint);
+        for (double startTime = 0; startTime < MAX_TIME; startTime += MAX_TIME / nb_threads) {
+            double endTime = startTime + MAX_TIME / nb_threads;
+            futures.push_back(std::async(std::launch::async, &CollisionInterpreter::PerformCollisionPointCalculation, this, startTime,
+                                         endTime, representation, observedAgent));
         }
+
+        for (auto &f : futures) {
+            auto cp = f.get();
+            if (cp) {
+                resultCP.push_back(*cp);
+            }
+        }
+        if (resultCP.empty()) {
+            return std::nullopt;
+        }
+        CollisionPoint crashPoint =
+            *std::min_element(resultCP.begin(), resultCP.end(), [](auto a, auto b) { return a.timeToCollision < b.timeToCollision; });
+        return crashPoint;
     }
-    if (resultCP.empty()) {
-        return std::nullopt;
+    else {
+        auto result = PerformCollisionPointCalculation(0, MAX_TIME, representation, observedAgent);
+        if (!result) {
+            return std::nullopt;
+        }
+        return *result;
     }
-    CollisionPoint crashPoint =
-        *std::min_element(resultCP.begin(), resultCP.end(), [](auto a, auto b) { return a.timeToCollision < b.timeToCollision; });
-    return crashPoint;
 }
 
 std::optional<CollisionPoint> CollisionInterpreter::PerformCollisionPointCalculation(double timeStart, double timeEnd,
