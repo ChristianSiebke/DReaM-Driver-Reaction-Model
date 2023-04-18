@@ -27,12 +27,23 @@ void GlobalObserver_Implementation::UpdateInput(int localLinkId, const std::shar
             std::dynamic_pointer_cast<ContainerSignal<std::vector<OdId>> const>(data);
 
         if (!signal) {
-            const std::string msg = COMPONENTNAME + " invalid signaltype (localLinkId 0 = visible traffic signals)";
+            const std::string msg = COMPONENTNAME + " invalid signaltype (localLinkId 1 = visible traffic signals)";
             LOG(CbkLogLevel::Debug, msg);
             throw std::runtime_error(msg);
         }
 
         visibleTrafficSignals = signal->value;
+    }
+    else if (localLinkId == 2) {
+        std::shared_ptr<structSignal<AnalysisSignal> const> signal = std::dynamic_pointer_cast<structSignal<AnalysisSignal> const>(data);
+
+        if (!signal) {
+            const std::string msg = COMPONENTNAME + " invalid signaltype (localLinkId 2 = DReaM Analysis Data)";
+            LOG(CbkLogLevel::Debug, msg);
+            throw std::runtime_error(msg);
+        }
+
+        analysisData = signal->value;
     }
     else {
         const std::string msg = COMPONENTNAME + " invalid link";
@@ -99,4 +110,6 @@ void GlobalObserver_Implementation::Trigger(int time) {
     timeMeasure.StartTimePoint("Trigger GlobalObserver");
     globalObserverMain->Trigger(time);
     timeMeasure.EndTimePoint();
+    // dataRecorder->Trigger(globalObserverMain->GetDetailedAgentPerception(GetAgent()->GetId()),
+    //                       globalObserverMain->GetInfrastructurePerception(), analysisData, time);
 }

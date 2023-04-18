@@ -37,13 +37,17 @@ public:
     virtual ~TargetVelocityCalculation() = default;
 
     double Update(const WorldRepresentation &worldRepresentation, CrossingInfo crossingInfo);
+    double GetVelDistOffset() {
+        return velocityDistributionOffset;
+    }
 
 private:
     void CalculatePhaseVelocities(const WorldRepresentation &worldRepresentation, CrossingInfo crossingInfo);
-    double CalculateTargetVelocity(const WorldRepresentation &worldRepresentation, CrossingInfo crossingInfo) const;
+    double CalculateTargetVelocity(const WorldRepresentation &worldRepresentation, CrossingInfo crossingInfo);
     void Log(const std::string &message, DReaMLogLevel level = info) const {
         loggerInterface->Log(message, level);
     }
+    void CalculateVelDistOffset(double targetVelocity, DistributionEntry activeTargetDistribution);
 
     std::map<IntersectionSpot, double> phaseVelocities;
     std::map<std::string, double> velocityStatisticsSpecificRoads;
@@ -53,5 +57,7 @@ private:
     StochasticsInterface *stochastics;
     const LoggerInterface *loggerInterface;
     const BehaviourData &behaviourData;
+    const std::map<IntersectionSpot, std::shared_ptr<DistributionEntry>> *activeVelocityDistributions;
+    double velocityDistributionOffset;
 };
 } // namespace Interpreter

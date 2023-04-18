@@ -125,6 +125,8 @@ struct WorldInterpretation {
     double targetVelocity;
     //! next lane on route graph
     std::optional<const MentalInfrastructure::Lane *> targetLane;
+    //! data for DroneAnalysis
+    std::unique_ptr<AnalysisSignal> analysisData;
 };
 
 namespace CognitiveMap {

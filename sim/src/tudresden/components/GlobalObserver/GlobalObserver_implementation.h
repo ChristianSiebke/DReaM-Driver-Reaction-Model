@@ -10,6 +10,7 @@
 
 #pragma once
 
+#include "Analytics/AnalysisDataRecorder.h"
 #include "GlobalObserver_main.h"
 #include "Routes/RouteImporter.h"
 #include "WorldData.h"
@@ -30,6 +31,7 @@ public:
                         callbacks, agent),
         routeConverter(world) {
         globalObserverMain = GlobalObserver::Main::GetInstance(world, stochastics);
+        dataRecorder = GlobalObserver::AnalysisDataRecorder::GetInstance();
         // TODO: waypoints/Route must be passed via the openPASS framework.
         // So far the openPASS framework (AgentInterface/egoAgent) has no function to get the waypoints/route --> redundant import
         auto arguments = QCoreApplication::arguments();
@@ -75,9 +77,12 @@ public:
 
 private:
     std::shared_ptr<GlobalObserver::Main> globalObserverMain;
+    std::shared_ptr<GlobalObserver::AnalysisDataRecorder> dataRecorder;
 
     std::vector<OdId> visibleTrafficSignals;
     std::vector<int> visibleAgents;
+
+    AnalysisSignal analysisData;
 
     GlobalObserver::Routes::RouteConverter routeConverter;
 };

@@ -91,6 +91,17 @@ const GazeState DriverReactionModel::GetGazeState() {
     return gazeMovement->GetGazeState();
 }
 
+const AnalysisSignal DriverReactionModel::GetAnalysisSignal() {
+    AnalysisSignal data = *cognitiveMap->GetWorldInterpretation().analysisData.get();
+    for (auto &agent : cognitiveMap->GetWorldInterpretation().interpretedAgents) {
+        if (agent.second->collisionPoint.has_value()) {
+            double ttc = agent.second->collisionPoint->timeToCollision;
+            data.ttcs.insert(std::make_pair(agent.first, ttc));
+        }
+    }
+    return data;
+}
+
 const std::vector<Common::Vector2d> DriverReactionModel::GetSegmentControlFixationPoints() {
     return gazeMovement->GetSegmentControlFixationPoints();
 }

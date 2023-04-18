@@ -255,3 +255,12 @@ struct Waypoint {
 using Waypoints = std::vector<Waypoint>;
 
 } // namespace DReaMRoute
+
+struct AnalysisSignal {
+    bool obstruction = false;
+    bool following = false;
+    double timeHeadway = std::numeric_limits<double>::max();
+    double targetVelocity = -1.0;
+    double targetDistributionOffset;
+    std::map<int, double> ttcs;
+};

@@ -3,7 +3,6 @@
 namespace GlobalObserver {
 
 std::shared_ptr<Main> Main::instance = nullptr;
-int Main::runId = 0;
 
 void Main::Trigger(int time) {
     if (time == lastConversionTime)

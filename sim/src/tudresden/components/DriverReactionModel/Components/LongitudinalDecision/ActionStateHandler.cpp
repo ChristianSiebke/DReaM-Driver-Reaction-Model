@@ -20,6 +20,21 @@
             IncrementState();
         }
     }
+    if (currentState == ActionState::Following) {
+        worldInterpretation.analysisData->following = true;
+        if (agent->relativeDistance.has_value() && agent->relativeDistance.value() > 0) {
+            double dist = agent->relativeDistance.value();
+            double relVelocity = worldRepresentation.egoAgent->GetVelocity() - agent->agent->GetVelocity();
+            if (relVelocity > 0) {
+                double headway = dist / relVelocity;
+                if (headway < worldInterpretation.analysisData->timeHeadway) {
+                    worldInterpretation.analysisData->timeHeadway = headway;
+                }
+            }
+        }
+    }
+    if (currentState == ActionState::CollisionImminent || currentState == ActionState::ReactToIntersectionSituation)
+        worldInterpretation.analysisData->obstruction = true;
     return currentState;
 }
 

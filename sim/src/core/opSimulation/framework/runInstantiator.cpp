@@ -15,6 +15,7 @@
 #include <sstream>
 
 #include "../../../tudresden/components/DriverReactionModel/AgentStateRecorder/AgentStateRecorder.h" //DReaM
+#include "../../../tudresden/components/GlobalObserver/Analytics/AnalysisDataRecorder.h"             //DReaM
 #include "agentFactory.h"
 #include "agentType.h"
 #include "bindings/dataBuffer.h"
@@ -94,6 +95,9 @@ bool RunInstantiator::ExecuteRun()
                                         << "### run successful ###";
         AgentStateRecorder::AgentStateRecorder::SetRunId(invocation);      // DReaM: hand over run id
         AgentStateRecorder::AgentStateRecorder::ResetAgentStateRecorder(); // DReaM agents record
+
+        GlobalObserver::AnalysisDataRecorder::SetRunId(invocation); // DReaM: hand over run id
+        GlobalObserver::AnalysisDataRecorder::Reset();              // DReaM agents record
 
         observationNetwork.FinalizeRun(runResult);
         ClearRun();

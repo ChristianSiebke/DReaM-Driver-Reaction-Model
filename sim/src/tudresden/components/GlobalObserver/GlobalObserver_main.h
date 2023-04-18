@@ -58,22 +58,6 @@ public:
     Main &operator=(Main const &) = delete;
 
     /**
-     * @brief Resets the instance of GlobalObserver.
-     *
-     */
-    static void Reset() {
-        instance.reset();
-    }
-
-    /**
-     * @brief Sets the current run ID.
-     *
-     */
-    static void SetRunId(int invocation) {
-        runId = invocation;
-    }
-
-    /**
      * @brief Triggers an update of the internally stored shared representations as well as the logic for detecting and categorizing crash
      * events.
      *
@@ -137,7 +121,6 @@ private:
 private:
     // singleton related fields
     static std::shared_ptr<Main> instance;
-    static int runId;
 
     // internal fields
     WorldInterface *world;

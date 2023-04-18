@@ -18,6 +18,7 @@ void CrossingInfoInterpreter::Update(WorldInterpretation* interpretation, const 
         interpretation->crossingInfo = crossingInfo;
 
         interpretation->targetVelocity = targetVelocityCalculation.Update(representation, crossingInfo);
+        interpretation->analysisData->targetDistributionOffset = targetVelocityCalculation.GetVelDistOffset();
     }
     catch (std::logic_error e) {
         std::string message = e.what();
