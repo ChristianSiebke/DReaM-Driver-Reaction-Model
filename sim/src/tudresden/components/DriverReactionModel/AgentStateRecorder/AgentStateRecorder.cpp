@@ -11,11 +11,15 @@
 
 namespace AgentStateRecorder {
 std::shared_ptr<AgentStateRecorder> AgentStateRecorder::instance = nullptr;
-int AgentStateRecorder::runId = 0;
 boost::property_tree::ptree AgentStateRecorder::simulationOutut = {};
 std::string AgentStateRecorder::resultPath = "";
-bool AgentStateRecorder::infrastructureDataWritten = false;
-std::mutex AgentStateRecorder::mtx;
+boost::property_tree::ptree AgentStateRecorder::cyclesTree;
+boost::property_tree::ptree AgentStateRecorder::agentTree;
+boost::property_tree::ptree AgentStateRecorder::sampleTree;
+boost::property_tree::ptree AgentStateRecorder::samplesTree;
+boost::property_tree::ptree AgentStateRecorder::runResultTree;
+boost::property_tree::ptree AgentStateRecorder::runResultsTree;
+boost::property_tree::ptree AgentStateRecorder::infrastuctureTree;
 
 // string representations of enum values, can easily be accessed using array[(int) enum_value]
 const std::string gazeTypes[] = {"NONE", "ScanGlance", "ControlGlance", "ObserveGlance"};
@@ -28,61 +32,19 @@ const std::string stoppingPointTypes[] = {
     "NONE",         "Pedestrian_Right", "Pedestrian_Left", "Pedestrian_Crossing_ONE", "Pedestrian_Crossing_TWO",
     "Vehicle_Left", "Vehicle_Crossroad"};
 
-void AgentStateRecorder::AddInfrastructurePerception(std::shared_ptr<InfrastructurePerception> infrastructurePerception) {
-    record.infrastructurePerception = infrastructurePerception;
+void AgentStateRecorder::AddInfrastructurePerception(std::shared_ptr<InfrastructurePerception> infrastructure) {
+    if (infrastuctureTree.empty())
+        infrastuctureTree = AddInfrastructureData(infrastructure);
 }
 
-void AgentStateRecorder::AddGazeStates(int time, int id, GazeState gazeState) {
-    if (record.gazeStates.find(time) == record.gazeStates.end()) {
-        std::map<agentID, GazeState> idMap;
-        record.gazeStates.insert(std::make_pair(time, idMap));
-    }
-    record.gazeStates.at(time).insert(std::make_pair(id, gazeState));
-}
-
-void AgentStateRecorder::AddCrossingInfos(int time, int id, CrossingInfo info) {
-    if (record.crossingInfos.find(time) == record.crossingInfos.end()) {
-        std::map<agentID, CrossingInfo> idMap;
-        record.crossingInfos.insert(std::make_pair(time, idMap));
-    }
-    record.crossingInfos.at(time).insert(std::make_pair(id, info));
-}
-
-void AgentStateRecorder::AddOtherAgents(int time, int id, std::vector<GeneralAgentPerception> agents) {
-    if (record.observedAgents.find(time) == record.observedAgents.end()) {
-        std::map<agentID, std::vector<GeneralAgentPerception>> idMap;
-        record.observedAgents.insert(std::make_pair(time, idMap));
-    }
-    record.observedAgents.at(time).insert(std::make_pair(id, agents));
-}
-
-void AgentStateRecorder::AddFixationPoints(int time, int id, std::vector<Common::Vector2d> fixationPoints) {
-    if (record.segmentControlFixationPoints.find(time) == record.segmentControlFixationPoints.end()) {
-        std::map<agentID, std::vector<Common::Vector2d>> idMap;
-        record.segmentControlFixationPoints.insert(std::make_pair(time, idMap));
-    }
-    record.segmentControlFixationPoints.at(time).insert(std::make_pair(id, fixationPoints));
-}
-
-void AgentStateRecorder::AddTrafficSignals(int time, int id, std::unordered_map<DReaMId, MemorizedTrafficSignal> *signals) {
-    if (record.trafficSignalMemory.find(time) == record.trafficSignalMemory.end()) {
-        std::map<agentID, std::vector<OdId>> idMap;
-        record.trafficSignalMemory.insert(std::make_pair(time, idMap));
-    }
-
-    std::vector<OdId> signalIdList;
-    for (const auto &[id, signal] : *signals) {
-        signalIdList.push_back(signal.trafficSignal->GetOpenDriveId());
-    }
-    record.trafficSignalMemory[time].insert(std::make_pair(id, signalIdList));
-}
-
-std::string AgentStateRecorder::GenerateDataSet(int time, int agentId) {
+void AgentStateRecorder::BufferTimeStep(const int &time, const int &agentId, const GazeState &gazeState,
+                                        const std::vector<GeneralAgentPerception> &observedAgents, const CrossingInfo &crossingInfo,
+                                        const std::vector<Common::Vector2d> &segmentControlFixationPoints,
+                                        const std::unordered_map<DReaMId, MemorizedTrafficSignal> *trafficSignals) {
     std::string outputLine;
 
     // gaze information:
     // <GazeType>, <ScanAOI>, <ufovAngle>, <openingAngle>, <viewDistance>
-    GazeState gazeState = record.gazeStates.at(time).at(agentId);
     outputLine += gazeTypes[(int)gazeState.fixationState.first] + ",";
     outputLine += scanAOIs[gazeState.fixationState.second] + ",";
     outputLine += std::to_string(gazeState.ufovAngle) += ",";
@@ -93,7 +55,7 @@ std::string AgentStateRecorder::GenerateDataSet(int time, int agentId) {
     // other agents as perceived by the current:
     // [{<id> | <x> | <y> | <yaw>} | { ... }]
     outputLine += "[";
-    for (auto agent : record.observedAgents.at(time).at(agentId)) {
+    for (const auto &agent : observedAgents) {
         outputLine += "{";
         outputLine += std::to_string(agent.id) += " | ";
         outputLine += std::to_string(agent.refPosition.x) += " | ";
@@ -104,14 +66,13 @@ std::string AgentStateRecorder::GenerateDataSet(int time, int agentId) {
 
     // crossingType & crossingPhase:
     // <crossingType>, <crossingPhase>
-    auto crossingInfo = record.crossingInfos.at(time).at(agentId);
     outputLine += crossingTypes[(int)crossingInfo.type] + ",";
     outputLine += crossingPhases[(int)crossingInfo.phase] + ",";
 
     // fixation points:
     // [{<x> | <y>} | { ... }]
     outputLine += "[";
-    for (auto point : record.segmentControlFixationPoints.at(time).at(agentId)) {
+    for (const auto &point : segmentControlFixationPoints) {
         outputLine += ("{");
         outputLine += std::to_string(point.x) += " | ";
         outputLine += std::to_string(point.y) += "}";
@@ -122,16 +83,18 @@ std::string AgentStateRecorder::GenerateDataSet(int time, int agentId) {
     // memorized traffic signals:
     // [<TrafficSignalOdId> | ...]
     outputLine += "[";
-    for (int i = 0; i < record.trafficSignalMemory.at(time).at(agentId).size(); i++) {
-        outputLine += record.trafficSignalMemory.at(time).at(agentId)[i];
-        if (i != record.trafficSignalMemory.at(time).at(agentId).size() - 1) {
+    for (int i = 0; i < trafficSignals->size(); i++) {
+        outputLine += (trafficSignals->at(i)).trafficSignal->GetOpenDriveId();
+        if (i != trafficSignals->size() - 1) {
             outputLine += " | ";
         }
     }
 
     outputLine += "],";
 
-    return outputLine;
+    agentTree.put("<xmlattr>.id", agentId);
+    agentTree.put_value(std::move(outputLine));
+    sampleTree.add_child("Agent", agentTree);
 }
 
 std::string AgentStateRecorder::GenerateHeader() {
@@ -164,47 +127,19 @@ std::string doubleToString(double input, int precision = 5) {
 }
 
 void AgentStateRecorder::WriteOutputFile() {
+    simulationOutut.put("SimulationOutput.<xmlattr>.SchemaVersion", "0.3.0");
+    simulationOutut.add_child("SimulationOutput.InfrastructureData", std::move(infrastuctureTree));
+    simulationOutut.add_child("SimulationOutput.RunResults", std::move(runResultsTree));
+
     boost::property_tree::xml_writer_settings<std::string> settings(' ', 2);
     boost::property_tree::write_xml(resultPath + "DReaMOutput.xml", simulationOutut, std::locale(), settings);
 }
 
-void AgentStateRecorder::BufferSimulationOutput() {
-    std::lock_guard<std::mutex> lock(mtx);
-    simulationOutut.put("SimulationOutput.<xmlattr>.SchemaVersion", "0.3.0");
-    if (!infrastructureDataWritten) {
-        simulationOutut.add_child("SimulationOutput.InfrastructureData", AddInfrastructureData());
-        infrastructureDataWritten = true;
-    }
-
-    // Creates Samples for each timestep, each matching the structure given above
-    boost::property_tree::ptree samplesTree;
-    for (auto [time, values] : record.gazeStates) {
-        boost::property_tree::ptree sampleTree;
-        boost::property_tree::ptree agentTree;
-        sampleTree.put("<xmlattr>.time", std::to_string(time));
-        for (auto [agentId, values] : record.gazeStates.at(time)) {
-            boost::property_tree::ptree agentTree;
-            agentTree.put("<xmlattr>.id", agentId);
-            agentTree.put_value(GenerateDataSet(time, agentId));
-            sampleTree.add_child("Agent", agentTree);
-        }
-        samplesTree.add_child("Sample", sampleTree);
-    }
-    boost::property_tree::ptree runResultTree;
-    boost::property_tree::ptree cyclesTree;
-
-    cyclesTree.add("Header", this->GenerateHeader());
-    cyclesTree.add_child("Samples", samplesTree);
-    runResultTree.add_child("Cyclics", cyclesTree);
-    runResultTree.put("<xmlattr>.RunId", std::to_string(runId));
-    simulationOutut.add_child("SimulationOutput.RunResults.RunResult", runResultTree);
-}
-
-boost::property_tree::ptree AgentStateRecorder::AddInfrastructureData() const {
+boost::property_tree::ptree AgentStateRecorder::AddInfrastructureData(std::shared_ptr<InfrastructurePerception> infrastructurePerception) {
     boost::property_tree::ptree infrastructureData;
     boost::property_tree::ptree stoppingPointsTree;
 
-    for (auto [intersectionId, lanemap] : record.infrastructurePerception->GetStoppingPointData().stoppingPoints) {
+    for (auto [intersectionId, lanemap] : infrastructurePerception->GetStoppingPointData().stoppingPoints) {
         boost::property_tree::ptree intersectionTree;
         intersectionTree.put("<xmlattr>.id", intersectionId);
         for (auto [laneId, pointmap] : lanemap) {
@@ -230,7 +165,7 @@ boost::property_tree::ptree AgentStateRecorder::AddInfrastructureData() const {
 
     // Adds conflict points to the output ptree
     boost::property_tree::ptree conflictAreaTree;
-    for (auto &conflictAreas : record.infrastructurePerception->GetConflictAreas()) {
+    for (auto &conflictAreas : infrastructurePerception->GetConflictAreas()) {
         boost::property_tree::ptree conflictAreaJunctionTree;
         conflictAreaJunctionTree.put("<xmlattr>.id", conflictAreas.first);
         for (auto &conflictArea : conflictAreas.second) {

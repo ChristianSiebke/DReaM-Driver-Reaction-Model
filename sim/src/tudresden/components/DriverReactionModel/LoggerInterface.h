@@ -19,7 +19,9 @@ class LoggerInterface {
     LoggerInterface(Logger& logger) : logger{logger} {}
     LoggerInterface();
 
-    void Log(const std::string& message, DReaMLogLevel level = info) const { logger.Log(message, level); }
+    void Log(const std::string &message, DReaMLogLevel level = error) const {
+        logger.Log(message, level);
+    }
 
   private:
     Logger& logger;

@@ -68,8 +68,6 @@ public:
 private:
     double DetermineAccelerationWish();
 
-    bool observedAgentIsbehindEgoAgent(const std::unique_ptr<AgentInterpretation> &oAgent) const;
-
     double AgentCrashImminent(const std::unique_ptr<AgentInterpretation> &oAgent) const;
     
     double accelerationResult;

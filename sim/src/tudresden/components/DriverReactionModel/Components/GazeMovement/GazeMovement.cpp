@@ -85,16 +85,19 @@ void GazeMovement::UpdateRoadSegment() {
                 }
             }
             else if (nextJunction->GetIncomingRoads().size() == 3) {
-                auto nextLanes = worldRepresentation.egoAgent->GetLanePosition().lane->NextLanes(
-                    worldRepresentation.egoAgent->IsMovingInLaneDirection());
+                auto lanes = worldRepresentation.egoAgent->GetLanePosition().lane->GetRoad()->GetLanes();
+                auto findCorrespondinglaneToId = [lanes](std::string id) {
+                    return std::find_if(lanes.begin(), lanes.end(), [id](auto element) { return element->GetOpenDriveId() == id; });
+                };
+
+                auto lane = std::stoi(worldRepresentation.egoAgent->GetLanePosition().lane->GetOpenDriveId()) < 0
+                                ? *findCorrespondinglaneToId("-1")
+                                : *findCorrespondinglaneToId("1");
+                auto nextLanes = lane->NextLanes(worldRepresentation.egoAgent->IsMovingInLaneDirection());
                 if (nextLanes == std::nullopt) {
                     std::string message = __FILE__ " Line: " + std::to_string(__LINE__) + "unknown successor lanes";
                     throw std::runtime_error(message);
                 }
-
-
-
-
                 TJunctionLayout layout;
                 if (nextLanes->leftLanes.size() > 0 && nextLanes->straightLanes.size() > 0 && nextLanes->rightLanes.size() == 0) {
                     layout = TJunctionLayout::LeftStraight;

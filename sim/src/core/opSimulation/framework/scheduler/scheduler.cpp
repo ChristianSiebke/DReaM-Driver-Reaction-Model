@@ -11,9 +11,10 @@
 
 #include "scheduler.h"
 
-#include "common/log.h"
+#include "../../../../tudresden/components/DriverReactionModel/AgentStateRecorder/AgentStateRecorder.h" //DReaM
 #include "agent.h"
 #include "agentParser.h"
+#include "common/log.h"
 #include "eventNetwork.h"
 #include "runResult.h"
 #include "taskBuilder.h"
@@ -96,7 +97,7 @@ bool Scheduler::Run(
         {
             return Scheduler::FAILURE;
         }
-
+        AgentStateRecorder::AgentStateRecorder::BufferSamples(currentTime);
         currentTime = taskList.GetNextTimestamp(currentTime);
 
         if (runResult.IsEndCondition())
@@ -104,7 +105,6 @@ bool Scheduler::Run(
             LOG_INTERN(LogLevel::DebugCore) << "Scheduler: End of operation (end condition reached)";
             return Scheduler::SUCCESS;
         }
-
         eventNetwork.Clear();
     }
 

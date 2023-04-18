@@ -9,17 +9,22 @@
  *****************************************************************************/
 #include "ConflictSituationInterpreter.h"
 
+#include "Common/TimeMeasurement.hpp"
 #include "Helper.h"
+
+TimeMeasurement timeMeasure2("ConflictSituationInterpreter.cpp");
 
 namespace Interpreter {
 
 void ConflictSituationInterpreter::Update(WorldInterpretation *interpretation, const WorldRepresentation &representation) {
     try {
+        timeMeasure2.StartTimePoint("ConflictSituationInterpreter ");
         for (const auto &observedAgent : *representation.agentMemory) {
             auto conflictSituation = PossibleConflictSituationAlongLane(representation.egoAgent, *observedAgent);
             auto agentInterpretation = &interpretation->interpretedAgents.at(observedAgent->GetID());
             (*agentInterpretation)->conflictSituation = conflictSituation;
         }
+        timeMeasure2.EndTimePoint();
     }
     catch (std::logic_error e) {
         std::string message = e.what();
@@ -47,8 +52,7 @@ ConflictSituationInterpreter::PossibleConflictSituationAlongLane(const EgoAgentR
                 break;
             if (auto cAEgo = egoLane->GetConflictAreaWithLane(observedLane)) {
                 auto cAObserved = observedLane->GetConflictAreaWithLane(egoLane);
-                auto result = Common::DistanceToConflictArea({*cAEgo, egoLane->GetOwlId()}, {*cAObserved, observedLane->GetOwlId()}, ego,
-                                                             observedAgent);
+                auto result = Common::DistanceToConflictArea({*cAEgo, egoLane}, {*cAObserved, observedLane}, ego, observedAgent);
                 return result;
             }
             observedLane =

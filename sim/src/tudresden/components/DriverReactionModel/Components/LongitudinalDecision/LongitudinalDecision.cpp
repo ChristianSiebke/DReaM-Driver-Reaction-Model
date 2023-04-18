@@ -127,15 +127,17 @@ double LongitudinalDecision::DetermineAccelerationWish() {
                         anticipation.IDMBrakeStrategy(*agent->relativeDistance, v, worldRepresentation.egoAgent->GetVelocity()));
                 }
                 else {
-                    accelerations.push_back(
-                        anticipation.MaximumAccelerationWish(v, worldRepresentation.egoAgent->GetVelocity() - v, *agent->relativeDistance));
+                    accelerations.push_back(anticipation.MaximumAccelerationWish(
+                        worldInterpretation.targetVelocity, worldRepresentation.egoAgent->GetVelocity(),
+                        worldRepresentation.egoAgent->GetVelocity() - v, *agent->relativeDistance));
                 }
             }
             else {
                 accelerations.push_back(anticipation.MaximumAccelerationWish(
-                    worldInterpretation.targetVelocity, worldRepresentation.egoAgent->GetVelocity() - agent->agent->GetVelocity(),
-                    *agent->relativeDistance));
+                    worldInterpretation.targetVelocity, worldRepresentation.egoAgent->GetVelocity(),
+                    worldRepresentation.egoAgent->GetVelocity() - agent->agent->GetVelocity(), *agent->relativeDistance));
             }
+
             //-----
             std::cout << "Agent: " << worldRepresentation.egoAgent->GetID() << " | relative distance=" << *agent->relativeDistance
                       << " | Following acceleration:" << accelerations.back() << " | Observed Agent=" << agent->agent->GetID() << std::endl;
@@ -168,30 +170,19 @@ double LongitudinalDecision::DetermineAccelerationWish() {
 }
 
 double LongitudinalDecision::AgentCrashImminent(const std::unique_ptr<AgentInterpretation> &oAgent) const {
-    if (observedAgentIsbehindEgoAgent(oAgent)) {
-        return anticipation.MaximumAccelerationWish(worldInterpretation.targetVelocity,
+    if (oAgent->relativeDistance.has_value() && oAgent->relativeDistance < 0) {
+        return anticipation.MaximumAccelerationWish(worldInterpretation.targetVelocity, worldRepresentation.egoAgent->GetVelocity(),
                                                     worldRepresentation.egoAgent->GetVelocity() - worldInterpretation.targetVelocity,
                                                     std::numeric_limits<double>::infinity());
     }
-    else if (oAgent->relativeDistance.has_value()) {
-        return anticipation.MaximumAccelerationWish(worldInterpretation.targetVelocity,
+    else if (oAgent->relativeDistance.has_value() && oAgent->relativeDistance > 0) {
+        return anticipation.MaximumAccelerationWish(worldInterpretation.targetVelocity, worldRepresentation.egoAgent->GetVelocity(),
                                                     worldRepresentation.egoAgent->GetVelocity() - oAgent->agent->GetVelocity(),
                                                     *oAgent->relativeDistance);
     }
     else {
         return anticipation.Deceleration(oAgent);
     }
-}
-
-bool LongitudinalDecision::observedAgentIsbehindEgoAgent(const std::unique_ptr<AgentInterpretation> &oAgent) const {
-    return (oAgent->agent->GetNextLane() == worldRepresentation.egoAgent->GetLanePosition().lane &&
-            oAgent->agent->IsMovingInLaneDirection() == worldRepresentation.egoAgent->IsMovingInLaneDirection()) ||
-           ((oAgent->agent->IsMovingInLaneDirection() == true && worldRepresentation.egoAgent->IsMovingInLaneDirection() == true) &&
-            (oAgent->agent->GetLanePosition().lane->GetRoad() == worldRepresentation.egoAgent->GetLanePosition().lane->GetRoad() &&
-             oAgent->agent->GetLanePosition().sCoordinate < worldRepresentation.egoAgent->GetLanePosition().sCoordinate)) ||
-           ((oAgent->agent->IsMovingInLaneDirection() == false && worldRepresentation.egoAgent->IsMovingInLaneDirection() == false) &&
-            (oAgent->agent->GetLanePosition().lane->GetRoad() == worldRepresentation.egoAgent->GetLanePosition().lane->GetRoad() &&
-             oAgent->agent->GetLanePosition().sCoordinate > worldRepresentation.egoAgent->GetLanePosition().sCoordinate));
 }
 
 } // namespace LongitudinalDecision

@@ -45,34 +45,7 @@
 #endif
 
 namespace AgentStateRecorder {
-using time = int;
-using agentID = int;
-//! Stores all collected data in the agentStateRecorder to be processed later
-struct Record {
-    //! For each timestep, maps a map containing each agent's GazeState to the associated timestep
-    std::map<time, std::map<agentID, GazeState>> gazeStates;
 
-    //! For each timestep, maps a map containing each agent's CrossingInfo to the associated timestep
-    std::map<time, std::map<agentID, CrossingInfo>> crossingInfos;
-
-    //! For each timestep, maps a map containing each agent's segmentControlFixationPoints to the associated timestep
-    std::map<time, std::map<agentID, std::vector<Common::Vector2d>>> segmentControlFixationPoints;
-
-    std::shared_ptr<InfrastructurePerception> infrastructurePerception;
-
-    //! For each timestep, maps a map containing the Id and position of other known agents for each agent, to the associated timestep
-    std::map<time, std::map<agentID, std::vector<GeneralAgentPerception>>> observedAgents;
-
-    //! For each timestep, stores the traffic signals currently in memory of an agent
-    std::map<time, std::map<agentID, std::vector<OdId>>> trafficSignalMemory;
-};
-
-/*!
- * \brief Saves the states of each agent
- *
- * This singleton class saves and later outputs all neccessary data from map and agents
- *
- */
 class EXPORT AgentStateRecorder {
 public:
     static std::shared_ptr<AgentStateRecorder> GetInstance(std::string resultPath) {
@@ -85,12 +58,7 @@ public:
         instance.reset();
     }
 
-    static void SetRunId(int invocation) {
-        runId = invocation;
-    }
-
     ~AgentStateRecorder() {
-        BufferSimulationOutput();
     }
 
     AgentStateRecorder(AgentStateRecorder const &) = delete;
@@ -98,56 +66,53 @@ public:
 
     void AddInfrastructurePerception(std::shared_ptr<InfrastructurePerception> infrastructurePerception);
 
-    void AddStoppingPoints(StoppingPointData);
+    static void BufferRuns(int runId) {
+        cyclesTree.add("Header", GenerateHeader());
+        cyclesTree.add_child("Samples", samplesTree);
+        runResultTree.add_child("Cyclics", std::move(cyclesTree));
+        runResultTree.put("<xmlattr>.RunId", std::to_string(runId));
+        runResultsTree.add_child("RunResult", std::move(runResultTree));
+        cyclesTree.clear();
+        samplesTree.clear();
+        runResultTree.clear();
+    };
 
-    /**
-     * @brief 
-     * 
-     * @param time 
-     * @param id 
-     */
-    void AddGazeStates(int time, int id, GazeState);
+    static void BufferSamples(int time) {
+        sampleTree.put("<xmlattr>.time", std::to_string(time));
+        samplesTree.add_child("Sample", sampleTree);
+        agentTree.clear();
+        sampleTree.clear();
+    };
 
-    void AddOtherAgents(int time, int id, std::vector<GeneralAgentPerception>);
-
-    void AddCrossingInfos(int time, int id, CrossingInfo);
-
-    void AddFixationPoints(int time, int id, std::vector<Common::Vector2d>);
-
-    void AddTrafficSignals(int time, int id, std::unordered_map<DReaMId, MemorizedTrafficSignal> *);
+    void BufferTimeStep(const int &time, const int &agentId, const GazeState &gazeState,
+                        const std::vector<GeneralAgentPerception> &observedAgents, const CrossingInfo &crossingInfo,
+                        const std::vector<Common::Vector2d> &segmentControlFixationPoints,
+                        const std::unordered_map<DReaMId, MemorizedTrafficSignal> *trafficSignals);
 
     //! All information saved in the agentStateRecorder is written into an xml file
     static void WriteOutputFile();
+    //! Generates a header matching and discribing the recorded datasets
+    static std::string GenerateHeader();
 
 private:
     AgentStateRecorder(std::string inResultPath) {
         resultPath = inResultPath;
     }
 
-    void BufferSimulationOutput();
-    boost::property_tree::ptree AddInfrastructureData() const;
+    boost::property_tree::ptree AddInfrastructureData(std::shared_ptr<InfrastructurePerception> infrastructure);
 
     static std::shared_ptr<AgentStateRecorder> instance;
-    static std::mutex mtx;
     static boost::property_tree::ptree simulationOutut;
     static std::string resultPath;
-    Record record;
-    static int runId;
-    static bool infrastructureDataWritten;
-
-    /*!
-     * \brief Generates a string containing all information for one timestep
-     *
-     * All data from record describing the same state (time) are collected into a
-     * single string with seperators.
-     *
-     * @param[in]     time           Requested simulation timestep
-     */
-    std::string GenerateDataSet(int time, int agentId);
+    std::shared_ptr<InfrastructurePerception> infrastructurePerception;
+    static boost::property_tree::ptree agentTree;
+    static boost::property_tree::ptree sampleTree;
+    static boost::property_tree::ptree samplesTree;
+    static boost::property_tree::ptree cyclesTree;
+    static boost::property_tree::ptree runResultTree;
+    static boost::property_tree::ptree runResultsTree;
+    static boost::property_tree::ptree infrastuctureTree;
 
     std::string StoppingTypeToString(StoppingPointType);
-
-    //! Generates a header matching and discribing the recorded datasets
-    std::string GenerateHeader();
 };
-} // namespace agentRecordState
+} // namespace AgentStateRecorder

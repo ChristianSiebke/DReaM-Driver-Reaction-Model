@@ -191,18 +191,18 @@ std::optional<const ConflictArea *> Lane::GetConflictAreaWithLane(const Lane *la
     }
 }
 std::optional<NextDirectionLanes> Lane::NextLanes(bool movingInLaneDirection) const {
-    NextDirectionLanes nextLanes;
-    auto nextLanePointers = this->GetSuccessors();
+    NextDirectionLanes result;
+    auto nextLanes = this->GetSuccessors();
 
     if (!movingInLaneDirection) {
-        nextLanePointers = this->GetPredecessors();
+        nextLanes = this->GetPredecessors();
     }
-    if (nextLanePointers.empty()) {
+    if (nextLanes.empty()) {
         return std::nullopt;
     }
-    if (nextLanePointers.size() == 1) {
-        nextLanes.straightLanes.push_back(nextLanePointers.front());
-        return std::move(nextLanes);
+    if (nextLanes.size() == 1) {
+        result.straightLanes.push_back(nextLanes.front());
+        return std::move(result);
     }
 
     // calculate direction vector of current lane at its end
@@ -214,7 +214,7 @@ std::optional<NextDirectionLanes> Lane::NextLanes(bool movingInLaneDirection) co
         currentDirection = {this->GetFirstPoint()->x - pointCL->x, this->GetFirstPoint()->y - pointCL->y};
     }
 
-    for (auto nextLane : nextLanePointers) {
+    for (auto nextLane : nextLanes) {
         auto pointsNextLane = nextLane->GetLanePoints();
         // calculate direction vector of successor lane
         auto pointNL = std::prev(pointsNextLane.end(), 2);
@@ -226,16 +226,16 @@ std::optional<NextDirectionLanes> Lane::NextLanes(bool movingInLaneDirection) co
 
         auto angleDeg = AngleBetween2d(currentDirection, successorDirection) * (180 / M_PI);
         if (parallelEpsilonDeg >= angleDeg || parallelEpsilonDeg >= std::fabs(180 - angleDeg)) {
-            nextLanes.straightLanes.push_back(nextLane);
+            result.straightLanes.push_back(nextLane);
         }
         else if (parallelEpsilonDeg < angleDeg && currentDirection.Cross(successorDirection) > 0) {
-            nextLanes.leftLanes.push_back(nextLane);
+            result.leftLanes.push_back(nextLane);
         }
         else if (parallelEpsilonDeg < angleDeg && currentDirection.Cross(successorDirection) < 0) {
-            nextLanes.rightLanes.push_back(nextLane);
+            result.rightLanes.push_back(nextLane);
         }
     }
-    return std::move(nextLanes);
+    return std::move(result);
 }
 
 const MentalInfrastructure::Lane *Lane::NextLane(IndicatorState indicatorState, bool movingInLaneDirection)const {

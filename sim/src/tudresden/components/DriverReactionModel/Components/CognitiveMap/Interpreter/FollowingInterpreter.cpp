@@ -10,14 +10,20 @@
 
 #include "FollowingInterpreter.h"
 
+#include "Common/TimeMeasurement.hpp"
 #include "common/Helper.h"
+
+TimeMeasurement timeMeasure4("FollowingInterpreter.cpp");
+
 namespace Interpreter {
 
 void FollowingInterpreter::Update(WorldInterpretation* interpretation, const WorldRepresentation& representation) {
     try {
+        timeMeasure4.StartTimePoint("FollowingInterpreter ");
         for (const auto& agent : *representation.agentMemory) {
             interpretation->interpretedAgents.at(agent->GetID())->relativeDistance = CalculateFollowingDistance(*agent, representation);
         }
+        timeMeasure4.EndTimePoint();
     } catch (...) {
         std::string message =
             "File: " + static_cast<std::string>(__FILE__) + " Line: " + std::to_string(__LINE__) + " Update followingInterpreter failed";
@@ -29,6 +35,13 @@ void FollowingInterpreter::Update(WorldInterpretation* interpretation, const Wor
 
 std::optional<double> FollowingInterpreter::CalculateFollowingDistance(const AgentRepresentation& agent,
                                                                        const WorldRepresentation& representation) {
+    // TODO: define followingThreshold  (min safety distance 2s --> 4 *min safety distance)
+    double followingThreshold = representation.egoAgent->GetVelocity() * 8;
+    followingThreshold = followingThreshold < 30 ? 30 : followingThreshold;
+
+    if ((representation.egoAgent->GetRefPosition() - agent.GetRefPosition()).Length() - (followingThreshold) > 0) {
+        return std::nullopt;
+    }
     auto egoLane = representation.egoAgent->GetLanePosition().lane;
     double egoS = representation.egoAgent->GetLanePosition().sCoordinate;
     auto observedLane = agent.GetLanePosition().lane;
@@ -123,8 +136,7 @@ FollowingInterpreter::MergeOrSplitManoeuvreDistanceToConflictArea(const EgoAgent
                 (Common::anyElementOfCollectionIsElementOfOtherCollection(egoLane->GetSuccessors(), observedLane->GetSuccessors()) ||
                  Common::anyElementOfCollectionIsElementOfOtherCollection(egoLane->GetPredecessors(), observedLane->GetPredecessors()))) {
                 auto cAObserved = observedLane->GetConflictAreaWithLane(egoLane);
-                auto result = Common::DistanceToConflictArea({*cAEgo, egoLane->GetOwlId()}, {*cAObserved, observedLane->GetOwlId()}, ego,
-                                                             observedAgent);
+                auto result = Common::DistanceToConflictArea({*cAEgo, egoLane}, {*cAObserved, observedLane}, ego, observedAgent);
                 return result;
             }
             observedLane =

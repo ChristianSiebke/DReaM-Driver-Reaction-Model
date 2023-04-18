@@ -48,11 +48,11 @@ class Anticipation {
      * return acceleration
      *
      */
-    double IDMAcceleration(double velTarget, double dv, double sDiff) const;
+    double IDMAcceleration(double velTarget, double velCurrent, double dv, double sDiff) const;
 
-    double ComfortAccelerationWish(double velTarget, double dv, double sDiff) const;
+    double ComfortAccelerationWish(double velTarget, double velCurrent, double dv, double sDiff) const;
 
-    double MaximumAccelerationWish(double velTarget, double dv, double sDiff) const;
+    double MaximumAccelerationWish(double velTarget, double velCurrent, double dv, double sDiff) const;
     double CalculatePhaseAcceleration() const;
 
     double Deceleration(const std::unique_ptr<AgentInterpretation>& observedAgent) const;
@@ -64,15 +64,10 @@ private:
 
     void DeletePriorityAgent(int oAgentID);
 
-    TimeToConflictArea CalculateTimeToConflictAreaEgo(DistanceToConflictArea distance, double velocity) const;
+    TimeToConflictArea CalculateTimeToConflictArea(DistanceToConflictArea distance, double velocity) const;
+    double TravelTime(double distance, double velocity, double vTarget) const;
 
-    TimeToConflictArea CalculateTimeToConflictAreaObserved(const ConflictSituation &situation,
-                                                           const AmbientAgentRepresentation *oAgent) const;
-
-    double TravelTimeEgo(double distance, double velocity, double vTarget) const;
-    double TravelTimeObserved(double distance, bool egoInsideConflictArea, const AmbientAgentRepresentation *oAgent) const;
-
-    double CalculateDeceleration(double sFrontEgo, double tEndObserved, const AgentInterpretation *observedAgent) const;
+    double ApproachingStoppingPoint(double sFrontEgo, double tEndObserved, const AgentInterpretation *observedAgent) const;
 
     const BehaviourData &GetBehaviourData() const {
         return behaviourData;
