@@ -130,6 +130,9 @@ std::optional<int> LeadingCarID(const std::unordered_map<int, std::unique_ptr<Ag
 double GetDistanceStoppingPoint(const AgentRepresentation *ego, const AgentInterpretation *observedAgent,
                                 const WorldInterpretation &worldInterpretation) {
     StoppingPoint sp;
+    if (observedAgent->conflictSituation->junction->GetOpenDriveId() != worldInterpretation.crossingInfo.junctionOdId) {
+        return std::numeric_limits<double>::infinity();
+    }
     if (worldInterpretation.crossingInfo.phase == CrossingPhase::Deceleration_TWO ||
         worldInterpretation.crossingInfo.phase == CrossingPhase::Deceleration_ONE) {
         if (IsVehicle(ego) && IsVehicle(observedAgent->agent)) {
@@ -238,24 +241,28 @@ std::optional<Vector2d> IntersectionPoint(Vector2d p1, Vector2d p2, Vector2d q1,
     return std::optional<Vector2d>{{x, y}};
 }
 
-ConflictSituation DistanceToConflictArea(const std::pair<const MentalInfrastructure::ConflictArea *, OwlId> &egoCA,
-                                         const std::pair<const MentalInfrastructure::ConflictArea *, OwlId> &observedCA,
-                                         const EgoAgentRepresentation *ego, const AgentRepresentation &observedAgent) {
+ConflictSituation
+DistanceToConflictArea(const std::pair<const MentalInfrastructure::ConflictArea *, const MentalInfrastructure::Lane *> &egoCA,
+                       const std::pair<const MentalInfrastructure::ConflictArea *, const MentalInfrastructure::Lane *> &observedCA,
+                       const EgoAgentRepresentation *ego, const AgentRepresentation &observedAgent) {
     ConflictSituation result;
-    auto distanceEgoToStartCA = DistanceToConflictPoint(ego, egoCA.first->start, egoCA.second);
-    auto distanceEgoToEndCA = DistanceToConflictPoint(ego, egoCA.first->end, egoCA.second);
+    auto distanceEgoToStartCA = DistanceToConflictPoint(ego, egoCA.first->start, egoCA.second->GetOwlId());
+    auto distanceEgoToEndCA = DistanceToConflictPoint(ego, egoCA.first->end, egoCA.second->GetOwlId());
     if (!ego->IsMovingInLaneDirection()) {
         auto temp = distanceEgoToStartCA;
         distanceEgoToStartCA = distanceEgoToEndCA;
         distanceEgoToEndCA = temp;
     }
-    auto distanceObservedToStartCA = DistanceToConflictPoint(&observedAgent, observedCA.first->start, observedCA.second);
-    auto distanceObservedToEndCA = DistanceToConflictPoint(&observedAgent, observedCA.first->end, observedCA.second);
+    auto distanceObservedToStartCA = DistanceToConflictPoint(&observedAgent, observedCA.first->start, observedCA.second->GetOwlId());
+    auto distanceObservedToEndCA = DistanceToConflictPoint(&observedAgent, observedCA.first->end, observedCA.second->GetOwlId());
     if (!observedAgent.IsMovingInLaneDirection()) {
         auto temp = distanceObservedToStartCA;
         distanceObservedToStartCA = distanceObservedToEndCA;
         distanceObservedToEndCA = temp;
     }
+    auto junction = egoCA.second->GetRoad()->GetJunction();
+    junction = junction != nullptr ? junction : observedCA.second->GetRoad()->GetJunction();
+    result.junction = junction;
     result.egoCA = egoCA.first;
     result.oAgentCA = observedCA.first;
     result.egoDistance.vehicleReferenceToCAStart = distanceEgoToStartCA;

@@ -8,16 +8,24 @@
  * for further information please visit:  https://www.driver-model.de
  *****************************************************************************/
 #include "CrossingInfoInterpreter.h"
+
 #include <iostream>
+
+#include "Common/TimeMeasurement.hpp"
+
+TimeMeasurement timeMeasure3("CrossingInfoInterpreter.cpp");
+
 namespace Interpreter {
 
 void CrossingInfoInterpreter::Update(WorldInterpretation* interpretation, const WorldRepresentation& representation) {
     try {
+        timeMeasure3.StartTimePoint("CrossingInfoInterpreter ");
+        (interpretation, representation);
         Localize(representation);
         UpdateStoppingPoints(representation);
         interpretation->crossingInfo = crossingInfo;
-
         interpretation->targetVelocity = targetVelocityCalculation.Update(representation, crossingInfo);
+        timeMeasure3.EndTimePoint();
     }
     catch (std::logic_error e) {
         std::string message = e.what();
@@ -45,22 +53,6 @@ void CrossingInfoInterpreter::UpdateStoppingPoints(const WorldRepresentation& re
     }
 
     SetDistanceSP(representation.egoAgent, crossingInfo.egoStoppingPoints);
-
-    for (auto &agent : *representation.agentMemory) {
-        auto junction = agent->NextJunction();
-        auto lane = agent->GetLanePosition().lane;
-
-        if (junction) {
-            if (crossingInfo.otherStoppingpoints.find(agent->GetID()) == crossingInfo.otherStoppingpoints.end()) {
-                auto &stoppingpoints = representation.infrastructure->GetStoppingPoints(junction->GetOpenDriveId(), lane->GetOwlId());
-                crossingInfo.otherStoppingpoints.insert(std::make_pair(agent->GetID(), stoppingpoints));
-            }
-        }
-        if (std::any_of(crossingInfo.otherStoppingpoints.begin(), crossingInfo.otherStoppingpoints.end(),
-                        [&agent](auto element) { return element.first == agent->GetID(); })) {
-            SetDistanceSP(agent.get(), crossingInfo.otherStoppingpoints.at(agent->GetID()));
-        }
-    }
 }
 
 void CrossingInfoInterpreter::Localize(const WorldRepresentation &representation) {

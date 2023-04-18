@@ -13,13 +13,14 @@
 #include <future>
 #include <iostream>
 
+#include "Common/TimeMeasurement.hpp"
 #include "common/Helper.h"
 
 namespace Interpreter {
 bool use_Threads = false;
 
 // time step size for collision detection (s)
-const double TIME_STEP = 0.2;
+const double TIME_STEP = 0.3;
 // max extrapolation time (s)
 const double MAX_TIME = 5;
 // maximum amounts of lanes an agent will look into
@@ -31,9 +32,13 @@ const int CIRCLE_POLYGON_PRECISION = 8;
 // used for debug output
 const bool DEBUG_OUT = true;
 
+TimeMeasurement timeMeasure1("CollisionInterpreter.cpp");
+
 void CollisionInterpreter::Update(WorldInterpretation *interpretation, const WorldRepresentation &representation) {
     try {
+        timeMeasure1.StartTimePoint("CollisionInterpreter ");
         DetermineCollisionPoints(interpretation, representation);
+        timeMeasure1.EndTimePoint();
     }
     catch (...) {
         std::string message =
@@ -81,10 +86,13 @@ std::optional<CollisionPoint> CollisionInterpreter::CalculationCollisionPoint(co
     std::vector<std::future<std::optional<CollisionPoint>>> futures;
     std::vector<CollisionPoint> resultCP;
 
-    if (representation.egoAgent->GetVelocity() <= 0.05 && observedAgent.GetVelocity() <= 0.05) {
-        // no agent move --> no crash
+    double egoDistance = representation.egoAgent->ExtrapolateDistanceAlongLane(MAX_TIME);
+    double observedDistance = observedAgent.ExtrapolateDistanceAlongLane(MAX_TIME);
+
+    if ((representation.egoAgent->GetRefPosition() - observedAgent.GetRefPosition()).Length() - (egoDistance + observedDistance) > 0) {
         return std::nullopt;
     }
+
     if (use_Threads) {
         unsigned nb_threads_hint = std::thread::hardware_concurrency();
         unsigned nb_threads = nb_threads_hint == 0 ? 8 : (nb_threads_hint);

@@ -97,30 +97,20 @@ AgentPerceptionConverter::RouteUpdate(const AgentInterface *agent) const {
 
     std::vector<GlobalObserver::Routes::InternWaypoint> newRoute;
     auto currentLaneId = egoAgent.GetReferencePointPosition()->laneId;
+    std::transform(
+        rbegin, rend, std::back_inserter(newRoute), [&straightRouteGraph = straightRouteGraph, roads, &currentLaneId](auto element) {
+            GlobalObserver::Routes::InternWaypoint newRoute;
+            newRoute.roadId = get(RouteElement(), straightRouteGraph, element).roadId;
+            newRoute.s = 0;
+            auto road = roads.at(get(RouteElement(), straightRouteGraph, element).roadId);
+            auto section = road->GetSections().front();
+            auto laneId = get(RouteElement(), straightRouteGraph, element).inOdDirection ? -1 : 1;
 
-    std::transform(rbegin, rend, std::back_inserter(newRoute),
-                   [&straightRouteGraph = straightRouteGraph, roads, &currentLaneId](auto element) {
-                       GlobalObserver::Routes::InternWaypoint newRoute;
-                       newRoute.roadId = get(RouteElement(), straightRouteGraph, element).roadId;
-                       newRoute.s = 0;
-                       auto road = roads.at(get(RouteElement(), straightRouteGraph, element).roadId);
-                       auto section = road->GetSections().front();
-                       auto laneId = 0;
-                       if (get(RouteElement(), straightRouteGraph, element).inOdDirection) {
-                           laneId = currentLaneId < 0 ? -1 : 1;
-                           auto iter = std::find_if(section->GetLanes().begin(), section->GetLanes().end(),
-                                                    [laneId](auto element) { return element->GetOdId() == laneId; });
-                           newRoute.lane = (*iter)->GetId();
-                       }
-                       else {
-                           laneId = currentLaneId < 0 ? 1 : -1;
-                           auto iter = std::find_if(section->GetLanes().begin(), section->GetLanes().end(),
-                                                    [laneId](auto element) { return element->GetOdId() == laneId; });
-                           newRoute.lane = (*iter)->GetId();
-                       }
-                       currentLaneId = laneId;
-                       return newRoute;
-                   });
+            auto iter = std::find_if(section->GetLanes().begin(), section->GetLanes().end(),
+                                     [laneId](auto element) { return element->GetOdId() == laneId; });
+            newRoute.lane = (*iter)->GetId();
+            return newRoute;
+        });
     const_cast<AgentInterface *>(agent)->GetEgoAgent().SetRoadGraph(std::move(straightRouteGraph), newRoot, newTarget);
     return newRoute;
 }

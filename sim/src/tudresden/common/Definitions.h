@@ -215,7 +215,6 @@ struct CrossingInfo {
     // the id of the junction that the stopping point belongs to
     OdId junctionOdId;
     StoppingPointMap egoStoppingPoints;
-    std::map<int, StoppingPointMap> otherStoppingpoints;
 };
 
 /**

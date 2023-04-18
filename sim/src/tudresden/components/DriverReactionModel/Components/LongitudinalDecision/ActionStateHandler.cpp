@@ -32,6 +32,10 @@ bool ActionStateHandler::DetermineNextState(const std::unique_ptr<AgentInterpret
             return agent->collisionPoint.has_value() && agent->collisionPoint->collisionImminent;
         case ActionState::Following:
             if (agent->relativeDistance.has_value()) {
+                if (agent->conflictSituation.has_value() &&
+                    (agent->conflictSituation->junction->GetOpenDriveId() != worldInterpretation.crossingInfo.junctionOdId)) {
+                    return false;
+                }
                 if (agent->conflictSituation->oAgentDistance.vehicleFrontToCAStart < 0) {
                     return true;
                 }

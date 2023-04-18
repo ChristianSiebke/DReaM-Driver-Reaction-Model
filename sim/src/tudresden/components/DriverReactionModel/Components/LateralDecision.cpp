@@ -95,38 +95,7 @@ bool LateralDecision::AgentIsTurningOnJunction() const {
 IndicatorState LateralDecision::SetIndicatorAtJunction(const MentalInfrastructure::Lane *targetLane) const {
     try {
         auto lanesPtr =
-            worldRepresentation.egoAgent->GetLanePosition().lane->NextLanes(worldRepresentation.egoAgent->IsMovingInLaneDirection());
-
-        std::cout << "lanesPtr= " << lanesPtr.has_value() << std::endl;
-        std::cout << "targetLane ID= " << targetLane->GetDReaMId() << "  | type=" << static_cast<int>(targetLane->GetType())
-                  << " | on junction? =" << static_cast<int>(targetLane->GetRoad()->IsOnJunction())
-                  << " |  Road id = " << targetLane->GetRoad()->GetOpenDriveId() << " | lane id= " << targetLane->GetOpenDriveId()
-                  << std::endl;
-        if (lanesPtr) {
-            if (lanesPtr->leftLanes.size() > 0)
-                std::cout << "leftLanes= " << lanesPtr->leftLanes.size() << "  |  id= " << lanesPtr->leftLanes.front()->GetDReaMId()
-                          << std::endl;
-            if (lanesPtr->rightLanes.size() > 0)
-                std::cout << "rightLanes= " << lanesPtr->rightLanes.size() << "  |  id= " << lanesPtr->rightLanes.front()->GetDReaMId()
-                          << std::endl;
-            if (lanesPtr->straightLanes.size() > 0)
-                std::cout << "straightLanes= " << lanesPtr->straightLanes.size()
-                          << "  |  id= " << lanesPtr->straightLanes.front()->GetDReaMId() << std::endl;
-        }
-        lanesPtr = worldRepresentation.egoAgent->GetMainLocatorLane()->NextLanes(worldRepresentation.egoAgent->IsMovingInLaneDirection());
-        if (lanesPtr) {
-            std::cout << "-------------main loccator lane-----" << std::endl;
-            if (lanesPtr->leftLanes.size() > 0)
-                std::cout << "leftLanes= " << lanesPtr->leftLanes.size() << "  |  id= " << lanesPtr->leftLanes.front()->GetDReaMId()
-                          << std::endl;
-            if (lanesPtr->rightLanes.size() > 0)
-                std::cout << "rightLanes= " << lanesPtr->rightLanes.size() << "  |  id= " << lanesPtr->rightLanes.front()->GetDReaMId()
-                          << std::endl;
-            if (lanesPtr->straightLanes.size() > 0)
-                std::cout << "straightLanes= " << lanesPtr->straightLanes.size()
-                          << "  |  id= " << lanesPtr->straightLanes.front()->GetDReaMId() << std::endl;
-        }
-
+            worldRepresentation.egoAgent->GetMainLocatorLane()->NextLanes(worldRepresentation.egoAgent->IsMovingInLaneDirection());
         if (lanesPtr) {
             if (std::any_of(lanesPtr->leftLanes.begin(), lanesPtr->leftLanes.end(),
                             [targetLane](auto element) { return element == targetLane; })) {

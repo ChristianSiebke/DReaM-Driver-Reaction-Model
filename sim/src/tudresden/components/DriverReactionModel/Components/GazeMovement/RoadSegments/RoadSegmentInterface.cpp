@@ -134,6 +134,7 @@ GazeState RoadSegmentInterface::ScanGlance(CrossingPhase phase) {
         Distribution de = behaviourData.gmBehaviour.scanAOIs.driverAOIs.at(aoi).fixationDuration;
         double dist = stochastics->GetNormalDistributed(de.mean, de.std_deviation);
         gazeState.fixationDuration = Common::ValueInBounds(de.min, dist, de.max);
+        gazeState.viewDistance = 100;
     }
     else if (behaviourData.gmBehaviour.scanAOIs.mirrorAOIs.find(aoi) != behaviourData.gmBehaviour.scanAOIs.mirrorAOIs.end()) {
         std::cout << "mirror aoi found" << std::endl;
@@ -143,6 +144,7 @@ GazeState RoadSegmentInterface::ScanGlance(CrossingPhase phase) {
         Distribution de = behaviourData.gmBehaviour.scanAOIs.mirrorAOIs.at(aoi).fixationDuration;
         double dist = stochastics->GetNormalDistributed(de.mean, de.std_deviation);
         gazeState.fixationDuration = Common::ValueInBounds(de.min, dist, de.max);
+        gazeState.viewDistance = 100;
     }
     else {
         std::cout << "aoi not found" << std::endl;

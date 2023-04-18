@@ -39,6 +39,7 @@ struct ConflictSituation {
     DistanceToConflictArea oAgentDistance;
     const MentalInfrastructure::ConflictArea *egoCA;
     const MentalInfrastructure::ConflictArea *oAgentCA;
+    const MentalInfrastructure::Junction* junction= nullptr;
 };
 
 struct AgentInterpretation {

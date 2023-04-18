@@ -8,11 +8,18 @@
  * for further information please visit:  https://www.driver-model.de
  *****************************************************************************/
 #include "TargetLaneInterpreter.h"
+
+#include "Common/TimeMeasurement.hpp"
+
+TimeMeasurement timeMeasure5("CollisionInterpreter.cpp");
+
 namespace Interpreter {
 
 void TargetLaneInterpreter::Update(WorldInterpretation *interpretation, const WorldRepresentation &representation) {
     try {
+        timeMeasure5.StartTimePoint("TargetLaneInterpreter ");
         interpretation->targetLane = TargetLane(representation);
+        timeMeasure5.EndTimePoint();
     }
     catch (...) {
         std::string message =

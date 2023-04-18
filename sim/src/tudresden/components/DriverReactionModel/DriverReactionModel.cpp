@@ -71,12 +71,10 @@ void DriverReactionModel::UpdateAgentStateRecorder(int time, int id, std::shared
     for (const auto &oAgent : *(GetWorldRepresentation().agentMemory)) {
         observedAgents.push_back(oAgent->GetInternalData());
     }
-    agentStateRecorder->AddOtherAgents(time, id, observedAgents);
-    agentStateRecorder->AddGazeStates(time, id, GetGazeState());
-    agentStateRecorder->AddCrossingInfos(time, id, GetWorldInterpretation().crossingInfo);
-    agentStateRecorder->AddFixationPoints(time, id, GetSegmentControlFixationPoints());
+
+    agentStateRecorder->BufferTimeStep(time, id, GetGazeState(), observedAgents, GetWorldInterpretation().crossingInfo,
+                                       GetSegmentControlFixationPoints(), GetWorldRepresentation().trafficSignalMemory->memory);
     agentStateRecorder->AddInfrastructurePerception(infrastructure);
-    agentStateRecorder->AddTrafficSignals(time, id, GetWorldRepresentation().trafficSignalMemory->memory);
 }
 
 double DriverReactionModel::GetAcceleration() {
