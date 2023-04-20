@@ -102,7 +102,8 @@ bool RunInstantiator::ExecuteRun()
         observationNetwork.FinalizeRun(runResult);
         ClearRun();
     }
-    AgentStateRecorder::AgentStateRecorder::WriteOutputFile(); // DReaM: write output file
+    AgentStateRecorder::AgentStateRecorder::WriteOutputFile(); // DReaM: write output files
+    GlobalObserver::AnalysisDataRecorder::WriteOutput();
 
     LOG_INTERN(LogLevel::DebugCore) << std::endl
                                     << "### end of all runs ###";

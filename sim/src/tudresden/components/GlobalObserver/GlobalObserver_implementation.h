@@ -31,7 +31,9 @@ public:
                         callbacks, agent),
         routeConverter(world) {
         globalObserverMain = GlobalObserver::Main::GetInstance(world, stochastics);
-        dataRecorder = GlobalObserver::AnalysisDataRecorder::GetInstance();
+        std::string scenarioResultsPath = QCoreApplication::applicationDirPath().toStdString() + "\\" +
+                                          CommandLineParser::Parse(QCoreApplication::arguments()).resultsPath + "\\";
+        dataRecorder = GlobalObserver::AnalysisDataRecorder::GetInstance(scenarioResultsPath);
         // TODO: waypoints/Route must be passed via the openPASS framework.
         // So far the openPASS framework (AgentInterface/egoAgent) has no function to get the waypoints/route --> redundant import
         auto arguments = QCoreApplication::arguments();

@@ -94,6 +94,7 @@ const AnalysisSignal DriverReactionModel::GetAnalysisSignal() {
     for (auto &agent : cognitiveMap->GetWorldInterpretation().interpretedAgents) {
         if (agent.second->collisionPoint.has_value()) {
             double ttc = agent.second->collisionPoint->timeToCollision;
+            std::cout << "TTC: " << ttc << std::endl;
             data.ttcs.insert(std::make_pair(agent.first, ttc));
         }
     }

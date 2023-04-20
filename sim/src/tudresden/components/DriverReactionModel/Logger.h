@@ -10,6 +10,7 @@
 
 #pragma once
 #include <cstdarg>
+#include <filesystem>
 #include <fstream>
 #include <iostream>
 #include <string>
@@ -41,4 +42,6 @@ class Logger {
     std::ofstream stream;
     DReaMLogLevel defaultLogLevel;
     uint64_t agentId;
+
+    static bool cleared;
 };

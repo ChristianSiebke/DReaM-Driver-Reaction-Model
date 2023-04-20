@@ -11,9 +11,16 @@
 
 #include <stdio.h>
 
+bool Logger::cleared = false;
+
 Logger::Logger(uint64_t agentId, std::string logPath, DReaMLogLevel defaultLevel) : agentId{agentId} {
     defaultLogLevel = defaultLevel;
-    std::string path = logPath + "\\" + "agent" + std::to_string(agentId) + ".txt";
+    if (!cleared) {
+        cleared = true;
+        std::filesystem::remove_all(logPath + "\\agentLogs");
+        std::filesystem::create_directories(logPath + "\\agentLogs");
+    }
+    std::string path = logPath + "\\agentLogs\\" + "agent" + std::to_string(agentId) + ".txt";
     stream = std::ofstream(path, std::ofstream::out);
 }
 
