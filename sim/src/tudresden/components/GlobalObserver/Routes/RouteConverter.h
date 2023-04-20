@@ -11,6 +11,7 @@
 #pragma once
 #include <vector>
 
+#include "Common/Definitions.h"
 #include "RouteImporter.h"
 #include "WorldData.h"
 

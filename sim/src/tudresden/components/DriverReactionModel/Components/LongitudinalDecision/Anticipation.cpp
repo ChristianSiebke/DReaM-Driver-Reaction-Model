@@ -258,10 +258,6 @@ double Anticipation::AnticipationAccelerationToAchieveVelocityInDistance(double 
         return IDMBrakeStrategy(distance, velTarget, currentVelocity);
     }
     else {
-        auto test =
-            ComfortAccelerationWish(velTarget, currentVelocity, currentVelocity - velTarget, std::numeric_limits<double>::infinity());
-        std::cout << "Acceleration==" << test << " | velTarget" << velTarget << " | currentVelocity - velTarget =" << currentVelocity
-                  << std::endl;
         return ComfortAccelerationWish(velTarget, currentVelocity, currentVelocity - velTarget, std::numeric_limits<double>::infinity());
     }
 }

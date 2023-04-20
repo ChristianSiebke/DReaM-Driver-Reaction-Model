@@ -30,7 +30,7 @@ const int MAX_LANES_AHEAD = 2;
 // pedestrians) e.g. 4 vertices will result in a rectangle
 const int CIRCLE_POLYGON_PRECISION = 8;
 // used for debug output
-const bool DEBUG_OUT = true;
+const bool DEBUG_OUT = false;
 
 TimeMeasurement timeMeasure1("CollisionInterpreter.cpp");
 

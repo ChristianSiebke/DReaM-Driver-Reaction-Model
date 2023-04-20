@@ -4,35 +4,36 @@
 #include <memory>
 #include <vector>
 
-#include "Calculators/ConflictAreaCalculator.h"
-#include "Calculators/RoadmapGraphCalculator.h"
-#include "Calculators/StoppingPointCalculator.h"
-#include "Converters/AgentPerceptionConverter.h"
-#include "Converters/RoadNetworkConverter.h"
+#include "../Calculators/ConflictAreaCalculator.h"
+#include "../Calculators/RoadmapGraphCalculator.h"
+#include "../Calculators/StoppingPointCalculator.h"
+#include "../Converters/AgentPerceptionConverter.h"
+#include "../Converters/RoadNetworkConverter.h"
+#include "../Routes/RouteImporter.h"
 #include "common/PerceptionData.h"
 
 #ifdef QMAKE_BUILD
-#define GlobalObserverIMPORT
-#define GlobalObserverEXPORT
+#define GlobalObserverMainIMPORT
+#define GlobalObserverMainEXPORT
 #else
 #if defined(_WIN32) && !defined(NODLL)
-#define GlobalObserverIMPORT __declspec(dllimport)
-#define GlobalObserverEXPORT __declspec(dllexport)
+#define GlobalObserverMainIMPORT __declspec(dllimport)
+#define GlobalObserverMainEXPORT __declspec(dllexport)
 
 #elif (defined(__GNUC__) && __GNUC__ >= 4 || defined(__clang__))
-#define GlobalObserverEXPORT __attribute__((visibility("default")))
-#define GlobalObserverIMPORT GlobalObserverEXPORT
+#define GlobalObserverMainEXPORT __attribute__((visibility("default")))
+#define GlobalObserverMainIMPORT GlobalObserverMainEXPORT
 
 #else
-#define GlobalObserverIMPORT
-#define GlobalObserverEXPORT
+#define GlobalObserverMainIMPORT
+#define GlobalObserverMainEXPORT
 #endif
 #endif
 
-#if defined(GlobalObserver_EXPORTS)
-#define EXPORT GlobalObserverEXPORT
+#if defined(Main_EXPORTS)
+#define EXPORT GlobalObserverMainEXPORT
 #else
-#define EXPORT GlobalObserverIMPORT
+#define EXPORT GlobalObserverMainEXPORT
 #endif
 
 namespace GlobalObserver {
@@ -71,6 +72,22 @@ public:
      */
     static void SetRunId(int invocation) {
         runId = invocation;
+    }
+
+    /**
+     * @brief Sets the profiles of the ProfileCatalog
+     *
+     */
+    static void SetProfiles(ProfilesInterface *profileCatalog) {
+        profile = profileCatalog;
+    }
+
+    /**
+     * @brief Sets the profiles of the ProfileCatalog
+     *
+     */
+    static void SetScenarioConfigPath(std::string path) {
+        scenarioConfigPath = path;
     }
 
     /**
@@ -118,9 +135,8 @@ public:
      * @brief Set the initial route for an agent, will pass through to AgentPerceptionConverter::SetInitialRoute.
      *
      * @param agent the agent for which to set the initial route
-     * @param route the route that this agent should / will take
      */
-    void SetInitialRoute(AgentInterface *agent, std::vector<GlobalObserver::Routes::InternWaypoint> route);
+    void SetInitialRoute(AgentInterface *agent);
 
 private:
     Main(WorldInterface *world, StochasticsInterface *stochastics) :
@@ -131,13 +147,16 @@ private:
         caCalculator(infrastructurePerception),
         rgCalculator(infrastructurePerception),
         spCalculator(infrastructurePerception),
-        apConverter(world, stochastics, infrastructurePerception, agentPerceptions) {
+        apConverter(world, stochastics, infrastructurePerception, agentPerceptions),
+        routeConverter(world) {
     }
 
 private:
     // singleton related fields
     static std::shared_ptr<Main> instance;
     static int runId;
+    static ProfilesInterface *profile;
+    static std::string scenarioConfigPath;
 
     // internal fields
     WorldInterface *world;
@@ -156,6 +175,7 @@ private:
     GlobalObserver::Converters::AgentPerceptionConverter apConverter;
     std::unordered_map<int, std::shared_ptr<DetailedAgentPerception>> agentPerceptions;
     bool agentPerceptionsCreated = false;
-};
 
-}
+    GlobalObserver::Routes::RouteConverter routeConverter;
+};
+} // namespace GlobalObserver

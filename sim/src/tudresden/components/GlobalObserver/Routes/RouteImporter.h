@@ -9,14 +9,16 @@
  *****************************************************************************/
 #pragma once
 
+#include <iostream>
+#include <variant>
+
 #include <QCoreApplication>
 #include <QDir>
 #include <QDomDocument>
 #include <QFile>
 
-#include "LoggerInterface.h"
+#include "Common/Definitions.h"
 #include "common/xmlParser.h"
-
 namespace GlobalObserver::Routes {
 
 namespace Import {
@@ -47,6 +49,6 @@ public:
 private:
     Import::LanePosition ImportLanePosition(QDomElement positionElement);
     Import::RoadPosition ImportRoadPosition(QDomElement positionElement);
-    std::map<std::string, std::vector<Import::Position>> waypointsMap;
+    std::map<std::string, std::vector<Import::Position>> waypointsMap{};
 };
 }

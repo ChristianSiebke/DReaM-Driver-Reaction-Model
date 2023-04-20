@@ -14,7 +14,11 @@
 #include <functional>
 #include <sstream>
 
+#include <QCommandLineParser>
+#include <qcoreapplication.h>
+
 #include "../../../tudresden/components/DriverReactionModel/AgentStateRecorder/AgentStateRecorder.h" //DReaM
+#include "../../../tudresden/components/GlobalObserver/GlobalObserverMain/GlobalObserver_main.h"     //DReaM
 #include "agentFactory.h"
 #include "agentType.h"
 #include "bindings/dataBuffer.h"
@@ -22,6 +26,7 @@
 #include "channel.h"
 #include "common/log.h"
 #include "component.h"
+#include "core/opSimulation/framework/commandLineParser.h"
 #include "include/agentBlueprintProviderInterface.h"
 #include "include/eventDetectorNetworkInterface.h"
 #include "include/manipulatorNetworkInterface.h"
@@ -53,7 +58,14 @@ bool RunInstantiator::ExecuteRun()
     auto &profiles = *configurationContainer.GetProfiles();
     auto &experimentConfig = simulationConfig.GetExperimentConfig();
     auto &environmentConfig = simulationConfig.GetEnvironmentConfig();
-
+    //--- TU Dresden
+    GlobalObserver::Main::SetProfiles(configurationContainer.GetProfiles());
+    auto arguments = QCoreApplication::arguments();
+    auto parsedArguments = CommandLineParser::Parse(arguments);
+    std::string scenarioConfigPath =
+        QCoreApplication::applicationDirPath().toStdString() + "\\" + parsedArguments.configsPath + "\\" + "Scenario.xosc";
+    GlobalObserver::Main::SetScenarioConfigPath(scenarioConfigPath);
+    //--
     if (!InitPreRun(scenario, scenery))
     {
         LOG_INTERN(LogLevel::DebugCore) << std::endl
@@ -94,6 +106,7 @@ bool RunInstantiator::ExecuteRun()
                                         << "### run successful ###";
         AgentStateRecorder::AgentStateRecorder::BufferRuns(invocation);
         AgentStateRecorder::AgentStateRecorder::ResetAgentStateRecorder(); // DReaM agents record
+        GlobalObserver::Main::Reset();
 
         observationNetwork.FinalizeRun(runResult);
         ClearRun();

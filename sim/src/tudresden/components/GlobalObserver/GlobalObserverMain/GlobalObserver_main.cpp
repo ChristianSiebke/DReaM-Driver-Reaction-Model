@@ -4,6 +4,8 @@ namespace GlobalObserver {
 
 std::shared_ptr<Main> Main::instance = nullptr;
 int Main::runId = 0;
+ProfilesInterface *Main::profile = nullptr;
+std::string Main::scenarioConfigPath = "";
 
 void Main::Trigger(int time) {
     if (time == lastConversionTime)
@@ -30,7 +32,14 @@ void Main::TriggerRoadNetworkConversion() {
     rnConverter.Populate();
 }
 
-void Main::SetInitialRoute(AgentInterface *agent, std::vector<GlobalObserver::Routes::InternWaypoint> route) {
+void Main::SetInitialRoute(AgentInterface *agent) {
+    // TODO: waypoints/Route must be passed via the openPASS framework.
+    // So far the openPASS framework (AgentInterface/egoAgent) has no function to get the waypoints/route --> redundant import
+    Routes::RouteImporter routeImporter(scenarioConfigPath);
+    auto routeImport = routeImporter.GetDReaMRoute(agent->GetScenarioName());
+    auto route = routeConverter.Convert(routeImport);
+    auto a = profile->GetProfileGroups();
+    std::for_each(a.begin(), a.end(), [](auto element) { std::cout << "Profilegroup: " << element.first << std::endl; });
     apConverter.SetInitialRoute(agent, route);
 }
 
@@ -67,4 +76,4 @@ std::vector<const MentalInfrastructure::TrafficSignal *> Main::GetVisibleTraffic
     }
     return toReturn;
 }
-}
+} // namespace GlobalObserver

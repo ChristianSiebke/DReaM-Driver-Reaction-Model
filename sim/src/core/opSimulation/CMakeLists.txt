@@ -186,6 +186,10 @@ add_openpass_target(
     modelElements
     modules
     ../../tudresden
+    ../../tudresden/components/GlobalObserver
+    modules/World_OSI
+
+
   LIBRARIES
     Boost::headers
     Qt5::Core
@@ -194,6 +198,10 @@ add_openpass_target(
     Common
     CoreCommon
     AgentStateRecorder
+    GlobalObserverMain
+    TUDresdenCommon
+    
+  LINKOSI
 )
 
 set(COMPONENT_NAME opSimulation)

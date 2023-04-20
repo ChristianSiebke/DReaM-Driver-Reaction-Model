@@ -9,8 +9,6 @@
  *****************************************************************************/
 #pragma once
 
-#include <variant>
-
 #include "WorldData.h"
 #include "common/complexSignals.h"
 #include "common/primitiveSignals.h"

@@ -18,6 +18,9 @@ RouteImporter::RouteImporter(std::string path) {
 }
 
 bool RouteImporter::Import(const std::string &filename) {
+    if (!waypointsMap.empty()) {
+        return true;
+    }
     std::locale::global(std::locale("C"));
     QFile xmlFile(filename.c_str());
     if (!xmlFile.open(QIODevice::ReadOnly)) {
