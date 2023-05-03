@@ -25,8 +25,9 @@ class FollowingInterpreter : public InterpreterInterface {
     virtual void Update(WorldInterpretation* interpretation, const WorldRepresentation& representation) override;
 
   protected:
-    std::optional<double> CalculateFollowingDistance(const AgentRepresentation& agent, const WorldRepresentation& representation);
-    std::optional<ConflictSituation> MergeOrSplitManoeuvreDistanceToConflictArea(const EgoAgentRepresentation *ego,
-                                                                                 const AgentRepresentation &observedAgent) const;
+      std::pair<std::optional<double>, bool> FollowingState(const AgentRepresentation &agent, const WorldRepresentation &representation,
+                                                            const WorldInterpretation *interpretation);
+      std::optional<ConflictSituation> MergeOrSplitManoeuvreDistanceToConflictArea(const EgoAgentRepresentation *ego,
+                                                                                   const AgentRepresentation &observedAgent) const;
 };
 } // namespace Interpreter

@@ -44,7 +44,7 @@ public:
     ~RouteImporter() = default;
 
     bool Import(const std::string &filename);
-    std::vector<Import::Position> GetDReaMRoute(std::string);
+    std::map<std::string, std::vector<Import::Position>> GetDReaMRoute();
 
 private:
     Import::LanePosition ImportLanePosition(QDomElement positionElement);

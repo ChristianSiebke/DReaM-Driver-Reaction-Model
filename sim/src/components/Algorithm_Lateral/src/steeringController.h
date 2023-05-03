@@ -106,8 +106,9 @@ protected:
 
     //! Previous scheduling time (for calculation of cycle time lenght).
     int timeLast {-100};
+    double last_steeringAngle{0};
     //! running average of  mean curvature up to NearPoint
-    double meanCurvatureToNearPointSmoothLast {0.};
+    double meanCurvatureToNearPointSmoothLast{0.};
     //! running average of  mean curvature from NearPoint up to FarPoint
     double meanCurvatureToFarPointSmoothLast {0.};
     //! running average of kappaRoad at referencepoint

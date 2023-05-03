@@ -42,7 +42,12 @@ std::optional<const MentalInfrastructure::Lane *> AgentRepresentation::GetJuncti
     auto successorLane = [&agent](const MentalInfrastructure::Lane *lane) {
         return lane->NextLane(agent.GetIndicatorState(), agent.IsMovingInLaneDirection());
     };
-    auto predecessorLane = [](const MentalInfrastructure::Lane *lane) { return lane->GetPredecessors().front(); };
+    auto predecessorLane = [](const MentalInfrastructure::Lane *lane) -> const MentalInfrastructure::Lane * {
+        if (lane->GetPredecessors().empty()) {
+            return nullptr;
+        }
+        return lane->GetPredecessors().front();
+    };
     auto nextLane = [&](auto lane) { return agent.IsMovingInLaneDirection() ? successorLane(lane) : predecessorLane(lane); };
     const MentalInfrastructure::Junction *egoJunction = nullptr;
     auto lane = laneAgent;

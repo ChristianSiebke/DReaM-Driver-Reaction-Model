@@ -203,7 +203,8 @@ double GetDistanceStoppingPoint(const AgentRepresentation *ego, const AgentInter
 bool IsVehicle(const AgentRepresentation *agent) {
     return agent->GetVehicleType() == DReaMDefinitions::AgentVehicleType::Car ||
            agent->GetVehicleType() == DReaMDefinitions::AgentVehicleType::Truck ||
-           agent->GetVehicleType() == DReaMDefinitions::AgentVehicleType::Motorbike;
+           agent->GetVehicleType() == DReaMDefinitions::AgentVehicleType::Motorbike ||
+           agent->GetVehicleType() == DReaMDefinitions::AgentVehicleType::Bicycle;
 }
 
 double AngleBetween2d(const Vector2d &vectorA, const Vector2d &vectorB) {

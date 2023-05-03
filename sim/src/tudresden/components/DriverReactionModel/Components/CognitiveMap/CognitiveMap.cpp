@@ -21,10 +21,6 @@ CognitiveMap::CognitiveMap(int cycleTime, StochasticsInterface* stochastics, Log
         std::make_unique<Interpreter::CollisionInterpreter>(loggerInterface, GetBehaviourData());
     worldInterpreter.SetPrimaryTask(std::move(collisionInterpreter));
 
-    std::unique_ptr<Interpreter::InterpreterInterface> followingInterpreter =
-        std::make_unique<Interpreter::FollowingInterpreter>(loggerInterface, GetBehaviourData());
-    worldInterpreter.SetPrimaryTask(std::move(followingInterpreter));
-
     std::unique_ptr<Interpreter::InterpreterInterface> targetLaneInterpreter =
         std::make_unique<Interpreter::TargetLaneInterpreter>(loggerInterface, GetBehaviourData());
     worldInterpreter.SetPrimaryTask(std::move(targetLaneInterpreter));
@@ -32,6 +28,10 @@ CognitiveMap::CognitiveMap(int cycleTime, StochasticsInterface* stochastics, Log
     std::unique_ptr<Interpreter::InterpreterInterface> conflictSituationInterpreter =
         std::make_unique<Interpreter::ConflictSituationInterpreter>(loggerInterface, GetBehaviourData());
     worldInterpreter.SetPrimaryTask(std::move(conflictSituationInterpreter));
+
+    std::unique_ptr<Interpreter::InterpreterInterface> followingInterpreter =
+        std::make_unique<Interpreter::FollowingInterpreter>(loggerInterface, GetBehaviourData());
+    worldInterpreter.SetSecondaryTask(std::move(followingInterpreter));
 
     std::unique_ptr<Interpreter::InterpreterInterface> rightOfWayInterpreter =
         std::make_unique<Interpreter::RightOfWayInterpreter>(loggerInterface, GetBehaviourData());

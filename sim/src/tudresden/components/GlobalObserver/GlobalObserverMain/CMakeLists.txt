@@ -1,7 +1,7 @@
 set(FOLDER "GlobalObserverMain")
 set(COMPONENT_NAME GlobalObserverMain)
 
-add_compile_definitions(Main_EXPORTS)
+add_compile_definitions(GlobalObserverMain_EXPORTS)
  
 add_openpass_target(
   NAME ${COMPONENT_NAME} TYPE library LINKAGE shared COMPONENT common

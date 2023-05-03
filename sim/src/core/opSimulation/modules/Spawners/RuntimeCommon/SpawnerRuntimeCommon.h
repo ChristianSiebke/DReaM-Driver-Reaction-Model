@@ -86,11 +86,7 @@ private:
 
     SpawningAgentProfile SampleAgentProfile(bool rightLane);
 
-    const LaneTypes supportedLaneTypes =
-    {
-        LaneType::Driving,
-        LaneType::OnRamp
-    };
+    const LaneTypes supportedLaneTypes = {LaneType::Driving, LaneType::OnRamp, LaneType::Biking, LaneType::Sidewalk};
 
     const SpawnPointDependencies dependencies;
     const WorldAnalyzer worldAnalyzer;

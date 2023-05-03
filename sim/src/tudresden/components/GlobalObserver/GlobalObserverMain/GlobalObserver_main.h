@@ -30,10 +30,10 @@
 #endif
 #endif
 
-#if defined(Main_EXPORTS)
-#define EXPORT GlobalObserverMainEXPORT
+#if defined(GlobalObserverMain_EXPORTS)
+#define EXPORTMAIN GlobalObserverMainEXPORT
 #else
-#define EXPORT GlobalObserverMainEXPORT
+#define EXPORTMAIN GlobalObserverMainIMPORT
 #endif
 
 namespace GlobalObserver {
@@ -43,7 +43,7 @@ namespace GlobalObserver {
  * whenever the \code Trigger() \endcode method is invoked.
  *
  */
-class EXPORT Main {
+class EXPORTMAIN Main {
 public:
     static std::shared_ptr<Main> GetInstance(WorldInterface *world, StochasticsInterface *stochastics) {
         if (!instance)
@@ -149,7 +149,14 @@ private:
         spCalculator(infrastructurePerception),
         apConverter(world, stochastics, infrastructurePerception, agentPerceptions),
         routeConverter(world) {
+        profileCatalogRouteDistributions = ProfilesRouteConverter(profile);
+        scenarioRoutes = ScenarioRouteConverter(scenarioConfigPath);
     }
+
+    std::unordered_map<DReaMDefinitions::AgentVehicleType,
+                       std::unordered_map<OdId, std::vector<std::pair<std::vector<Routes::InternWaypoint>, double>>>>
+    ProfilesRouteConverter(ProfilesInterface *profile);
+    std::unordered_map<std::string, std::vector<Routes::InternWaypoint>> ScenarioRouteConverter(std::string scenarioConfigPath);
 
 private:
     // singleton related fields
@@ -157,7 +164,10 @@ private:
     static int runId;
     static ProfilesInterface *profile;
     static std::string scenarioConfigPath;
-
+    static std::unordered_map<DReaMDefinitions::AgentVehicleType,
+                              std::unordered_map<OdId, std::vector<std::pair<std::vector<Routes::InternWaypoint>, double>>>>
+        profileCatalogRouteDistributions;
+    static std::unordered_map<std::string, std::vector<Routes::InternWaypoint>> scenarioRoutes;
     // internal fields
     WorldInterface *world;
     StochasticsInterface *stochastics;

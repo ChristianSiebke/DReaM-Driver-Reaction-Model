@@ -21,7 +21,10 @@ void FollowingInterpreter::Update(WorldInterpretation* interpretation, const Wor
     try {
         timeMeasure4.StartTimePoint("FollowingInterpreter ");
         for (const auto& agent : *representation.agentMemory) {
-            interpretation->interpretedAgents.at(agent->GetID())->relativeDistance = CalculateFollowingDistance(*agent, representation);
+            auto state = FollowingState(*agent, representation, interpretation);
+
+            interpretation->interpretedAgents.at(agent->GetID())->relativeDistance = state.first;
+            interpretation->interpretedAgents.at(agent->GetID())->laneInLineWithEgoLane = state.second;
         }
         timeMeasure4.EndTimePoint();
     } catch (...) {
@@ -29,18 +32,21 @@ void FollowingInterpreter::Update(WorldInterpretation* interpretation, const Wor
             "File: " + static_cast<std::string>(__FILE__) + " Line: " + std::to_string(__LINE__) + " Update followingInterpreter failed";
         Log(message, error);
         throw std::logic_error(message);
-
     }
 };
 
-std::optional<double> FollowingInterpreter::CalculateFollowingDistance(const AgentRepresentation& agent,
-                                                                       const WorldRepresentation& representation) {
+std::pair<std::optional<double>, bool> FollowingInterpreter::FollowingState(const AgentRepresentation &agent,
+                                                                            const WorldRepresentation &representation,
+                                                                            const WorldInterpretation *interpretation) {
     // TODO: define followingThreshold  (min safety distance 2s --> 4 *min safety distance)
     double followingThreshold = representation.egoAgent->GetVelocity() * 8;
     followingThreshold = followingThreshold < 30 ? 30 : followingThreshold;
-
+    std::cout << "Ego agent " << representation.egoAgent->GetID() << " | observed agent" << agent.GetID() << " | followingThreshold "
+              << followingThreshold
+              << " distance between ego-observed= " << (representation.egoAgent->GetRefPosition() - agent.GetRefPosition()).Length()
+              << std::endl;
     if ((representation.egoAgent->GetRefPosition() - agent.GetRefPosition()).Length() - (followingThreshold) > 0) {
-        return std::nullopt;
+        return {std::nullopt, false};
     }
     auto egoLane = representation.egoAgent->GetLanePosition().lane;
     double egoS = representation.egoAgent->GetLanePosition().sCoordinate;
@@ -58,49 +64,76 @@ std::optional<double> FollowingInterpreter::CalculateFollowingDistance(const Age
     // following on same lane
     if (observedLane == egoLane && egoLane != nullptr) {
         if (observedS > egoS) {
-            return observedS - egoS - distanceReferenceToEdgesFollowing;
+            std::cout << "Case 11 distance=" << observedS - egoS - distanceReferenceToEdgesFollowing << std::endl;
+            return {{observedS - egoS - distanceReferenceToEdgesFollowing}, true};
         }
         else {
-            return observedS - egoS + distanceReferenceToEdgesLeading;
+            std::cout << "Case 12 distance=" << observedS - egoS + distanceReferenceToEdgesLeading << std::endl;
+            return {{observedS - egoS + distanceReferenceToEdgesLeading}, true};
         }
     }
     // observed agent on successor lane
     if (std::any_of(egoLane->GetSuccessors().begin(), egoLane->GetSuccessors().end(),
-                    [observedLane](const auto& lane) { return lane == observedLane; })) {
-        return egoLane->GetLastPoint()->sOffset - egoS + observedS - observedLane->GetFirstPoint()->sOffset -
-               distanceReferenceToEdgesFollowing;
+                    [observedLane](const auto &lane) { return lane == observedLane; })) {
+        std::cout << "Case 2 distance="
+                  << egoLane->GetLastPoint()->sOffset - egoS + observedS - observedLane->GetFirstPoint()->sOffset -
+                         distanceReferenceToEdgesFollowing
+                  << std::endl;
+        return {{egoLane->GetLastPoint()->sOffset - egoS + observedS - observedLane->GetFirstPoint()->sOffset -
+                 distanceReferenceToEdgesFollowing},
+                true};
     }
     // observed agent on predecessor lane
     if (std::any_of(egoLane->GetPredecessors().begin(), egoLane->GetPredecessors().end(),
                     [observedLane](const auto &lane) { return lane == observedLane; })) {
-        return -(((observedLane->GetLastPoint()->sOffset - observedS) + (egoS - egoLane->GetFirstPoint()->sOffset)) -
-                 distanceReferenceToEdgesLeading);
+        std::cout << "Case 3 distance="
+                  << -(((observedLane->GetLastPoint()->sOffset - observedS) + (egoS - egoLane->GetFirstPoint()->sOffset)) -
+                       distanceReferenceToEdgesLeading)
+                  << std::endl;
+        return {{-(((observedLane->GetLastPoint()->sOffset - observedS) + (egoS - egoLane->GetFirstPoint()->sOffset)) -
+                   distanceReferenceToEdgesLeading)},
+                true};
     }
 
     // one of observed agent predecessor lanes == successor lane of egoAgent
     auto sucLaneEgo = representation.egoAgent->GetNextLane();
     if (std::any_of(observedLane->GetPredecessors().begin(), observedLane->GetPredecessors().end(),
-                    [sucLaneEgo](const auto& lane) { return lane == sucLaneEgo; })) {
-        return egoLane->GetLastPoint()->sOffset - egoS + sucLaneEgo->GetLength() + observedS - observedLane->GetFirstPoint()->sOffset -
-               distanceReferenceToEdgesFollowing;
+                    [sucLaneEgo](const auto &lane) { return lane == sucLaneEgo; })) {
+        std::cout << "Case 4 distance="
+                  << egoLane->GetLastPoint()->sOffset - egoS + sucLaneEgo->GetLength() + observedS -
+                         observedLane->GetFirstPoint()->sOffset - distanceReferenceToEdgesFollowing
+                  << std::endl;
+        return {{egoLane->GetLastPoint()->sOffset - egoS + sucLaneEgo->GetLength() + observedS - observedLane->GetFirstPoint()->sOffset -
+                 distanceReferenceToEdgesFollowing},
+                true};
     }
     // one of ego predecessor lanes == successor lane of observed
     auto sucLaneOAgent = agent.GetNextLane();
     if (std::any_of(egoLane->GetPredecessors().begin(), egoLane->GetPredecessors().end(),
                     [sucLaneOAgent](const auto &lane) { return lane == sucLaneOAgent; })) {
-        return -(sucLaneOAgent->GetLength() + (observedLane->GetLastPoint()->sOffset - observedS) +
-                 (egoS - egoLane->GetFirstPoint()->sOffset) - distanceReferenceToEdgesLeading);
+        std::cout << "Case 5 distance="
+                  << -(sucLaneOAgent->GetLength() + (observedLane->GetLastPoint()->sOffset - observedS) +
+                       (egoS - egoLane->GetFirstPoint()->sOffset) - distanceReferenceToEdgesLeading)
+                  << std::endl;
+        return {{-(sucLaneOAgent->GetLength() + (observedLane->GetLastPoint()->sOffset - observedS) +
+                   (egoS - egoLane->GetFirstPoint()->sOffset) - distanceReferenceToEdgesLeading)},
+                true};
     }
 
     //  agents have conflict area and same successor --> merging manoeuvre
     //  agents have conflict area and same predecessor --> splitting manoeuvre
+    if (interpretation->interpretedAgents.at(agent.GetID())->conflictSituation.has_value() &&
+        (interpretation->interpretedAgents.at(agent.GetID())->conflictSituation->junction->GetOpenDriveId() !=
+         interpretation->crossingInfo.junctionOdId)) {
+        return {std::nullopt, false};
+    }
     auto conflictAreaDistance = MergeOrSplitManoeuvreDistanceToConflictArea(representation.egoAgent, agent);
     if (conflictAreaDistance) {
         auto distanceOAgentToEndCA = conflictAreaDistance->oAgentDistance.vehicleReferenceToCAEnd;
         std::cout << "distanceOAgentToEndCA=" << distanceOAgentToEndCA << std::endl;
         if (distanceOAgentToEndCA + oAgentDistanceReferenceToBack <= 0) {
             // observed agent leaves confict area
-            return std::nullopt;
+            return {std::nullopt, false};
         }
         auto distanceEgoToEndCA = conflictAreaDistance->egoDistance.vehicleReferenceToCAEnd;
         double followingDistance = distanceEgoToEndCA - distanceOAgentToEndCA;
@@ -112,12 +145,16 @@ std::optional<double> FollowingInterpreter::CalculateFollowingDistance(const Age
                   << " | followingDistance final = " << finalDistance(followingDistance) << std::endl;
         if ((followingDistance >= 0 && followingDistance - distanceReferenceToEdgesFollowing < 0) ||
             (followingDistance <= 0 && followingDistance + distanceReferenceToEdgesLeading > 0)) {
-            return std::nullopt;
+            return {std::nullopt, false};
         }
-        return followingDistance > 0 ? followingDistance - distanceReferenceToEdgesFollowing
-                                     : followingDistance + distanceReferenceToEdgesLeading;
+        if (followingDistance > 0) {
+            return {{followingDistance - distanceReferenceToEdgesFollowing}, false};
+        }
+        else {
+            return {{followingDistance + distanceReferenceToEdgesLeading}, false};
+        }
     }
-    return std::nullopt;
+    return {std::nullopt, false};
 }
 
 std::optional<ConflictSituation>

@@ -32,7 +32,7 @@ private:
     DReaMRoute::Waypoints waypoints;
     DReaMRoute::Waypoints::iterator targetWP;
     DReaMRoute::Waypoints::iterator lastTimeStepWP;
-    const MentalInfrastructure::Lane *egoLane;
+    const MentalInfrastructure::Lane *egoLane = nullptr;
     std::list<const RoadmapGraph::RoadmapNode *> path;
 };
 } // namespace Interpreter

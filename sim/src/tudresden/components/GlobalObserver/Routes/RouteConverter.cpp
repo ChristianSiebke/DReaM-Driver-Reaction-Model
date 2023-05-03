@@ -45,12 +45,12 @@ OwlId RouteConverter::GetLane(OdId roadId, int laneId, double s) const {
             auto lanes = section->GetLanes();
             auto result = std::find_if(lanes.begin(), lanes.end(), [laneId](auto element) { return element->GetOdId() == laneId; });
             if (result == lanes.end()) {
-                throw std::logic_error(__FILE__ " " + std::to_string(__LINE__) + " Waypoint does not match witch infrastructure");
+                throw std::logic_error(__FILE__ " " + std::to_string(__LINE__) + " Waypoint does not match infrastructure");
             }
             return (*result)->GetId();
         }
     }
-    throw std::logic_error(__FILE__ " " + std::to_string(__LINE__) + " Waypoint does not match witch infrastructure");
+    throw std::logic_error(__FILE__ " " + std::to_string(__LINE__) + " Waypoint does not match infrastructure");
 }
 
 static bool negativeLaneSort(const OWL::Lane *a, const OWL::Lane *b) {
@@ -87,7 +87,7 @@ OwlId RouteConverter::GetLane(OdId roadId, double t, double s) const {
         if ((widthSum > t && t > 0) || (-widthSum < t && t < 0))
             return lane->GetId();
     }
-    throw std::logic_error(__FILE__ " " + std::to_string(__LINE__) + " Waypoint does not match witch infrastructure");
+    throw std::logic_error(__FILE__ " " + std::to_string(__LINE__) + " Waypoint does not match infrastructure");
 }
 
 }

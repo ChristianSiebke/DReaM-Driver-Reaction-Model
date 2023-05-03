@@ -11,7 +11,6 @@ add_openpass_target(
     GlobalObserver_global.h
     GlobalObserver.h
     GlobalObserver_implementation.h
-    GlobalObserverMain/GlobalObserver_main.h
     Calculators/ConflictAreaCalculator.h
     Calculators/StoppingPointCalculator.h
     Calculators/RoadmapGraphCalculator.h
@@ -20,7 +19,6 @@ add_openpass_target(
     Routes/RouteConverter.h
   SOURCES
     # MAIN
-    GlobalObserverMain/GlobalObserver_main.cpp
     GlobalObserver.cpp
     GlobalObserver_implementation.cpp
     Calculators/ConflictAreaCalculator.cpp

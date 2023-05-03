@@ -209,8 +209,8 @@ struct StoppingPoint {
 using StoppingPointMap = std::unordered_map<StoppingPointType, StoppingPoint>;
 
 struct CrossingInfo {
-    CrossingType type;
-    CrossingPhase phase;
+    CrossingType type = CrossingType::NA;
+    CrossingPhase phase = CrossingPhase::NONE;
 
     // the id of the junction that the stopping point belongs to
     OdId junctionOdId;

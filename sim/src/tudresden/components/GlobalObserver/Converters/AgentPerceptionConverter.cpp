@@ -22,6 +22,25 @@ void AgentPerceptionConverter::SetInitialRoute(AgentInterface *agent, std::vecto
     }
     else {
         routeMapping.insert_or_assign(agent->GetId(), ConvertRoute(route));
+        auto roadGraph = RoadGraph{};
+        auto vertex1 = add_vertex(
+            RouteElement{route.back().roadId,
+                         this->infrastructurePerception->lookupTableRoadNetwork.lanes.at(route.back().lane)->IsInRoadDirection()},
+            roadGraph);
+        auto target = vertex1;
+        RoadGraphVertex vertex2;
+        for (auto iter = route.rbegin(); iter != route.rend(); iter++) {
+            if (route.back().roadId == iter->roadId) {
+                continue;
+            }
+            vertex2 =
+                add_vertex(RouteElement{iter->roadId,
+                                        this->infrastructurePerception->lookupTableRoadNetwork.lanes.at(iter->lane)->IsInRoadDirection()},
+                           roadGraph);
+            add_edge(vertex2, vertex1, roadGraph);
+            vertex1 = vertex2;
+        }
+        const_cast<AgentInterface *>(agent)->GetEgoAgent().SetRoadGraph(std::move(roadGraph), vertex2, target);
     }
 }
 

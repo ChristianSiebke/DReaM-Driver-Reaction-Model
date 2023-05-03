@@ -123,7 +123,11 @@ double SteeringController::CalculateSteeringAngleTUDresden(int time) {
     if (in_velocity == 0.0) {
         timeLast = time;
 
-        return in_steeringWheelAngle * in_steeringRatio;
+        if (time < timeLast) {
+            last_steeringAngle = in_steeringWheelAngle * in_steeringRatio;
+        }
+
+        return last_steeringAngle;
     }
 
     // Time step length

@@ -51,6 +51,7 @@ struct AgentInterpretation {
     std::optional<ConflictSituation> conflictSituation;
     RightOfWay rightOfWay;
     std::optional<double> relativeDistance;
+    bool laneInLineWithEgoLane {false};
 };
 
 struct MemorizedTrafficSignal {
