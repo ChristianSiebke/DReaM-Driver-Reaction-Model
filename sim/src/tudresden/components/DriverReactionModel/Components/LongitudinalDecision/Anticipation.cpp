@@ -289,11 +289,11 @@ double Anticipation::ApproachingStoppingPoint(double sFrontEgo, double tEndObser
     if (aIDM < behaviourData.adBehaviour.comfortDeceleration.min && observedAgent->rightOfWay.ego) {
         // ego slows down so that when it enters the conflict area, the observed agent has already passed the conflict area.
         double a = (2 * (sFrontEgo - (worldRepresentation.egoAgent->GetVelocity() * tEndObserved))) / (tEndObserved * tEndObserved);
-
+        a = Common::ValueInBounds(maxEmergencyDeceleration, a, GetBehaviourData().adBehaviour.maxAcceleration);
         std::cout << " a: " << a << " | aIDM: " << aIDM << " | std::abs(worldRepresentation.egoAgent->GetVelocity() / a:"
                   << std::abs(worldRepresentation.egoAgent->GetVelocity() / a) << " | tEndObserved" << tEndObserved << std::endl;
         if ((tEndObserved < std::numeric_limits<double>::infinity() && a > aIDM) &&
-            std::abs(worldRepresentation.egoAgent->GetVelocity() / a) > tEndObserved) {
+            (a > 0 && std::abs(worldRepresentation.egoAgent->GetVelocity() / a)) > tEndObserved) {
             return a;
         }
 

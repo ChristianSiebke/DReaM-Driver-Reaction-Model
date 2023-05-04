@@ -24,11 +24,13 @@ LateralDecision::LateralDecision(const WorldRepresentation &worldRepresentation,
 
 void LateralDecision::Update() {
     auto egoAgent = worldRepresentation.egoAgent;
+
     if (!worldInterpretation.targetLane) {
         lateralAction = ResetLateralAction(egoAgent->GetIndicatorState());
         return;
     }
     auto targetLane = *worldInterpretation.targetLane;
+
     if (std::none_of(egoAgent->GetMainLocatorLane()->GetSuccessors().begin(), egoAgent->GetMainLocatorLane()->GetSuccessors().end(),
                      [targetLane](auto element) { return element == targetLane; })) {
         // New Lane free ?

@@ -118,25 +118,9 @@ double LongitudinalDecision::DetermineAccelerationWish() {
                 // agent is behind ego
                 break;
             }
-            if (worldInterpretation.crossingInfo.phase > CrossingPhase::Approach) {
-                double v = worldInterpretation.targetVelocity < agent->agent->GetVelocity() ? worldInterpretation.targetVelocity
-                                                                                            : agent->agent->GetVelocity();
-                if (*agent->relativeDistance < std::numeric_limits<double>::infinity() &&
-                    worldRepresentation.egoAgent->GetVelocity() >= v) {
-                    accelerations.push_back(
-                        anticipation.IDMBrakeStrategy(*agent->relativeDistance, v, worldRepresentation.egoAgent->GetVelocity()));
-                }
-                else {
-                    accelerations.push_back(anticipation.MaximumAccelerationWish(
-                        worldInterpretation.targetVelocity, worldRepresentation.egoAgent->GetVelocity(),
-                        worldRepresentation.egoAgent->GetVelocity() - v, *agent->relativeDistance));
-                }
-            }
-            else {
-                accelerations.push_back(anticipation.MaximumAccelerationWish(
-                    worldInterpretation.targetVelocity, worldRepresentation.egoAgent->GetVelocity(),
-                    worldRepresentation.egoAgent->GetVelocity() - agent->agent->GetVelocity(), *agent->relativeDistance));
-            }
+            accelerations.push_back(anticipation.MaximumAccelerationWish(
+                worldInterpretation.targetVelocity, worldRepresentation.egoAgent->GetVelocity(),
+                worldRepresentation.egoAgent->GetVelocity() - agent->agent->GetVelocity(), *agent->relativeDistance));
 
             //-----
             std::cout << "Agent: " << worldRepresentation.egoAgent->GetID() << " | relative distance=" << *agent->relativeDistance

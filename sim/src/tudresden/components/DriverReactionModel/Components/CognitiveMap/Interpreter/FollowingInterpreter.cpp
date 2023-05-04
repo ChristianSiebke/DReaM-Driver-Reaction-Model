@@ -41,10 +41,7 @@ std::pair<std::optional<double>, bool> FollowingInterpreter::FollowingState(cons
     // TODO: define followingThreshold  (min safety distance 2s --> 4 *min safety distance)
     double followingThreshold = representation.egoAgent->GetVelocity() * 8;
     followingThreshold = followingThreshold < 30 ? 30 : followingThreshold;
-    std::cout << "Ego agent " << representation.egoAgent->GetID() << " | observed agent" << agent.GetID() << " | followingThreshold "
-              << followingThreshold
-              << " distance between ego-observed= " << (representation.egoAgent->GetRefPosition() - agent.GetRefPosition()).Length()
-              << std::endl;
+
     if ((representation.egoAgent->GetRefPosition() - agent.GetRefPosition()).Length() - (followingThreshold) > 0) {
         return {std::nullopt, false};
     }
@@ -64,21 +61,15 @@ std::pair<std::optional<double>, bool> FollowingInterpreter::FollowingState(cons
     // following on same lane
     if (observedLane == egoLane && egoLane != nullptr) {
         if (observedS > egoS) {
-            std::cout << "Case 11 distance=" << observedS - egoS - distanceReferenceToEdgesFollowing << std::endl;
             return {{observedS - egoS - distanceReferenceToEdgesFollowing}, true};
         }
         else {
-            std::cout << "Case 12 distance=" << observedS - egoS + distanceReferenceToEdgesLeading << std::endl;
             return {{observedS - egoS + distanceReferenceToEdgesLeading}, true};
         }
     }
     // observed agent on successor lane
     if (std::any_of(egoLane->GetSuccessors().begin(), egoLane->GetSuccessors().end(),
                     [observedLane](const auto &lane) { return lane == observedLane; })) {
-        std::cout << "Case 2 distance="
-                  << egoLane->GetLastPoint()->sOffset - egoS + observedS - observedLane->GetFirstPoint()->sOffset -
-                         distanceReferenceToEdgesFollowing
-                  << std::endl;
         return {{egoLane->GetLastPoint()->sOffset - egoS + observedS - observedLane->GetFirstPoint()->sOffset -
                  distanceReferenceToEdgesFollowing},
                 true};
@@ -86,10 +77,6 @@ std::pair<std::optional<double>, bool> FollowingInterpreter::FollowingState(cons
     // observed agent on predecessor lane
     if (std::any_of(egoLane->GetPredecessors().begin(), egoLane->GetPredecessors().end(),
                     [observedLane](const auto &lane) { return lane == observedLane; })) {
-        std::cout << "Case 3 distance="
-                  << -(((observedLane->GetLastPoint()->sOffset - observedS) + (egoS - egoLane->GetFirstPoint()->sOffset)) -
-                       distanceReferenceToEdgesLeading)
-                  << std::endl;
         return {{-(((observedLane->GetLastPoint()->sOffset - observedS) + (egoS - egoLane->GetFirstPoint()->sOffset)) -
                    distanceReferenceToEdgesLeading)},
                 true};
@@ -99,10 +86,6 @@ std::pair<std::optional<double>, bool> FollowingInterpreter::FollowingState(cons
     auto sucLaneEgo = representation.egoAgent->GetNextLane();
     if (std::any_of(observedLane->GetPredecessors().begin(), observedLane->GetPredecessors().end(),
                     [sucLaneEgo](const auto &lane) { return lane == sucLaneEgo; })) {
-        std::cout << "Case 4 distance="
-                  << egoLane->GetLastPoint()->sOffset - egoS + sucLaneEgo->GetLength() + observedS -
-                         observedLane->GetFirstPoint()->sOffset - distanceReferenceToEdgesFollowing
-                  << std::endl;
         return {{egoLane->GetLastPoint()->sOffset - egoS + sucLaneEgo->GetLength() + observedS - observedLane->GetFirstPoint()->sOffset -
                  distanceReferenceToEdgesFollowing},
                 true};
@@ -111,10 +94,6 @@ std::pair<std::optional<double>, bool> FollowingInterpreter::FollowingState(cons
     auto sucLaneOAgent = agent.GetNextLane();
     if (std::any_of(egoLane->GetPredecessors().begin(), egoLane->GetPredecessors().end(),
                     [sucLaneOAgent](const auto &lane) { return lane == sucLaneOAgent; })) {
-        std::cout << "Case 5 distance="
-                  << -(sucLaneOAgent->GetLength() + (observedLane->GetLastPoint()->sOffset - observedS) +
-                       (egoS - egoLane->GetFirstPoint()->sOffset) - distanceReferenceToEdgesLeading)
-                  << std::endl;
         return {{-(sucLaneOAgent->GetLength() + (observedLane->GetLastPoint()->sOffset - observedS) +
                    (egoS - egoLane->GetFirstPoint()->sOffset) - distanceReferenceToEdgesLeading)},
                 true};
@@ -130,19 +109,12 @@ std::pair<std::optional<double>, bool> FollowingInterpreter::FollowingState(cons
     auto conflictAreaDistance = MergeOrSplitManoeuvreDistanceToConflictArea(representation.egoAgent, agent);
     if (conflictAreaDistance) {
         auto distanceOAgentToEndCA = conflictAreaDistance->oAgentDistance.vehicleReferenceToCAEnd;
-        std::cout << "distanceOAgentToEndCA=" << distanceOAgentToEndCA << std::endl;
         if (distanceOAgentToEndCA + oAgentDistanceReferenceToBack <= 0) {
             // observed agent leaves confict area
             return {std::nullopt, false};
         }
         auto distanceEgoToEndCA = conflictAreaDistance->egoDistance.vehicleReferenceToCAEnd;
         double followingDistance = distanceEgoToEndCA - distanceOAgentToEndCA;
-        auto finalDistance = [distanceReferenceToEdgesFollowing, distanceReferenceToEdgesLeading](double followingDistance) {
-            return followingDistance > 0 ? followingDistance - distanceReferenceToEdgesFollowing
-                                         : followingDistance + distanceReferenceToEdgesLeading;
-        };
-        std::cout << " oAgent =" << agent.GetID() << " | followingDistance raw = " << followingDistance
-                  << " | followingDistance final = " << finalDistance(followingDistance) << std::endl;
         if ((followingDistance >= 0 && followingDistance - distanceReferenceToEdgesFollowing < 0) ||
             (followingDistance <= 0 && followingDistance + distanceReferenceToEdgesLeading > 0)) {
             return {std::nullopt, false};
