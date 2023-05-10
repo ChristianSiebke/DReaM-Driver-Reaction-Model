@@ -628,7 +628,7 @@ Interfaces::StationaryObject& WorldData::AddStationaryObject(const Id id, void* 
 Interfaces::TrafficSign& WorldData::AddTrafficSign(const Id id, const std::string odId)
 {
     osi3::TrafficSign* osiTrafficSign = osiGroundTruth->add_traffic_sign();
-    auto trafficSignal = new TrafficSign(osiTrafficSign);
+    auto trafficSignal = new TrafficSign(odId, osiTrafficSign);
 
     trafficSignIdMapping[odId] = id;
 

@@ -27,7 +27,6 @@ class FollowingInterpreter : public InterpreterInterface {
   protected:
       std::pair<std::optional<double>, bool> FollowingState(const AgentRepresentation &agent, const WorldRepresentation &representation,
                                                             const WorldInterpretation *interpretation);
-      std::optional<ConflictSituation> MergeOrSplitManoeuvreDistanceToConflictArea(const EgoAgentRepresentation *ego,
-                                                                                   const AgentRepresentation &observedAgent) const;
+      std::optional<ConflictSituation> MergeOrSplitManoeuvreDistanceToConflictArea(const ConflictSituation &conflictSituation) const;
 };
 } // namespace Interpreter

@@ -146,9 +146,11 @@ void AlgorithmDReaMImplementation::Trigger(int time) {
         out_laneWidth = DReaM.GetWorldRepresentation().egoAgent->GetLaneWidth();
         out_lateral_displacement = DReaM.GetWorldRepresentation().egoAgent->GetLateralDisplacement() -
                                    DReaM.GetLateralAction().lateralDisplacement; // lateral deviation
+
         out_heading_error = DReaM.GetWorldRepresentation().egoAgent->GetHeading();
         out_curvature = DReaM.GetWorldRepresentation().egoAgent->GetCurvature();
         //****************************************
+        GetPublisher()->Publish("TestDReaM1234", DReaM.GetDebuggingState());
     }
     catch (const char *error) {
         const std::string msg = COMPONENTNAME + " " + error;

@@ -1376,9 +1376,7 @@ InvalidLane::~InvalidLane()
     }
 }
 
-
-TrafficSign::TrafficSign(osi3::TrafficSign* osiObject) : osiSign{osiObject}
-{
+TrafficSign::TrafficSign(std::string id, osi3::TrafficSign *osiObject) : id{id}, osiSign{osiObject} {
 }
 
 bool TrafficSign::SetSpecification(RoadSignalInterface* signal, Position position)

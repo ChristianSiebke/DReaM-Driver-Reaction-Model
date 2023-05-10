@@ -38,6 +38,11 @@ class DriverReactionModel {
       const std::vector<Common::Vector2d> GetSegmentControlFixationPoints();
       const WorldRepresentation &GetWorldRepresentation();
       const WorldInterpretation &GetWorldInterpretation();
+      //--debugging
+      std::string GetDebuggingState() {
+          return longitudinalDecision->debuggingState;
+      }
+      //--debugging
 
   private:
       void UpdateInput(int time, std::shared_ptr<DetailedAgentPerception> egoAgent,

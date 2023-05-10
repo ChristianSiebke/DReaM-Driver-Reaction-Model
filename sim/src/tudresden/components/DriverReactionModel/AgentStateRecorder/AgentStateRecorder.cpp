@@ -83,9 +83,10 @@ void AgentStateRecorder::BufferTimeStep(const int &time, const int &agentId, con
     // memorized traffic signals:
     // [<TrafficSignalOdId> | ...]
     outputLine += "[";
-    for (int i = 0; i < trafficSignals->size(); i++) {
-        outputLine += (trafficSignals->at(i)).trafficSignal->GetOpenDriveId();
-        if (i != trafficSignals->size() - 1) {
+    for (auto iter = (*trafficSignals).begin(); iter != (*trafficSignals).end(); iter++) {
+        outputLine += iter->second.trafficSignal->GetOpenDriveId();
+        auto nextIter = std::next(iter, 1);
+        if (nextIter != (*trafficSignals).end()) {
             outputLine += " | ";
         }
     }
@@ -115,7 +116,7 @@ std::string AgentStateRecorder::GenerateHeader() {
     header += "fixationPoints[{";
     header += "FixationPointX | ";
     header += "FixationPointY}], ";
-    header += "TrafficSignalss[TrafficSignalId]";
+    header += "TrafficSignals[TrafficSignalId]";
 
     return header;
 }

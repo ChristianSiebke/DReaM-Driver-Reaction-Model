@@ -68,7 +68,6 @@ double TargetVelocityCalculation::CalculateTargetVelocity(const WorldRepresentat
             "File: " + static_cast<std::string>(__FILE__) + " Line: " + std::to_string(__LINE__) + "  unknown vehicle type ";
         throw std::logic_error(message);
     }
-    std::cout << "Agent ID =" << worldRepresentation.egoAgent->GetID() << " | targetVelocity==" << targetVelocity << std::endl;
     return targetVelocity;
 }
 

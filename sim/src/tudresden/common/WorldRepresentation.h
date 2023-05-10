@@ -72,9 +72,10 @@ struct VisibleTrafficSignals {
     const MentalInfrastructure::TrafficSign *currentSpeedLimitSign;
     const MentalInfrastructure::TrafficSign *previousSpeedLimitSign;
 
-    std::optional<const MentalInfrastructure::TrafficSign *> GetSignForLane(DReaMId laneId, MentalInfrastructure::TrafficSignType type) {
+    std::optional<const MentalInfrastructure::TrafficSign *> GetSignForLane(DReaMId laneId,
+                                                                            MentalInfrastructure::TrafficSignType type) const {
         if (laneTrafficSignalMap.find(laneId) != laneTrafficSignalMap.end()) {
-            for (const auto signal : laneTrafficSignalMap[laneId]) {
+            for (const auto signal : laneTrafficSignalMap.at(laneId)) {
                 auto trafficSign = dynamic_cast<const MentalInfrastructure::TrafficSign *>(signal);
                 if (trafficSign != nullptr && trafficSign->GetType() == type)
                     return trafficSign;
@@ -84,9 +85,9 @@ struct VisibleTrafficSignals {
         return std::nullopt;
     }
 
-    std::optional<const MentalInfrastructure::TrafficLight *> GetTrafficLightForLane(DReaMId laneId) {
+    std::optional<const MentalInfrastructure::TrafficLight *> GetTrafficLightForLane(DReaMId laneId) const {
         if (laneTrafficSignalMap.find(laneId) != laneTrafficSignalMap.end()) {
-            for (const auto signal : laneTrafficSignalMap[laneId]) {
+            for (const auto signal : laneTrafficSignalMap.at(laneId)) {
                 auto trafficLight = dynamic_cast<const MentalInfrastructure::TrafficLight *>(signal);
                 if (trafficLight != nullptr)
                     return trafficLight;
@@ -96,16 +97,37 @@ struct VisibleTrafficSignals {
         return std::nullopt;
     }
 
-    std::vector<const MentalInfrastructure::TrafficSign *> GetSignsForLane(DReaMId laneId) {
+    std::vector<const MentalInfrastructure::TrafficSign *> GetSignsForLane(DReaMId laneId) const {
         std::vector<const MentalInfrastructure::TrafficSign *> toReturn;
         if (laneTrafficSignalMap.find(laneId) != laneTrafficSignalMap.end()) {
-            for (const auto signal : laneTrafficSignalMap[laneId]) {
+            for (const auto signal : laneTrafficSignalMap.at(laneId)) {
                 auto trafficSign = dynamic_cast<const MentalInfrastructure::TrafficSign *>(signal);
                 if (trafficSign != nullptr)
                     toReturn.push_back(trafficSign);
             }
         }
         return toReturn;
+    }
+    const MentalInfrastructure::TrafficSign *GetRightOfWaySignsForLane(const MentalInfrastructure::Lane *lane) const {
+        auto laneSigns = GetSignsForLane(lane->GetDReaMId());
+        auto iter = std::find_if(laneSigns.begin(), laneSigns.end(), [](const MentalInfrastructure::TrafficSign *element) {
+            return static_cast<int>(element->GetType()) > 0 && static_cast<int>(element->GetType()) <= 100;
+        });
+        if (iter != laneSigns.end()) {
+            return *iter;
+        }
+        auto newLane = lane;
+        while (newLane->IsJunctionLane()) {
+            newLane = newLane->GetPredecessors().front();
+        }
+        laneSigns = GetSignsForLane(newLane->GetDReaMId());
+        iter = std::find_if(laneSigns.begin(), laneSigns.end(), [](const MentalInfrastructure::TrafficSign *element) {
+            return static_cast<int>(element->GetType()) > 0 && static_cast<int>(element->GetType()) <= 100;
+        });
+        if (iter != laneSigns.end()) {
+            return *iter;
+        }
+        return nullptr;
     }
 };
 
@@ -167,13 +189,6 @@ class AgentRepresentation {
      * @return        junction
      */
     const MentalInfrastructure::Junction *NextJunction() const;
-
-    /*!
-     * \brief  return next right of way sign
-     *
-     * @return        next right of way sign
-     */
-    virtual std::optional<MentalInfrastructure::TrafficSign> NextROWSign() const;
 
     /*!
      * \brief  extrapolate distance (in lane direction distance >0 against lane direction distance <0)

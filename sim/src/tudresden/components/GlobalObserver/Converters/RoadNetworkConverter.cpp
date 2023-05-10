@@ -262,9 +262,12 @@ const MentalInfrastructure::Road *RoadNetworkConverter::ConvertRoad(const OWL::I
 
 const MentalInfrastructure::TrafficSign *RoadNetworkConverter::ConvertTrafficSign(const MentalInfrastructure::Road *road,
                                                                                   const OWL::Interfaces::TrafficSign *sign) {
-    auto trafficSignLookup = infrastructurePerception->lookupTableRoadNetwork.trafficSigns;
-    if (trafficSignLookup.find(sign->GetId()) == trafficSignLookup.end()) {
-        return trafficSignLookup[sign->GetId()];
+    OdId openDriveIdSign = sign->GetId();
+    auto iter = std::find_if(infrastructurePerception->trafficSigns.begin(), infrastructurePerception->trafficSigns.end(),
+                             [openDriveIdSign](auto element) { return element->GetOpenDriveId() == openDriveIdSign; });
+    if (iter != infrastructurePerception->trafficSigns.end()) {
+        // if the road is already in the infrastructure result return it
+        return iter->get();
     }
 
     auto newSign = std::make_shared<MentalInfrastructure::TrafficSign>(
@@ -277,16 +280,18 @@ const MentalInfrastructure::TrafficSign *RoadNetworkConverter::ConvertTrafficSig
             newSign->AddValidLane(lane);
     }
 
-    trafficSignLookup.insert(std::make_pair(sign->GetId(), newSign.get()));
     infrastructurePerception->trafficSigns.push_back(newSign);
     return newSign.get();
 }
 
 const MentalInfrastructure::TrafficLight *RoadNetworkConverter::ConvertTrafficLight(const MentalInfrastructure::Road *road,
                                                                                     const OWL::Interfaces::TrafficLight *trafficLight) {
-    auto trafficLightLookup = infrastructurePerception->lookupTableRoadNetwork.trafficLights;
-    if (trafficLightLookup.find(trafficLight->GetId()) == trafficLightLookup.end()) {
-        return trafficLightLookup[trafficLight->GetId()];
+    OdId openDriveIdTrafficLight = trafficLight->GetId();
+    auto iter = std::find_if(infrastructurePerception->trafficLights.begin(), infrastructurePerception->trafficLights.end(),
+                             [openDriveIdTrafficLight](auto element) { return element->GetOpenDriveId() == openDriveIdTrafficLight; });
+    if (iter != infrastructurePerception->trafficLights.end()) {
+        // if the road is already in the infrastructure result return it
+        return iter->get();
     }
 
     auto newLight = std::make_shared<MentalInfrastructure::TrafficLight>(
@@ -299,7 +304,6 @@ const MentalInfrastructure::TrafficLight *RoadNetworkConverter::ConvertTrafficLi
             newLight->AddValidLane(lane);
     }
 
-    trafficLightLookup.insert(std::make_pair(trafficLight->GetId(), newLight.get()));
     infrastructurePerception->trafficLights.push_back(newLight);
     return newLight.get();
 }
@@ -351,6 +355,10 @@ void RoadNetworkConverter::PrepareLookupTableRoadNetwork() {
     }
     for (const auto &road : infrastructurePerception->roads) {
         infrastructurePerception->lookupTableRoadNetwork.roads.insert({road->GetOpenDriveId(), road.get()});
+    }
+
+    for (const auto &sign : infrastructurePerception->trafficSigns) {
+        infrastructurePerception->lookupTableRoadNetwork.trafficSigns.insert({sign->GetOpenDriveId(), sign.get()});
     }
 }
 }

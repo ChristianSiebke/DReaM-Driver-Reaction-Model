@@ -101,12 +101,13 @@ std::pair<std::optional<double>, bool> FollowingInterpreter::FollowingState(cons
 
     //  agents have conflict area and same successor --> merging manoeuvre
     //  agents have conflict area and same predecessor --> splitting manoeuvre
-    if (interpretation->interpretedAgents.at(agent.GetID())->conflictSituation.has_value() &&
-        (interpretation->interpretedAgents.at(agent.GetID())->conflictSituation->junction->GetOpenDriveId() !=
-         interpretation->crossingInfo.junctionOdId)) {
+    auto conflictSituation = interpretation->interpretedAgents.at(agent.GetID())->conflictSituation;
+    if (!conflictSituation.has_value()) {
         return {std::nullopt, false};
     }
-    auto conflictAreaDistance = MergeOrSplitManoeuvreDistanceToConflictArea(representation.egoAgent, agent);
+    if (conflictSituation->junction->GetOpenDriveId() != interpretation->crossingInfo.junctionOdId) {
+    }
+    auto conflictAreaDistance = MergeOrSplitManoeuvreDistanceToConflictArea(*conflictSituation);
     if (conflictAreaDistance) {
         auto distanceOAgentToEndCA = conflictAreaDistance->oAgentDistance.vehicleReferenceToCAEnd;
         if (distanceOAgentToEndCA + oAgentDistanceReferenceToBack <= 0) {
@@ -130,28 +131,12 @@ std::pair<std::optional<double>, bool> FollowingInterpreter::FollowingState(cons
 }
 
 std::optional<ConflictSituation>
-FollowingInterpreter::MergeOrSplitManoeuvreDistanceToConflictArea(const EgoAgentRepresentation *ego,
-                                                                  const AgentRepresentation &observedAgent) const {
-    auto egoLane = ego->GetLanePosition().lane;
-    for (auto i = 0; i < maxNumberLanesExtrapolation; i++) {
-        if (!egoLane)
-            break;
-        auto observedLane = observedAgent.GetLanePosition().lane;
-        for (auto j = 0; j < maxNumberLanesExtrapolation; j++) {
-            if (!observedLane)
-                break;
-            auto cAEgo = egoLane->GetConflictAreaWithLane(observedLane);
-            if (cAEgo &&
-                (Common::anyElementOfCollectionIsElementOfOtherCollection(egoLane->GetSuccessors(), observedLane->GetSuccessors()) ||
-                 Common::anyElementOfCollectionIsElementOfOtherCollection(egoLane->GetPredecessors(), observedLane->GetPredecessors()))) {
-                auto cAObserved = observedLane->GetConflictAreaWithLane(egoLane);
-                auto result = Common::DistanceToConflictArea({*cAEgo, egoLane}, {*cAObserved, observedLane}, ego, observedAgent);
-                return result;
-            }
-            observedLane =
-                observedLane ? observedLane->NextLane(observedAgent.GetIndicatorState(), observedAgent.IsMovingInLaneDirection()) : nullptr;
-        }
-        egoLane = egoLane ? egoLane->NextLane(ego->GetIndicatorState(), ego->IsMovingInLaneDirection()) : nullptr;
+FollowingInterpreter::MergeOrSplitManoeuvreDistanceToConflictArea(const ConflictSituation &conflictSituation) const {
+    auto egoLane = conflictSituation.egoCA->lane;
+    auto observedLane = conflictSituation.oAgentCA->lane;
+    if (Common::anyElementOfCollectionIsElementOfOtherCollection(egoLane->GetSuccessors(), observedLane->GetSuccessors()) ||
+        Common::anyElementOfCollectionIsElementOfOtherCollection(egoLane->GetPredecessors(), observedLane->GetPredecessors())) {
+        return conflictSituation;
     }
     return std::nullopt;
 }

@@ -666,7 +666,6 @@ void SceneryImporter::ParseSignals(QDomElement& roadElement,
             while (!signalElement.isNull())
             {
                 RoadSignalSpecification signal;
-
                 ThrowIfFalse(ParseAttributeDouble(signalElement, ATTRIBUTE::s,           signal.s),
                              signalElement, "Attribute " + std::string(ATTRIBUTE::s) + " is missing.");
                 ThrowIfFalse(ParseAttributeDouble(signalElement, ATTRIBUTE::t,           signal.t),
@@ -683,18 +682,19 @@ void SceneryImporter::ParseSignals(QDomElement& roadElement,
                              signalElement, "Attribute " + std::string(ATTRIBUTE::type) + " is missing.");
                 ThrowIfFalse(ParseAttributeString(signalElement, ATTRIBUTE::subtype,     signal.subtype),
                              signalElement, "Attribute " + std::string(ATTRIBUTE::subtype) + " is missing.");
+
                 // optional
-                std::string signalUnit;
-                ParseAttributeDouble(signalElement, ATTRIBUTE::value, signal.value);
-                ParseAttributeString(signalElement, ATTRIBUTE::unit,  signalUnit);
-                ParseSignalUnit(signalUnit, signal.unit);
-                ParseAttributeDouble(signalElement, ATTRIBUTE::hOffset, signal.hOffset);
-                ParseAttributeDouble(signalElement, ATTRIBUTE::pitch,   signal.pitch);
-                ParseAttributeString(signalElement, ATTRIBUTE::name,    signal.name);
-                ParseAttributeDouble(signalElement, ATTRIBUTE::height,  signal.height);
-                ParseAttributeDouble(signalElement, ATTRIBUTE::width,   signal.width);
-                ParseAttributeString(signalElement, ATTRIBUTE::text,    signal.text);
-                ParseAttributeString(signalElement, ATTRIBUTE::country, signal.country);
+                //  std::string signalUnit;
+                //  ParseAttributeDouble(signalElement, ATTRIBUTE::value, signal.value);
+                //  ParseAttributeString(signalElement, ATTRIBUTE::unit,  signalUnit);
+                //  ParseSignalUnit(signalUnit, signal.unit);
+                //  ParseAttributeDouble(signalElement, ATTRIBUTE::hOffset, signal.hOffset);
+                //  ParseAttributeDouble(signalElement, ATTRIBUTE::pitch,   signal.pitch);
+                //  ParseAttributeString(signalElement, ATTRIBUTE::name,    signal.name);
+                //  ParseAttributeDouble(signalElement, ATTRIBUTE::height,  signal.height);
+                //  ParseAttributeDouble(signalElement, ATTRIBUTE::width,   signal.width);
+                //  ParseAttributeString(signalElement, ATTRIBUTE::text,    signal.text);
+                //  ParseAttributeString(signalElement, ATTRIBUTE::country, signal.country);
 
                 // check validity subtag
                 ParseElementValidity(signalElement, signal.validity);

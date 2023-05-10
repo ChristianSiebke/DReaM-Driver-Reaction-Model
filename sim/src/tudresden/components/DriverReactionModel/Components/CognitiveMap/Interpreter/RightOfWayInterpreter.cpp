@@ -52,9 +52,10 @@ void RightOfWayInterpreter::Update(WorldInterpretation* interpretation, const Wo
 }
 
 void RightOfWayInterpreter::UpdateRightOfWayRegulation(const WorldRepresentation& representation) {
-    if (auto rowSign = representation.egoAgent->NextROWSign()) {
+    if (auto rowSign = representation.trafficSignalMemory->GetRightOfWaySignsForLane(representation.egoAgent->GetLanePosition().lane)) {
         rightOfWayRegulation = std::make_unique<RightOfWayRegulation::TrafficSignRegulationGermany>();
-    } else {
+    }
+    else {
         rightOfWayRegulation = std::make_unique<RightOfWayRegulation::RightBeforeLeftRegulationGermany>();
     }
 }

@@ -89,64 +89,6 @@ const MentalInfrastructure::Junction *AgentRepresentation::NextJunction() const 
     return nextJunction;
 }
 
-std::optional<MentalInfrastructure::TrafficSign> AgentRepresentation::NextROWSign() const {
-    const auto &egoLane = GetLanePosition().lane;
-    const auto &egoRoad = GetLanePosition().lane->GetRoad();
-    bool egoIsMovingInLaneDirection = IsMovingInLaneDirection();
-    bool egoLaneInRoadDirection = egoLane->IsInRoadDirection();
-
-    // TODO re-implement
-
-    //    auto rowSigns = FilterROWTrafficSigns(*egoRoad.GetTrafficSigns());
-
-    //    auto findROWSignInDirection = [egoIsMovingInLaneDirection,
-    //                                   egoLaneInRoadDirection](const std::vector<MentalInfrastructure::TrafficSign>& rowSigns) {
-    //        return std::find_if(rowSigns.begin(), rowSigns.end(),
-    //                            [egoIsMovingInLaneDirection, egoLaneInRoadDirection](MentalInfrastructure::TrafficSign element) {
-    //                                if (element.GetT() < 0 || (egoIsMovingInLaneDirection && egoLaneInRoadDirection)) {
-    //                                    return true;
-    //                                } else if (element.GetT() < 0 || (!egoIsMovingInLaneDirection && !egoLaneInRoadDirection)) {
-    //                                    return true;
-    //                                } else if (element.GetT() > 0 || (egoIsMovingInLaneDirection && !egoLaneInRoadDirection)) {
-    //                                    return true;
-    //                                } else if (element.GetT() > 0 || (!egoIsMovingInLaneDirection && egoLaneInRoadDirection)) {
-    //                                    return true;
-    //                                }
-    //                                return false;
-    //                            });
-    //    };
-
-    //    const MentalInfrastructure::TrafficSign* rowSign = nullptr;
-    //    std::for_each(rowSigns.begin(), rowSigns.end(), [&rowSign, findROWSignInDirection](const auto& element) {
-    //        std::vector<MentalInfrastructure::TrafficSign>::const_iterator rowSignIter = findROWSignInDirection(element.second);
-    //        if (rowSignIter != element.second.end()) {
-    //            rowSign = &(*rowSignIter);
-    //        }
-    //    });
-
-    //    if (rowSign) {
-    //        return *rowSign;
-    //    } else {
-    //        return std::nullopt;
-    //    }
-
-    return std::nullopt;
-}
-
-const std::unordered_map<MentalInfrastructure::TrafficSignType, std::vector<MentalInfrastructure::TrafficSign>>
-AgentRepresentation::FilterROWTrafficSigns(
-    const std::unordered_map<MentalInfrastructure::TrafficSignType, std::vector<MentalInfrastructure::TrafficSign>>& trafficSignMap) const {
-    std::unordered_map<MentalInfrastructure::TrafficSignType, std::vector<MentalInfrastructure::TrafficSign>> result;
-    std::copy_if(trafficSignMap.begin(), trafficSignMap.end(), std::inserter(result, result.begin()),
-                 [](const std::pair<MentalInfrastructure::TrafficSignType, std::vector<MentalInfrastructure::TrafficSign>> element) {
-                     return element.first == MentalInfrastructure::TrafficSignType::Stop ||
-                            element.first == MentalInfrastructure::TrafficSignType::GiveWay ||
-                            element.first == MentalInfrastructure::TrafficSignType::RightOfWayBegin ||
-                            element.first == MentalInfrastructure::TrafficSignType::RightOfWayNextIntersection;
-                 });
-    return result;
-}
-
 double AgentRepresentation::ExtrapolateDistanceAlongLane(double timeStep) const {
     // extrapolated distance
     double extrapolatedDistance = (GetAcceleration() / 2) * std::pow((timeStep), 2) + GetVelocity() * (timeStep);

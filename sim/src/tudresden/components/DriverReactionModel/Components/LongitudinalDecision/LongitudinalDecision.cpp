@@ -85,31 +85,29 @@ void LongitudinalDecision::Update() {
 }
 
 double LongitudinalDecision::DetermineAccelerationWish() {
-    std::cout << "Agent: " << worldRepresentation.egoAgent->GetID() << "| START " << std::endl;
+    //---debugging---
+    debuggingState = "";
+    //---debugging---
     std::vector<double> accelerations;
     accelerations.push_back(anticipation.CalculatePhaseAcceleration());
     minEmergencyBrakeDelay.ResetEmergencyState();
     for (auto &entry : worldInterpretation.interpretedAgents) {
         const auto &agent = entry.second;
-
-        if (agent->rightOfWay.ego && !agent->rightOfWay.observed) {
-            std::cout << "Agent: " << worldRepresentation.egoAgent->GetID() << "| HAVE RIGHT OF WAY over Agent =" << agent->agent->GetID()
-                      << std::endl;
-        }
-
         switch (actionStateHandler.GetState(agent)) {
         case ActionState::CollisionImminent:
+            //---debugging--
+            // debuggingState += "A" + std::to_string(agent->agent->GetID()) + " Collision| ";
+            //---debugging--
             double deceleration;
 
             deceleration = AgentCrashImminent(agent);
             minEmergencyBrakeDelay.InsertEmergencyBrakeEvent(agent->agent->GetID(), deceleration);
             accelerations.push_back(deceleration);
-            //-----
-            std::cout << "Agent: " << worldRepresentation.egoAgent->GetID() << "| Collision acceleration: " << deceleration
-                      << " | Collision agent :" << agent->agent->GetID() << std::endl;
-            //-----
             break;
         case ActionState::Following:
+            //---debugging--
+            // debuggingState += "A" + std::to_string(agent->agent->GetID()) + " Following| ";
+            //---debugging--
             if ((agent->conflictSituation && agent->conflictSituation->oAgentDistance.vehicleFrontToCAStart > 0) &&
                 (agent->agent->GetVelocity() == 0)) {
                 break;
@@ -122,21 +120,19 @@ double LongitudinalDecision::DetermineAccelerationWish() {
                 worldInterpretation.targetVelocity, worldRepresentation.egoAgent->GetVelocity(),
                 worldRepresentation.egoAgent->GetVelocity() - agent->agent->GetVelocity(), *agent->relativeDistance));
 
-            //-----
-            std::cout << "Agent: " << worldRepresentation.egoAgent->GetID() << " | relative distance=" << *agent->relativeDistance
-                      << " | Following acceleration:" << accelerations.back() << " | Observed Agent=" << agent->agent->GetID() << std::endl;
-            //-----
             break;
-        case ActionState::ReactToIntersectionSituation:
+        case ActionState::ReactToIntersectionSituation: {
+            //---debugging--
+            std::string stringlaneInLineWithEgoLane = agent->laneInLineWithEgoLane == true ? "true" : "false";
+            std::string stringDistance =
+                agent->relativeDistance.has_value() ? std::to_string(static_cast<int>(*agent->relativeDistance)) : "none";
+            debuggingState +=
+                "A" + std::to_string(agent->agent->GetID()) + " I R" + stringlaneInLineWithEgoLane + " D" + stringDistance + "|";
+
+            //---debugging--
             accelerations.push_back(anticipation.IntersectionGap(agent));
-
-            //-----
-            std::cout << "Agent: " << worldRepresentation.egoAgent->GetID()
-                      << "| ReactToIntersectionSituation  acceleration: " << accelerations.back()
-                      << " | Observed Agent=" << agent->agent->GetID() << std::endl;
-            //-----
-
-                break;
+            break;
+        }
         case ActionState::End:
             break;
         default:
@@ -149,7 +145,6 @@ double LongitudinalDecision::DetermineAccelerationWish() {
 
     accelerations.insert(accelerations.end(), emergencyDelay.begin(), emergencyDelay.end());
     std::sort(accelerations.begin(), accelerations.end(), AccelerationSorting);
-    std::cout << " accelerations.front(): " << accelerations.front() << std::endl;
     return accelerations.front();
 }
 

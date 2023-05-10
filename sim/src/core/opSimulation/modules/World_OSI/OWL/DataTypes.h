@@ -1290,8 +1290,7 @@ public:
 class TrafficSign : public Interfaces::TrafficSign
 {
 public:
-
-    TrafficSign(osi3::TrafficSign* osiObject);
+    TrafficSign(std::string id, osi3::TrafficSign *osiObject);
 
     virtual ~TrafficSign() override = default;
 

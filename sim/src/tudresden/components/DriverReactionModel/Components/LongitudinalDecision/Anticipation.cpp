@@ -27,22 +27,12 @@ double Anticipation::IntersectionGap(const std::unique_ptr<AgentInterpretation> 
 
     auto tEgo = CalculateTimeToConflictArea(conflictSituation->egoDistance, worldRepresentation.egoAgent->GetVelocity());
     auto tObserved = CalculateTimeToConflictArea(conflictSituation->oAgentDistance, oAgent->GetVelocity());
-
-    std::cout << " t ego front to CA start: " << tEgo.vehicleFrontToCAStart
-              << " | s  =" << conflictSituation->egoDistance.vehicleFrontToCAStart << std::endl;
-    std::cout << " t ego back to CA end: " << tEgo.vehicleBackToCAEnd << " | s  =" << conflictSituation->egoDistance.vehicleBackToCAEnd
-              << std::endl;
-    std::cout << " t observed front to CA start: " << tObserved.vehicleFrontToCAStart
-              << " | s  =" << conflictSituation->oAgentDistance.vehicleFrontToCAStart << std::endl;
-    std::cout << " t observed back to CA end: " << tObserved.vehicleBackToCAEnd
-              << " | s  =" << conflictSituation->oAgentDistance.vehicleBackToCAEnd << std::endl;
     //  check whether ego (if he has right of way) can pass
     if ((oAgent->GetAcceleration() == 0.0 && oAgent->GetVelocity() == 0.0) && observedAgent->rightOfWay.ego) {
         if (observedAgent->collisionPoint) {
             return ApproachingStoppingPoint(conflictSituation->egoDistance.vehicleFrontToCAStart, tObserved.vehicleBackToCAEnd,
                                             observedAgent.get());
         }
-        std::cout << "Agent: " << worldRepresentation.egoAgent->GetID() << " | RoW and oagent do not move " << std::endl;
         return freeAccelerationEgo;
     }
     // observed agent stops
@@ -51,20 +41,17 @@ double Anticipation::IntersectionGap(const std::unique_ptr<AgentInterpretation> 
     }
     // observed agent pass conflict area until ego reaches conflict area
     if (tEgo.vehicleFrontToCAStart - tObserved.vehicleBackToCAEnd >= GetBehaviourData().adBehaviour.timeGapAcceptance) {
-        std::cout << "Agent: " << worldRepresentation.egoAgent->GetID() << " | observed agent pass CA until ego reach CA" << std::endl;
         return freeAccelerationEgo;
     }
 
     if (std::any_of(priorityAgents.begin(), priorityAgents.end(), [oAgentID, conflictSituation](auto element) {
             return element.first == oAgentID && element.second == conflictSituation->egoCA;
         })) {
-        std::cout << "Agent: " << worldRepresentation.egoAgent->GetID() << " |  let pass other agent " << std::endl;
         return ApproachingStoppingPoint(conflictSituation->egoDistance.vehicleFrontToCAStart, tObserved.vehicleBackToCAEnd,
                                         observedAgent.get());
     }
     // ego stops
     if (!(tEgo.vehicleBackToCAEnd < std::numeric_limits<double>::infinity())) {
-        std::cout << "Agent: " << worldRepresentation.egoAgent->GetID() << " | stop  " << std::endl;
         return ApproachingStoppingPoint(conflictSituation->egoDistance.vehicleFrontToCAStart, tObserved.vehicleBackToCAEnd,
                                         observedAgent.get());
     }
@@ -75,16 +62,10 @@ double Anticipation::IntersectionGap(const std::unique_ptr<AgentInterpretation> 
 
     if (tEgo.vehicleFrontToCAStart - tObserved.vehicleBackToCAEnd >= GetBehaviourData().adBehaviour.timeGapAcceptance ||
         tObserved.vehicleFrontToCAStart - tEgo.vehicleBackToCAEnd >= GetBehaviourData().adBehaviour.timeGapAcceptance) {
-        std::cout << "Agent: " << worldRepresentation.egoAgent->GetID() << " | save to pass"
-                  << " |Gap 1: " << tEgo.vehicleFrontToCAStart - tObserved.vehicleBackToCAEnd
-                  << " |Gap 2: " << tObserved.vehicleFrontToCAStart - tEgo.vehicleBackToCAEnd
-                  << " |  Acceleration : " << freeAccelerationEgo << std::endl;
-
         return freeAccelerationEgo;
     }
     else {
         priorityAgents.insert_or_assign(oAgentID, conflictSituation->egoCA);
-        std::cout << "Agent: " << worldRepresentation.egoAgent->GetID() << " | gap too small" << std::endl;
         return ApproachingStoppingPoint(conflictSituation->egoDistance.vehicleFrontToCAStart, tObserved.vehicleBackToCAEnd,
                                         observedAgent.get());
     }
@@ -279,19 +260,15 @@ double Anticipation::ApproachingStoppingPoint(double sFrontEgo, double tEndObser
     }
 
     double s = Common::GetDistanceStoppingPoint(egoAgent, observedAgent, worldInterpretation);
-    std::cout << "distance to stopping point: " << s << std::endl;
     if (s > sFrontEgo || s < 0) {
         s = sFrontEgo;
     }
-    std::cout << "distance Deceleration: " << s << std::endl;
 
     double aIDM = MaximumAccelerationWish(0, egoAgent->GetVelocity(), egoAgent->GetVelocity(), s);
     if (aIDM < behaviourData.adBehaviour.comfortDeceleration.min && observedAgent->rightOfWay.ego) {
         // ego slows down so that when it enters the conflict area, the observed agent has already passed the conflict area.
         double a = (2 * (sFrontEgo - (worldRepresentation.egoAgent->GetVelocity() * tEndObserved))) / (tEndObserved * tEndObserved);
         a = Common::ValueInBounds(maxEmergencyDeceleration, a, GetBehaviourData().adBehaviour.maxAcceleration);
-        std::cout << " a: " << a << " | aIDM: " << aIDM << " | std::abs(worldRepresentation.egoAgent->GetVelocity() / a:"
-                  << std::abs(worldRepresentation.egoAgent->GetVelocity() / a) << " | tEndObserved" << tEndObserved << std::endl;
         if ((tEndObserved < std::numeric_limits<double>::infinity() && a > aIDM) &&
             (a > 0 && std::abs(worldRepresentation.egoAgent->GetVelocity() / a)) > tEndObserved) {
             return a;

@@ -28,12 +28,6 @@ Line2d StoppingPointCalculator::CalcExtendedLine(const MentalInfrastructure::Lan
     laneDirection.x = last(rightWay, lane)->x - (*secondLast(rightWay, pointsList)).x;
     laneDirection.y = last(rightWay, lane)->y - (*secondLast(rightWay, pointsList)).y;
 
-    // std::cout << "Vec calc: " << laneDirection << " = "
-    //           << "(" << last(rightWay, lane)->x << "," << last(rightWay, lane)->y << ") - (" << (*secondLast(rightWay, pointsList)).x <<
-    //           ","
-    //           << (*secondLast(rightWay, pointsList)).y << ")" << std::endl;
-    // std::cout << "Vec before: " << laneDirection << std::endl;
-
     lineStart.x = last(rightWay, lane)->x;
     lineStart.y = last(rightWay, lane)->y;
 
@@ -49,8 +43,6 @@ Line2d StoppingPointCalculator::CalcExtendedLine(const MentalInfrastructure::Lan
     copy.Rotate(rotationAngle);
 
     lineStart.Add(copy);
-
-    // std::cout << "Vec after: " << laneDirection << std::endl;
 
     Line2d line;
     line.start = lineStart;
@@ -160,7 +152,6 @@ bool StoppingPointCalculator::CCLFromTurningLanes(const MentalInfrastructure::La
                                                   const MentalInfrastructure::Junction *junction) {
     if (lane->GetSuccessors().size() == 1) {
         const auto succLane = lane->GetSuccessors().front();
-        // std::cout << "Lane " << lane->GetRoad()->GetOpenDriveId() << " is in direction? " << lane->IsInRoadDirection() << std::endl;
         return CalcCrossingLines(succLane, dir, lines, junction);
     }
 

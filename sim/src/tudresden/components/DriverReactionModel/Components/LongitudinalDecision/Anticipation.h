@@ -29,7 +29,6 @@ class Anticipation {
         DistributionEntry maxEmergencyDecelDistribution = GetBehaviourData().adBehaviour.maxEmergencyDeceleration;
         double emergencyDec = -stochastics->GetLogNormalDistributed(std::abs(maxEmergencyDecelDistribution.mean),
                                                                     maxEmergencyDecelDistribution.std_deviation);
-        std::cout << "emergencyDec: " << emergencyDec << std::endl;
         maxEmergencyDeceleration =
             Common::ValueInBounds(maxEmergencyDecelDistribution.min, emergencyDec, maxEmergencyDecelDistribution.max);
 
@@ -38,7 +37,6 @@ class Anticipation {
                                                                        comfortDecelerationDistribution.std_deviation);
         comfortDeceleration =
             Common::ValueInBounds(comfortDecelerationDistribution.min, drawnComfortDec, comfortDecelerationDistribution.max);
-        std::cout << "comfortDeceleration: " << comfortDeceleration << std::endl;
     }
     double IntersectionGap(const std::unique_ptr<AgentInterpretation> &agent);
 

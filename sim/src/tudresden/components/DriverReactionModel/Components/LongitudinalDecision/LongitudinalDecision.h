@@ -64,6 +64,9 @@ public:
     double GetAcceleration() const {
         return accelerationResult;
     }
+    //--debugging
+    std::string debuggingState;
+    //--debugging
 
 private:
     double DetermineAccelerationWish();

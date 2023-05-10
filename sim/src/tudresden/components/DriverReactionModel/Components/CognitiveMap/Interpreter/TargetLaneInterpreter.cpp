@@ -11,7 +11,7 @@
 
 #include "Common/TimeMeasurement.hpp"
 
-TimeMeasurement timeMeasure5("CollisionInterpreter.cpp");
+TimeMeasurement timeMeasure5("TargetLaneInterpreter.cpp");
 
 namespace Interpreter {
 

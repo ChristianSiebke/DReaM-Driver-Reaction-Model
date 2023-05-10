@@ -35,12 +35,12 @@ bool ActionStateHandler::DetermineNextState(const std::unique_ptr<AgentInterpret
                 if (agent->conflictSituation->oAgentDistance.vehicleFrontToCAStart < 0) {
                     return true;
                 }
-                else if (agent->relativeDistance < 0 && !(agent->laneInLineWithEgoLane)) {
+                else if (agent->relativeDistance < 0 && !agent->laneInLineWithEgoLane) {
                     if (agent->conflictSituation.has_value() && !EgoHasRightOfWay(agent)) {
                         return false;
                     }
                 }
-                else if (agent->relativeDistance > 0 && !(agent->laneInLineWithEgoLane)) {
+                else if (agent->relativeDistance > 0 && !agent->laneInLineWithEgoLane) {
                     if (agent->conflictSituation.has_value() && EgoHasRightOfWay(agent)) {
                         return false;
                     }
