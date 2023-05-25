@@ -87,6 +87,7 @@ void LongitudinalDecision::Update() {
 double LongitudinalDecision::DetermineAccelerationWish() {
     //---debugging---
     debuggingState = "";
+    debuggingState += "TargetVelocity= " + std::to_string(static_cast<int>(worldInterpretation.targetVelocity)) + "|";
     //---debugging---
     std::vector<double> accelerations;
     accelerations.push_back(anticipation.CalculatePhaseAcceleration());
@@ -94,51 +95,59 @@ double LongitudinalDecision::DetermineAccelerationWish() {
     for (auto &entry : worldInterpretation.interpretedAgents) {
         const auto &agent = entry.second;
         switch (actionStateHandler.GetState(agent)) {
-        case ActionState::CollisionImminent:
+        case ActionState::CollisionImminent: {
             //---debugging--
-            // debuggingState += "A" + std::to_string(agent->agent->GetID()) + " Collision| ";
+            debuggingState += "A:" + std::to_string(agent->agent->GetID()) + " Collision|";
             //---debugging--
-            double deceleration;
 
-            deceleration = AgentCrashImminent(agent);
+            double deceleration = AgentCrashImminent(agent);
             minEmergencyBrakeDelay.InsertEmergencyBrakeEvent(agent->agent->GetID(), deceleration);
             accelerations.push_back(deceleration);
             break;
-        case ActionState::Following:
+        }
+        case ActionState::Following: {
             //---debugging--
-            // debuggingState += "A" + std::to_string(agent->agent->GetID()) + " Following| ";
+            debuggingState += "A:" + std::to_string(agent->agent->GetID()) + " Following|";
             //---debugging--
             if ((agent->conflictSituation && agent->conflictSituation->oAgentDistance.vehicleFrontToCAStart > 0) &&
-                (agent->agent->GetVelocity() == 0)) {
+                (agent->agent->GetVelocity() == 0 && !agent->laneInLineWithEgoLane)) {
+                debuggingState += " XX|";
                 break;
             }
             if (*agent->relativeDistance < 0) {
                 // agent is behind ego
                 break;
             }
-            accelerations.push_back(anticipation.MaximumAccelerationWish(
-                worldInterpretation.targetVelocity, worldRepresentation.egoAgent->GetVelocity(),
-                worldRepresentation.egoAgent->GetVelocity() - agent->agent->GetVelocity(), *agent->relativeDistance));
-
+            if (worldInterpretation.crossingInfo.phase > CrossingPhase::Approach) {
+                accelerations.push_back(anticipation.AnticipationAccelerationToAchieveVelocityInDistance(
+                    *agent->relativeDistance, agent->agent->GetVelocity(), worldRepresentation.egoAgent->GetVelocity()));
+            }
+            else {
+                accelerations.push_back(anticipation.MaximumAccelerationWish(
+                    worldInterpretation.targetVelocity, worldRepresentation.egoAgent->GetVelocity(),
+                    worldRepresentation.egoAgent->GetVelocity() - agent->agent->GetVelocity(), *agent->relativeDistance));
+            }
             break;
+        }
         case ActionState::ReactToIntersectionSituation: {
             //---debugging--
-            std::string stringlaneInLineWithEgoLane = agent->laneInLineWithEgoLane == true ? "true" : "false";
-            std::string stringDistance =
-                agent->relativeDistance.has_value() ? std::to_string(static_cast<int>(*agent->relativeDistance)) : "none";
-            debuggingState +=
-                "A" + std::to_string(agent->agent->GetID()) + " I R" + stringlaneInLineWithEgoLane + " D" + stringDistance + "|";
 
-            //---debugging--
+            debuggingState += "A:" + std::to_string(agent->agent->GetID()) + " I " +
+                              " EROW=" + std::to_string(static_cast<int>(agent->rightOfWay.ego)) +
+                              " OROW=" + std::to_string(static_cast<int>(agent->rightOfWay.observed)) + "|";
+
+            ////---debugging--
             accelerations.push_back(anticipation.IntersectionGap(agent));
             break;
         }
-        case ActionState::End:
+        case ActionState::End: {
             break;
-        default:
+        }
+        default: {
             std::string message =
                 "File: " + static_cast<std::string>(__FILE__) + " Line: " + std::to_string(__LINE__) + " ActionState is unkown ";
             throw std::logic_error(message);
+        }
         }
     }
     auto emergencyDelay = minEmergencyBrakeDelay.ActivateIfNeeded(worldInterpretation.interpretedAgents);

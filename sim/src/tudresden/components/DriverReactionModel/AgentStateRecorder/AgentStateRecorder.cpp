@@ -77,8 +77,7 @@ void AgentStateRecorder::BufferTimeStep(const int &time, const int &agentId, con
         outputLine += std::to_string(point.x) += " | ";
         outputLine += std::to_string(point.y) += "}";
     }
-    outputLine += "]";
-    outputLine += "}";
+    outputLine += "],";
 
     // memorized traffic signals:
     // [<TrafficSignalOdId> | ...]
@@ -91,7 +90,7 @@ void AgentStateRecorder::BufferTimeStep(const int &time, const int &agentId, con
         }
     }
 
-    outputLine += "],";
+    outputLine += "]";
 
     agentTree.put("<xmlattr>.id", agentId);
     agentTree.put_value(std::move(outputLine));

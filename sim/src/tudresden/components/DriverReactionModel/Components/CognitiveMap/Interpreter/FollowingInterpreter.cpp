@@ -38,13 +38,6 @@ void FollowingInterpreter::Update(WorldInterpretation* interpretation, const Wor
 std::pair<std::optional<double>, bool> FollowingInterpreter::FollowingState(const AgentRepresentation &agent,
                                                                             const WorldRepresentation &representation,
                                                                             const WorldInterpretation *interpretation) {
-    // TODO: define followingThreshold  (min safety distance 2s --> 4 *min safety distance)
-    double followingThreshold = representation.egoAgent->GetVelocity() * 8;
-    followingThreshold = followingThreshold < 30 ? 30 : followingThreshold;
-
-    if ((representation.egoAgent->GetRefPosition() - agent.GetRefPosition()).Length() - (followingThreshold) > 0) {
-        return {std::nullopt, false};
-    }
     auto egoLane = representation.egoAgent->GetLanePosition().lane;
     double egoS = representation.egoAgent->GetLanePosition().sCoordinate;
     auto observedLane = agent.GetLanePosition().lane;
@@ -67,6 +60,14 @@ std::pair<std::optional<double>, bool> FollowingInterpreter::FollowingState(cons
             return {{observedS - egoS + distanceReferenceToEdgesLeading}, true};
         }
     }
+    // TODO: define followingThreshold  (min safety distance 2s --> 4 *min safety distance)
+    double followingThreshold = representation.egoAgent->GetVelocity() * 8;
+    followingThreshold = followingThreshold < 50 ? 50 : followingThreshold;
+    if ((representation.egoAgent->GetRefPosition() - agent.GetRefPosition()).Length() - (followingThreshold) > 0) {
+        // reduce simulaton time
+        return {std::nullopt, false};
+    }
+
     // observed agent on successor lane
     if (std::any_of(egoLane->GetSuccessors().begin(), egoLane->GetSuccessors().end(),
                     [observedLane](const auto &lane) { return lane == observedLane; })) {

@@ -44,8 +44,7 @@ void CollisionInterpreter::Update(WorldInterpretation *interpretation, const Wor
         std::string message =
             "File: " + static_cast<std::string>(__FILE__) + " Line: " + std::to_string(__LINE__) + " Update collision points failed";
         Log(message, error);
-        throw std::logic_error(message);
-
+        throw std::runtime_error(message);
     }
 }
 
@@ -171,6 +170,8 @@ polygon_t CollisionInterpreter::ConstructAgentPolygonRepresentation(const AgentR
     case DReaMDefinitions::AgentVehicleType::Truck:
         return ConstructPolygonRepresentation(data, pos, hdg);
     case DReaMDefinitions::AgentVehicleType::Pedestrian:
+        return ConstructPolygonRepresentation(data, pos, hdg);
+    case DReaMDefinitions::AgentVehicleType::Bicycle:
         return ConstructPolygonRepresentation(data, pos, hdg);
     default:
         std::string message = __FILE__ " Line: " + std::to_string(__LINE__) + "AgentType does not exist";

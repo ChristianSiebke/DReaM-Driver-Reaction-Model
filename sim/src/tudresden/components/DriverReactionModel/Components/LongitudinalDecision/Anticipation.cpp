@@ -24,9 +24,18 @@ double Anticipation::IntersectionGap(const std::unique_ptr<AgentInterpretation> 
         DeletePriorityAgent(oAgentID);
         return freeAccelerationEgo;
     }
+    std::cout << "observed Agent:" << oAgentID << std::endl;
+    auto tEgo = CalculateTimeToConflictAreaEgo(conflictSituation->egoDistance, worldRepresentation.egoAgent->GetVelocity());
+    auto tObserved = CalculateTimeToConflictAreaObserved(*conflictSituation, oAgent);
+    std::cout << " t ego front to CA start: " << tEgo.vehicleFrontToCAStart
+              << " | s  =" << conflictSituation->egoDistance.vehicleFrontToCAStart << std::endl;
+    std::cout << " t ego back to CA end: " << tEgo.vehicleBackToCAEnd << " | s  =" << conflictSituation->egoDistance.vehicleBackToCAEnd
+              << std::endl;
+    std::cout << " t observed front to CA start: " << tObserved.vehicleFrontToCAStart
+              << " | s  =" << conflictSituation->oAgentDistance.vehicleFrontToCAStart << std::endl;
+    std::cout << " t observed back to CA end: " << tObserved.vehicleBackToCAEnd
+              << " | s  =" << conflictSituation->oAgentDistance.vehicleBackToCAEnd << std::endl;
 
-    auto tEgo = CalculateTimeToConflictArea(conflictSituation->egoDistance, worldRepresentation.egoAgent->GetVelocity());
-    auto tObserved = CalculateTimeToConflictArea(conflictSituation->oAgentDistance, oAgent->GetVelocity());
     //  check whether ego (if he has right of way) can pass
     if ((oAgent->GetAcceleration() == 0.0 && oAgent->GetVelocity() == 0.0) && observedAgent->rightOfWay.ego) {
         if (observedAgent->collisionPoint) {
@@ -38,20 +47,24 @@ double Anticipation::IntersectionGap(const std::unique_ptr<AgentInterpretation> 
     // observed agent stops
     if (!(tObserved.vehicleFrontToCAStart < std::numeric_limits<double>::infinity()) && observedAgent->rightOfWay.ego) {
         DeletePriorityAgent(oAgentID);
+        return freeAccelerationEgo;
     }
     // observed agent pass conflict area until ego reaches conflict area
     if (tEgo.vehicleFrontToCAStart - tObserved.vehicleBackToCAEnd >= GetBehaviourData().adBehaviour.timeGapAcceptance) {
+        std::cout << "Agent: " << worldRepresentation.egoAgent->GetID() << " | observed agent pass CA until ego reach CA" << std::endl;
         return freeAccelerationEgo;
     }
 
     if (std::any_of(priorityAgents.begin(), priorityAgents.end(), [oAgentID, conflictSituation](auto element) {
             return element.first == oAgentID && element.second == conflictSituation->egoCA;
         })) {
+        std::cout << "Agent: " << worldRepresentation.egoAgent->GetID() << " |  let pass other agent " << std::endl;
         return ApproachingStoppingPoint(conflictSituation->egoDistance.vehicleFrontToCAStart, tObserved.vehicleBackToCAEnd,
                                         observedAgent.get());
     }
     // ego stops
     if (!(tEgo.vehicleBackToCAEnd < std::numeric_limits<double>::infinity())) {
+        std::cout << "Agent: " << worldRepresentation.egoAgent->GetID() << " | stop  " << std::endl;
         return ApproachingStoppingPoint(conflictSituation->egoDistance.vehicleFrontToCAStart, tObserved.vehicleBackToCAEnd,
                                         observedAgent.get());
     }
@@ -62,9 +75,14 @@ double Anticipation::IntersectionGap(const std::unique_ptr<AgentInterpretation> 
 
     if (tEgo.vehicleFrontToCAStart - tObserved.vehicleBackToCAEnd >= GetBehaviourData().adBehaviour.timeGapAcceptance ||
         tObserved.vehicleFrontToCAStart - tEgo.vehicleBackToCAEnd >= GetBehaviourData().adBehaviour.timeGapAcceptance) {
+        std::cout << "Agent: " << worldRepresentation.egoAgent->GetID() << " | save to pass"
+                  << " |Gap 1: " << tEgo.vehicleFrontToCAStart - tObserved.vehicleBackToCAEnd
+                  << " |Gap 2: " << tObserved.vehicleFrontToCAStart - tEgo.vehicleBackToCAEnd
+                  << " |  Acceleration : " << freeAccelerationEgo << std::endl;
         return freeAccelerationEgo;
     }
     else {
+        std::cout << "Agent: " << worldRepresentation.egoAgent->GetID() << " | gap too small" << std::endl;
         priorityAgents.insert_or_assign(oAgentID, conflictSituation->egoCA);
         return ApproachingStoppingPoint(conflictSituation->egoDistance.vehicleFrontToCAStart, tObserved.vehicleBackToCAEnd,
                                         observedAgent.get());
@@ -89,36 +107,47 @@ double Anticipation::Deceleration(const std::unique_ptr<AgentInterpretation>& ob
     return MaximumAccelerationWish(0, egoAgent->GetVelocity(), egoAgent->GetVelocity(), s);
 }
 
-TimeToConflictArea Anticipation::CalculateTimeToConflictArea(DistanceToConflictArea distance, double velocity) const {
+TimeToConflictArea Anticipation::CalculateTimeToConflictAreaEgo(DistanceToConflictArea distance, double velocity) const {
     TimeToConflictArea result;
-    result.vehicleFrontToCAStart = TravelTime(distance.vehicleFrontToCAStart, velocity, worldInterpretation.targetVelocity);
-    result.vehicleBackToCAEnd = TravelTime(distance.vehicleBackToCAEnd, velocity, worldInterpretation.targetVelocity);
+    result.vehicleFrontToCAStart = TravelTimeTargetVelocity(distance.vehicleFrontToCAStart, velocity, worldInterpretation.targetVelocity);
+    result.vehicleBackToCAEnd = TravelTimeTargetVelocity(distance.vehicleBackToCAEnd, velocity, worldInterpretation.targetVelocity);
+    return result;
+}
+TimeToConflictArea Anticipation::CalculateTimeToConflictAreaObserved(const ConflictSituation &situation,
+                                                                     const AmbientAgentRepresentation *oAgent) const {
+    TimeToConflictArea result;
+    result.vehicleFrontToCAStart =
+        TravelTimeObserved(situation.oAgentDistance.vehicleFrontToCAStart, 0 >= situation.egoDistance.vehicleFrontToCAStart, oAgent);
+    result.vehicleBackToCAEnd =
+        TravelTimeObserved(situation.oAgentDistance.vehicleBackToCAEnd, 0 >= situation.egoDistance.vehicleFrontToCAStart, oAgent);
     return result;
 }
 
-double Anticipation::TravelTime(double distance, double velocity, double vTarget) const {
-    double result;
-    auto egoAgent = worldRepresentation.egoAgent;
+double Anticipation::TravelTimeTargetVelocity(double distance, double velocity, double vTarget) const {
     double acceleration = ComfortAccelerationWish(vTarget, velocity, velocity - vTarget, std::numeric_limits<double>::infinity());
     // distance to reach target velocity
-    double sAcceleration = 0;
+    double distanceAcceleration = 0;
     if (acceleration != 0.0) {
-        sAcceleration =
+        distanceAcceleration =
             (acceleration / 2) * std::pow((vTarget - velocity) / acceleration, 2) + velocity * ((vTarget - velocity) / acceleration);
-        if (sAcceleration < 0) {
+        if (distanceAcceleration < 0) {
             std::string message = "File: " + static_cast<std::string>(__FILE__) + " Line: " + std::to_string(__LINE__) +
                                   "  Error in calculation TimeToConflictArea  ";
             throw std::logic_error(message);
         }
     }
+    return TravelTime(distance, distanceAcceleration, velocity, acceleration, vTarget);
+}
 
-    double interimResult = (velocity * velocity) + (2 * acceleration * sAcceleration);
+double Anticipation::TravelTime(double distance, double distanceAcceleration, double velocity, double acceleration, double vTarget) const {
+    double result;
+    double interimResult = (velocity * velocity) + (2 * acceleration * distanceAcceleration);
     double t1;
-    if (sAcceleration <= 0) {
+    if (distanceAcceleration <= 0) {
         t1 = 0;
     }
     else if (acceleration == 0.0) {
-        t1 = sAcceleration / velocity;
+        t1 = distanceAcceleration / velocity;
     }
     else if (interimResult < 0) {
         t1 = std::numeric_limits<double>::infinity();
@@ -135,7 +164,7 @@ double Anticipation::TravelTime(double distance, double velocity, double vTarget
         throw std::logic_error(message);
     }
 
-    if (sAcceleration >= distance) {
+    if (distanceAcceleration >= distance) {
         interimResult = (velocity * velocity) + (2 * acceleration * distance);
         if (distance <= 0) {
             return 0;
@@ -156,13 +185,48 @@ double Anticipation::TravelTime(double distance, double velocity, double vTarget
         }
     }
 
-    double sConstantSpeed = distance - sAcceleration;
+    double sConstantSpeed = distance - distanceAcceleration;
     double t2 = sConstantSpeed / vTarget;
     result = t1 + t2;
 
     std::string message = "File: " + static_cast<std::string>(__FILE__) + " Line: " + std::to_string(__LINE__) +
                           "  Error in calculation: time to conflict area is negative ";
     return result >= 0 ? result : throw std::logic_error(message);
+}
+
+double Anticipation::TravelTimeObserved(double distance, bool egoInsideConflictArea, const AmbientAgentRepresentation *oAgent) const {
+    double acceleration = oAgent->GetAcceleration();
+    double velocity = oAgent->GetVelocity();
+    if ((acceleration == 0.0 && velocity == 0.0) && !egoInsideConflictArea) {
+        // ego anticipate  observed vehicle could accelerate unless ego is inside conflict area
+        acceleration = GetBehaviourData().adBehaviour.maxAcceleration;
+    }
+    if (distance <= 0) {
+        return 0;
+    }
+    double decelerationStandstill = (velocity * velocity) / (2 * distance);
+    if (decelerationStandstill < GetBehaviourData().adBehaviour.comfortDeceleration.min || acceleration >= 0) {
+        // observed will probably not slow down for ego
+        return TravelTimeTargetVelocity(distance, velocity, worldInterpretation.targetVelocity);
+    }
+    else {
+        double interimResult = (velocity * velocity) + (2 * acceleration * distance);
+
+        if (acceleration == 0.0) {
+            return distance / velocity;
+        }
+        else if (interimResult < 0) {
+            return std::numeric_limits<double>::infinity();
+        }
+        else if (interimResult >= 0) {
+            return (std::sqrt(interimResult) - velocity) / acceleration;
+        }
+        else {
+            std::string message = "File: " + static_cast<std::string>(__FILE__) + " Line: " + std::to_string(__LINE__) +
+                                  "  Error in calculation TimeToConflictArea  ";
+            throw std::logic_error(message);
+        }
+    }
 }
 
 double Anticipation::IDMAcceleration(double velTarget, double velCurrent, double dv, double sDiff) const {

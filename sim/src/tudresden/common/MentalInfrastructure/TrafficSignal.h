@@ -27,7 +27,7 @@ public:
         validLanes.push_back(lanePtr);
     }
 
-    std::vector<const MentalInfrastructure::Lane *> GetValidLanes() const {
+   const std::vector<const MentalInfrastructure::Lane *>& GetValidLanes() const {
         return validLanes;
     }
 

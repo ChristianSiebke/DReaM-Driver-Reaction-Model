@@ -100,17 +100,6 @@ MentalInfrastructure::Lane *RoadNetworkConverter::ConvertLane(const OWL::Lane *l
     AddLaneGeometry(newLane.get(), lane);
     auto road = ConvertRoad(&lane->GetSection().GetRoad());
     newLane->SetRoad(road);
-
-    // convert traffic signs
-    for (auto &value : lane->GetTrafficSigns()) {
-        const_cast<MentalInfrastructure::Road *>(road)->AddTrafficSign(ConvertTrafficSign(road, value));
-    }
-
-    // convert traffic lights
-    for (auto &value : lane->GetTrafficLights()) {
-        const_cast<MentalInfrastructure::Road *>(road)->AddTrafficLight(ConvertTrafficLight(road, value));
-    }
-
     return newLane.get();
 }
 
@@ -231,6 +220,14 @@ const MentalInfrastructure::Road *RoadNetworkConverter::ConvertRoad(const OWL::I
             //------------
 
             newRoad->AddLane(newLane);
+            // convert traffic signs
+            for (auto &value : lane->GetTrafficSigns()) {
+                newRoad->AddTrafficSign(ConvertTrafficSign(newLane, newRoad.get(), value));
+            }
+            // convert traffic lights
+            for (auto &value : lane->GetTrafficLights()) {
+                newRoad->AddTrafficLight(ConvertTrafficLight(newLane, newRoad.get(), value));
+            }
         }
     }
 
@@ -260,12 +257,19 @@ const MentalInfrastructure::Road *RoadNetworkConverter::ConvertRoad(const OWL::I
     return newRoad.get();
 }
 
-const MentalInfrastructure::TrafficSign *RoadNetworkConverter::ConvertTrafficSign(const MentalInfrastructure::Road *road,
+const MentalInfrastructure::TrafficSign *RoadNetworkConverter::ConvertTrafficSign(const MentalInfrastructure::Lane *lane,
+                                                                                  const MentalInfrastructure::Road *road,
                                                                                   const OWL::Interfaces::TrafficSign *sign) {
     OdId openDriveIdSign = sign->GetId();
     auto iter = std::find_if(infrastructurePerception->trafficSigns.begin(), infrastructurePerception->trafficSigns.end(),
                              [openDriveIdSign](auto element) { return element->GetOpenDriveId() == openDriveIdSign; });
     if (iter != infrastructurePerception->trafficSigns.end()) {
+        if (std::none_of(
+                (*iter)->GetValidLanes().begin(), (*iter)->GetValidLanes().end(),
+                [lane](const MentalInfrastructure::Lane *element) { return lane->GetOpenDriveId() == element->GetOpenDriveId(); })) {
+            auto it = const_cast<MentalInfrastructure::TrafficSign *>(iter->get());
+            it->AddValidLane(lane);
+        }
         // if the road is already in the infrastructure result return it
         return iter->get();
     }
@@ -275,21 +279,23 @@ const MentalInfrastructure::TrafficSign *RoadNetworkConverter::ConvertTrafficSig
         Common::Vector2d(sign->GetReferencePointPosition().x, sign->GetReferencePointPosition().y), sign->GetSpecification(0).value,
         sign->GetSpecification(0).type);
 
-    for (const auto lane : road->GetLanes()) {
-        if (sign->IsValidForLane(lane->GetOwlId()))
-            newSign->AddValidLane(lane);
-    }
-
+    newSign->AddValidLane(lane);
     infrastructurePerception->trafficSigns.push_back(newSign);
     return newSign.get();
 }
 
-const MentalInfrastructure::TrafficLight *RoadNetworkConverter::ConvertTrafficLight(const MentalInfrastructure::Road *road,
+const MentalInfrastructure::TrafficLight *RoadNetworkConverter::ConvertTrafficLight(const MentalInfrastructure::Lane *lane,
+                                                                                    const MentalInfrastructure::Road *road,
                                                                                     const OWL::Interfaces::TrafficLight *trafficLight) {
     OdId openDriveIdTrafficLight = trafficLight->GetId();
     auto iter = std::find_if(infrastructurePerception->trafficLights.begin(), infrastructurePerception->trafficLights.end(),
                              [openDriveIdTrafficLight](auto element) { return element->GetOpenDriveId() == openDriveIdTrafficLight; });
     if (iter != infrastructurePerception->trafficLights.end()) {
+        if (std::none_of((*iter)->GetValidLanes().begin(), (*iter)->GetValidLanes().end(),
+                         [lane](auto element) { return lane->GetOpenDriveId() == element->GetOpenDriveId(); })) {
+            auto it = const_cast<MentalInfrastructure::TrafficLight *>(iter->get());
+            it->AddValidLane(lane);
+        }
         // if the road is already in the infrastructure result return it
         return iter->get();
     }
@@ -299,11 +305,7 @@ const MentalInfrastructure::TrafficLight *RoadNetworkConverter::ConvertTrafficLi
         Common::Vector2d(trafficLight->GetReferencePointPosition().x, trafficLight->GetReferencePointPosition().y),
         (MentalInfrastructure::TrafficLightType)trafficLight->GetSpecification(0).type);
 
-    for (const auto lane : road->GetLanes()) {
-        if (trafficLight->IsValidForLane(lane->GetOwlId()))
-            newLight->AddValidLane(lane);
-    }
-
+    newLight->AddValidLane(lane);
     infrastructurePerception->trafficLights.push_back(newLight);
     return newLight.get();
 }
@@ -338,6 +340,14 @@ void RoadNetworkConverter::Populate() {
     // convert all roads
     for (auto &[key, value] : worldData->GetRoads()) {
         ConvertRoad(value);
+    }
+
+    // add traffic signs
+    for (auto sign : worldData->GetTrafficSigns()) {
+        for (auto lane : infrastructurePerception->lanes) {
+            if (sign.second->IsValidForLane(lane->GetOwlId())) {
+            }
+        }
     }
 
     // convert all intersections

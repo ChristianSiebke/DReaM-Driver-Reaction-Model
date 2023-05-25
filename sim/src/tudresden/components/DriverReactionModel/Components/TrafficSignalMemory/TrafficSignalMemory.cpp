@@ -95,7 +95,6 @@ VisibleTrafficSignals *TrafficSignalMemory::Update(int timestamp, std::vector<co
 
     UpdateSpeedLimits(visibleTrafficSignals.get(), ego);
     visibleTrafficSignals->memory = &memory;
-
     return visibleTrafficSignals.get();
 }
 
@@ -108,7 +107,7 @@ void TrafficSignalMemory::InsertIntoVisibleTrafficSignals(const MentalInfrastruc
             visibleTrafficSignals->laneTrafficSignalMap.insert(std::make_pair(lane->GetDReaMId(), tmp));
         }
         else {
-            auto trafficSignalList = visibleTrafficSignals->laneTrafficSignalMap[lane->GetDReaMId()];
+            auto &trafficSignalList = visibleTrafficSignals->laneTrafficSignalMap[lane->GetDReaMId()];
             if (std::find(trafficSignalList.begin(), trafficSignalList.end(), signal) == trafficSignalList.end()) {
                 trafficSignalList.push_back(signal);
             }

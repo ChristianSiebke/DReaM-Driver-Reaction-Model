@@ -80,13 +80,9 @@ void TargetVelocityCalculation::CalculatePhaseVelocities(const WorldRepresentati
                                                                         worldRepresentation.egoAgent->IsMovingInLaneDirection())
                 : nullptr;
         auto nextNextJunction = nextNextLane != nullptr ? nextNextLane->GetRoad()->GetJunction() : nullptr;
-        std::string nextNextJunctionValue = "not exist";
-        nextNextJunctionValue;
-        if (nextNextJunction) {
-            nextNextJunctionValue = "exist";
-        }
+        auto currentJunction = worldRepresentation.egoAgent->GetLanePosition().lane->GetRoad()->GetJunction();
 
-        if (nextJunction || nextNextJunction) {
+        if (nextJunction || nextNextJunction || currentJunction) {
             auto velocityDistributions = &behaviourData.adBehaviour.velocityStatisticsIntersection.at("default").at("default").at(
                 worldRepresentation.egoAgent->GetIndicatorState());
             if (nextJunction) {
@@ -104,6 +100,16 @@ void TargetVelocityCalculation::CalculatePhaseVelocities(const WorldRepresentati
                 velocityDistributions = &behaviourData.adBehaviour.velocityStatisticsIntersection.at(nextNextJunction->GetOpenDriveId())
                                              .at(roadID)
                                              .at(worldRepresentation.egoAgent->GetIndicatorState());
+            }
+            else if (currentJunction) {
+                auto iter = behaviourData.adBehaviour.velocityStatisticsIntersection.find(currentJunction->GetOpenDriveId());
+                if (iter != behaviourData.adBehaviour.velocityStatisticsIntersection.end()) {
+                    auto roadID =
+                        worldRepresentation.egoAgent->GetLanePosition().lane->GetPredecessors().front()->GetRoad()->GetOpenDriveId();
+                    velocityDistributions = &behaviourData.adBehaviour.velocityStatisticsIntersection.at(currentJunction->GetOpenDriveId())
+                                                 .at(roadID)
+                                                 .at(worldRepresentation.egoAgent->GetIndicatorState());
+                }
             }
 
             phaseVelocities.clear();

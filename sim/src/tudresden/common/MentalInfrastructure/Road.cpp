@@ -91,13 +91,15 @@ const std::vector<const TrafficSign *> &Road::GetTrafficSigns() const {
 }
 
 void Road::AddTrafficSign(const TrafficSign *sign) {
-    if (std::find(trafficSigns.begin(), trafficSigns.end(), sign) == trafficSigns.end()) {
+    if (std::none_of(trafficSigns.begin(), trafficSigns.end(),
+                     [sign](auto element) { return element->GetOpenDriveId() == sign->GetOpenDriveId(); })) {
         trafficSigns.push_back(sign);
     }
 }
 
 void Road::AddTrafficLight(const TrafficLight *trafficLight) {
-    if (std::find(trafficLights.begin(), trafficLights.end(), trafficLight) == trafficLights.end()) {
+    if (std::none_of(trafficLights.begin(), trafficLights.end(),
+                     [trafficLight](auto element) { return element->GetOpenDriveId() == trafficLight->GetOpenDriveId(); })) {
         trafficLights.push_back(trafficLight);
     }
 }

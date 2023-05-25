@@ -54,22 +54,27 @@ class Anticipation {
     double CalculatePhaseAcceleration() const;
 
     double Deceleration(const std::unique_ptr<AgentInterpretation>& observedAgent) const;
-    double GetMaxEmergencyAcceleration() const { return maxEmergencyDeceleration; }
-    double IDMBrakeStrategy(double distance, double velTarget, double currentVelocity) const;
+    double GetMaxEmergencyAcceleration() const {
+        return maxEmergencyDeceleration;
+    }
+    double AnticipationAccelerationToAchieveVelocityInDistance(double distance, double velTarget, double currentVelocity) const;
 
 private:
-     double AnticipationAccelerationToAchieveVelocityInDistance(double distance, double velTarget, double currentVelocity) const;
-
+    double IDMBrakeStrategy(double distance, double velTarget, double currentVelocity) const;
     void DeletePriorityAgent(int oAgentID);
 
-    TimeToConflictArea CalculateTimeToConflictArea(DistanceToConflictArea distance, double velocity) const;
-    double TravelTime(double distance, double velocity, double vTarget) const;
+    TimeToConflictArea CalculateTimeToConflictAreaEgo(DistanceToConflictArea distance, double velocity) const;
+    TimeToConflictArea CalculateTimeToConflictAreaObserved(const ConflictSituation &situation,
+                                                           const AmbientAgentRepresentation *oAgent) const;
 
+    double TravelTimeTargetVelocity(double distance, double velocity, double vTarget) const;
+    double TravelTimeObserved(double distance, bool egoInsideConflictArea, const AmbientAgentRepresentation *oAgent) const;
+    double TravelTime(double distance, double distanceAcceleration, double velocity, double acceleration, double vTarget) const;
     double ApproachingStoppingPoint(double sFrontEgo, double tEndObserved, const AgentInterpretation *observedAgent) const;
 
     const BehaviourData &GetBehaviourData() const {
         return behaviourData;
-        }
+    }
 
         double maxEmergencyDeceleration;
         double comfortDeceleration;

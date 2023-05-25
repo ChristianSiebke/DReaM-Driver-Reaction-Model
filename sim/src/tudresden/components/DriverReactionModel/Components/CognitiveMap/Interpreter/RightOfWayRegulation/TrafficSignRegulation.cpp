@@ -16,7 +16,6 @@ RightOfWay TrafficSignRegulationGermany::VehicleVsVehicleROW(const AgentRepresen
     RightOfWay observedAgentPriority(false, true);
 
     auto oAgentSign = representation.trafficSignalMemory->GetRightOfWaySignsForLane(observedAgent.GetLanePosition().lane);
-
     auto egoSign = representation.trafficSignalMemory->GetRightOfWaySignsForLane(representation.egoAgent->GetLanePosition().lane);
 
     if ((egoSign && oAgentSign)) {

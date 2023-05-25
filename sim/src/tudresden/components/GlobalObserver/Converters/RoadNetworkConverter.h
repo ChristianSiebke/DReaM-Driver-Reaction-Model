@@ -48,7 +48,8 @@ private:
      * @param sign traffic sign to convert
      * @return converted traffic sign
      */
-    const MentalInfrastructure::TrafficSign *ConvertTrafficSign(const MentalInfrastructure::Road *road,
+    const MentalInfrastructure::TrafficSign *ConvertTrafficSign(const MentalInfrastructure::Lane *lane,
+                                                                const MentalInfrastructure::Road *road,
                                                                 const OWL::Interfaces::TrafficSign *sign);
 
     /**
@@ -58,7 +59,8 @@ private:
      * @param trafficLight traffic light to be converted
      * @return converted traffic light
      */
-    const MentalInfrastructure::TrafficLight *ConvertTrafficLight(const MentalInfrastructure::Road *road,
+    const MentalInfrastructure::TrafficLight *ConvertTrafficLight(const MentalInfrastructure::Lane *lane,
+                                                                  const MentalInfrastructure::Road *road,
                                                                   const OWL::Interfaces::TrafficLight *trafficLight);
 
     /**

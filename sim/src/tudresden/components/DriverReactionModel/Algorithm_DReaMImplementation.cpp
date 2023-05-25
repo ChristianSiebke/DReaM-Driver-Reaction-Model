@@ -155,22 +155,26 @@ void AlgorithmDReaMImplementation::Trigger(int time) {
     catch (const char *error) {
         const std::string msg = COMPONENTNAME + " " + error;
         LOG(CbkLogLevel::Error, msg);
+        throw std::runtime_error(msg);
     }
     catch (const std::string &error) {
         const std::string msg = COMPONENTNAME + " " + error;
         LOG(CbkLogLevel::Error, msg);
+        throw std::runtime_error(msg);
     }
     catch (const std::out_of_range &error) {
-        const std::string msg = COMPONENTNAME + error.what();
+        const std::string msg = COMPONENTNAME + " " + error.what();
         LOG(CbkLogLevel::Error, msg);
         throw std::runtime_error(msg);
     }
     catch (const std::runtime_error &error) {
-        LOG(CbkLogLevel::Error, error.what());
-        throw error;
+        const std::string msg = COMPONENTNAME + " " + error.what();
+        LOG(CbkLogLevel::Error, msg);
+        throw std::runtime_error(msg);
     }
     catch (const std::logic_error &error) {
-        LOG(CbkLogLevel::Error, error.what());
-        throw error;
+        const std::string msg = COMPONENTNAME + " " + error.what();
+        LOG(CbkLogLevel::Error, msg);
+        throw std::runtime_error(msg);
     }
 }
