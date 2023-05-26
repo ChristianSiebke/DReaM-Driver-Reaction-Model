@@ -98,6 +98,7 @@ const AnalysisSignal DriverReactionModel::GetAnalysisSignal() {
             data.ttcs.insert(std::make_pair(agent.first, ttc));
         }
     }
+    data.maxComfortDeceleration = behaviourData->adBehaviour.comfortDeceleration.mean;
     return data;
 }
 

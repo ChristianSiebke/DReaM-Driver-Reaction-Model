@@ -41,9 +41,13 @@ struct GroupingData {
     std::string startRoadOdId;
     std::string endRoadOdId;
 
+    bool secondJunction = false;
     int obstructionCounter = 0;
+
     bool obstructed = false;
     bool following = false;
+    bool obstructed2 = false;
+    bool following2 = false;
     // vector of: offset to velocity distribution mean in relation to std deviation
     std::vector<double> velocityProfile;
 };
@@ -68,8 +72,7 @@ struct CollisionData {
     int runId;
     int egoId;
     int otherId;
-
-    // TODO fields for the accident type
+    int type;
 };
 
 class DLL_EXPORT AnalysisDataRecorder {
@@ -130,16 +133,19 @@ public:
      */
     static void WriteOutput();
 
-    void CheckCollisions(std::vector<std::pair<ObjectTypeOSI, int>> collisionPartners, int egoId, int time);
+    void CheckCollisions(std::vector<std::pair<int, std::shared_ptr<DetailedAgentPerception>>> partners, int egoId,
+                         std::shared_ptr<DetailedAgentPerception> egoData, AnalysisSignal data, int time);
 
 private:
     void CountExitVelocities(std::shared_ptr<DetailedAgentPerception> ego);
     void AddAgentTrajectoryDataPoint(std::shared_ptr<DetailedAgentPerception> ego, AnalysisSignal data);
     void UpdateGroupDataPoint(std::shared_ptr<DetailedAgentPerception> ego, AnalysisSignal data);
     void UpdateTTCs(std::shared_ptr<DetailedAgentPerception> ego, AnalysisSignal data);
-    uint8_t ComputeGroup(GroupingData &data);
+    uint16_t ComputeGroup(GroupingData &data);
     static void ComputeExitDistributions(std::ofstream &file);
-    static std::string GroupInfo(uint8_t group);
+    static std::string GroupInfo(uint16_t group);
+    int DetermineCollisionType(int egoId, int otherId, std::shared_ptr<DetailedAgentPerception> egoData,
+                               std::shared_ptr<DetailedAgentPerception> partnerData, AnalysisSignal data);
 
     void BufferRun();
 
@@ -150,7 +156,7 @@ private:
     static std::string resultsPath;
 
     // buffered data
-    static std::map<uint8_t, std::shared_ptr<std::vector<AgentData>>> analysisData;
+    static std::map<uint16_t, std::shared_ptr<std::vector<AgentData>>> analysisData;
     static std::vector<TTCData> ttcData;
     static std::map<std::string, std::shared_ptr<std::map<DReaMDefinitions::AgentVehicleType, int>>> exitVehicleCounters;
     static std::map<std::string, std::shared_ptr<std::map<DReaMDefinitions::AgentVehicleType, std::shared_ptr<std::vector<double>>>>>
@@ -162,14 +168,20 @@ private:
     std::map<int, GroupingData> groupingData;
     std::map<int, bool> relevantAgents;
     std::map<int, const MentalInfrastructure::Lane *> lastLane;
+    std::map<int, const MentalInfrastructure::Road *> lastRoad;
     std::map<int, uint64_t> lastS;
     std::map<int, std::shared_ptr<std::map<int, double>>> minTTCs;
+    std::map<int, std::shared_ptr<std::list<int>>> collisionPartners;
+    std::map<int, AnalysisSignal> analysisSignalLog;
 
     std::map<std::string, double> observationStartS;
     std::map<std::string, double> observationEndS;
 
     int runtime = 0;
-    bool collissionDetected = false;
+
+    int obstructionCounterLimit = 9;
+    double minTTCUpperBound = 3.0;
+    double trajectorySampleRate = 5.0; // every x meters
 };
 
 } // namespace GlobalObserver

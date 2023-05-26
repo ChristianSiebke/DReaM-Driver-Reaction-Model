@@ -6,7 +6,7 @@ std::shared_ptr<AnalysisDataRecorder> AnalysisDataRecorder::instance = nullptr;
 int AnalysisDataRecorder::runId = 0;
 int AnalysisDataRecorder::totalTime = 0;
 std::string AnalysisDataRecorder::resultsPath = "";
-std::map<uint8_t, std::shared_ptr<std::vector<AgentData>>> AnalysisDataRecorder::analysisData;
+std::map<uint16_t, std::shared_ptr<std::vector<AgentData>>> AnalysisDataRecorder::analysisData;
 std::vector<TTCData> AnalysisDataRecorder::ttcData;
 std::vector<CollisionData> AnalysisDataRecorder::collisions;
 std::map<std::string, std::shared_ptr<std::map<DReaMDefinitions::AgentVehicleType, int>>> AnalysisDataRecorder::exitVehicleCounters;
@@ -17,6 +17,8 @@ void AnalysisDataRecorder::Trigger(std::shared_ptr<DetailedAgentPerception> ego,
                                    AnalysisSignal data, int time) {
     if (time > runtime)
         runtime = time;
+
+    analysisSignalLog.insert(std::make_pair(ego->id, data));
 
     auto lane = ego->lanePosition.lane;
     auto s = ego->lanePosition.sCoordinate;
@@ -41,6 +43,7 @@ void AnalysisDataRecorder::Trigger(std::shared_ptr<DetailedAgentPerception> ego,
         observationStartS.at(startRoadId) < s) {
         relevantAgents.at(ego->id) = true;
         lastLane.insert(std::make_pair(ego->id, lane));
+        lastRoad.insert(std::make_pair(ego->id, lane->GetRoad()));
         lastS.insert(std::make_pair(ego->id, s));
     }
     if (exitRoadId == lane->GetRoad()->GetOpenDriveId() && observationEndS.find(exitRoadId) != observationEndS.end() &&
@@ -48,20 +51,27 @@ void AnalysisDataRecorder::Trigger(std::shared_ptr<DetailedAgentPerception> ego,
         CountExitVelocities(ego);
         if (relevantAgents.at(ego->id)) {
             lastLane.erase(ego->id);
+            lastRoad.erase(ego->id);
             lastS.erase(ego->id);
         }
         relevantAgents.at(ego->id) = false;
     }
     if (relevantAgents.at(ego->id)) {
         double dist;
-        if (lastLane.at(ego->id)->GetDReaMId() == lane->GetDReaMId()) {
+        if (lastLane.at(ego->id)->GetDReaMId() == lane->GetDReaMId() &&
+            lastRoad.at(ego->id)->GetDReaMId() == lane->GetRoad()->GetDReaMId()) {
+            dist = s - lastS.at(ego->id);
+        }
+        else if (lastLane.at(ego->id)->GetDReaMId() != lane->GetDReaMId() &&
+                 lastRoad.at(ego->id)->GetDReaMId() == lane->GetRoad()->GetDReaMId()) { // lane change
             dist = s - lastS.at(ego->id);
         }
         else {
             dist = lastLane.at(ego->id)->GetLength() - lastS.at(ego->id) + s;
         }
-        if (dist > 5.0) {
+        if (dist > trajectorySampleRate) {
             lastLane.at(ego->id) = lane;
+            lastRoad.at(ego->id) = lane->GetRoad();
             lastS.at(ego->id) = s;
 
             AddAgentTrajectoryDataPoint(ego, data);
@@ -115,23 +125,41 @@ void AnalysisDataRecorder::AddAgentTrajectoryDataPoint(std::shared_ptr<DetailedA
 
 void AnalysisDataRecorder::UpdateGroupDataPoint(std::shared_ptr<DetailedAgentPerception> ego, AnalysisSignal data) {
     GroupingData &gd = groupingData.at(ego->id);
+    if (ego->lanePosition.lane->GetRoad()->GetOpenDriveId() == "2") {
+        gd.secondJunction = true;
+        gd.obstructionCounter = 0;
+    }
+
     if (!gd.obstructed) {
-        if (data.obstruction && (ego->velocity < data.targetVelocity / 2.0 || ego->acceleration < -1.5)) { // TODO maybe change threshold
+        if (data.obstruction && (ego->velocity < data.targetVelocity / 2.0 || ego->acceleration < data.maxComfortDeceleration)) {
             gd.obstructionCounter++;
         }
-        if (gd.obstructionCounter > 9) {
-            gd.obstructed = true;
+        if (!data.obstruction) {
+            gd.obstructionCounter = 0;
+        }
+        if (gd.obstructionCounter > obstructionCounterLimit) {
+            if (gd.secondJunction) {
+                gd.obstructed = true;
+            }
+            else {
+                gd.obstructed2 = true;
+            }
         }
     }
     if (data.following) {
-        gd.following = true;
+        if (gd.secondJunction) {
+            gd.following = true;
+        }
+        else {
+            gd.following2 = true;
+        }
     }
     gd.velocityProfile.emplace_back(data.targetDistributionOffset);
 }
 
 void AnalysisDataRecorder::UpdateTTCs(std::shared_ptr<DetailedAgentPerception> ego, AnalysisSignal data) {
     for (auto &agent : data.ttcs) {
-        if (agent.second >= 3) {
+        if (agent.second >= minTTCUpperBound) {
             continue;
         }
         if (minTTCs.find(ego->id) == minTTCs.end()) {
@@ -153,65 +181,306 @@ void AnalysisDataRecorder::UpdateTTCs(std::shared_ptr<DetailedAgentPerception> e
     }
 }
 
-void AnalysisDataRecorder::CheckCollisions(std::vector<std::pair<ObjectTypeOSI, int>> collisionPartners, int egoId, int time) {
-    for (auto &partner : collisionPartners) {
+void AnalysisDataRecorder::CheckCollisions(std::vector<std::pair<int, std::shared_ptr<DetailedAgentPerception>>> partners, int egoId,
+                                           std::shared_ptr<DetailedAgentPerception> egoData, AnalysisSignal data, int time) {
+    if (collisionPartners.find(egoId) != collisionPartners.end()) {
+        auto tmpVec = std::make_shared<std::list<int>>();
+        collisionPartners.insert(std::make_pair(egoId, tmpVec));
+    }
+
+    for (auto &partner : partners) {
+        if (std::find(collisionPartners.at(egoId)->begin(), collisionPartners.at(egoId)->end(), partner.first) ==
+            collisionPartners.at(egoId)->end())
+            continue;
+
+        collisionPartners.at(egoId)->emplace_back(partner.first);
         CollisionData cd;
         cd.egoId = egoId;
-        cd.otherId = partner.second;
+        cd.otherId = partner.first;
         cd.runId = this->runId;
         cd.timestamp = time;
+        cd.type = DetermineCollisionType(egoId, partner.first, egoData, partner.second, data);
+        if (cd.type == -1)
+            continue;
         collisions.emplace_back(cd);
     }
 }
 
-uint8_t AnalysisDataRecorder::ComputeGroup(GroupingData &data) {
-    uint8_t startRoad;
+int AnalysisDataRecorder::DetermineCollisionType(int egoId, int otherId, std::shared_ptr<DetailedAgentPerception> egoData,
+                                                 std::shared_ptr<DetailedAgentPerception> partnerData, AnalysisSignal data) {
+    auto egoLane = egoData->lanePosition.lane;
+    auto egoRoad = egoLane->GetRoad();
+    auto egoInd = egoData->indicatorState;
+
+    auto partnerLane = partnerData->lanePosition.lane;
+    auto partnerRoad = partnerLane->GetRoad();
+    auto parnterInd = partnerData->indicatorState;
+
+    std::string appDir = "";
+
+    if (egoData->junctionDistance.on > 0) {
+        if (analysisSignalLog.at(otherId).followingTarget == egoId) {
+            switch (egoInd) {
+            case IndicatorState::IndicatorState_Left:
+                return 201;
+            case IndicatorState::IndicatorState_Right:
+                return 231;
+            default:
+                return -1;
+            }
+        }
+
+        if (!egoLane->IsJunctionLane())
+            return -1;
+
+        auto egoPred = egoRoad->GetPredecessor();
+        auto partnerPred = partnerRoad->GetPredecessor();
+
+        if (partnerRoad->HasPredecessor()) {
+            if (egoPred->GetDReaMId() == partnerPred->GetDReaMId()) {
+                appDir = "Behind";
+            }
+        }
+        else {
+            return -1;
+        }
+
+        auto nl = egoLane->GetPredecessors().front()->NextLanes(egoLane->GetPredecessors().front()->IsInRoadDirection());
+        if (!nl.has_value())
+            return -1;
+
+        for (auto &l : nl->leftLanes) {
+            if (l->GetRoad()->HasSuccessor() && l->GetRoad()->GetSuccessor()->GetDReaMId() == partnerRoad->GetDReaMId()) {
+                appDir = "Left";
+                break;
+            }
+        }
+        for (auto &l : nl->rightLanes) {
+            if (l->GetRoad()->HasSuccessor() && l->GetRoad()->GetSuccessor()->GetDReaMId() == partnerRoad->GetDReaMId()) {
+                appDir = "Right";
+                break;
+            }
+        }
+        for (auto &l : nl->straightLanes) {
+            if (l->GetRoad()->HasSuccessor() && l->GetRoad()->GetSuccessor()->GetDReaMId() == partnerRoad->GetDReaMId()) {
+                appDir = "Straight";
+                break;
+            }
+        }
+
+        if (appDir == "Straight") {
+            if (partnerData->vehicleType == DReaMDefinitions::AgentVehicleType::Bicycle) {
+                switch (egoInd) {
+                case IndicatorState::IndicatorState_Left:
+                    return 224;
+                case IndicatorState::IndicatorState_Right:
+                    return 243;
+                default:
+                    return -1;
+                }
+            }
+            else if (partnerData->vehicleType == DReaMDefinitions::AgentVehicleType::Pedestrian) {
+                switch (egoInd) {
+                case IndicatorState::IndicatorState_Left:
+                    return 222;
+                case IndicatorState::IndicatorState_Right:
+                    return 241;
+                default:
+                    return -1;
+                }
+            }
+            else {
+                switch (egoInd) {
+                case IndicatorState::IndicatorState_Left:
+                    switch (parnterInd) {
+                    case IndicatorState::IndicatorState_Left:
+                        return 215;
+                    case IndicatorState::IndicatorState_Right:
+                        return 212;
+                    case IndicatorState::IndicatorState_Off:
+                        return 211;
+                    default:
+                        return -1;
+                    }
+                case IndicatorState::IndicatorState_Right:
+                    return -1;
+                default:
+                    return -1;
+                }
+            }
+        }
+        else if (appDir == "Left") {
+            if (!data.hasROW) {
+                if (partnerData->vehicleType == DReaMDefinitions::AgentVehicleType::Bicycle) {
+                    return 341;
+                }
+                switch (egoInd) {
+                case IndicatorState::IndicatorState_Left:
+                    switch (parnterInd) {
+                    case IndicatorState::IndicatorState_Left:
+                        return 302;
+                    case IndicatorState::IndicatorState_Right:
+                        return 306;
+                    case IndicatorState::IndicatorState_Off:
+                        return 302;
+                    default:
+                        return -1;
+                    }
+                case IndicatorState::IndicatorState_Right:
+                    return 303;
+                case IndicatorState::IndicatorState_Off:
+                    return 301;
+                default:
+                    return -1;
+                }
+            }
+            else {
+                if (analysisSignalLog.at(otherId).hasROW) {
+                    return -1;
+                }
+                else {
+                    return 261;
+                }
+            }
+        }
+        else if (appDir == "Right") {
+            if (!data.hasROW) {
+                if (partnerData->vehicleType == DReaMDefinitions::AgentVehicleType::Bicycle) {
+                    return 344;
+                }
+                switch (egoInd) {
+                case IndicatorState::IndicatorState_Left:
+                    return 322;
+                case IndicatorState::IndicatorState_Right:
+                    switch (parnterInd) {
+                    case IndicatorState::IndicatorState_Left:
+                        return 326;
+                    case IndicatorState::IndicatorState_Right:
+                        return 323;
+                    case IndicatorState::IndicatorState_Off:
+                        return 323;
+                    default:
+                        return -1;
+                    }
+                case IndicatorState::IndicatorState_Off:
+                    return 321;
+                default:
+                    return -1;
+                }
+            }
+            else {
+                if (analysisSignalLog.at(otherId).hasROW) {
+                    return -1;
+                }
+                else {
+                    return 262;
+                }
+            }
+        }
+        else if (appDir == "Behind") {
+            if (egoData->vehicleType == DReaMDefinitions::AgentVehicleType::Bicycle) {
+                if (egoInd == IndicatorState::IndicatorState_Left) {
+                    return 203;
+                }
+            }
+            if (partnerData->vehicleType == DReaMDefinitions::AgentVehicleType::Bicycle) {
+                return 374;
+            }
+            switch (egoInd) {
+            case IndicatorState::IndicatorState_Left:
+                return 201;
+            case IndicatorState::IndicatorState_Right:
+                return 231;
+            default:
+                return -1;
+            }
+        }
+        else {
+            return -1;
+        }
+    }
+    else {
+        if (egoRoad->GetDReaMId() == partnerRoad->GetDReaMId()) {
+            if (partnerData->vehicleType == DReaMDefinitions::AgentVehicleType::Bicycle) {
+                return 373;
+            }
+            if (egoLane->GetDReaMId() == partnerLane->GetDReaMId()) {
+                if (data.followingTarget == otherId) {
+                    if (analysisSignalLog.at(otherId).following) {
+                        return 611;
+                    }
+                    else if (!analysisSignalLog.at(otherId).hasROW) {
+                        return 621;
+                    }
+                    else {
+                        return 601;
+                    }
+                }
+                else {
+                    return -1;
+                }
+            }
+            else if (egoLane->IsInRoadDirection() != partnerLane->IsInRoadDirection()) {
+                return 681;
+            }
+            else {
+                return -1;
+            }
+        }
+        else {
+            return -1;
+        }
+    }
+}
+
+uint16_t AnalysisDataRecorder::ComputeGroup(GroupingData &data) {
+    uint16_t startRoad;
     if (data.startRoadOdId == "3") {
-        startRoad = 0b00000000;
+        startRoad = 0b0000000000;
     }
     else if (data.startRoadOdId == "4") {
-        startRoad = 0b01000000;
+        startRoad = 0b0100000000;
     }
     else if (data.startRoadOdId == "1") {
-        startRoad = 0b10000000;
+        startRoad = 0b1000000000;
     }
     else if (data.startRoadOdId == "5") {
-        startRoad = 0b11000000;
+        startRoad = 0b1100000000;
     }
     else {
-        return 0b11111111;
+        return 0b1111111111;
     }
-    uint8_t endRoad;
+    uint16_t endRoad;
     if (data.endRoadOdId == "3") {
-        endRoad = 0b00000000;
+        endRoad = 0b0000000000;
     }
     else if (data.endRoadOdId == "4") {
-        endRoad = 0b00010000;
+        endRoad = 0b0001000000;
     }
     else if (data.endRoadOdId == "1") {
-        endRoad = 0b00100000;
+        endRoad = 0b0010000000;
     }
     else if (data.endRoadOdId == "5") {
-        endRoad = 0b00110000;
+        endRoad = 0b0011000000;
     }
     else {
-        return 0b11111111;
+        return 0b1111111111;
     }
-    uint8_t obstructed = data.obstructed ? 0b00001000 : 0b00000000;
-    uint8_t following = data.following ? 0b00000100 : 0b00000000;
-    uint8_t profile;
+    uint16_t obstructed = data.obstructed ? 0b0000010000 : 0b0000000000 + data.obstructed2 ? 0b0000100000 : 0b0000000000;
+    uint16_t following = data.following ? 0b0000000100 : 0b0000000000 + data.following2 ? 0b0000001000 : 0b0000000000;
+    uint16_t profile;
     std::sort(data.velocityProfile.begin(), data.velocityProfile.end());
     int median = data.velocityProfile.at(data.velocityProfile.size() / 2);
     if (median > 0.3) {
-        profile = 0b00000010;
+        profile = 0b0000000010;
     }
     else if (median < -0.3) {
-        profile = 0b00000000;
+        profile = 0b0000000000;
     }
     else {
-        profile = 0b00000001;
+        profile = 0b0000000001;
     }
-    uint8_t group = startRoad + endRoad + obstructed + following + profile;
+    uint16_t group = startRoad + endRoad + obstructed + following + profile;
     return group;
 }
 
@@ -236,8 +505,8 @@ void AnalysisDataRecorder::BufferRun() {
         a.agentId = data.first;
         a.runId = this->runId;
         a.td = trajectoryData.at(data.first);
-        uint8_t g = ComputeGroup(data.second);
-        if (g == 255)
+        uint16_t g = ComputeGroup(data.second);
+        if (g == 1023)
             continue;
         a.group = g;
         if (analysisData.find(g) != analysisData.end()) {
@@ -299,30 +568,34 @@ void AnalysisDataRecorder::WriteOutput() {
 
     file.open(resultsPath + "\\analysis\\collisions.csv");
     if (file.is_open()) {
-        // TODO collisions wieder einbinden
-        file << "Run ID" << SEPERATOR << "Ego ID" << SEPERATOR << "Other Agent ID" << SEPERATOR << "Collision Type ID" << std::endl;
+        file << "Run ID" << SEPERATOR << "Timestamp" << SEPERATOR << "Ego ID" << SEPERATOR << "Other Agent ID" << SEPERATOR
+             << "Collision Type ID" << std::endl;
+        for (auto col : collisions) {
+            file << col.runId << SEPERATOR << col.timestamp << SEPERATOR << col.egoId << SEPERATOR << col.otherId << SEPERATOR << col.type
+                 << std::endl;
+        }
     }
     file.close();
 }
 
-std::string AnalysisDataRecorder::GroupInfo(uint8_t group) {
+std::string AnalysisDataRecorder::GroupInfo(uint16_t group) {
     std::string info = "### GROUP INFO: ";
-    uint8_t startRoad = group & 0b11000000;
-    uint8_t endRoad = group & 0b00110000;
-    uint8_t obstructed = group & 0b00001000;
-    uint8_t following = group & 0b00000100;
-    uint8_t profile = group & 0b00000011;
+    uint16_t startRoad = group & 0b1100000000;
+    uint16_t endRoad = group & 0b0011000000;
+    uint16_t obstructed = group & 0b0000110000;
+    uint16_t following = group & 0b0000001100;
+    uint16_t profile = group & 0b0000000011;
     switch (startRoad) {
-    case 0b00000000:
+    case 0b0000000000:
         info += "Start Road = '3' (Tharandter Str. stadteinwärts) | ";
         break;
-    case 0b01000000:
+    case 0b0100000000:
         info += "Start Road = '4' (Frankenbergstr.) | ";
         break;
-    case 0b10000000:
+    case 0b1000000000:
         info += "Start Road = '1' (Tharandter Str. stadtauswärts) | ";
         break;
-    case 0b11000000:
+    case 0b1100000000:
         info += "Start Road = '5' (Netto Einfahrt) | ";
         break;
     default:
@@ -330,16 +603,16 @@ std::string AnalysisDataRecorder::GroupInfo(uint8_t group) {
         break;
     }
     switch (endRoad) {
-    case 0b00000000:
+    case 0b0000000000:
         info += "Exit Road = '3' (Tharandter Str. stadteinwärts) | ";
         break;
-    case 0b00010000:
+    case 0b0001000000:
         info += "Exit Road = '4' (Frankenbergstr.) | ";
         break;
-    case 0b00100000:
+    case 0b0010000000:
         info += "Exit Road = '1' (Tharandter Str. stadtauswärts) | ";
         break;
-    case 0b00110000:
+    case 0b0011000000:
         info += "Exit Road = '5' (Netto Einfahrt) | ";
         break;
     default:
@@ -347,35 +620,47 @@ std::string AnalysisDataRecorder::GroupInfo(uint8_t group) {
         break;
     }
     switch (obstructed) {
-    case 0b00000000:
+    case 0b0000000000:
         info += "Obstructed: NO | ";
         break;
-    case 0b00001000:
-        info += "Obstructed: YES | ";
+    case 0b0000010000:
+        info += "Obstructed: 1ST | ";
+        break;
+    case 0b0000100000:
+        info += "Obstructed: 2ND | ";
+        break;
+    case 0b0000110000:
+        info += "Obstructed: BOTH | ";
         break;
     default:
         info += "Obstructed: ? | ";
         break;
     }
     switch (following) {
-    case 0b00000000:
+    case 0b0000000000:
         info += "Following: NO | ";
         break;
-    case 0b00000100:
-        info += "Following: YES | ";
+    case 0b0000000100:
+        info += "Following: 1ST | ";
+        break;
+    case 0b0000001000:
+        info += "Following: 2ND | ";
+        break;
+    case 0b0000001100:
+        info += "Following: BOTH | ";
         break;
     default:
         info += "Following: ? | ";
         break;
     }
     switch (profile) {
-    case 0b00000000:
+    case 0b0000000000:
         info += "Driver Profile: LOW ###";
         break;
-    case 0b00000001:
+    case 0b0000000001:
         info += "Driver Profile: MED ###";
         break;
-    case 0b00000010:
+    case 0b0000000010:
         info += "Driver Profile: HIGH ####";
         break;
     default:

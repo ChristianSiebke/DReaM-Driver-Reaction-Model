@@ -112,5 +112,11 @@ void GlobalObserver_Implementation::Trigger(int time) {
     timeMeasure.EndTimePoint();
     dataRecorder->Trigger(globalObserverMain->GetDetailedAgentPerception(GetAgent()->GetId()),
                           globalObserverMain->GetInfrastructurePerception(), analysisData, time);
-    dataRecorder->CheckCollisions(GetAgent()->GetCollisionPartners(), GetAgent()->GetId(), time);
+
+    std::vector<std::pair<int, std::shared_ptr<DetailedAgentPerception>>> cps;
+    for (auto &pair : GetAgent()->GetCollisionPartners()) {
+        cps.emplace_back(std::make_pair(pair.second, globalObserverMain->GetDetailedAgentPerception(pair.second)));
+    }
+    dataRecorder->CheckCollisions(cps, GetAgent()->GetId(), globalObserverMain->GetDetailedAgentPerception(GetAgent()->GetId()),
+                                  analysisData, time);
 }

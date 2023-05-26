@@ -28,12 +28,16 @@
                 double headway = dist / worldRepresentation.egoAgent->GetVelocity();
                 if (headway < worldInterpretation.analysisData->timeHeadway) {
                     worldInterpretation.analysisData->timeHeadway = headway;
+                    worldInterpretation.analysisData->followingTarget = agent->agent->GetID();
                 }
             }
         }
     }
     if (currentState == ActionState::CollisionImminent || currentState == ActionState::ReactToIntersectionSituation)
         worldInterpretation.analysisData->obstruction = true;
+
+    if (currentState == ActionState::ReactToIntersectionSituation && !EgoHasRightOfWay(agent))
+        worldInterpretation.analysisData->hasROW = false;
     return currentState;
 }
 
