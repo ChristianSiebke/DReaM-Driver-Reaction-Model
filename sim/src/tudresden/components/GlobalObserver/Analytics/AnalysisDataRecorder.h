@@ -43,6 +43,7 @@ struct GroupingData {
 
     bool secondJunction = false;
     int obstructionCounter = 0;
+    int followingTarget = -1;
 
     bool obstructed = false;
     bool following = false;

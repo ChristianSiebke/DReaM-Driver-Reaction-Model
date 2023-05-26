@@ -153,6 +153,7 @@ void AnalysisDataRecorder::UpdateGroupDataPoint(std::shared_ptr<DetailedAgentPer
         else {
             gd.following2 = true;
         }
+        gd.followingTarget = data.followingTarget;
     }
     gd.velocityProfile.emplace_back(data.targetDistributionOffset);
 }
@@ -183,15 +184,16 @@ void AnalysisDataRecorder::UpdateTTCs(std::shared_ptr<DetailedAgentPerception> e
 
 void AnalysisDataRecorder::CheckCollisions(std::vector<std::pair<int, std::shared_ptr<DetailedAgentPerception>>> partners, int egoId,
                                            std::shared_ptr<DetailedAgentPerception> egoData, AnalysisSignal data, int time) {
-    if (collisionPartners.find(egoId) != collisionPartners.end()) {
+    if (collisionPartners.find(egoId) == collisionPartners.end()) {
         auto tmpVec = std::make_shared<std::list<int>>();
         collisionPartners.insert(std::make_pair(egoId, tmpVec));
     }
 
     for (auto &partner : partners) {
-        if (std::find(collisionPartners.at(egoId)->begin(), collisionPartners.at(egoId)->end(), partner.first) ==
-            collisionPartners.at(egoId)->end())
+        if (std::find(collisionPartners.at(egoId)->begin(), collisionPartners.at(egoId)->end(), partner.first) !=
+            collisionPartners.at(egoId)->end()) {
             continue;
+        }
 
         collisionPartners.at(egoId)->emplace_back(partner.first);
         CollisionData cd;
@@ -200,7 +202,7 @@ void AnalysisDataRecorder::CheckCollisions(std::vector<std::pair<int, std::share
         cd.runId = this->runId;
         cd.timestamp = time;
         cd.type = DetermineCollisionType(egoId, partner.first, egoData, partner.second, data);
-        if (cd.type == -1)
+        if (cd.type < 0)
             continue;
         collisions.emplace_back(cd);
     }
@@ -208,6 +210,10 @@ void AnalysisDataRecorder::CheckCollisions(std::vector<std::pair<int, std::share
 
 int AnalysisDataRecorder::DetermineCollisionType(int egoId, int otherId, std::shared_ptr<DetailedAgentPerception> egoData,
                                                  std::shared_ptr<DetailedAgentPerception> partnerData, AnalysisSignal data) {
+    std::cout << "other agent not in signal Log" << std::endl;
+    if (analysisSignalLog.find(otherId) == analysisSignalLog.end()) {
+        std::cout << "other agent not in signal Log" << std::endl;
+    }
     auto egoLane = egoData->lanePosition.lane;
     auto egoRoad = egoLane->GetRoad();
     auto egoInd = egoData->indicatorState;
@@ -219,7 +225,7 @@ int AnalysisDataRecorder::DetermineCollisionType(int egoId, int otherId, std::sh
     std::string appDir = "";
 
     if (egoData->junctionDistance.on > 0) {
-        if (analysisSignalLog.at(otherId).followingTarget == egoId) {
+        if (groupingData.at(otherId).followingTarget == egoId) {
             switch (egoInd) {
             case IndicatorState::IndicatorState_Left:
                 return 201;
@@ -405,7 +411,7 @@ int AnalysisDataRecorder::DetermineCollisionType(int egoId, int otherId, std::sh
                 return 373;
             }
             if (egoLane->GetDReaMId() == partnerLane->GetDReaMId()) {
-                if (data.followingTarget == otherId) {
+                if (egoData->lanePosition.sCoordinate < partnerData->lanePosition.sCoordinate) {
                     if (analysisSignalLog.at(otherId).following) {
                         return 611;
                     }
@@ -417,14 +423,14 @@ int AnalysisDataRecorder::DetermineCollisionType(int egoId, int otherId, std::sh
                     }
                 }
                 else {
-                    return -1;
+                    return -2;
                 }
             }
             else if (egoLane->IsInRoadDirection() != partnerLane->IsInRoadDirection()) {
                 return 681;
             }
             else {
-                return -1;
+                return -3;
             }
         }
         else {
