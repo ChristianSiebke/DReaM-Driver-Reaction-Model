@@ -107,6 +107,7 @@ std::pair<std::optional<double>, bool> FollowingInterpreter::FollowingState(cons
         return {std::nullopt, false};
     }
     if (conflictSituation->junction->GetOpenDriveId() != interpretation->crossingInfo.junctionOdId) {
+        return {std::nullopt, false};
     }
     auto conflictAreaDistance = MergeOrSplitManoeuvreDistanceToConflictArea(*conflictSituation);
     if (conflictAreaDistance) {

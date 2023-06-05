@@ -122,12 +122,12 @@ LanePoint Lane::InterpolatePoint(double sLaneCoordinate) const
     if (lanePointsReference.empty())
     {
         auto message = __FILE__ " Line: " + std::to_string(__LINE__) + "Lane does not have any points -->Can not interpolate point";
-        throw std::out_of_range(message);
+        throw std::runtime_error(message);
     }
     if (SLaneCoordinateOutOfLane(sLaneCoordinate))
     {
         auto message = __FILE__ " Line: " + std::to_string(__LINE__) + "sLaneCoordniate out of lane --> Can not interpolate point";
-        throw std::out_of_range(message);
+        throw std::runtime_error(message);
     }
     auto upperPointIter = std::upper_bound(lanePointsReference.begin(), lanePointsReference.end(), sLaneCoordinate,
                                            [](auto sLaneCoordniate, LanePoint point) -> bool { return (sLaneCoordniate < point.sOffset); });
@@ -166,14 +166,14 @@ LanePoint Lane::InterpolatePoint(double sLaneCoordinate) const
     else
     {
         auto message = __FILE__ " Line: " + std::to_string(__LINE__) + "Can not calculate  point";
-        throw std::out_of_range(message);
+        throw std::runtime_error(message);
     }
     LanePoint detectedPoint(x, y, hdg, sLaneCoordinate);
     return detectedPoint;
 }
 
 bool Lane::SLaneCoordinateOutOfLane(double sLaneCoordinate) const {
-    return GetLastPoint()->sOffset - sLaneCoordinate < -0.001 || -0.001 > sLaneCoordinate - GetFirstPoint()->sOffset;
+    return GetLastPoint()->sOffset - sLaneCoordinate < -0.01 || -0.01 > sLaneCoordinate - GetFirstPoint()->sOffset;
 };
 
 std::optional<const ConflictArea *> Lane::GetConflictAreaWithLane(const Lane *lane) const {

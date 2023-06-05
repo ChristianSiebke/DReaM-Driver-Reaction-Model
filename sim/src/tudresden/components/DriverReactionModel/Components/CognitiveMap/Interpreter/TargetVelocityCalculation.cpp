@@ -41,7 +41,9 @@ double TargetVelocityCalculation::CalculateTargetVelocity(const WorldRepresentat
 
     if (worldRepresentation.egoAgent->GetVehicleType() == DReaMDefinitions::AgentVehicleType::Car ||
         worldRepresentation.egoAgent->GetVehicleType() == DReaMDefinitions::AgentVehicleType::Motorbike ||
-        worldRepresentation.egoAgent->GetVehicleType() == DReaMDefinitions::AgentVehicleType::Truck) {
+        worldRepresentation.egoAgent->GetVehicleType() == DReaMDefinitions::AgentVehicleType::Truck ||
+        worldRepresentation.egoAgent->GetVehicleType() == DReaMDefinitions::AgentVehicleType::Pedestrian ||
+        worldRepresentation.egoAgent->GetVehicleType() == DReaMDefinitions::AgentVehicleType::Bicycle) {
         if ((crossingInfo.phase <= CrossingPhase::Deceleration_TWO && crossingInfo.phase > CrossingPhase::Approach) ||
             (crossingInfo.type == CrossingType::Straight &&
              worldRepresentation.egoAgent->GetIndicatorState() != IndicatorState::IndicatorState_Off)) {
@@ -56,12 +58,6 @@ double TargetVelocityCalculation::CalculateTargetVelocity(const WorldRepresentat
         else {
             targetVelocity = defaultVelocity;
         }
-    }
-    else if (worldRepresentation.egoAgent->GetVehicleType() == DReaMDefinitions::AgentVehicleType::Pedestrian) {
-        targetVelocity = 3.6;
-    }
-    else if (worldRepresentation.egoAgent->GetVehicleType() == DReaMDefinitions::AgentVehicleType::Bicycle) {
-        targetVelocity = 9.0;
     }
     else {
         std::string message =

@@ -14,6 +14,7 @@
 #include "Components/ComponentInterface.h"
 #include "Components/GazeMovement/GazeMovement.h"
 #include "Components/GazeMovement/RoadSegments/RoadSegmentInterface.h"
+#include "Components/Importer/BehaviourImporter.h"
 #include "Components/LateralDecision.h"
 #include "Components/LongitudinalDecision/LongitudinalDecision.h"
 #include "Components/TrafficSignalMemory/TrafficSignalMemory.h"
@@ -21,12 +22,16 @@
 class DriverReactionModel {
   public:
       DriverReactionModel(std::string behaviourConfigPath, std::string resultPath, LoggerInterface &loggerInterface, int cycleTime,
-                          StochasticsInterface *stochastics);
+                          StochasticsInterface *stochastics, DReaMDefinitions::AgentVehicleType agentType);
       DriverReactionModel(const DriverReactionModel &) = delete;
       DriverReactionModel(DriverReactionModel &&) = delete;
       DriverReactionModel &operator=(const DriverReactionModel &) = delete;
       DriverReactionModel &operator=(DriverReactionModel &&) = delete;
-      ~DriverReactionModel() = default;
+      ~DriverReactionModel() {
+          if (importer.use_count() == 2) {
+              importer->ResetBehaviourImporter();
+          }
+      }
 
       void UpdateDReaM(int time, std::shared_ptr<DetailedAgentPerception> egoAgent,
                        std::vector<std::shared_ptr<GeneralAgentPerception>> ambientAgents,
@@ -53,7 +58,9 @@ class DriverReactionModel {
       void UpdateAgentStateRecorder(int time, int id, std::shared_ptr<InfrastructurePerception> infrastructure);
 
       std::shared_ptr<AgentStateRecorder::AgentStateRecorder> agentStateRecorder;
-      std::unique_ptr<BehaviourData> behaviourData;
+      std::shared_ptr<BehaviourData> behaviourData;
+      std::shared_ptr<BehaviourImporter> importer;
+
       std::unique_ptr<CognitiveMap::CognitiveMap> cognitiveMap;
       std::unique_ptr<LateralDecision::LateralDecision> lateralDecision;
       std::unique_ptr<GazeMovement::GazeMovement> gazeMovement;

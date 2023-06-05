@@ -13,15 +13,14 @@
 #include "Common/TimeMeasurement.hpp"
 #include "Components/CognitiveMap/CognitiveMap.h"
 #include "Components/GazeMovement/GazeMovement.h"
-#include "Components/Importer/BehaviourImporter.h"
 #include "Components/LongitudinalDecision/LongitudinalDecision.h"
 
 TimeMeasurement timeMeasure("DriverReactionModel.cpp");
 
 DriverReactionModel::DriverReactionModel(std::string behaviourConfigPath, std::string resultPath, LoggerInterface &loggerInterface,
-                                         int cycleTime, StochasticsInterface *stochastics) {
-    BehaviourImporter importer(behaviourConfigPath, &loggerInterface);
-    behaviourData = importer.GetBehaviourData();
+                                         int cycleTime, StochasticsInterface *stochastics, DReaMDefinitions::AgentVehicleType agentType) {
+    importer->GetInstance(behaviourConfigPath, &loggerInterface);
+    behaviourData = importer->GetBehaviourData(agentType);
     cognitiveMap = std::make_unique<CognitiveMap::CognitiveMap>(cycleTime, stochastics, &loggerInterface, *behaviourData);
     lateralDecision =
         std::make_unique<LateralDecision::LateralDecision>(cognitiveMap->GetWorldRepresentation(), cognitiveMap->GetWorldInterpretation(),

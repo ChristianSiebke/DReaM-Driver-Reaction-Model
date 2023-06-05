@@ -48,6 +48,12 @@ namespace AgentStateRecorder {
 
 class EXPORT AgentStateRecorder {
 public:
+    ~AgentStateRecorder() {
+        std::cout << "AgentStateRecorder destroyed" << std::endl;
+    }
+
+    AgentStateRecorder(AgentStateRecorder const &) = delete;
+    AgentStateRecorder &operator=(AgentStateRecorder const &) = delete;
     static std::shared_ptr<AgentStateRecorder> GetInstance(std::string resultPath) {
         if (!instance)
             instance = std::shared_ptr<AgentStateRecorder>(new AgentStateRecorder(resultPath));
@@ -57,12 +63,6 @@ public:
     static void ResetAgentStateRecorder() {
         instance.reset();
     }
-
-    ~AgentStateRecorder() {
-    }
-
-    AgentStateRecorder(AgentStateRecorder const &) = delete;
-    AgentStateRecorder &operator=(AgentStateRecorder const &) = delete;
 
     void AddInfrastructurePerception(std::shared_ptr<InfrastructurePerception> infrastructurePerception);
 

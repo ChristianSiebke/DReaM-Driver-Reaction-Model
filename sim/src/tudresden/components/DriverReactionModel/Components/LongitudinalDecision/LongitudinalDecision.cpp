@@ -36,7 +36,8 @@ void MinEmergencyBrakeDelay::InsertEmergencyBrakeEvent(int agentID, double decel
     }
 }
 
-std::vector<double> MinEmergencyBrakeDelay::ActivateIfNeeded(const std::unordered_map<int, std::unique_ptr<AgentInterpretation>> &agents) {
+std::vector<std::pair<double, int>>
+MinEmergencyBrakeDelay::ActivateIfNeeded(const std::unordered_map<int, std::unique_ptr<AgentInterpretation>> &agents) {
     for (auto it = begin(emergencyBrake); it != end(emergencyBrake);) {
         if (agents.find(it->first) == agents.end()) {
             it = emergencyBrake.erase(it);
@@ -45,10 +46,10 @@ std::vector<double> MinEmergencyBrakeDelay::ActivateIfNeeded(const std::unordere
             ++it;
     }
 
-    std::vector<double> accelerations;
+    std::vector<std::pair<double, int>> accelerations;
     std::for_each(emergencyBrake.begin(), emergencyBrake.end(), [=, &accelerations](std::pair<const int, EmergencyBrakeInfo> &element) {
         if (!element.second.emergencyState && element.second.timeEmergencyBrakeActive < minTimeEmergencyBrakeIsActive) {
-            accelerations.push_back(element.second.deceleration);
+            accelerations.push_back({element.second.deceleration, element.first});
             element.second.timeEmergencyBrakeActive += cycleTime;
         }
     });
@@ -64,8 +65,8 @@ std::vector<double> MinEmergencyBrakeDelay::ActivateIfNeeded(const std::unordere
     return accelerations;
 }
 
-bool AccelerationSorting(double d1, double d2) {
-    return d1 < d2;
+bool AccelerationSorting(std::pair<double, int> d1, std::pair<double, int> d2) {
+    return d1.first < d2.first;
 }
 
 void LongitudinalDecision::Update() {
@@ -89,8 +90,8 @@ double LongitudinalDecision::DetermineAccelerationWish() {
     debuggingState = "";
     debuggingState += "TargetVelocity= " + std::to_string(static_cast<int>(worldInterpretation.targetVelocity)) + "|";
     //---debugging---
-    std::vector<double> accelerations;
-    accelerations.push_back(anticipation.CalculatePhaseAcceleration());
+    std::vector<std::pair<double, int>> accelerations;
+    accelerations.push_back({anticipation.CalculatePhaseAcceleration(), 999});
     minEmergencyBrakeDelay.ResetEmergencyState();
     for (auto &entry : worldInterpretation.interpretedAgents) {
         const auto &agent = entry.second;
@@ -102,7 +103,7 @@ double LongitudinalDecision::DetermineAccelerationWish() {
 
             double deceleration = AgentCrashImminent(agent);
             minEmergencyBrakeDelay.InsertEmergencyBrakeEvent(agent->agent->GetID(), deceleration);
-            accelerations.push_back(deceleration);
+            accelerations.push_back({deceleration, agent->agent->GetID()});
             break;
         }
         case ActionState::Following: {
@@ -119,13 +120,17 @@ double LongitudinalDecision::DetermineAccelerationWish() {
                 break;
             }
             if (worldInterpretation.crossingInfo.phase > CrossingPhase::Approach) {
-                accelerations.push_back(anticipation.AnticipationAccelerationToAchieveVelocityInDistance(
-                    *agent->relativeDistance, agent->agent->GetVelocity(), worldRepresentation.egoAgent->GetVelocity()));
+                accelerations.push_back(
+                    {anticipation.AnticipationAccelerationToAchieveVelocityInDistance(*agent->relativeDistance, agent->agent->GetVelocity(),
+                                                                                      worldRepresentation.egoAgent->GetVelocity()),
+                     agent->agent->GetID()});
             }
             else {
-                accelerations.push_back(anticipation.MaximumAccelerationWish(
-                    worldInterpretation.targetVelocity, worldRepresentation.egoAgent->GetVelocity(),
-                    worldRepresentation.egoAgent->GetVelocity() - agent->agent->GetVelocity(), *agent->relativeDistance));
+                accelerations.push_back(
+                    {anticipation.MaximumAccelerationWish(worldInterpretation.targetVelocity, worldRepresentation.egoAgent->GetVelocity(),
+                                                          worldRepresentation.egoAgent->GetVelocity() - agent->agent->GetVelocity(),
+                                                          *agent->relativeDistance),
+                     agent->agent->GetID()});
             }
             break;
         }
@@ -137,7 +142,7 @@ double LongitudinalDecision::DetermineAccelerationWish() {
                               " OROW=" + std::to_string(static_cast<int>(agent->rightOfWay.observed)) + "|";
 
             ////---debugging--
-            accelerations.push_back(anticipation.IntersectionGap(agent));
+            accelerations.push_back({anticipation.IntersectionGap(agent), agent->agent->GetID()});
             break;
         }
         case ActionState::End: {
@@ -154,7 +159,14 @@ double LongitudinalDecision::DetermineAccelerationWish() {
 
     accelerations.insert(accelerations.end(), emergencyDelay.begin(), emergencyDelay.end());
     std::sort(accelerations.begin(), accelerations.end(), AccelerationSorting);
-    return accelerations.front();
+    debuggingState +=
+        "Decelerate Agent = " + std::to_string(accelerations.front().second) +
+        " Wish Decel=" + std::to_string(static_cast<int>(accelerations.front().first)) + ":" +
+        std::to_string(static_cast<int>(((accelerations.front().first) - static_cast<int>(accelerations.front().first)) * 100));
+ if(worldRepresentation.egoAgent->GetID()== 30)
+    std::cout << "Ego" << worldRepresentation.egoAgent->GetID() << " | Acceleration: " << accelerations.front().first
+              << " | oAgent=" << accelerations.front().second << std::endl;
+    return accelerations.front().first;
 }
 
 double LongitudinalDecision::AgentCrashImminent(const std::unique_ptr<AgentInterpretation> &oAgent) const {

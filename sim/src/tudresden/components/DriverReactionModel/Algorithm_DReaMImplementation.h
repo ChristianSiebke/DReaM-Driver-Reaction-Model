@@ -86,7 +86,7 @@ class AlgorithmDReaMImplementation : public AlgorithmInterface {
                   CommandLineParser::Parse(QCoreApplication::arguments()).configsPath + "\\" + "behaviour.xml",
               QCoreApplication::applicationDirPath().toStdString() + "\\" +
                   CommandLineParser::Parse(QCoreApplication::arguments()).resultsPath + "\\",
-              loggerInterface, cycleTime, stochastics) {
+              loggerInterface, cycleTime, stochastics,(DReaMDefinitions::AgentVehicleType)agent->GetVehicleModelParameters().vehicleType) {
         CommandLineArguments parsedArguments = CommandLineParser::Parse(QCoreApplication::arguments());
         std::string resultPath = QCoreApplication::applicationDirPath().toStdString() + "\\" + parsedArguments.resultsPath + "\\";
         std::string logPath = resultPath + "agent" + std::to_string(agent->GetId()) + ".txt";

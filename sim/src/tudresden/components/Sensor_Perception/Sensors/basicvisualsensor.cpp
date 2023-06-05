@@ -11,6 +11,11 @@
 
 #include <thread>
 
+#include "Common/TimeMeasurement.hpp"
+
+TimeMeasurement timeMeasureAABB("AABB.cpp");
+TimeMeasurement timeMeasureBasicSensor("BasicSensor.cpp");
+
 #define MEASURE_TIME false
 
 #if MEASURE_TIME
@@ -38,11 +43,14 @@ void BasicVisualSensor::Trigger(int timestamp, GazeState gazeState, std::optiona
         maxViewAngle = gazeState.openingAngle / 2.0;
     }
     viewDistance = gazeState.viewDistance;
-
+    timeMeasureAABB.StartTimePoint("Trigger AABB");
     aabbTree = aabbTreeHandler->GetCurrentAABBTree(timestamp); // this updates the aabb tree (if needed)
-    visible.Clear();
+    timeMeasureAABB.EndTimePoint();
 
+    visible.Clear();
+    timeMeasureBasicSensor.StartTimePoint("Trigger BasicSensor");
     ThreadedAgentPerception(useThreads);
+    timeMeasureBasicSensor.EndTimePoint();
 }
 
 void BasicVisualSensor::ThreadedAgentPerception(bool useThreads) {

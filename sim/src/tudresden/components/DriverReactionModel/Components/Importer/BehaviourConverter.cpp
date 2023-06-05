@@ -9,63 +9,112 @@
  *****************************************************************************/
 #include "BehaviourConverter.h"
 
-std::unique_ptr<BehaviourData> BehaviourConverter::Convert(const StatisticsGroup& main) {
-    behaviourData = std::make_unique<BehaviourData>();
-    ConvertActionDecisionParameters(main.groups.at("ActionDecision"));
-    ConvertCognitiveMapParameters(main.groups.at("CognitiveMap"));
-    ConvertGazeMovementParameters(main.groups.at("GazeMovement"));
-    return std::move(behaviourData);
+std::map<DReaMDefinitions::AgentVehicleType, std::shared_ptr<BehaviourData>> BehaviourConverter::Convert(const StatisticsGroup &main) {
+    for (const auto &group : main.groups) {
+        if (group.first == "Car") {
+            auto data = std::make_shared<BehaviourData>();
+            auto agentType = DReaMDefinitions::AgentVehicleType::Car;
+            data = ConvertActionDecisionParameters(data, group.second.groups.at("ActionDecision"));
+            data = ConvertCognitiveMapParameters(data, group.second.groups.at("CognitiveMap"));
+            data = ConvertGazeMovementParameters(data, group.second.groups.at("GazeMovement"));
+            behaviourMap.insert({agentType, data});
+        }
+        else if (group.first == "Cyclist") {
+            auto data = std::make_shared<BehaviourData>();
+            auto agentType = DReaMDefinitions::AgentVehicleType::Bicycle;
+            data = ConvertActionDecisionParameters(data, group.second.groups.at("ActionDecision"));
+            data = ConvertCognitiveMapParameters(data, group.second.groups.at("CognitiveMap"));
+            data = ConvertGazeMovementParameters(data, group.second.groups.at("GazeMovement"));
+            behaviourMap.insert({agentType, data});
+        }
+        else if (group.first == "Motorbike") {
+            auto data = std::make_shared<BehaviourData>();
+            auto agentType = DReaMDefinitions::AgentVehicleType::Motorbike;
+            data = ConvertActionDecisionParameters(data, group.second.groups.at("ActionDecision"));
+            data = ConvertCognitiveMapParameters(data, group.second.groups.at("CognitiveMap"));
+            data = ConvertGazeMovementParameters(data, group.second.groups.at("GazeMovement"));
+            behaviourMap.insert({agentType, data});
+        }
+        else if (group.first == "Pedestrian") {
+            auto data = std::make_shared<BehaviourData>();
+            auto agentType = DReaMDefinitions::AgentVehicleType::Pedestrian;
+            data = ConvertActionDecisionParameters(data, group.second.groups.at("ActionDecision"));
+            data = ConvertCognitiveMapParameters(data, group.second.groups.at("CognitiveMap"));
+            data = ConvertGazeMovementParameters(data, group.second.groups.at("GazeMovement"));
+            behaviourMap.insert({agentType, data});
+        }
+        else if (group.first == "Truck") {
+            auto data = std::make_shared<BehaviourData>();
+            auto agentType = DReaMDefinitions::AgentVehicleType::Truck;
+            data = ConvertActionDecisionParameters(data, group.second.groups.at("ActionDecision"));
+            data = ConvertCognitiveMapParameters(data, group.second.groups.at("CognitiveMap"));
+            data = ConvertGazeMovementParameters(data, group.second.groups.at("GazeMovement"));
+            behaviourMap.insert({agentType, data});
+        }
+        else {
+            throw std::runtime_error(" AgentType groupe in behaviour.xml is missing ");
+        }
+    }
+    for(const auto& element :behaviourMap){
+        std::cout << "Type:" << static_cast<int>(element.first)<<std::endl;
+        for (const auto &element2 : element.second->adBehaviour.velocityStatisticsIntersection)
+            std::cout << "IntersecionID:" << element2.first<< std::endl;
+        std::cout << "----------" << std::endl;
+    }
+
+        return std::move(behaviourMap);
 }
 
-void BehaviourConverter::ConvertActionDecisionParameters(const StatisticsGroup& main) {
+std::shared_ptr<BehaviourData> BehaviourConverter::ConvertActionDecisionParameters(std::shared_ptr<BehaviourData> data,
+                                                                                   const StatisticsGroup &main) {
     std::string key;
     try {
-        ConvertActionDecisionStatistics(main.groups.at("Velocity Statistics"));
+        data = ConvertActionDecisionStatistics(data, main.groups.at("Velocity Statistics"));
         key = "BehaviourParameters";
         const StatisticsSet& params = main.sets.at(key);
         key = "collisionImminentMargin";
-        behaviourData->adBehaviour.collisionImminentMargin = std::static_pointer_cast<StandardDoubleEntry>(params.entries.at(key))->value;
-        if (behaviourData->adBehaviour.collisionImminentMargin < 0)
+        data->adBehaviour.collisionImminentMargin = std::static_pointer_cast<StandardDoubleEntry>(params.entries.at(key))->value;
+        if (data->adBehaviour.collisionImminentMargin < 0)
             throw std::logic_error(" collisionImminentMargin must be a positive value! ");
         key = "comfortDeceleration";
-        behaviourData->adBehaviour.comfortDeceleration = *std::static_pointer_cast<DistributionEntry>(params.entries.at(key));
-        if (behaviourData->adBehaviour.comfortDeceleration.mean >= 0)
+        data->adBehaviour.comfortDeceleration = *std::static_pointer_cast<DistributionEntry>(params.entries.at(key));
+        if (data->adBehaviour.comfortDeceleration.mean >= 0)
             throw std::logic_error(" comfortDeceleration mean must be a negative value! ");
-        if (behaviourData->adBehaviour.comfortDeceleration.max > 0)
+        if (data->adBehaviour.comfortDeceleration.max > 0)
             throw std::logic_error(" comfortDeceleration max must be a negative value! ");
-        if (behaviourData->adBehaviour.comfortDeceleration.min > 0)
+        if (data->adBehaviour.comfortDeceleration.min > 0)
             throw std::logic_error(" comfortDeceleration min must be a negative value! ");
         key = "maxAcceleration";
-        behaviourData->adBehaviour.maxAcceleration = std::static_pointer_cast<StandardDoubleEntry>(params.entries.at(key))->value;
-        if (behaviourData->adBehaviour.maxAcceleration < 0)
+        data->adBehaviour.maxAcceleration = std::static_pointer_cast<StandardDoubleEntry>(params.entries.at(key))->value;
+        if (data->adBehaviour.maxAcceleration < 0)
             throw std::logic_error(" maxAcceleration must be a positive value! ");
         key = "minDistanceStationaryTraffic";
-        behaviourData->adBehaviour.minDistanceStationaryTraffic =
-            std::static_pointer_cast<StandardDoubleEntry>(params.entries.at(key))->value;
-        if (behaviourData->adBehaviour.minDistanceStationaryTraffic < 0)
+        data->adBehaviour.minDistanceStationaryTraffic = std::static_pointer_cast<StandardDoubleEntry>(params.entries.at(key))->value;
+        if (data->adBehaviour.minDistanceStationaryTraffic < 0)
             throw std::logic_error(" minDistanceStationaryTraffic must be a positive value! ");
         key = "desiredFollowingTimeHeadway";
-        behaviourData->adBehaviour.desiredFollowingTimeHeadway =
-            std::static_pointer_cast<StandardDoubleEntry>(params.entries.at(key))->value;
-        if (behaviourData->adBehaviour.desiredFollowingTimeHeadway < 0)
+        data->adBehaviour.desiredFollowingTimeHeadway = std::static_pointer_cast<StandardDoubleEntry>(params.entries.at(key))->value;
+        if (data->adBehaviour.desiredFollowingTimeHeadway < 0)
             throw std::logic_error(" desiredFollowingTimeHeadway must be a positive value! ");
         key = "maxEmergencyDeceleration";
-        behaviourData->adBehaviour.maxEmergencyDeceleration = *std::static_pointer_cast<DistributionEntry>(params.entries.at(key));
-        if (behaviourData->adBehaviour.maxEmergencyDeceleration.mean > 0)
+        data->adBehaviour.maxEmergencyDeceleration = *std::static_pointer_cast<DistributionEntry>(params.entries.at(key));
+        if (data->adBehaviour.maxEmergencyDeceleration.mean > 0)
             throw std::logic_error(" maxEmergencyDeceleration mean must be a negative value! ");
-        if (behaviourData->adBehaviour.maxEmergencyDeceleration.max > 0)
+        if (data->adBehaviour.maxEmergencyDeceleration.max > 0)
             throw std::logic_error(" maxEmergencyDeceleration max must be a negative value! ");
-        if (behaviourData->adBehaviour.maxEmergencyDeceleration.min > 0)
+        if (data->adBehaviour.maxEmergencyDeceleration.min > 0)
             throw std::logic_error(" maxEmergencyDeceleration min must be a negative value! ");
         key = "timeGapAcceptance";
-        behaviourData->adBehaviour.timeGapAcceptance = std::static_pointer_cast<StandardDoubleEntry>(params.entries.at(key))->value;
-        if (behaviourData->adBehaviour.timeGapAcceptance < 0)
+        data->adBehaviour.timeGapAcceptance = std::static_pointer_cast<StandardDoubleEntry>(params.entries.at(key))->value;
+        if (data->adBehaviour.timeGapAcceptance < 0)
             throw std::logic_error(" timeGapAcceptance must be a positive value! ");
         key = "minTimeEmergencyBrakeIsActive";
-        behaviourData->adBehaviour.minTimeEmergencyBrakeIsActive =
+        data->adBehaviour.minTimeEmergencyBrakeIsActive =
             static_cast<int>(std::static_pointer_cast<StandardDoubleEntry>(params.entries.at(key))->value * 1000);
-        if (behaviourData->adBehaviour.minTimeEmergencyBrakeIsActive < 0)
+        if (data->adBehaviour.minTimeEmergencyBrakeIsActive < 0)
             throw std::logic_error(" minTimeEmergencyBrakeIsActive must be a positive value! ");
+
+        return data;
     } catch (const std::out_of_range& oor) {
         std::string message = "File: " + static_cast<std::string>(__FILE__) + " Line: " + std::to_string(__LINE__) +
                               " ConfigFile: Missing BehaviourParameter/s in Behaviour config file: cannot find " + key + " | " + oor.what();
@@ -78,7 +127,8 @@ void BehaviourConverter::ConvertActionDecisionParameters(const StatisticsGroup& 
     }
 }
 
-void BehaviourConverter::ConvertActionDecisionStatistics(const StatisticsGroup &main) {
+std::shared_ptr<BehaviourData> BehaviourConverter::ConvertActionDecisionStatistics(std::shared_ptr<BehaviourData> data,
+                                                                                   const StatisticsGroup &main) {
     std::map<IntersectionSpot, std::shared_ptr<DistributionEntry>> intersectionSpotMap;
     TurningVelocitis indicatorMap;
     std::map<RoadID, TurningVelocitis> approachRoadMap;
@@ -118,7 +168,7 @@ void BehaviourConverter::ConvertActionDecisionStatistics(const StatisticsGroup &
                     }
                     approachRoadMap.insert({"default", indicatorMap});
                     indicatorMap.clear();
-                    behaviourData->adBehaviour.velocityStatisticsIntersection.insert({"default", approachRoadMap});
+                    data->adBehaviour.velocityStatisticsIntersection.insert({"default", approachRoadMap});
                     approachRoadMap.clear();
                 }
                 else {
@@ -158,26 +208,26 @@ void BehaviourConverter::ConvertActionDecisionStatistics(const StatisticsGroup &
                             indicatorMap.clear();
                         }
                     }
-                    behaviourData->adBehaviour.velocityStatisticsIntersection.insert({interID, approachRoadMap});
+                    data->adBehaviour.velocityStatisticsIntersection.insert({interID, approachRoadMap});
                     approachRoadMap.clear();
                 }
             }
         }
         for (const auto &set : main.sets) {
             if (set.first == "default") {
-                behaviourData->adBehaviour.defaultVelocity = *std::static_pointer_cast<DistributionEntry>(set.second.entries.at("default"));
-                if (behaviourData->adBehaviour.defaultVelocity.mean < 0)
+                data->adBehaviour.defaultVelocity = *std::static_pointer_cast<DistributionEntry>(set.second.entries.at("default"));
+                if (data->adBehaviour.defaultVelocity.mean < 0)
                     throw std::logic_error(" action decision distribution mean default velocity must be a positive value! ");
-                if (behaviourData->adBehaviour.defaultVelocity.max < 0)
+                if (data->adBehaviour.defaultVelocity.max < 0)
                     throw std::logic_error(" action decision distribution max default velocity must be a positive value! ");
-                if (behaviourData->adBehaviour.defaultVelocity.min < 0)
+                if (data->adBehaviour.defaultVelocity.min < 0)
                     throw std::logic_error(" action decision distribution min default velocity must be a positive value! ");
                 continue;
             }
 
             for (const auto &entry : set.second.entries) {
                 if (set.first == "SpecificRoads") {
-                    behaviourData->adBehaviour.velocityStatisticsSpecificRoads.insert(
+                    data->adBehaviour.velocityStatisticsSpecificRoads.insert(
                         {entry.first, std::static_pointer_cast<DistributionEntry>(entry.second)});
                     if (std::static_pointer_cast<DistributionEntry>(entry.second)->mean < 0)
                         throw std::logic_error(" mean velocity for specific road must be a positive value! ");
@@ -190,52 +240,53 @@ void BehaviourConverter::ConvertActionDecisionStatistics(const StatisticsGroup &
             }
         }
     }
+    return data;
 }
 
-void BehaviourConverter::ConvertCognitiveMapParameters(const StatisticsGroup &main) {
+std::shared_ptr<BehaviourData> BehaviourConverter::ConvertCognitiveMapParameters(std::shared_ptr<BehaviourData> data,
+                                                                                 const StatisticsGroup &main) {
     std::string key;
     try {
         key = "BehaviourParameters";
         const StatisticsSet &params = main.sets.at(key);
         key = "memorytime";
-        behaviourData.get()->cmBehaviour.memorytime =
-            static_cast<int>(std::static_pointer_cast<StandardDoubleEntry>(params.entries.at(key))->value);
-        if (behaviourData->cmBehaviour.memorytime < 0)
+        data->cmBehaviour.memorytime = static_cast<int>(std::static_pointer_cast<StandardDoubleEntry>(params.entries.at(key))->value);
+        if (data->cmBehaviour.memorytime < 0)
             throw std::logic_error(" memorytime must be a positive value! ");
         key = "memoryCapacity";
-        behaviourData.get()->cmBehaviour.memoryCapacity =
-            static_cast<int>(std::static_pointer_cast<StandardDoubleEntry>(params.entries.at(key))->value);
-        if (behaviourData->cmBehaviour.memoryCapacity < 0)
+        data->cmBehaviour.memoryCapacity = static_cast<int>(std::static_pointer_cast<StandardDoubleEntry>(params.entries.at(key))->value);
+        if (data->cmBehaviour.memoryCapacity < 0)
             throw std::logic_error(" memoryCapacity must be a positive value! ");
         key = "perceptionLatency";
-        behaviourData.get()->cmBehaviour.perceptionLatency = *std::static_pointer_cast<DistributionEntry>(params.entries.at(key));
-        if (behaviourData->cmBehaviour.perceptionLatency.mean < 0)
+        data->cmBehaviour.perceptionLatency = *std::static_pointer_cast<DistributionEntry>(params.entries.at(key));
+        if (data->cmBehaviour.perceptionLatency.mean < 0)
             throw std::logic_error(" perceptionLatency mean must be a positive value! ");
-        if (behaviourData->cmBehaviour.perceptionLatency.max < 0)
+        if (data->cmBehaviour.perceptionLatency.max < 0)
             throw std::logic_error(" perceptionLatency max must be a positive value! ");
-        if (behaviourData->cmBehaviour.perceptionLatency.min < 0)
+        if (data->cmBehaviour.perceptionLatency.min < 0)
             throw std::logic_error(" perceptionLatency min must be a positive value! ");
         key = "initialPerceptionTime";
-        behaviourData.get()->cmBehaviour.initialPerceptionTime = *std::static_pointer_cast<DistributionEntry>(params.entries.at(key));
-        if (behaviourData->cmBehaviour.initialPerceptionTime.mean < 0)
+        data->cmBehaviour.initialPerceptionTime = *std::static_pointer_cast<DistributionEntry>(params.entries.at(key));
+        if (data->cmBehaviour.initialPerceptionTime.mean < 0)
             throw std::logic_error(" initialPerceptionTime mean must be a positive value! ");
-        if (behaviourData->cmBehaviour.initialPerceptionTime.max < 0)
+        if (data->cmBehaviour.initialPerceptionTime.max < 0)
             throw std::logic_error(" initialPerceptionTime max must be a positive value! ");
-        if (behaviourData->cmBehaviour.initialPerceptionTime.min < 0)
+        if (data->cmBehaviour.initialPerceptionTime.min < 0)
             throw std::logic_error(" initialPerceptionTime min must be a positive value! ");
 
         key = "TrafficSignalMemoryParameters";
         const StatisticsSet &tsParams = main.sets.at(key);
         key = "memorytime";
-        behaviourData.get()->cmBehaviour.trafficSig_memorytime =
+        data->cmBehaviour.trafficSig_memorytime =
             static_cast<int>(std::static_pointer_cast<StandardDoubleEntry>(tsParams.entries.at(key))->value);
-        if (behaviourData->cmBehaviour.trafficSig_memorytime < 0)
+        if (data->cmBehaviour.trafficSig_memorytime < 0)
             throw std::logic_error(" memorytime must be a positive value! ");
         key = "memoryCapacity";
-        behaviourData.get()->cmBehaviour.trafficSig_memoryCapacity =
+        data->cmBehaviour.trafficSig_memoryCapacity =
             static_cast<int>(std::static_pointer_cast<StandardDoubleEntry>(tsParams.entries.at(key))->value);
-        if (behaviourData->cmBehaviour.trafficSig_memoryCapacity < 0)
+        if (data->cmBehaviour.trafficSig_memoryCapacity < 0)
             throw std::logic_error(" memoryCapacity must be a positive value! ");
+        return data;
     }
     catch (const std::out_of_range &oor) {
         std::string message = "File: " + static_cast<std::string>(__FILE__) + " Line: " + std::to_string(__LINE__) +
@@ -250,14 +301,15 @@ void BehaviourConverter::ConvertCognitiveMapParameters(const StatisticsGroup &ma
     }
 }
 
-void BehaviourConverter::ConvertGazeMovementParameters(const StatisticsGroup &main) {
-    behaviourData->gmBehaviour.XInt_controlAOIProbabilities.insert({CrossingPhase::Approach, {}});
-    behaviourData->gmBehaviour.XInt_controlAOIProbabilities.insert({CrossingPhase::Deceleration_ONE, {}});
-    behaviourData->gmBehaviour.XInt_controlAOIProbabilities.insert({CrossingPhase::Deceleration_TWO, {}});
-    behaviourData->gmBehaviour.XInt_controlAOIProbabilities.insert({CrossingPhase::Crossing_Right, {}});
-    behaviourData->gmBehaviour.XInt_controlAOIProbabilities.insert({CrossingPhase::Crossing_Straight, {}});
-    behaviourData->gmBehaviour.XInt_controlAOIProbabilities.insert({CrossingPhase::Crossing_Left_ONE, {}});
-    behaviourData->gmBehaviour.XInt_controlAOIProbabilities.insert({CrossingPhase::Crossing_Left_TWO, {}});
+std::shared_ptr<BehaviourData> BehaviourConverter::ConvertGazeMovementParameters(std::shared_ptr<BehaviourData> data,
+                                                                                 const StatisticsGroup &main) {
+    data->gmBehaviour.XInt_controlAOIProbabilities.insert({CrossingPhase::Approach, {}});
+    data->gmBehaviour.XInt_controlAOIProbabilities.insert({CrossingPhase::Deceleration_ONE, {}});
+    data->gmBehaviour.XInt_controlAOIProbabilities.insert({CrossingPhase::Deceleration_TWO, {}});
+    data->gmBehaviour.XInt_controlAOIProbabilities.insert({CrossingPhase::Crossing_Right, {}});
+    data->gmBehaviour.XInt_controlAOIProbabilities.insert({CrossingPhase::Crossing_Straight, {}});
+    data->gmBehaviour.XInt_controlAOIProbabilities.insert({CrossingPhase::Crossing_Left_ONE, {}});
+    data->gmBehaviour.XInt_controlAOIProbabilities.insert({CrossingPhase::Crossing_Left_TWO, {}});
 
     std::string key;
     try {
@@ -286,7 +338,7 @@ void BehaviourConverter::ConvertGazeMovementParameters(const StatisticsGroup &ma
                 throw std::logic_error(" DriverGaze -> openingAngle must be a positive value! ");
             dr.fixationDuration = std::static_pointer_cast<DistributionEntry>(set.second.entries.at("fixationDuration"))->toDistribution();
 
-            behaviourData->gmBehaviour.scanAOIs.driverAOIs.insert(std::make_pair(scan, dr));
+            data->gmBehaviour.scanAOIs.driverAOIs.insert(std::make_pair(scan, dr));
         }
 
         key = "MirrorGaze";
@@ -314,27 +366,25 @@ void BehaviourConverter::ConvertGazeMovementParameters(const StatisticsGroup &ma
             mir.pos.y = std::static_pointer_cast<StandardDoubleEntry>(set.second.entries.at("mirrorPosY"))->value;
             mir.fixationDuration = std::static_pointer_cast<DistributionEntry>(set.second.entries.at("fixationDuration"))->toDistribution();
 
-            behaviourData->gmBehaviour.scanAOIs.mirrorAOIs.insert(std::make_pair(scan, mir));
+            data->gmBehaviour.scanAOIs.mirrorAOIs.insert(std::make_pair(scan, mir));
         }
 
         key = "BaseParameters";
         StatisticsSet base = main.sets.at(key);
-        behaviourData->gmBehaviour.foresightTime = std::static_pointer_cast<StandardDoubleEntry>(base.entries.at("foresightTime"))->value;
-        if (behaviourData->gmBehaviour.XInt_controlOpeningAngle < 0)
+        data->gmBehaviour.foresightTime = std::static_pointer_cast<StandardDoubleEntry>(base.entries.at("foresightTime"))->value;
+        if (data->gmBehaviour.XInt_controlOpeningAngle < 0)
             throw std::logic_error(" GazeMovement -> foresightTime must be a positive value! ");
-        behaviourData->gmBehaviour.minForesightDistance =
+        data->gmBehaviour.minForesightDistance =
             std::static_pointer_cast<StandardDoubleEntry>(base.entries.at("minForesightDistance"))->value;
-        if (behaviourData->gmBehaviour.XInt_controlOpeningAngle < 0)
+        if (data->gmBehaviour.XInt_controlOpeningAngle < 0)
             throw std::logic_error(" GazeMovement ->  minForesightDistance must be a positive value! ");
 
         key = "AgentObserveParameters";
         StatisticsSet obs = main.sets.at(key);
-        behaviourData->gmBehaviour.observe_openingAngle =
-            std::static_pointer_cast<StandardDoubleEntry>(obs.entries.at("openingAngle"))->value;
-        if (behaviourData->gmBehaviour.XInt_controlOpeningAngle < 0)
+        data->gmBehaviour.observe_openingAngle = std::static_pointer_cast<StandardDoubleEntry>(obs.entries.at("openingAngle"))->value;
+        if (data->gmBehaviour.XInt_controlOpeningAngle < 0)
             throw std::logic_error(" GazeMovement -> AgentObserveParameters -> openingAngle must be a positive value! ");
-        behaviourData->gmBehaviour.observe_fixationDuration =
-            std::static_pointer_cast<DistributionEntry>(obs.entries.at("fixationDuration"));
+        data->gmBehaviour.observe_fixationDuration = std::static_pointer_cast<DistributionEntry>(obs.entries.at("fixationDuration"));
 
         key = "Standard Road";
         StatisticsGroup standardRoad = main.groups.at(key);
@@ -344,39 +394,37 @@ void BehaviourConverter::ConvertGazeMovementParameters(const StatisticsGroup &ma
         StatisticsSet std_params = standardRoad.sets.at(key);
         StatisticsSet XInt_params = XJunction.sets.at(key);
         key = "probabilityFixateLeadCar";
-        behaviourData.get()->gmBehaviour.std_probabilityFixateLeadCar =
+        data->gmBehaviour.std_probabilityFixateLeadCar =
             static_cast<int>(std::static_pointer_cast<StandardDoubleEntry>(std_params.entries.at(key))->value);
-        if (behaviourData->gmBehaviour.std_probabilityFixateLeadCar < 0)
+        if (data->gmBehaviour.std_probabilityFixateLeadCar < 0)
             throw std::logic_error(" standard road -> probabilityFixateLeadCar must be a positive value! ");
-        behaviourData.get()->gmBehaviour.XInt_probabilityFixateLeadCar =
+        data->gmBehaviour.XInt_probabilityFixateLeadCar =
             static_cast<int>(std::static_pointer_cast<StandardDoubleEntry>(XInt_params.entries.at(key))->value);
-        if (behaviourData->gmBehaviour.XInt_probabilityFixateLeadCar < 0)
+        if (data->gmBehaviour.XInt_probabilityFixateLeadCar < 0)
             throw std::logic_error(" XJunction -> probabilityFixateLeadCar must be a positive value! ");
 
         key = "probabilityControlGlance";
-        behaviourData.get()->gmBehaviour.std_probabilityControlGlance =
+        data->gmBehaviour.std_probabilityControlGlance =
             static_cast<int>(std::static_pointer_cast<StandardDoubleEntry>(std_params.entries.at(key))->value);
-        if (behaviourData->gmBehaviour.std_probabilityControlGlance < 0)
+        if (data->gmBehaviour.std_probabilityControlGlance < 0)
             throw std::logic_error(" standard road -> probabilityControlGlance must be a positive value! ");
-        behaviourData.get()->gmBehaviour.XInt_probabilityControlGlance =
+        data->gmBehaviour.XInt_probabilityControlGlance =
             static_cast<int>(std::static_pointer_cast<StandardDoubleEntry>(XInt_params.entries.at(key))->value);
-        if (behaviourData->gmBehaviour.XInt_probabilityControlGlance < 0)
+        if (data->gmBehaviour.XInt_probabilityControlGlance < 0)
             throw std::logic_error(" XJunction -> probabilityControlGlance must be a positive value! ");
 
         key = "viewingDepthIntoRoad";
-        behaviourData.get()->gmBehaviour.XInt_viewingDepthIntoRoad =
+        data->gmBehaviour.XInt_viewingDepthIntoRoad =
             static_cast<int>(std::static_pointer_cast<StandardDoubleEntry>(XInt_params.entries.at(key))->value);
-        if (behaviourData->gmBehaviour.XInt_viewingDepthIntoRoad < 0)
+        if (data->gmBehaviour.XInt_viewingDepthIntoRoad < 0)
             throw std::logic_error(" XJunction -> viewingDepthIntoRoad must be a positive value! ");
 
         key = "ControlGlanceParameters";
         StatisticsSet ctrl = XJunction.sets.at(key);
-        behaviourData->gmBehaviour.XInt_controlOpeningAngle =
-            std::static_pointer_cast<StandardDoubleEntry>(ctrl.entries.at("openingAngle"))->value;
-        if (behaviourData->gmBehaviour.XInt_controlOpeningAngle < 0)
+        data->gmBehaviour.XInt_controlOpeningAngle = std::static_pointer_cast<StandardDoubleEntry>(ctrl.entries.at("openingAngle"))->value;
+        if (data->gmBehaviour.XInt_controlOpeningAngle < 0)
             throw std::logic_error(" XJunction -> ControlGlanceParameters -> openingAngle must be a positive value! ");
-        behaviourData->gmBehaviour.XInt_controlFixationDuration =
-            std::static_pointer_cast<DistributionEntry>(ctrl.entries.at("fixationDuration"));
+        data->gmBehaviour.XInt_controlFixationDuration = std::static_pointer_cast<DistributionEntry>(ctrl.entries.at("fixationDuration"));
 
         key = "ScanAOIProbabilities";
         StatisticsSet std_scan = standardRoad.sets.at(key);
@@ -401,7 +449,7 @@ void BehaviourConverter::ConvertGazeMovementParameters(const StatisticsGroup &ma
             else {
                 continue;
             }
-            behaviourData->gmBehaviour.std_scanAOIProbabilities.insert(
+            data->gmBehaviour.std_scanAOIProbabilities.insert(
                 std::make_pair(sc, std::static_pointer_cast<DistributionEntry>(entry.second)));
             if (std::static_pointer_cast<DistributionEntry>(entry.second)->mean < 0)
                 throw std::logic_error(" gaze state scan AOI distribution mean must be a positive value! ");
@@ -455,7 +503,7 @@ void BehaviourConverter::ConvertGazeMovementParameters(const StatisticsGroup &ma
                 else {
                     continue;
                 }
-                behaviourData->gmBehaviour.XInt_controlAOIProbabilities.at(cr).insert(
+                data->gmBehaviour.XInt_controlAOIProbabilities.at(cr).insert(
                     std::make_pair(con, std::static_pointer_cast<StandardDoubleEntry>(entry.second)->value));
                 if (std::static_pointer_cast<StandardDoubleEntry>(entry.second)->value < 0)
                     throw std::logic_error(" XJunction -> Control AOI probability must be a positive value! ");
@@ -477,9 +525,9 @@ void BehaviourConverter::ConvertGazeMovementParameters(const StatisticsGroup &ma
         tmp2.insert({TrafficDensity::MODERATE, tmp});
         tmp2.insert({TrafficDensity::HIGH, tmp});
 
-        behaviourData->gmBehaviour.XInt_scanAOIProbabilities.insert({IndicatorState::IndicatorState_Left, tmp2});
-        behaviourData->gmBehaviour.XInt_scanAOIProbabilities.insert({IndicatorState::IndicatorState_Off, tmp2});
-        behaviourData->gmBehaviour.XInt_scanAOIProbabilities.insert({IndicatorState::IndicatorState_Right, tmp2});
+        data->gmBehaviour.XInt_scanAOIProbabilities.insert({IndicatorState::IndicatorState_Left, tmp2});
+        data->gmBehaviour.XInt_scanAOIProbabilities.insert({IndicatorState::IndicatorState_Off, tmp2});
+        data->gmBehaviour.XInt_scanAOIProbabilities.insert({IndicatorState::IndicatorState_Right, tmp2});
 
         key = "ScanAOIProbabilities";
         StatisticsGroup XInt_scan = XJunction.groups.at(key);
@@ -562,7 +610,7 @@ void BehaviourConverter::ConvertGazeMovementParameters(const StatisticsGroup &ma
                         else {
                             continue;
                         }
-                        behaviourData->gmBehaviour.XInt_scanAOIProbabilities.at(ind).at(dens).at(cr).insert(
+                        data->gmBehaviour.XInt_scanAOIProbabilities.at(ind).at(dens).at(cr).insert(
                             std::make_pair(sc, std::static_pointer_cast<DistributionEntry>(entry.second)));
                         if (std::static_pointer_cast<DistributionEntry>(entry.second)->mean < 0)
                             throw std::logic_error(" gaze state scan AOI distribution mean must be a positive value! ");
@@ -574,6 +622,7 @@ void BehaviourConverter::ConvertGazeMovementParameters(const StatisticsGroup &ma
                 }
             }
         }
+        return data;
     }
     catch (const std::out_of_range &oor) {
         std::string message = "File: " + static_cast<std::string>(__FILE__) + " Line: " + std::to_string(__LINE__) +

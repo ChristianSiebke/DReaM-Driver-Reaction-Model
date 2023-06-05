@@ -33,6 +33,7 @@ public:
     AABBTreeHandler(const AABBTreeHandler &) = delete;
     AABBTreeHandler &operator=(const AABBTreeHandler &) = delete;
     ~AABBTreeHandler() {
+        std::cout << "AABBTreeHandler destroyed" << std::endl;
     }
 
 public:

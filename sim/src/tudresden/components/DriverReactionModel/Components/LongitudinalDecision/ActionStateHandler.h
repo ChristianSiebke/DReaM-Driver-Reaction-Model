@@ -24,7 +24,7 @@ class ActionStateHandler {
   private:
     bool DetermineNextState(const std::unique_ptr<AgentInterpretation>& agent);
     void IncrementState();
-    bool CloseToConlictArea(const std::unique_ptr<AgentInterpretation> &oAgent) const;
+    bool CloseToJunction(const std::unique_ptr<AgentInterpretation> &oAgent) const;
     bool EgoHasRightOfWay(const std::unique_ptr<AgentInterpretation> &agent) const;
 
     ActionState currentState;

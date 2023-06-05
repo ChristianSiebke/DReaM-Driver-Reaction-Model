@@ -18,18 +18,18 @@ class BehaviourConverter {
     BehaviourConverter(LoggerInterface* loggerInterface) : loggerInterface{loggerInterface} {}
     ~BehaviourConverter() = default;
 
-    std::unique_ptr<BehaviourData> Convert(const StatisticsGroup& main);
+    std::map<DReaMDefinitions::AgentVehicleType, std::shared_ptr<BehaviourData>> Convert(const StatisticsGroup &main);
 
-  private:
-    void ConvertActionDecisionStatistics(const StatisticsGroup& main);
-    void ConvertActionDecisionParameters(const StatisticsGroup& main);
-    void ConvertCognitiveMapParameters(const StatisticsGroup& main);
-    void ConvertGazeMovementParameters(const StatisticsGroup& main);
+private:
+    std::shared_ptr<BehaviourData> ConvertActionDecisionStatistics(std::shared_ptr<BehaviourData> data, const StatisticsGroup &main);
+    std::shared_ptr<BehaviourData> ConvertActionDecisionParameters(std::shared_ptr<BehaviourData> data, const StatisticsGroup &main);
+    std::shared_ptr<BehaviourData> ConvertCognitiveMapParameters(std::shared_ptr<BehaviourData> data, const StatisticsGroup &main);
+    std::shared_ptr<BehaviourData> ConvertGazeMovementParameters(std::shared_ptr<BehaviourData> data, const StatisticsGroup &main);
     void Log(const std::string &message, DReaMLogLevel level = info) const {
         loggerInterface->Log(message, level);
     }
 
-    std::unique_ptr<BehaviourData> behaviourData;
+    std::map<DReaMDefinitions::AgentVehicleType, std::shared_ptr<BehaviourData>> behaviourMap{};
     LoggerInterface* loggerInterface;
 };
 

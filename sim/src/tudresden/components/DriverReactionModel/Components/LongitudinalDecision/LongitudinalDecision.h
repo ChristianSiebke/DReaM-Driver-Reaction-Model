@@ -34,7 +34,7 @@ public:
     void ResetEmergencyState();
     void InsertEmergencyBrakeEvent(int agentID, double deceleration);
 
-    std::vector<double> ActivateIfNeeded(const std::unordered_map<int, std::unique_ptr<AgentInterpretation>> &agents);
+    std::vector<std::pair<double, int>> ActivateIfNeeded(const std::unordered_map<int, std::unique_ptr<AgentInterpretation>> &agents);
 
 private:
     std::unordered_map<int, EmergencyBrakeInfo> emergencyBrake;

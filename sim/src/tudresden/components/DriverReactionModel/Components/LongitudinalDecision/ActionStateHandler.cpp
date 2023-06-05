@@ -49,7 +49,7 @@ bool ActionStateHandler::DetermineNextState(const std::unique_ptr<AgentInterpret
             }
             return false;
         case ActionState::ReactToIntersectionSituation:
-            return agent->conflictSituation.has_value() && (!EgoHasRightOfWay(agent) || CloseToConlictArea(agent));
+            return agent->conflictSituation.has_value() && (!EgoHasRightOfWay(agent) || CloseToJunction(agent));
         case ActionState::End:
             return true;
         }
@@ -60,9 +60,9 @@ bool ActionStateHandler::DetermineNextState(const std::unique_ptr<AgentInterpret
         throw std::logic_error(message);
     }
 }
-bool ActionStateHandler::CloseToConlictArea(const std::unique_ptr<AgentInterpretation> &oAgent) const {
+bool ActionStateHandler::CloseToJunction(const std::unique_ptr<AgentInterpretation> &oAgent) const {
     return oAgent->agent->GetJunctionDistance().on > 0 ||
-           (oAgent->agent->GetJunctionDistance().toNext > -1 && oAgent->agent->GetJunctionDistance().toNext < 5);
+           (oAgent->agent->GetJunctionDistance().toNext > -1 && oAgent->agent->GetJunctionDistance().toNext < 7);
 }
 
 bool ActionStateHandler::EgoHasRightOfWay(const std::unique_ptr<AgentInterpretation> &agent) const {

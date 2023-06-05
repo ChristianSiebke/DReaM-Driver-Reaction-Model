@@ -27,22 +27,39 @@
 
 class BehaviourImporter {
   public:
-      BehaviourImporter(std::string path, LoggerInterface *loggerInterface);
-      ~BehaviourImporter() = default;
+      BehaviourImporter(const BehaviourImporter &) = delete;
+      BehaviourImporter &operator=(const BehaviourImporter &) = delete;
+      ~BehaviourImporter() {
+          std::cout << "BehaviourImporter destroyed" << std::endl;
+      }
 
       bool Import(const std::string &filename);
-      std::unique_ptr<BehaviourData> GetBehaviourData();
+      std::shared_ptr<BehaviourData> GetBehaviourData(DReaMDefinitions::AgentVehicleType agentType);
+
+      static std::shared_ptr<BehaviourImporter> GetInstance(std::string path, LoggerInterface *loggerInterface) {
+          if (!instance)
+              instance = std::shared_ptr<BehaviourImporter>(new BehaviourImporter(path, loggerInterface));
+          return instance;
+      }
+
+      static void ResetBehaviourImporter() {
+          instance.reset();
+      }
 
   private:
-    bool ImportGroup(QDomElement& groupElement, StatisticsGroup& group);
-    bool ImportSet(QDomElement& setElement, StatisticsSet& set);
-    bool ImportEntry(QDomElement& entryElement, std::string id, StatisticsSet& set);
-    void Log(const std::string& message, DReaMLogLevel level = info) const { loggerInterface->Log(message, level); }
+      BehaviourImporter(std::string path, LoggerInterface *loggerInterface);
 
+      bool ImportGroup(QDomElement &groupElement, StatisticsGroup &group);
+      bool ImportSet(QDomElement &setElement, StatisticsSet &set);
+      bool ImportEntry(QDomElement &entryElement, std::string id, StatisticsSet &set);
+      void Log(const std::string &message, DReaMLogLevel level = info) const {
+          loggerInterface->Log(message, level);
+      }
 
-    std::unique_ptr<BehaviourData> behaviourData;
-    StatisticsGroup mainGroup{"-1"};
-    LoggerInterface* loggerInterface;
+      static std::shared_ptr<BehaviourImporter> instance;
+      static std::map<DReaMDefinitions::AgentVehicleType, std::shared_ptr<BehaviourData>> behaviourDataMap;
+      StatisticsGroup mainGroup{"-1"};
+      LoggerInterface *loggerInterface;
 };
 
 #endif // BEHAVIOURIMPORTER_H

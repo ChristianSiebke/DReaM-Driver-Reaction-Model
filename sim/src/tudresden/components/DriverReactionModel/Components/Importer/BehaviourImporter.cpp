@@ -9,15 +9,29 @@
  *****************************************************************************/
 #include "BehaviourImporter.h"
 
+std::shared_ptr<BehaviourImporter> BehaviourImporter::instance = nullptr;
+std::map<DReaMDefinitions::AgentVehicleType, std::shared_ptr<BehaviourData>> BehaviourImporter::behaviourDataMap{};
 BehaviourImporter::BehaviourImporter(std::string path, LoggerInterface *loggerInterface) : loggerInterface{loggerInterface} {
     if (!Import(path)) {
         Log("Could not import Behaviour.xml ", DReaMLogLevel::error);
     }
     BehaviourConverter converter(loggerInterface);
-    behaviourData = converter.Convert(mainGroup);
+    behaviourDataMap = converter.Convert(mainGroup);
 }
 
-std::unique_ptr<BehaviourData> BehaviourImporter::GetBehaviourData() { return std::move(behaviourData); }
+std::shared_ptr<BehaviourData> BehaviourImporter::GetBehaviourData(DReaMDefinitions::AgentVehicleType agentType) {
+    if (behaviourDataMap.find(agentType) != behaviourDataMap.end()) {
+        return behaviourDataMap.at(agentType);
+    }
+    else if (behaviourDataMap.find(DReaMDefinitions::AgentVehicleType::Car) != behaviourDataMap.end()) {
+        return behaviourDataMap.at(DReaMDefinitions::AgentVehicleType::Car);
+    }
+    else {
+        std::string message =
+            "File: " + static_cast<std::string>(__FILE__) + " Line: " + std::to_string(__LINE__) + " AgentType exist not in behaviour.xml";
+        throw std::runtime_error(message);
+    }
+}
 
 bool BehaviourImporter::Import(const std::string& filename) {
     std::locale::global(std::locale("C"));
