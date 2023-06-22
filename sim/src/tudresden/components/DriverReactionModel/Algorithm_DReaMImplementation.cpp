@@ -135,7 +135,10 @@ void AlgorithmDReaMImplementation::UpdateOutput(int localLinkId, std::shared_ptr
 void AlgorithmDReaMImplementation::Trigger(int time) {
     Q_UNUSED(time)
     try {
-        std::cout << "time: " << time << std::endl;
+        static int lastTimeStep;
+        if (time > lastTimeStep)
+            std::cout << "time: " << time << std::endl;
+        lastTimeStep = time;
         DReaM.UpdateDReaM(time, egoPerception, ambientAgents, infrastructurePerception, trafficSignals);
         out_indicatorState = static_cast<int>(DReaM.GetLateralAction().indicator);
         out_longitudinalAccelerationWish = DReaM.GetAcceleration();

@@ -86,6 +86,7 @@ struct GeneralAgentPerception : ObjectPerception {
 
     // positional information (at reference point)
     LanePosition lanePosition{};
+    std::map<std::string, RoadInterval> touchedRoads{};
     const MentalInfrastructure::Lane *nextLane;
     JunctionDistance junctionDistance{};
 

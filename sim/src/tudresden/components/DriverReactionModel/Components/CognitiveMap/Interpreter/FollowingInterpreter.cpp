@@ -102,6 +102,7 @@ std::pair<std::optional<double>, bool> FollowingInterpreter::FollowingState(cons
 
     //  agents have conflict area and same successor --> merging manoeuvre
     //  agents have conflict area and same predecessor --> splitting manoeuvre
+
     auto conflictSituation = interpretation->interpretedAgents.at(agent.GetID())->conflictSituation;
     if (!conflictSituation.has_value()) {
         return {std::nullopt, false};
@@ -111,12 +112,24 @@ std::pair<std::optional<double>, bool> FollowingInterpreter::FollowingState(cons
     }
     auto conflictAreaDistance = MergeOrSplitManoeuvreDistanceToConflictArea(*conflictSituation);
     if (conflictAreaDistance) {
-        auto distanceOAgentToEndCA = conflictAreaDistance->oAgentDistance.vehicleReferenceToCAEnd;
-        if (distanceOAgentToEndCA + oAgentDistanceReferenceToBack <= 0) {
+        auto endPointCAObserved = conflictAreaDistance->oAgentCA->end;
+        auto oAgentPoint = agent.GetLanePosition().lane->InterpolatePoint(agent.GetLanePosition().sCoordinate);
+        auto distanceOAgentToEndCA = std::hypot(endPointCAObserved.x - oAgentPoint.x, endPointCAObserved.y - oAgentPoint.y);
+        distanceOAgentToEndCA =
+            conflictAreaDistance->oAgentDistance.vehicleReferenceToCAEnd < 0 ? -distanceOAgentToEndCA : distanceOAgentToEndCA;
+
+        if (conflictAreaDistance->oAgentDistance.vehicleBackToCAEnd <= 0) {
             // observed agent leaves confict area
             return {std::nullopt, false};
         }
-        auto distanceEgoToEndCA = conflictAreaDistance->egoDistance.vehicleReferenceToCAEnd;
+        auto endPointCAEgo = conflictAreaDistance->egoCA->end;
+        auto egoAgentPoint = representation.egoAgent->GetLanePosition().lane->InterpolatePoint(egoS);
+        auto distanceEgoToEndCA = std::hypot(endPointCAEgo.x - egoAgentPoint.x, endPointCAEgo.y - egoAgentPoint.y);
+        distanceEgoToEndCA = conflictAreaDistance->egoDistance.vehicleReferenceToCAEnd < 0 ? -distanceEgoToEndCA : distanceEgoToEndCA;
+        if (conflictAreaDistance->egoDistance.vehicleBackToCAEnd <= 0) {
+            // ego agent leaves confict area
+            return {std::nullopt, false};
+        }
         double followingDistance = distanceEgoToEndCA - distanceOAgentToEndCA;
         if ((followingDistance >= 0 && followingDistance - distanceReferenceToEdgesFollowing < 0) ||
             (followingDistance <= 0 && followingDistance + distanceReferenceToEdgesLeading > 0)) {

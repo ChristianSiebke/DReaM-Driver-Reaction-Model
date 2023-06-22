@@ -182,6 +182,7 @@ std::shared_ptr<DetailedAgentPerception> AgentPerceptionConverter::ConvertAgent(
     perceptionData.width = agent->GetWidth();
     perceptionData.length = agent->GetLength();
     perceptionData.refPosition = Common::Vector2d(agent->GetPositionX(), agent->GetPositionY());
+    perceptionData.touchedRoads = actualEgoAgent.GetAgent()->GetObjectPosition().touchedRoads;
 
     // general agent information
     perceptionData.vehicleType = (DReaMDefinitions::AgentVehicleType)agent->GetVehicleModelParameters().vehicleType;

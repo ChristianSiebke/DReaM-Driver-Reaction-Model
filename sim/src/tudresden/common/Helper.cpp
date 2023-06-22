@@ -130,7 +130,8 @@ std::optional<int> LeadingCarID(const std::unordered_map<int, std::unique_ptr<Ag
 double GetDistanceStoppingPoint(const AgentRepresentation *ego, const AgentInterpretation *observedAgent,
                                 const WorldInterpretation &worldInterpretation) {
     StoppingPoint sp;
-    if (observedAgent->conflictSituation->junction->GetOpenDriveId() != worldInterpretation.crossingInfo.junctionOdId) {
+    if (!observedAgent->conflictSituation.has_value() ||
+        observedAgent->conflictSituation->junction->GetOpenDriveId() != worldInterpretation.crossingInfo.junctionOdId) {
         return std::numeric_limits<double>::infinity();
     }
     if (worldInterpretation.crossingInfo.phase == CrossingPhase::Deceleration_TWO ||

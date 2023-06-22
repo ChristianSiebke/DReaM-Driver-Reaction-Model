@@ -33,10 +33,7 @@ void LateralDecision::Update() {
 
     if (std::none_of(egoAgent->GetMainLocatorLane()->GetSuccessors().begin(), egoAgent->GetMainLocatorLane()->GetSuccessors().end(),
                      [targetLane](auto element) { return element == targetLane; })) {
-        // New Lane free ?
-        // TODO: implement Algorithm -->new lane free?
-        // TODO: move to interpreter
-        if (NewLaneIsFree()) {
+        if (NewLaneIsFree(targetLane)) {
             if (targetLane == egoAgent->GetMainLocatorLane()->GetLeftLane()) {
                 auto lateralDisplacement = (egoAgent->GetMainLocatorLane()->GetWidth() / 2) + (targetLane->GetWidth() / 2);
                 lateralAction.lateralDisplacement =
@@ -59,9 +56,10 @@ void LateralDecision::Update() {
             }
         }
         else {
-            // TODO: slow down and wait at end of road/ after waiting a specific time choose new lane
-            // TODO acceleration calcualtion in longitudinalAction
-            // TODO: move to interpreter
+            if (worldRepresentation.egoAgent->GetJunctionDistance().toNext < 15 &&
+                worldRepresentation.egoAgent->GetJunctionDistance().toNext > 0) {
+                const_cast<WorldInterpretation &>(worldInterpretation).waitUntilTargetLaneIsFree = true;
+            }
         }
     }
     else {
@@ -82,9 +80,34 @@ LateralAction LateralDecision::ResetLateralAction(IndicatorState currentIndicato
     lateralAction.indicator = IndicatorState::IndicatorState_Off;
     return lateralAction;
 }
-bool LateralDecision::NewLaneIsFree() const {
-    // TODO: implement
-    return true;
+bool LateralDecision::NewLaneIsFree(const MentalInfrastructure::Lane *targetLane) const {
+    auto egoS = worldRepresentation.egoAgent->GetLanePosition().sCoordinate;
+    auto upperBound = std::numeric_limits<double>::infinity();
+    auto lowerBound = 0;
+    AgentInterpretation *upperAgent = nullptr;
+    AgentInterpretation *lowerAgent = nullptr;
+
+    for (const auto &entry : worldInterpretation.interpretedAgents) {
+        const auto &agent = entry.second;
+        if (agent->agent->GetLanePosition().lane == targetLane) {
+            auto oAgentS = agent->agent->GetLanePosition().sCoordinate;
+            if (egoS <= oAgentS && oAgentS < upperBound) {
+                upperBound = oAgentS;
+                upperAgent = agent.get();
+            }
+            if (egoS > oAgentS && oAgentS > lowerBound) {
+                lowerBound = oAgentS;
+                lowerAgent = agent.get();
+            }
+        }
+    }
+
+    if ((!upperAgent || std::abs(upperBound - egoS) > (worldRepresentation.egoAgent->GetVelocity() * 2) + 5) &&
+        (!lowerAgent || std::abs(lowerBound - egoS) > (lowerAgent->agent->GetVelocity() * 2) + 5)) {
+        const_cast<WorldInterpretation &>(worldInterpretation).waitUntilTargetLaneIsFree = false;
+        return true;
+    }
+    return false;
 }
 bool LateralDecision::TurningAtJunction() const {
     return (worldInterpretation.crossingInfo.phase == CrossingPhase::Deceleration_TWO ||

@@ -14,7 +14,7 @@
 #include "Common/WorldRepresentation.h"
 #include "Components/ComponentInterface.h"
 namespace LongitudinalDecision {
-
+typedef int NumberOfPriorityAgentsOnIntersection;
 struct TimeToConflictArea {
     double vehicleFrontToCAStart; // time until the front of the vehicle reach conflict area
     double vehicleBackToCAEnd;    // time until the end of the vehicle leaves the conflict area
@@ -59,30 +59,64 @@ class Anticipation {
     }
     double AnticipationAccelerationToAchieveVelocityInDistance(double distance, double velTarget, double currentVelocity) const;
 
-private:
     double IDMBrakeStrategy(double distance, double velTarget, double currentVelocity) const;
+
+    void UpdateEqualPriorityCommunication(int egoAgentId, const std::unique_ptr<AgentInterpretation> &oAgent) {
+        auto oAgentId = oAgent->agent->GetID();
+
+        if (std::any_of(equalPriorityCommunication.begin(), equalPriorityCommunication.end(),
+                        [egoAgentId](std::pair<int, std::unordered_map<int, std::pair<std::optional<NumberOfPriorityAgentsOnIntersection>,
+                                                                                      std::optional<NumberOfPriorityAgentsOnIntersection>>>>
+                                         element) { return element.first == egoAgentId; })) {
+            if (!oAgent->conflictSituation.has_value()) {
+                equalPriorityCommunication.at(egoAgentId).erase(oAgentId);
+            }
+            for (auto it = equalPriorityCommunication.at(egoAgentId).cbegin(); it != equalPriorityCommunication.at(egoAgentId).cend();) {
+                if (std::none_of(worldInterpretation.interpretedAgents.begin(), worldInterpretation.interpretedAgents.end(),
+                                 [it](const auto &element) { return it->first == element.first; })) {
+                    it = equalPriorityCommunication.at(egoAgentId).erase(it);
+                }
+                else {
+                    it++;
+                }
+            }
+
+            if (equalPriorityCommunication.at(egoAgentId).empty()) {
+                equalPriorityCommunication.erase(egoAgentId);
+            }
+        }
+    }
+
+private:
+    void UpdatePriorityAgents(int oAgentID, const ConflictSituation &cA);
     void DeletePriorityAgent(int oAgentID);
 
     TimeToConflictArea CalculateTimeToConflictAreaEgo(DistanceToConflictArea distance, double velocity) const;
     TimeToConflictArea CalculateTimeToConflictAreaObserved(const ConflictSituation &situation,
-                                                           const AmbientAgentRepresentation *oAgent) const;
+                                                           const std::unique_ptr<AgentInterpretation> &oAgent) const;
 
     double TravelTimeTargetVelocity(double distance, double velocity, double vTarget) const;
-    double TravelTimeObserved(double distance, bool egoInsideConflictArea, const AmbientAgentRepresentation *oAgent) const;
+    double TravelTimeObserved(double distance, bool egoInsideConflictArea, const std::unique_ptr<AgentInterpretation> &observedAgent) const;
     double TravelTime(double distance, double distanceAcceleration, double velocity, double acceleration, double vTarget) const;
     double ApproachingStoppingPoint(double sFrontEgo, double tEndObserved, const AgentInterpretation *observedAgent) const;
 
+    double AccelerationIfPriorityAgentExist(const std::unique_ptr<AgentInterpretation> &observedAgent,
+                                            const std::optional<ConflictSituation> &conflictSituation, const TimeToConflictArea &tObserved,
+                                            double freeAccelerationEgo);
+    bool AnyOfTouchesRoadsIsConflictAreaRoad(const std::map<std::string, RoadInterval> &touchedRoads, OdId roadId) const;
     const BehaviourData &GetBehaviourData() const {
         return behaviourData;
     }
-
-        double maxEmergencyDeceleration;
-        double comfortDeceleration;
-        std::unordered_map<int, const MentalInfrastructure::ConflictArea *> priorityAgents;
-        const WorldRepresentation &worldRepresentation;
-        const WorldInterpretation &worldInterpretation;
-        StochasticsInterface *stochastics;
-        const LoggerInterface *loggerInterface;
-        const BehaviourData &behaviourData;
+    static std::unordered_map<int, std::unordered_map<int, std::pair<std::optional<NumberOfPriorityAgentsOnIntersection>,
+                                                                     std::optional<NumberOfPriorityAgentsOnIntersection>>>>
+        equalPriorityCommunication;
+    double maxEmergencyDeceleration;
+    double comfortDeceleration;
+    std::unordered_map<int, ConflictSituation> priorityAgents{};
+    const WorldRepresentation &worldRepresentation;
+    const WorldInterpretation &worldInterpretation;
+    StochasticsInterface *stochastics;
+    const LoggerInterface *loggerInterface;
+    const BehaviourData &behaviourData;
     };
 } // namespace LongitudinalDecision

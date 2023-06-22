@@ -106,9 +106,31 @@ ConflictAreaCalculator::IntersectionPoints(const MentalInfrastructure::LanePoint
          ((std::min(p1->y, p2->y) <= point->y + threshold && std::max(p1->y, p2->y) >= point->y - threshold))) &&
         ((std::min(q1->x, q2->x) <= point->x + threshold && std::max(q1->x, q2->x) >= point->x - threshold) &&
          ((std::min(q1->y, q2->y) <= point->y + threshold && std::max(q1->y, q2->y) >= point->y - threshold)))) {
-        auto pS = std::sqrt((std::pow((point->x - p1->x), 2)) + (std::pow((point->y - p1->y), 2)));
-        auto qS = std::sqrt((std::pow((point->x - q1->x), 2)) + (std::pow((point->y - q1->y), 2)));
-        return {{{point->x, point->y, p1->hdg, p1->sOffset + pS}, {point->x, point->y, q1->hdg, q1->sOffset + qS}}};
+        auto pSDistance1 = std::sqrt((std::pow((point->x - p1->x), 2)) + (std::pow((point->y - p1->y), 2)));
+        auto pSDistance2 = std::sqrt((std::pow((point->x - p2->x), 2)) + (std::pow((point->y - p2->y), 2)));
+        auto qSDistance1 = std::sqrt((std::pow((point->x - q1->x), 2)) + (std::pow((point->y - q1->y), 2)));
+        auto qSDistance2 = std::sqrt((std::pow((point->x - q2->x), 2)) + (std::pow((point->y - q2->y), 2)));
+        double pS, qS;
+        if (pSDistance1 > 0 && pSDistance2 > 0) {
+            pS = ((p1->sOffset / pSDistance1) + (p2->sOffset / pSDistance2)) / ((1 / pSDistance1) + (1 / pSDistance2));
+        }
+        else if (std::abs(pSDistance1) < 0.001) {
+            pS = p1->sOffset;
+        }
+        else if (std::abs(pSDistance2) < 0.001) {
+            pS = p2->sOffset;
+        }
+
+        if (qSDistance1 > 0 && qSDistance2 > 0) {
+            qS = ((q1->sOffset / qSDistance1) + (q2->sOffset / qSDistance2)) / ((1 / qSDistance1) + (1 / qSDistance2));
+        }
+        else if (std::abs(qSDistance1) < 0.001) {
+            qS = q1->sOffset;
+        }
+        else if (std::abs(qSDistance2) < 0.001) {
+            qS = q2->sOffset;
+        }
+        return {{{point->x, point->y, p1->hdg, pS}, {point->x, point->y, q1->hdg, qS}}};
     }
     return std::nullopt;
 }
@@ -116,11 +138,16 @@ ConflictAreaCalculator::IntersectionPoints(const MentalInfrastructure::LanePoint
 std::optional<std::pair<MentalInfrastructure::ConflictArea, MentalInfrastructure::ConflictArea>>
 ConflictAreaCalculator::CalculateConflictAreas(const MentalInfrastructure::Lane *currentLane,
                                                const MentalInfrastructure::Lane *intersectionLane) const {
+    auto minPoint = [](std::vector<MentalInfrastructure::LanePoint> vec) {
+        return *std::min_element(vec.begin(), vec.end(), [](auto a, auto b) { return a.sOffset < b.sOffset; });
+    };
+    auto maxPoint = [](std::vector<MentalInfrastructure::LanePoint> vec) {
+        return *std::max_element(vec.begin(), vec.end(), [](auto a, auto b) { return a.sOffset < b.sOffset; });
+    };
     auto leftLeft = CalculateLaneIntersectionPoints(currentLane->GetLeftSidePoints(), intersectionLane->GetLeftSidePoints());
     auto leftRight = CalculateLaneIntersectionPoints(currentLane->GetLeftSidePoints(), intersectionLane->GetRightSidePoints());
     auto rightLeft = CalculateLaneIntersectionPoints(currentLane->GetRightSidePoints(), intersectionLane->GetLeftSidePoints());
     auto rightRight = CalculateLaneIntersectionPoints(currentLane->GetRightSidePoints(), intersectionLane->GetRightSidePoints());
-
     int intersectionPointNumber = !leftLeft.first.empty();
     intersectionPointNumber += !leftRight.first.empty();
     intersectionPointNumber += !rightLeft.first.empty();
@@ -129,30 +156,65 @@ ConflictAreaCalculator::CalculateConflictAreas(const MentalInfrastructure::Lane 
     if (intersectionPointNumber < 3)
         return std::nullopt;
     std::vector<MentalInfrastructure::LanePoint> conflictPointsCL;
-    std::move(leftLeft.first.begin(), leftLeft.first.end(), std::back_inserter(conflictPointsCL));
-    std::move(leftRight.first.begin(), leftRight.first.end(), std::back_inserter(conflictPointsCL));
-    std::move(rightLeft.first.begin(), rightLeft.first.end(), std::back_inserter(conflictPointsCL));
-    std::move(rightRight.first.begin(), rightRight.first.end(), std::back_inserter(conflictPointsCL));
-
+    if (!leftLeft.first.empty())
+        conflictPointsCL.push_back(maxPoint(leftLeft.first));
+    if (!leftRight.first.empty())
+        conflictPointsCL.push_back(maxPoint(leftRight.first));
+    if (!rightLeft.first.empty())
+        conflictPointsCL.push_back(maxPoint(rightLeft.first));
+    if (!rightRight.first.empty())
+        conflictPointsCL.push_back(maxPoint(rightRight.first));
     std::vector<MentalInfrastructure::LanePoint> conflictPointsIL;
-    std::move(leftLeft.second.begin(), leftLeft.second.end(), std::back_inserter(conflictPointsIL));
-    std::move(leftRight.second.begin(), leftRight.second.end(), std::back_inserter(conflictPointsIL));
-    std::move(rightLeft.second.begin(), rightLeft.second.end(), std::back_inserter(conflictPointsIL));
-    std::move(rightRight.second.begin(), rightRight.second.end(), std::back_inserter(conflictPointsIL));
+    if (!leftLeft.second.empty())
+        conflictPointsIL.push_back(maxPoint(leftLeft.second));
+    if (!leftRight.second.empty())
+        conflictPointsIL.push_back(maxPoint(leftRight.second));
+    if (!rightLeft.second.empty())
+        conflictPointsIL.push_back(maxPoint(rightLeft.second));
+    if (!rightRight.second.empty())
+        conflictPointsIL.push_back(maxPoint(rightRight.second));
 
-    auto minPointCL =
-        *std::min_element(conflictPointsCL.begin(), conflictPointsCL.end(), [](auto a, auto b) { return a.sOffset < b.sOffset; });
-    auto maxPointCL =
-        *std::max_element(conflictPointsCL.begin(), conflictPointsCL.end(), [](auto a, auto b) { return a.sOffset < b.sOffset; });
-
-    auto minPointIL =
-        *std::min_element(conflictPointsIL.begin(), conflictPointsIL.end(), [](auto a, auto b) { return a.sOffset < b.sOffset; });
-    auto maxPointIL =
-        *std::max_element(conflictPointsIL.begin(), conflictPointsIL.end(), [](auto a, auto b) { return a.sOffset < b.sOffset; });
+    std::vector<std::pair<MentalInfrastructure::LanePoint, MentalInfrastructure::LanePoint>> cAPoints;
+    for (int i = 0; i < leftLeft.first.size(); i++) {
+        cAPoints.push_back(std::make_pair(leftLeft.first[i], leftLeft.second[i]));
+    }
+    for (int i = 0; i < leftRight.first.size(); i++) {
+        cAPoints.push_back(std::make_pair(leftRight.first[i], leftRight.second[i]));
+    }
+    for (int i = 0; i < rightLeft.first.size(); i++) {
+        cAPoints.push_back(std::make_pair(rightLeft.first[i], rightLeft.second[i]));
+    }
+    for (int i = 0; i < rightRight.first.size(); i++) {
+        cAPoints.push_back(std::make_pair(rightRight.first[i], rightRight.second[i]));
+    }
+    auto findPartnerPointWithMaxS = [cAPoints](std::vector<MentalInfrastructure::LanePoint> points) {
+        double s = -1;
+        MentalInfrastructure::LanePoint result;
+        for (auto point : points) {
+            for (auto element : cAPoints) {
+                if (point == element.first) {
+                    if (s < element.second.sOffset) {
+                        s = element.second.sOffset;
+                        result = element.second;
+                    }
+                }
+                if (point == element.second) {
+                    if (s < element.first.sOffset) {
+                        s = element.first.sOffset;
+                        result = element.first;
+                    }
+                }
+            }
+        }
+        return result;
+    };
+    auto maxPointIL = findPartnerPointWithMaxS(conflictPointsCL);
+    auto maxPointCL = findPartnerPointWithMaxS(conflictPointsIL);
 
     MentalInfrastructure::ConflictArea clConflictArea;
-    clConflictArea.start = minPointCL.sOffset <= currentLane->GetFirstPoint()->sOffset ? *currentLane->GetFirstPoint()
-                                                                                       : currentLane->InterpolatePoint(minPointCL.sOffset);
+    clConflictArea.start = minPoint(conflictPointsCL).sOffset <= currentLane->GetFirstPoint()->sOffset
+                               ? *currentLane->GetFirstPoint()
+                               : currentLane->InterpolatePoint(minPoint(conflictPointsCL).sOffset);
     clConflictArea.end = maxPointCL.sOffset >= currentLane->GetLastPoint()->sOffset ? *currentLane->GetLastPoint()
                                                                                     : currentLane->InterpolatePoint(maxPointCL.sOffset);
     clConflictArea.junction = currentLane->GetRoad()->GetJunction();
@@ -160,9 +222,9 @@ ConflictAreaCalculator::CalculateConflictAreas(const MentalInfrastructure::Lane 
     clConflictArea.lane = currentLane;
 
     MentalInfrastructure::ConflictArea ilConflictArea;
-    ilConflictArea.start = minPointIL.sOffset <= intersectionLane->GetFirstPoint()->sOffset
+    ilConflictArea.start = minPoint(conflictPointsIL).sOffset <= intersectionLane->GetFirstPoint()->sOffset
                                ? *intersectionLane->GetFirstPoint()
-                               : intersectionLane->InterpolatePoint(minPointIL.sOffset);
+                               : intersectionLane->InterpolatePoint(minPoint(conflictPointsIL).sOffset);
     ilConflictArea.end = maxPointIL.sOffset >= intersectionLane->GetLastPoint()->sOffset
                              ? *intersectionLane->GetLastPoint()
                              : intersectionLane->InterpolatePoint(maxPointIL.sOffset);

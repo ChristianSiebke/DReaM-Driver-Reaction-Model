@@ -93,8 +93,11 @@ double LongitudinalDecision::DetermineAccelerationWish() {
     std::vector<std::pair<double, int>> accelerations;
     accelerations.push_back({anticipation.CalculatePhaseAcceleration(), 999});
     minEmergencyBrakeDelay.ResetEmergencyState();
+
     for (auto &entry : worldInterpretation.interpretedAgents) {
         const auto &agent = entry.second;
+        anticipation.UpdateEqualPriorityCommunication(worldRepresentation.egoAgent->GetID(), agent);
+
         switch (actionStateHandler.GetState(agent)) {
         case ActionState::CollisionImminent: {
             //---debugging--
@@ -119,18 +122,38 @@ double LongitudinalDecision::DetermineAccelerationWish() {
                 // agent is behind ego
                 break;
             }
-            if (worldInterpretation.crossingInfo.phase > CrossingPhase::Approach) {
-                accelerations.push_back(
-                    {anticipation.AnticipationAccelerationToAchieveVelocityInDistance(*agent->relativeDistance, agent->agent->GetVelocity(),
-                                                                                      worldRepresentation.egoAgent->GetVelocity()),
-                     agent->agent->GetID()});
+
+            double acceleration = anticipation.Deceleration(agent);
+            if ((CrossingPhase::Approach <= worldInterpretation.crossingInfo.phase &&
+                 worldInterpretation.crossingInfo.phase <= CrossingPhase::Deceleration_TWO) &&
+                worldRepresentation.egoAgent->GetVelocity() >= worldInterpretation.targetVelocity) {
+                double acceleration2 = anticipation.IDMBrakeStrategy(*agent->relativeDistance, agent->agent->GetVelocity(),
+                                                                     worldRepresentation.egoAgent->GetVelocity());
+                if ((worldRepresentation.egoAgent->GetID() == 63 && agent->agent->GetID() == 79) ||
+                    (worldRepresentation.egoAgent->GetID() == 79 && agent->agent->GetID() == 63)) {
+                    std::cout << "acceleration= " << acceleration << " | acceleration2=" << acceleration2 << std::endl;
+                }
+
+                acceleration = (acceleration > acceleration2 && !agent->laneInLineWithEgoLane) &&
+                                       worldRepresentation.egoAgent->GetLanePosition().lane->IsJunctionLane()
+                                   ? acceleration
+                                   : acceleration2;
+                accelerations.push_back({acceleration, agent->agent->GetID()});
             }
             else {
-                accelerations.push_back(
-                    {anticipation.MaximumAccelerationWish(worldInterpretation.targetVelocity, worldRepresentation.egoAgent->GetVelocity(),
-                                                          worldRepresentation.egoAgent->GetVelocity() - agent->agent->GetVelocity(),
-                                                          *agent->relativeDistance),
-                     agent->agent->GetID()});
+                double acceleration2 = anticipation.MaximumAccelerationWish(
+                    worldInterpretation.targetVelocity, worldRepresentation.egoAgent->GetVelocity(),
+                    worldRepresentation.egoAgent->GetVelocity() - agent->agent->GetVelocity(), *agent->relativeDistance);
+                if ((worldRepresentation.egoAgent->GetID() == 63 && agent->agent->GetID() == 79) ||
+                    (worldRepresentation.egoAgent->GetID() == 79 && agent->agent->GetID() == 63)) {
+                    std::cout << "acceleration= " << acceleration << " | acceleration2=" << acceleration2 << std::endl;
+                }
+                acceleration = (acceleration > acceleration2 && !agent->laneInLineWithEgoLane) &&
+                                       worldRepresentation.egoAgent->GetLanePosition().lane->IsJunctionLane()
+                                   ? acceleration
+                                   : acceleration2;
+                accelerations.push_back({acceleration, agent->agent->GetID()});
+                accelerations.push_back({acceleration, agent->agent->GetID()});
             }
             break;
         }
@@ -148,12 +171,17 @@ double LongitudinalDecision::DetermineAccelerationWish() {
         case ActionState::End: {
             break;
         }
-        default: {
+         default: {
             std::string message =
                 "File: " + static_cast<std::string>(__FILE__) + " Line: " + std::to_string(__LINE__) + " ActionState is unkown ";
             throw std::logic_error(message);
-        }
-        }
+         }
+         }
+    }
+    if (worldInterpretation.waitUntilTargetLaneIsFree) {
+         accelerations.push_back({anticipation.ComfortAccelerationWish(0, worldRepresentation.egoAgent->GetVelocity(),
+                                                                       worldRepresentation.egoAgent->GetVelocity(), 0),
+                                  999});
     }
     auto emergencyDelay = minEmergencyBrakeDelay.ActivateIfNeeded(worldInterpretation.interpretedAgents);
 
@@ -163,9 +191,6 @@ double LongitudinalDecision::DetermineAccelerationWish() {
         "Decelerate Agent = " + std::to_string(accelerations.front().second) +
         " Wish Decel=" + std::to_string(static_cast<int>(accelerations.front().first)) + ":" +
         std::to_string(static_cast<int>(((accelerations.front().first) - static_cast<int>(accelerations.front().first)) * 100));
- if(worldRepresentation.egoAgent->GetID()== 30)
-    std::cout << "Ego" << worldRepresentation.egoAgent->GetID() << " | Acceleration: " << accelerations.front().first
-              << " | oAgent=" << accelerations.front().second << std::endl;
     return accelerations.front().first;
 }
 

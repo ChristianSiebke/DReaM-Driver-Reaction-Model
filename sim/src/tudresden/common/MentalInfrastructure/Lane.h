@@ -22,17 +22,18 @@ class Junction;
 ///
 /// \brief Struct to encapsulate a sampled point along the length of a lane.
 ///
-struct LanePoint
-{
-    LanePoint()
-    {
+
+struct LanePoint {
+    LanePoint() {
     }
-    LanePoint(double xPos, double yPos, double hdgValue, double sValue)
-    {
+    LanePoint(double xPos, double yPos, double hdgValue, double sValue) {
         x = xPos;
         y = yPos;
         hdg = hdgValue;
         sOffset = sValue;
+    }
+    bool operator==(const LanePoint &point) const {
+        return (hdg == point.hdg && sOffset == point.sOffset) && (x == point.x && y == point.y);
     }
 
     double x;

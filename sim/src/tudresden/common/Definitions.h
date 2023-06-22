@@ -213,8 +213,8 @@ struct CrossingInfo {
     CrossingPhase phase = CrossingPhase::NONE;
 
     // the id of the junction that the stopping point belongs to
-    OdId junctionOdId;
-    StoppingPointMap egoStoppingPoints;
+    OdId junctionOdId{""};
+    StoppingPointMap egoStoppingPoints{};
 };
 
 /**

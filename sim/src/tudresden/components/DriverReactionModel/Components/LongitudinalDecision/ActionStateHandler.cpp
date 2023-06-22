@@ -32,7 +32,8 @@ bool ActionStateHandler::DetermineNextState(const std::unique_ptr<AgentInterpret
             return agent->collisionPoint.has_value() && agent->collisionPoint->collisionImminent;
         case ActionState::Following:
             if (agent->relativeDistance.has_value()) {
-                if (agent->conflictSituation->oAgentDistance.vehicleFrontToCAStart < 0) {
+                if (agent->conflictSituation->oAgentDistance.vehicleFrontToCAStart < 0 ||
+                    agent->conflictSituation->egoDistance.vehicleFrontToCAStart < 0) {
                     return true;
                 }
                 else if (agent->relativeDistance < 0 && !agent->laneInLineWithEgoLane) {
@@ -49,7 +50,8 @@ bool ActionStateHandler::DetermineNextState(const std::unique_ptr<AgentInterpret
             }
             return false;
         case ActionState::ReactToIntersectionSituation:
-            return agent->conflictSituation.has_value() && (!EgoHasRightOfWay(agent) || CloseToJunction(agent));
+            return agent->conflictSituation.has_value() &&
+                   (!EgoHasRightOfWay(agent) || CloseToConflictArea(agent, agent->conflictSituation));
         case ActionState::End:
             return true;
         }
@@ -60,9 +62,20 @@ bool ActionStateHandler::DetermineNextState(const std::unique_ptr<AgentInterpret
         throw std::logic_error(message);
     }
 }
-bool ActionStateHandler::CloseToJunction(const std::unique_ptr<AgentInterpretation> &oAgent) const {
-    return oAgent->agent->GetJunctionDistance().on > 0 ||
-           (oAgent->agent->GetJunctionDistance().toNext > -1 && oAgent->agent->GetJunctionDistance().toNext < 7);
+bool ActionStateHandler::CloseToConflictArea(const std::unique_ptr<AgentInterpretation> &oAgent,
+                                             std::optional<ConflictSituation> cA) const {
+    if (cA) {
+        if ((cA->junction == oAgent->agent->NextJunction() ||
+             cA->junction == oAgent->agent->GetLanePosition().lane->GetRoad()->GetJunction()) &&
+            cA->junction != nullptr) {
+            return oAgent->agent->GetJunctionDistance().on > 0 ||
+                   (oAgent->agent->GetJunctionDistance().toNext > -1 && oAgent->agent->GetJunctionDistance().toNext < 7);
+        }
+        if (cA->oAgentDistance.vehicleFrontToCAStart < 7) {
+            return true;
+        }
+    }
+    return false;
 }
 
 bool ActionStateHandler::EgoHasRightOfWay(const std::unique_ptr<AgentInterpretation> &agent) const {

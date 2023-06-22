@@ -55,14 +55,7 @@ std::map<DReaMDefinitions::AgentVehicleType, std::shared_ptr<BehaviourData>> Beh
             throw std::runtime_error(" AgentType groupe in behaviour.xml is missing ");
         }
     }
-    for(const auto& element :behaviourMap){
-        std::cout << "Type:" << static_cast<int>(element.first)<<std::endl;
-        for (const auto &element2 : element.second->adBehaviour.velocityStatisticsIntersection)
-            std::cout << "IntersecionID:" << element2.first<< std::endl;
-        std::cout << "----------" << std::endl;
-    }
-
-        return std::move(behaviourMap);
+    return std::move(behaviourMap);
 }
 
 std::shared_ptr<BehaviourData> BehaviourConverter::ConvertActionDecisionParameters(std::shared_ptr<BehaviourData> data,
