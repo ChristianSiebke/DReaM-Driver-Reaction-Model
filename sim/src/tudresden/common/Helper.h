@@ -118,5 +118,6 @@ DistanceToConflictArea(const std::pair<const MentalInfrastructure::ConflictArea 
                        const std::pair<const MentalInfrastructure::ConflictArea *, const MentalInfrastructure::Lane *> &observedCA, const EgoAgentRepresentation *ego,
                        const AgentRepresentation &observedAgent);
 double DistanceToConflictPoint(const AgentRepresentation *agent, const MentalInfrastructure::LanePoint &conflictAreaBorder, OwlId laneId);
+bool AgentTouchesLane(const AgentRepresentation *agent, const MentalInfrastructure::Lane *lane);
 
 } // namespace Common

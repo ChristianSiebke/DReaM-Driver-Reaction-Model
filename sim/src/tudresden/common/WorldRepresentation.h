@@ -150,7 +150,7 @@ struct WorldInterpretation {
     //! next lane on route graph
     std::optional<const MentalInfrastructure::Lane *> targetLane;
     // waiting till lane change is possible
-    bool waitUntilTargetLaneIsFree =false;
+    bool waitUntilTargetLaneIsFree = false;
 };
 
 namespace CognitiveMap {

@@ -38,7 +38,7 @@ public:
      *
      * return    steering angle
      */
-    double CalculateSteeringAngleTUDresden(int time);
+    double CalculateSteeringAngleTUDresden(int time, AgentVehicleType agentType);
 
     /*!
     * \brief Sets the lateral input, which contains the desired lateral position.

@@ -308,4 +308,13 @@ double DistanceToConflictPoint(const AgentRepresentation *agent, const MentalInf
     return distanceToPoint;
 }
 
+bool AgentTouchesLane(const AgentRepresentation *agent, const MentalInfrastructure::Lane *lane) {
+    return std::any_of(agent->GetTouchedRoads().begin(), agent->GetTouchedRoads().end(),
+                       [lane](std::pair<std::string, RoadInterval> touchedRoad) {
+                           return touchedRoad.first == lane->GetRoad()->GetOpenDriveId() &&
+                                  std::any_of(touchedRoad.second.lanes.begin(), touchedRoad.second.lanes.end(),
+                                              [lane](int touchedLaneId) { return touchedLaneId == std::stoi(lane->GetOpenDriveId()); });
+                       });
+}
+
 } // namespace Common

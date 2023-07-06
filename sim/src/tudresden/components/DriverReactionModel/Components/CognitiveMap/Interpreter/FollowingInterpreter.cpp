@@ -52,7 +52,8 @@ std::pair<std::optional<double>, bool> FollowingInterpreter::FollowingState(cons
     double distanceReferenceToEdgesLeading = oAgentDistanceReferenceToFront + egoAgentDistanceReferenceToBack;
 
     // following on same lane
-    if (observedLane == egoLane && egoLane != nullptr) {
+    if ((observedLane == egoLane && egoLane != nullptr) ||
+        (Common::AgentTouchesLane(&agent, egoLane) && observedLane->GetRoad() == egoLane->GetRoad())) {
         if (observedS > egoS) {
             return {{observedS - egoS - distanceReferenceToEdgesFollowing}, true};
         }
@@ -75,6 +76,18 @@ std::pair<std::optional<double>, bool> FollowingInterpreter::FollowingState(cons
                  distanceReferenceToEdgesFollowing},
                 true};
     }
+    const MentalInfrastructure::Lane *suclane = nullptr;
+    if (std::any_of(egoLane->GetSuccessors().begin(), egoLane->GetSuccessors().end(),
+                    [agent, &suclane](auto &lane) {
+                        suclane = lane;
+                        return Common::AgentTouchesLane(&agent, lane);
+                    }) &&
+        observedLane->GetRoad() == suclane->GetRoad()) {
+        return {{egoLane->GetLastPoint()->sOffset - egoS + observedS - observedLane->GetFirstPoint()->sOffset -
+                 distanceReferenceToEdgesFollowing},
+                true};
+    }
+
     // observed agent on predecessor lane
     if (std::any_of(egoLane->GetPredecessors().begin(), egoLane->GetPredecessors().end(),
                     [observedLane](const auto &lane) { return lane == observedLane; })) {

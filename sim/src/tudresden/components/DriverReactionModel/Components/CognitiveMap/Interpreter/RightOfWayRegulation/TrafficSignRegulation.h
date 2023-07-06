@@ -17,10 +17,12 @@ class TrafficSignRegulationGermany : public RightOfWayRegulationInterface {
     TrafficSignRegulationGermany() {}
     virtual ~TrafficSignRegulationGermany() override = default;
 
-    RightOfWay VehicleVsVehicleROW(const AgentRepresentation& observedAgent, const WorldRepresentation& representation) override;
+    RightOfWay VehicleVsVehicleROW(const AgentRepresentation &observedAgent, const WorldRepresentation &representation,
+                                   const ConflictSituation &conflictSituation) override;
 
-    virtual RightOfWay VehicleVsVehicleSameSigns(const AgentRepresentation& observedAgent, const WorldRepresentation& representation) {
-        return rblRegulation.VehicleVsVehicleROW(observedAgent, representation);
+    virtual RightOfWay VehicleVsVehicleSameSigns(const AgentRepresentation &observedAgent, const WorldRepresentation &representation,
+                                                 const ConflictSituation &conflictSituation) {
+        return rblRegulation.VehicleVsVehicleROW(observedAgent, representation, conflictSituation);
     }
 
   private:

@@ -36,7 +36,7 @@ public:
     }
 
 private:
-    bool NewLaneIsFree(const MentalInfrastructure::Lane *targetLane) const;
+    bool NeighborLaneIsFree(const MentalInfrastructure::Lane *targetLane) const;
     bool TurningAtJunction() const;
     LateralAction ResetLateralAction(IndicatorState currentIndicator) const;
     IndicatorState SetIndicatorAtJunction(const MentalInfrastructure::Lane *targetLane) const;

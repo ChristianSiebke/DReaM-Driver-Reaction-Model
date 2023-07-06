@@ -215,8 +215,14 @@ const MentalInfrastructure::Road *RoadNetworkConverter::ConvertRoad(const OWL::I
             if (auto rightLaneInvalid = dynamic_cast<const OWL::Implementation::InvalidLane *>(rightLane)) {
                 rightLane = nullptr;
             }
-            newLane->AddLeftLane(ConvertLane(leftLane));
-            newLane->AddRightLane(ConvertLane(rightLane));
+            if (newLane->IsInRoadDirection()) {
+                newLane->AddLeftLane(ConvertLane(leftLane));
+                newLane->AddRightLane(ConvertLane(rightLane));
+            }
+            else {
+                newLane->AddLeftLane(ConvertLane(rightLane));
+                newLane->AddRightLane(ConvertLane(leftLane));
+            }
             //------------
 
             newRoad->AddLane(newLane);

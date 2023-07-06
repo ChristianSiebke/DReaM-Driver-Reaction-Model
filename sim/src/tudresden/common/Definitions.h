@@ -189,7 +189,7 @@ enum class StoppingPointType {
 };
 
 struct StoppingPoint {
-    StoppingPointType type;
+    StoppingPointType type = StoppingPointType::NONE;
 
     const MentalInfrastructure::Road *road = nullptr;
     const MentalInfrastructure::Lane *lane = nullptr;

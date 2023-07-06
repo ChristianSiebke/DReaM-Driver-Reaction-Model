@@ -14,13 +14,14 @@
 
 namespace RightOfWayRegulation {
 
-RightOfWay RightOfWayRegulationInterface::RightOfWayDetermination(const AgentRepresentation& observedAgent,
-                                                                  const WorldRepresentation& representation) {
+RightOfWay RightOfWayRegulationInterface::RightOfWayDetermination(const AgentRepresentation &observedAgent,
+                                                                  const WorldRepresentation &representation,
+                                                                  const ConflictSituation &conflictSituation) {
     RightOfWay rightOfWay(true, true);
 
     if (IsVehicle(*representation.egoAgent)) {
         if (IsVehicle(observedAgent)) {
-            return VehicleVsVehicleROW(observedAgent, representation);
+            return VehicleVsVehicleROW(observedAgent, representation, conflictSituation);
         } else if (IsPedestrian(observedAgent)) {
             bool observedAgentROW = PedestrianVsVehicleROW(observedAgent, *representation.egoAgent);
             rightOfWay.observed = observedAgentROW;

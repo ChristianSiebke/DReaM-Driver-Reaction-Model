@@ -43,9 +43,8 @@ void CrossingInfoInterpreter::Update(WorldInterpretation* interpretation, const 
 void CrossingInfoInterpreter::UpdateStoppingPoints(const WorldRepresentation& representation) {
     auto egoJunction = representation.egoAgent->NextJunction();
     auto egoLane = representation.egoAgent->GetLanePosition().lane;
-
     // setting stopping points
-    if (egoJunction && crossingInfo.phase <= CrossingPhase::Deceleration_TWO) {
+    if (egoJunction && crossingInfo.phase <= CrossingPhase::Deceleration_TWO && crossingInfo.phase > CrossingPhase::NONE) {
         crossingInfo.egoStoppingPoints =
             representation.infrastructure->GetStoppingPoints(egoJunction->GetOpenDriveId(), egoLane->GetOwlId());
         crossingInfo.junctionOdId = egoJunction->GetOpenDriveId();

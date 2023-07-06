@@ -17,6 +17,6 @@ class RightBeforeLeftRegulationGermany : public RightOfWayRegulationInterface {
     RightBeforeLeftRegulationGermany() {}
     virtual ~RightBeforeLeftRegulationGermany() override = default;
 
-    RightOfWay VehicleVsVehicleROW(const AgentRepresentation& observedAgent, const WorldRepresentation& representation) override;
+    RightOfWay VehicleVsVehicleROW(const AgentRepresentation& observedAgent, const WorldRepresentation& representation,const ConflictSituation &conflictSituation) override;
 };
 } // namespace RightOfWayRegulation

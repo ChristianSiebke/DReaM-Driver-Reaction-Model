@@ -103,7 +103,6 @@ private:
     double AccelerationIfPriorityAgentExist(const std::unique_ptr<AgentInterpretation> &observedAgent,
                                             const std::optional<ConflictSituation> &conflictSituation, const TimeToConflictArea &tObserved,
                                             double freeAccelerationEgo);
-    bool AnyOfTouchesRoadsIsConflictAreaRoad(const std::map<std::string, RoadInterval> &touchedRoads, OdId roadId) const;
     const BehaviourData &GetBehaviourData() const {
         return behaviourData;
     }

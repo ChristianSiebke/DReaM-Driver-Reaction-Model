@@ -23,30 +23,44 @@ LateralDecision::LateralDecision(const WorldRepresentation &worldRepresentation,
 }
 
 void LateralDecision::Update() {
+    const_cast<WorldInterpretation &>(worldInterpretation).waitUntilTargetLaneIsFree = false;
     auto egoAgent = worldRepresentation.egoAgent;
+    if (egoAgent->GetMainLocatorLane() != egoAgent->GetLanePosition().lane &&
+        (!NeighborLaneIsFree(egoAgent->GetMainLocatorLane()) ||
+         (worldInterpretation.targetLane && *worldInterpretation.targetLane != egoAgent->GetMainLocatorLane()))) {
+        if (egoAgent->GetLanePosition().lane == egoAgent->GetMainLocatorLane()->GetRightLane()) {
+            auto lateralDisplacement =
+                -(egoAgent->GetLanePosition().lane->GetWidth() / 2 + (egoAgent->GetMainLocatorLane()->GetWidth() / 2));
+            lateralAction.lateralDisplacement = lateralDisplacement;
+            return;
+        }
+        if (egoAgent->GetLanePosition().lane == egoAgent->GetMainLocatorLane()->GetLeftLane()) {
+            auto lateralDisplacement = egoAgent->GetLanePosition().lane->GetWidth() / 2 + (egoAgent->GetMainLocatorLane()->GetWidth() / 2);
+            lateralAction.lateralDisplacement = lateralDisplacement;
+            return;
+        }
+    }
 
     if (!worldInterpretation.targetLane) {
         lateralAction = ResetLateralAction(egoAgent->GetIndicatorState());
         return;
     }
+
     auto targetLane = *worldInterpretation.targetLane;
 
-    if (std::none_of(egoAgent->GetMainLocatorLane()->GetSuccessors().begin(), egoAgent->GetMainLocatorLane()->GetSuccessors().end(),
-                     [targetLane](auto element) { return element == targetLane; })) {
-        if (NewLaneIsFree(targetLane)) {
+    if (targetLane == egoAgent->GetMainLocatorLane()->GetLeftLane() || targetLane == egoAgent->GetMainLocatorLane()->GetRightLane()) {
+        if (NeighborLaneIsFree(targetLane)) {
             if (targetLane == egoAgent->GetMainLocatorLane()->GetLeftLane()) {
                 auto lateralDisplacement = (egoAgent->GetMainLocatorLane()->GetWidth() / 2) + (targetLane->GetWidth() / 2);
                 lateralAction.lateralDisplacement =
-                    egoAgent->GetMainLocatorLane()->IsInRoadDirection() ? lateralDisplacement : -lateralDisplacement;
-                lateralAction.indicator = egoAgent->GetMainLocatorLane()->IsInRoadDirection() ? IndicatorState::IndicatorState_Left
-                                                                                              : IndicatorState::IndicatorState_Right;
+                    worldRepresentation.egoAgent->IsMovingInLaneDirection() ? lateralDisplacement : -lateralDisplacement;
+                lateralAction.indicator = IndicatorState::IndicatorState_Left;
             }
             else if (targetLane == egoAgent->GetMainLocatorLane()->GetRightLane()) {
                 auto lateralDisplacement = -((egoAgent->GetMainLocatorLane()->GetWidth() / 2) + (targetLane->GetWidth() / 2));
                 lateralAction.lateralDisplacement =
-                    egoAgent->GetMainLocatorLane()->IsInRoadDirection() ? lateralDisplacement : -lateralDisplacement;
-                lateralAction.indicator = egoAgent->GetMainLocatorLane()->IsInRoadDirection() ? IndicatorState::IndicatorState_Right
-                                                                                              : IndicatorState::IndicatorState_Left;
+                    worldRepresentation.egoAgent->IsMovingInLaneDirection() ? lateralDisplacement : -lateralDisplacement;
+                lateralAction.indicator = IndicatorState::IndicatorState_Right;
             }
             else {
                 const std::string msg = "File: " + static_cast<std::string>(__FILE__) + " Line: " + std::to_string(__LINE__) +
@@ -56,8 +70,11 @@ void LateralDecision::Update() {
             }
         }
         else {
-            if (worldRepresentation.egoAgent->GetJunctionDistance().toNext < 15 &&
-                worldRepresentation.egoAgent->GetJunctionDistance().toNext > 0) {
+            lateralAction.lateralDisplacement = 0;
+            if (worldRepresentation.egoAgent->GetJunctionDistance().toNext < 20 &&
+                worldRepresentation.egoAgent->GetJunctionDistance().toNext > 0 &&
+                (!Common::AgentTouchesLane(egoAgent, egoAgent->GetLanePosition().lane->GetLeftLane()) &&
+                 !Common::AgentTouchesLane(egoAgent, egoAgent->GetLanePosition().lane->GetRightLane()))) {
                 const_cast<WorldInterpretation &>(worldInterpretation).waitUntilTargetLaneIsFree = true;
             }
         }
@@ -80,17 +97,36 @@ LateralAction LateralDecision::ResetLateralAction(IndicatorState currentIndicato
     lateralAction.indicator = IndicatorState::IndicatorState_Off;
     return lateralAction;
 }
-bool LateralDecision::NewLaneIsFree(const MentalInfrastructure::Lane *targetLane) const {
+bool LateralDecision::NeighborLaneIsFree(const MentalInfrastructure::Lane *targetLane) const {
+    if (targetLane == nullptr) {
+        return true;
+    }
     auto egoS = worldRepresentation.egoAgent->GetLanePosition().sCoordinate;
+    auto egoLane = worldRepresentation.egoAgent->GetLanePosition().lane;
+
     auto upperBound = std::numeric_limits<double>::infinity();
-    auto lowerBound = 0;
+    auto lowerBound = -std::numeric_limits<double>::infinity();
     AgentInterpretation *upperAgent = nullptr;
     AgentInterpretation *lowerAgent = nullptr;
 
     for (const auto &entry : worldInterpretation.interpretedAgents) {
         const auto &agent = entry.second;
-        if (agent->agent->GetLanePosition().lane == targetLane) {
+
+        auto agentLane = agent->agent->GetLanePosition().lane;
+        auto agentLaneSuccessor = std::any_of(targetLane->GetSuccessors().begin(), targetLane->GetSuccessors().end(),
+                                              [agentLane](const MentalInfrastructure::Lane *element) { return agentLane == element; });
+        auto agentLanePredecessor = std::any_of(targetLane->GetPredecessors().begin(), targetLane->GetPredecessors().end(),
+                                                [agentLane](const MentalInfrastructure::Lane *element) { return agentLane == element; });
+        if (agentLane == targetLane || agentLaneSuccessor || agentLanePredecessor) {
             auto oAgentS = agent->agent->GetLanePosition().sCoordinate;
+            if (agentLaneSuccessor) {
+                oAgentS =
+                    egoLane->GetLastPoint()->sOffset + (agent->agent->GetLanePosition().sCoordinate - agentLane->GetFirstPoint()->sOffset);
+            }
+            if (agentLanePredecessor) {
+                oAgentS =
+                    egoLane->GetFirstPoint()->sOffset - (agentLane->GetLastPoint()->sOffset - agent->agent->GetLanePosition().sCoordinate);
+            }
             if (egoS <= oAgentS && oAgentS < upperBound) {
                 upperBound = oAgentS;
                 upperAgent = agent.get();
@@ -101,10 +137,28 @@ bool LateralDecision::NewLaneIsFree(const MentalInfrastructure::Lane *targetLane
             }
         }
     }
+    auto test = [](AgentInterpretation *a) -> std::string {
+        if (a != nullptr) {
+            return std::to_string(a->agent->GetID());
+        }
+        return " there is no agent";
+    };
+    double upperAgentDistanceReferenceToBack = 0;
+    if (upperAgent)
+        upperAgentDistanceReferenceToBack = upperAgent->agent->GetLength() - upperAgent->agent->GetDistanceReferencePointToLeadingEdge();
+    double egoAgentDistanceReferenceToFront = worldRepresentation.egoAgent->GetDistanceReferencePointToLeadingEdge();
+    double lowerAgentDistanceReferenceToFront = 0;
+    if (lowerAgent)
+        lowerAgentDistanceReferenceToFront = lowerAgent->agent->GetDistanceReferencePointToLeadingEdge();
+    double egoAgentDistanceReferenceToBack =
+        worldRepresentation.egoAgent->GetLength() - worldRepresentation.egoAgent->GetDistanceReferencePointToLeadingEdge();
+    double distanceReferenceToEdgesUpperAgent = upperAgentDistanceReferenceToBack + egoAgentDistanceReferenceToFront;
+    double distanceReferenceToEdgesLowerAgent = lowerAgentDistanceReferenceToFront + egoAgentDistanceReferenceToBack;
+    double upperDistance = upperBound - egoS - distanceReferenceToEdgesUpperAgent;
+    double lowerDistance = egoS - lowerBound - distanceReferenceToEdgesLowerAgent;
 
-    if ((!upperAgent || std::abs(upperBound - egoS) > (worldRepresentation.egoAgent->GetVelocity() * 2) + 5) &&
-        (!lowerAgent || std::abs(lowerBound - egoS) > (lowerAgent->agent->GetVelocity() * 2) + 5)) {
-        const_cast<WorldInterpretation &>(worldInterpretation).waitUntilTargetLaneIsFree = false;
+    if ((!upperAgent || (upperDistance > (worldRepresentation.egoAgent->GetVelocity() * 3) && upperDistance > 5)) &&
+        (!lowerAgent || (lowerDistance > (lowerAgent->agent->GetVelocity() * 3) && lowerDistance > 5))) {
         return true;
     }
     return false;

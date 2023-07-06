@@ -15,7 +15,7 @@
 namespace RightOfWayRegulation {
 
 RightOfWay RightBeforeLeftRegulationGermany::VehicleVsVehicleROW(const AgentRepresentation& observedAgent,
-                                                                 const WorldRepresentation& representation) {
+                                                                 const WorldRepresentation& representation,const ConflictSituation &conflictSituation) {
     RightOfWay rightOfWay(true, true);
     if (representation.egoAgent->ObservedVehicleCameFromRight(observedAgent)) {
         rightOfWay.ego = false;

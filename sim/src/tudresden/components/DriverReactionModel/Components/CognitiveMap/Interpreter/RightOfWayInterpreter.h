@@ -28,7 +28,8 @@ class RightOfWayInterpreter : public InterpreterInterface {
       const MentalInfrastructure::Junction *NextJunction(const AgentRepresentation &agent) const;
       void UpdateRightOfWayRegulation(const WorldRepresentation &representation);
 
-      RightOfWay PerformRightOfWayDetermination(const AgentRepresentation &, const WorldRepresentation &representation);
+      RightOfWay PerformRightOfWayDetermination(const AgentRepresentation &, const WorldRepresentation &representationconst,
+                                                const ConflictSituation &conflictSituation);
 
       std::optional<JunctionSituation> JunctionSituation(const EgoAgentRepresentation *ego, const AgentRepresentation &observedAgent) const;
       bool IsMovingTowardsJunction(const AgentRepresentation &agent, const MentalInfrastructure::Junction *junction) const;

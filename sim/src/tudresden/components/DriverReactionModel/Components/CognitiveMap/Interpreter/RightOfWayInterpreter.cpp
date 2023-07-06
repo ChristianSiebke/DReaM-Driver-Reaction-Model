@@ -26,7 +26,7 @@ void RightOfWayInterpreter::Update(WorldInterpretation* interpretation, const Wo
             auto junctionSituation = JunctionSituation(representation.egoAgent, *observedAgent);
             auto &agentInterpretation = interpretation->interpretedAgents.at(observedAgent->GetID());
             if (agentInterpretation->conflictSituation && junctionSituation) {
-                rightOfWay = PerformRightOfWayDetermination(*observedAgent, representation);
+                rightOfWay = PerformRightOfWayDetermination(*observedAgent, representation, *agentInterpretation->conflictSituation);
             }
 
             interpretation->rightOfWayMap.insert({observedAgent->GetID(), rightOfWay});
@@ -60,9 +60,10 @@ void RightOfWayInterpreter::UpdateRightOfWayRegulation(const WorldRepresentation
     }
 }
 
-RightOfWay RightOfWayInterpreter::PerformRightOfWayDetermination(const AgentRepresentation& observedAgent,
-                                                                 const WorldRepresentation& representation) {
-    return rightOfWayRegulation->RightOfWayDetermination(observedAgent, representation);
+RightOfWay RightOfWayInterpreter::PerformRightOfWayDetermination(const AgentRepresentation &observedAgent,
+                                                                 const WorldRepresentation &representation,
+                                                                 const ConflictSituation &conflictSituation) {
+    return rightOfWayRegulation->RightOfWayDetermination(observedAgent, representation, conflictSituation);
 }
 
 std::optional<JunctionSituation> RightOfWayInterpreter::JunctionSituation(const EgoAgentRepresentation *ego,

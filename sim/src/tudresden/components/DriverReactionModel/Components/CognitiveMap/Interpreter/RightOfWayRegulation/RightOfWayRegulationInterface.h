@@ -16,12 +16,14 @@ class RightOfWayRegulationInterface {
     RightOfWayRegulationInterface() {}
     virtual ~RightOfWayRegulationInterface() = default;
 
-    virtual RightOfWay RightOfWayDetermination(const AgentRepresentation& observedAgent, const WorldRepresentation& representation);
+    virtual RightOfWay RightOfWayDetermination(const AgentRepresentation &observedAgent, const WorldRepresentation &representation,
+                                               const ConflictSituation &conflictSituation);
 
-  protected:
+protected:
     template <typename T> bool IsVehicle(const T& agentdata);
     template <typename T> bool IsPedestrian(const T& agentdata);
     virtual bool PedestrianVsVehicleROW(const AgentRepresentation& pedestrianAgent, const AgentRepresentation& vehicleAgent);
-    virtual RightOfWay VehicleVsVehicleROW(const AgentRepresentation& observedAgent, const WorldRepresentation& representation) = 0;
+    virtual RightOfWay VehicleVsVehicleROW(const AgentRepresentation &observedAgent, const WorldRepresentation &representation,
+                                           const ConflictSituation &conflictSituation) = 0;
 };
 } // namespace RightOfWayRegulation
