@@ -36,6 +36,7 @@ add_openpass_target(
     ${OPENPASS_SIMCORE_DIR}/core
     ${OPENPASS_SIMCORE_DIR}/common
     ../../../core/opSimulation/modules/World_OSI
+    ../../../common/RoutePlanning
     ../DriverReactionModel/
     .
   LIBRARIES
@@ -44,7 +45,12 @@ add_openpass_target(
     TUDresdenCommon
     World_OSI
     GlobalObserverMain
+    SimulationCore
+    Sensor_Perception
+    AnalysisDataRecorder
     
   LINKOSI
 )
 add_subdirectory(GlobalObserverMain) 
+add_subdirectory(Analytics) 
+

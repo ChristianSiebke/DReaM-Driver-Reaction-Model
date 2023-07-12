@@ -88,6 +88,19 @@ const GazeState DriverReactionModel::GetGazeState() {
     return gazeMovement->GetGazeState();
 }
 
+const AnalysisSignal DriverReactionModel::GetAnalysisSignal() {
+    auto data = cognitiveMap->GetWorldInterpretation().analysisData.get();
+    for (auto &agent : cognitiveMap->GetWorldInterpretation().interpretedAgents) {
+        if (agent.second->collisionPoint.has_value()) {
+            double ttc = agent.second->collisionPoint->timeToCollision;
+            std::cout << "TTC: " << ttc << std::endl;
+            data->ttcs.insert(std::make_pair(agent.first, ttc));
+        }
+    }
+    data->maxComfortDeceleration = behaviourData->adBehaviour.comfortDeceleration.mean;
+    return *data;
+}
+
 const std::vector<Common::Vector2d> DriverReactionModel::GetSegmentControlFixationPoints() {
     return gazeMovement->GetSegmentControlFixationPoints();
 }

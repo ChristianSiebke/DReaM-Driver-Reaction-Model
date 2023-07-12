@@ -151,6 +151,8 @@ struct WorldInterpretation {
     std::optional<const MentalInfrastructure::Lane *> targetLane;
     // waiting till lane change is possible
     bool waitUntilTargetLaneIsFree = false;
+   //! data for DroneAnalysis
+    std::unique_ptr<AnalysisSignal> analysisData;
 };
 
 namespace CognitiveMap {

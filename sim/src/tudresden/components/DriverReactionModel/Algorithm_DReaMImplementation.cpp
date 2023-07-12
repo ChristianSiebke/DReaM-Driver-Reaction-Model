@@ -130,6 +130,16 @@ void AlgorithmDReaMImplementation::UpdateOutput(int localLinkId, std::shared_ptr
             throw std::runtime_error(msg);
         }
     }
+    else if (localLinkId == 4) {
+        try {
+            data = std::make_shared<structSignal<AnalysisSignal> const>(DReaM.GetAnalysisSignal());
+        }
+        catch (const std::bad_alloc &) {
+            const std::string msg = COMPONENTNAME + " could not instantiate signal (localLinkId 4 = AnalysisSignal)";
+            LOG(CbkLogLevel::Debug, msg);
+            throw std::runtime_error(msg);
+        }
+    }
 }
 
 void AlgorithmDReaMImplementation::Trigger(int time) {

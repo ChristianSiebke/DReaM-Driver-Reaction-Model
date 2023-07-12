@@ -53,6 +53,9 @@ void CognitiveMap::UpdateInput(int time, std::shared_ptr<DetailedAgentPerception
 
 void CognitiveMap::UpdateWorldRepresentation() { memory.UpdateWorldRepresentation(worldRepresentation); }
 
-void CognitiveMap::ResetWorldInterpretation() { worldInterpretation = {}; }
+void CognitiveMap::ResetWorldInterpretation() {
+    worldInterpretation = {};
+    worldInterpretation.analysisData = std::make_unique<AnalysisSignal>();
+}
 
 }; // namespace CognitiveMap

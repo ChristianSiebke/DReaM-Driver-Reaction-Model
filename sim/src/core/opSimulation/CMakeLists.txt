@@ -200,7 +200,7 @@ add_openpass_target(
     AgentStateRecorder
     GlobalObserverMain
     TUDresdenCommon
-    
+    AnalysisDataRecorder
   LINKOSI
 )
 

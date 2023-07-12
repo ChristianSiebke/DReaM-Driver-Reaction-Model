@@ -19,6 +19,7 @@
 
 #include "../../../tudresden/components/DriverReactionModel/AgentStateRecorder/AgentStateRecorder.h" //DReaM
 #include "../../../tudresden/components/GlobalObserver/GlobalObserverMain/GlobalObserver_main.h"     //DReaM
+#include "../../../tudresden/components/GlobalObserver/Analytics/AnalysisDataRecorder.h"             //DReaM
 #include "agentFactory.h"
 #include "agentType.h"
 #include "bindings/dataBuffer.h"
@@ -65,6 +66,9 @@ bool RunInstantiator::ExecuteRun()
     std::string scenarioConfigPath =
         QCoreApplication::applicationDirPath().toStdString() + "\\" + parsedArguments.configsPath + "\\" + "Scenario.xosc";
     GlobalObserver::Main::SetScenarioConfigPath(scenarioConfigPath);
+    std::string scenarioResultsPath = QCoreApplication::applicationDirPath().toStdString() + "\\" +
+                                      CommandLineParser::Parse(QCoreApplication::arguments()).resultsPath + "\\";
+    GlobalObserver::AnalysisDataRecorder::SetScenarioConfigPath(scenarioResultsPath);
     //--
     if (!InitPreRun(scenario, scenery))
     {
@@ -108,10 +112,14 @@ bool RunInstantiator::ExecuteRun()
         AgentStateRecorder::AgentStateRecorder::ResetAgentStateRecorder(); // DReaM agents record
         GlobalObserver::Main::Reset();
 
+        GlobalObserver::AnalysisDataRecorder::SetRunId(invocation); // DReaM: hand over run id
+        GlobalObserver::AnalysisDataRecorder::Reset();              // DReaM agents record
+
         observationNetwork.FinalizeRun(runResult);
         ClearRun();
     }
-    AgentStateRecorder::AgentStateRecorder::WriteOutputFile(); // DReaM: write output file
+    AgentStateRecorder::AgentStateRecorder::WriteOutputFile(); // DReaM: write output files
+    GlobalObserver::AnalysisDataRecorder::WriteOutput();
 
     LOG_INTERN(LogLevel::DebugCore) << std::endl
                                     << "### end of all runs ###";

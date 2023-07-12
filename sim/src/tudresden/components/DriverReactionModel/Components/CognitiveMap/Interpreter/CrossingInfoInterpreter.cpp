@@ -25,6 +25,7 @@ void CrossingInfoInterpreter::Update(WorldInterpretation* interpretation, const 
         UpdateStoppingPoints(representation);
         interpretation->crossingInfo = crossingInfo;
         interpretation->targetVelocity = targetVelocityCalculation.Update(representation, crossingInfo);
+        interpretation->analysisData->targetDistributionOffset = targetVelocityCalculation.GetVelDistOffset();
         timeMeasure3.EndTimePoint();
     }
     catch (std::logic_error e) {

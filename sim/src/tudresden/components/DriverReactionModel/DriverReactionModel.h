@@ -40,6 +40,7 @@ class DriverReactionModel {
       double GetAcceleration();
       const LateralAction GetLateralAction();
       const GazeState GetGazeState();
+      const AnalysisSignal GetAnalysisSignal();
       const std::vector<Common::Vector2d> GetSegmentControlFixationPoints();
       const WorldRepresentation &GetWorldRepresentation();
       const WorldInterpretation &GetWorldInterpretation();

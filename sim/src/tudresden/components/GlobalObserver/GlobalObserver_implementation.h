@@ -11,9 +11,12 @@
 #pragma once
 
 #include "GlobalObserverMain/GlobalObserver_main.h"
+#include "Analytics/AnalysisDataRecorder.h"
+#include "Routes/RouteImporter.h"
 #include "WorldData.h"
 #include "common/complexSignals.h"
 #include "common/primitiveSignals.h"
+#include "core/opSimulation/framework/commandLineParser.h"
 #include "include/modelInterface.h"
 #include "include/observationInterface.h"
 
@@ -26,6 +29,7 @@ public:
                                   PublisherInterface *const publisher, const CallbackInterface *callbacks, AgentInterface *agent) :
         SensorInterface(componentName, isInit, priority, offsetTime, responseTime, cycleTime, stochastics, world, parameters, publisher,
                         callbacks, agent) {
+        dataRecorder = GlobalObserver::AnalysisDataRecorder::GetInstance();
         globalObserverMain = GlobalObserver::Main::GetInstance(world, stochastics);
         globalObserverMain->TriggerRoadNetworkConversion(); // ensure that a partially converted road network exists
         globalObserverMain->SetInitialRoute(GetAgent());    // forwarding the initial route of this agent
@@ -63,7 +67,9 @@ public:
 
 private:
     std::shared_ptr<GlobalObserver::Main> globalObserverMain;
+    std::shared_ptr<GlobalObserver::AnalysisDataRecorder> dataRecorder;
 
     std::vector<OdId> visibleTrafficSignals;
     std::vector<int> visibleAgents;
+    AnalysisSignal analysisData;
 };

@@ -32,8 +32,9 @@ double TargetVelocityCalculation::Update(const WorldRepresentation &worldReprese
     }
 };
 
-double TargetVelocityCalculation::CalculateTargetVelocity(const WorldRepresentation &worldRepresentation, CrossingInfo crossingInfo) const {
+double TargetVelocityCalculation::CalculateTargetVelocity(const WorldRepresentation &worldRepresentation, CrossingInfo crossingInfo) {
     double targetVelocity;
+    DistributionEntry activeTargetDistribution(0, 0, 0, 0);
     auto mmLane = worldRepresentation.egoAgent->GetLanePosition().lane;
 
     auto velocitySpecificRoad =
@@ -48,15 +49,21 @@ double TargetVelocityCalculation::CalculateTargetVelocity(const WorldRepresentat
             (crossingInfo.type == CrossingType::Straight &&
              worldRepresentation.egoAgent->GetIndicatorState() != IndicatorState::IndicatorState_Off)) {
             targetVelocity = phaseVelocities.at(IntersectionSpot::IntersectionEntry);
+            activeTargetDistribution = *activeVelocityDistributions->at(IntersectionSpot::IntersectionEntry).get();
         }
         else if (crossingInfo.phase > CrossingPhase::Deceleration_TWO) {
             targetVelocity = phaseVelocities.at(IntersectionSpot::IntersectionExit);
+            activeTargetDistribution = *activeVelocityDistributions->at(IntersectionSpot::IntersectionExit).get();
         }
         else if (velocitySpecificRoad != velocityStatisticsSpecificRoads.end()) {
             targetVelocity = velocitySpecificRoad->second;
+            activeTargetDistribution = *behaviourData.adBehaviour.velocityStatisticsSpecificRoads
+                                            .at(worldRepresentation.egoAgent->GetLanePosition().lane->GetRoad()->GetOpenDriveId())
+                                            .get();
         }
         else {
             targetVelocity = defaultVelocity;
+            activeTargetDistribution = behaviourData.adBehaviour.defaultVelocity;
         }
     }
     else {
@@ -64,7 +71,17 @@ double TargetVelocityCalculation::CalculateTargetVelocity(const WorldRepresentat
             "File: " + static_cast<std::string>(__FILE__) + " Line: " + std::to_string(__LINE__) + "  unknown vehicle type ";
         throw std::logic_error(message);
     }
+    CalculateVelDistOffset(targetVelocity, activeTargetDistribution);
+
     return targetVelocity;
+}
+
+void TargetVelocityCalculation::CalculateVelDistOffset(double targetVelocity, DistributionEntry activeTargetDistribution) {
+    if (activeTargetDistribution.std_deviation == 0.0) {
+        velocityDistributionOffset = 0;
+        return;
+    }
+    velocityDistributionOffset = (activeTargetDistribution.mean - targetVelocity) / activeTargetDistribution.std_deviation;
 }
 
 void TargetVelocityCalculation::CalculatePhaseVelocities(const WorldRepresentation &worldRepresentation, CrossingInfo crossingInfo) {
@@ -115,6 +132,7 @@ void TargetVelocityCalculation::CalculatePhaseVelocities(const WorldRepresentati
                 velocity = Common::ValueInBounds(de->min, velocity, de->max);
                 phaseVelocities.insert(std::make_pair(entry.first, velocity));
             }
+            activeVelocityDistributions = velocityDistributions;
         }
     }
 }
