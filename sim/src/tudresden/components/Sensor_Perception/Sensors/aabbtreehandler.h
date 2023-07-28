@@ -144,5 +144,5 @@ private:
     WorldInterface *world;
     int currentTimestamp = -__INT_MAX__;
     bool firstExecution = true;
-    std::shared_ptr<AABBTree> aabbTree;
+    std::shared_ptr<AABBTree> aabbTree = nullptr;
 };

@@ -36,17 +36,17 @@ struct LanePoint {
         return (hdg == point.hdg && sOffset == point.sOffset) && (x == point.x && y == point.y);
     }
 
-    double x;
-    double y;
-    double hdg;
-    double sOffset;
+    double x{0};
+    double y{0};
+    double hdg{0};
+    double sOffset{0};
 };
 
 struct ConflictArea
 {
-    const Junction *junction;
-    const Road *road;
-    const Lane *lane;
+    const Junction *junction = nullptr;
+    const Road *road = nullptr;
+    const Lane *lane = nullptr;
     LanePoint start;
     LanePoint end;
 };
@@ -56,9 +56,9 @@ struct ConflictArea
  *
  */
 struct NextDirectionLanes {
-    std::vector<const MentalInfrastructure::Lane *> rightLanes;
-    std::vector<const MentalInfrastructure::Lane *> leftLanes;
-    std::vector<const MentalInfrastructure::Lane *> straightLanes;
+    std::vector<const MentalInfrastructure::Lane *> rightLanes{};
+    std::vector<const MentalInfrastructure::Lane *> leftLanes{};
+    std::vector<const MentalInfrastructure::Lane *> straightLanes{};
 };
 
 ///
@@ -67,7 +67,7 @@ struct NextDirectionLanes {
 class Lane : public Element
 {
 public:
-    Lane(OdId openDriveId, DReaMId dreamId, OwlId owlId, double length, LaneType type, bool inRoadDirection) :
+    Lane(const OdId &openDriveId, DReaMId dreamId, OwlId owlId, double length, LaneType type, bool inRoadDirection) :
         Element(openDriveId, dreamId), owlId(owlId), length(length), type(type), inRoadDirection(inRoadDirection) {
     }
     ~Lane() override
@@ -304,19 +304,19 @@ public:
 
         OwlId owlId;
         double length;
-        double width;
+        double width = std::numeric_limits<double>::max();
         LaneType type;
         bool inRoadDirection;
 
-        const Road *road;
-        std::list<LanePoint> lanePointsLeftSide;
-        std::list<LanePoint> lanePointsReference;
-        std::list<LanePoint> lanePointsRightSide;
+        const Road *road = nullptr;
+        std::list<LanePoint> lanePointsLeftSide{};
+        std::list<LanePoint> lanePointsReference{};
+        std::list<LanePoint> lanePointsRightSide{};
 
-        std::unordered_map<const Lane *, const ConflictArea> conflictAreas;
+        std::unordered_map<const Lane *, const ConflictArea> conflictAreas{};
 
-        std::vector<const Lane *> predecessors;
-        std::vector<const Lane *> successors;
+        std::vector<const Lane *> predecessors{};
+        std::vector<const Lane *> successors{};
         const Lane *leftLane = nullptr;
         const Lane *rightLane = nullptr;
 

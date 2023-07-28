@@ -11,7 +11,7 @@
 
 std::shared_ptr<BehaviourImporter> BehaviourImporter::instance = nullptr;
 std::map<DReaMDefinitions::AgentVehicleType, std::shared_ptr<BehaviourData>> BehaviourImporter::behaviourDataMap{};
-BehaviourImporter::BehaviourImporter(std::string path, LoggerInterface *loggerInterface) : loggerInterface{loggerInterface} {
+BehaviourImporter::BehaviourImporter(const std::string &path, LoggerInterface *loggerInterface) : loggerInterface{loggerInterface} {
     if (!Import(path)) {
         Log("Could not import Behaviour.xml ", DReaMLogLevel::error);
     }

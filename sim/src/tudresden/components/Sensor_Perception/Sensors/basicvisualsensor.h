@@ -40,15 +40,15 @@ private:
 private:
     OWL::WorldData *worldData;
     std::shared_ptr<AABBTreeHandler> aabbTreeHandler;
-    std::shared_ptr<AABBTree> aabbTree;
+    std::shared_ptr<AABBTree> aabbTree =nullptr;
     ThreadSafeVector<int> visible;
 
-    double sensorDirection;
-    double minViewAngle;
-    double maxViewAngle;
-    double viewDistance;
+    double sensorDirection = 0;
+    double minViewAngle = 0;
+    double maxViewAngle = 0;
+    double viewDistance = 0;
     Common::Vector2d zeroVector = Common::Vector2d(0, 0);
-    Common::Vector2d driverPos;
+    Common::Vector2d driverPos = Common::Vector2d(0, 0);
 
     const unsigned subdivisions = 2;
 };

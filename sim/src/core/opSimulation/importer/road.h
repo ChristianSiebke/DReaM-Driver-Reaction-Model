@@ -284,7 +284,7 @@ class RoadLane : public RoadLaneInterface
     bool inDirection = true;
 
     RoadLaneRoadMarkType roadMarkType = RoadLaneRoadMarkType::Undefined;
-    double roadMarkTypeSOffset;
+    double roadMarkTypeSOffset = 0;
 
     std::vector<RoadLaneRoadMark *> roadMarks;
 };

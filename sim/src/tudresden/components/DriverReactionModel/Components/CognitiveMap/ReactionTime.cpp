@@ -11,9 +11,16 @@
 #include "ReactionTime.h"
 namespace CognitiveMap {
 void ReactionTime::Update(std::vector<std::shared_ptr<GeneralAgentPerception>> agents) {
-    perceivedAgentBuffer.push_front(agents);
-    if (perceivedAgentBuffer.size() > bufferSize) {
-        perceivedAgentBuffer.pop_back();
+    try {
+        perceivedAgentBuffer.push_front(agents);
+        if (perceivedAgentBuffer.size() > bufferSize) {
+            perceivedAgentBuffer.pop_back();
+        }
+    }
+    catch (...) {
+        std::string message =
+            "File: " + static_cast<std::string>(__FILE__) + " Line: " + std::to_string(__LINE__) + " Update ReactionTime failed";
+        throw std::logic_error(message);
     }
 }
 
@@ -24,7 +31,7 @@ std::vector<std::shared_ptr<GeneralAgentPerception>> ReactionTime::PerceivedAgen
                   [this](const std::shared_ptr<GeneralAgentPerception> agent) {
                       processingAgentBuffer.insert({agent->id, 0});
                   });
-    std::vector<std::shared_ptr<GeneralAgentPerception>> result;
+    std::vector<std::shared_ptr<GeneralAgentPerception>> result{};
     auto latencyElementPosition = static_cast<unsigned int>(std::round(perceptionLatency / (cycleTime / 1000)));
     for (auto agent : processingAgentBuffer) {
         if (agent.second < initialPerceptionTime)

@@ -58,12 +58,12 @@ class DriverReactionModel {
       void UpdateComponents();
       void UpdateAgentStateRecorder(int time, int id, std::shared_ptr<InfrastructurePerception> infrastructure);
 
-      std::shared_ptr<AgentStateRecorder::AgentStateRecorder> agentStateRecorder;
-      std::shared_ptr<BehaviourData> behaviourData;
-      std::shared_ptr<BehaviourImporter> importer;
+      std::shared_ptr<AgentStateRecorder::AgentStateRecorder> agentStateRecorder{nullptr};
+      std::shared_ptr<BehaviourData> behaviourData{nullptr};
+      std::shared_ptr<BehaviourImporter> importer{nullptr};
 
-      std::unique_ptr<CognitiveMap::CognitiveMap> cognitiveMap;
-      std::unique_ptr<LateralDecision::LateralDecision> lateralDecision;
-      std::unique_ptr<GazeMovement::GazeMovement> gazeMovement;
-      std::unique_ptr<LongitudinalDecision::LongitudinalDecision> longitudinalDecision;
+      std::unique_ptr<CognitiveMap::CognitiveMap> cognitiveMap{nullptr};
+      std::unique_ptr<LateralDecision::LateralDecision> lateralDecision{nullptr};
+      std::unique_ptr<GazeMovement::GazeMovement> gazeMovement{nullptr};
+      std::unique_ptr<LongitudinalDecision::LongitudinalDecision> longitudinalDecision{nullptr};
 };

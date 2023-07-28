@@ -23,68 +23,76 @@ LateralDecision::LateralDecision(const WorldRepresentation &worldRepresentation,
 }
 
 void LateralDecision::Update() {
-    const_cast<WorldInterpretation &>(worldInterpretation).waitUntilTargetLaneIsFree = false;
-    auto egoAgent = worldRepresentation.egoAgent;
-    if (egoAgent->GetMainLocatorLane() != egoAgent->GetLanePosition().lane &&
-        (!NeighborLaneIsFree(egoAgent->GetMainLocatorLane()) ||
-         (worldInterpretation.targetLane && *worldInterpretation.targetLane != egoAgent->GetMainLocatorLane()))) {
-        if (egoAgent->GetLanePosition().lane == egoAgent->GetMainLocatorLane()->GetRightLane()) {
-            auto lateralDisplacement =
-                -(egoAgent->GetLanePosition().lane->GetWidth() / 2 + (egoAgent->GetMainLocatorLane()->GetWidth() / 2));
-            lateralAction.lateralDisplacement = lateralDisplacement;
-            return;
-        }
-        if (egoAgent->GetLanePosition().lane == egoAgent->GetMainLocatorLane()->GetLeftLane()) {
-            auto lateralDisplacement = egoAgent->GetLanePosition().lane->GetWidth() / 2 + (egoAgent->GetMainLocatorLane()->GetWidth() / 2);
-            lateralAction.lateralDisplacement = lateralDisplacement;
-            return;
-        }
-    }
-
-    if (!worldInterpretation.targetLane) {
-        lateralAction = ResetLateralAction(egoAgent->GetIndicatorState());
-        return;
-    }
-
-    auto targetLane = *worldInterpretation.targetLane;
-
-    if (targetLane == egoAgent->GetMainLocatorLane()->GetLeftLane() || targetLane == egoAgent->GetMainLocatorLane()->GetRightLane()) {
-        if (NeighborLaneIsFree(targetLane)) {
-            if (targetLane == egoAgent->GetMainLocatorLane()->GetLeftLane()) {
-                auto lateralDisplacement = (egoAgent->GetMainLocatorLane()->GetWidth() / 2) + (targetLane->GetWidth() / 2);
-                lateralAction.lateralDisplacement =
-                    worldRepresentation.egoAgent->IsMovingInLaneDirection() ? lateralDisplacement : -lateralDisplacement;
-                lateralAction.indicator = IndicatorState::IndicatorState_Left;
+    try {
+        const_cast<WorldInterpretation &>(worldInterpretation).waitUntilTargetLaneIsFree = false;
+        auto egoAgent = worldRepresentation.egoAgent;
+        if (egoAgent->GetMainLocatorLane() != egoAgent->GetLanePosition().lane &&
+            (!NeighborLaneIsFree(egoAgent->GetMainLocatorLane()) ||
+             (worldInterpretation.targetLane && *worldInterpretation.targetLane != egoAgent->GetMainLocatorLane()))) {
+            if (egoAgent->GetLanePosition().lane == egoAgent->GetMainLocatorLane()->GetRightLane()) {
+                auto lateralDisplacement =
+                    -(egoAgent->GetLanePosition().lane->GetWidth() / 2 + (egoAgent->GetMainLocatorLane()->GetWidth() / 2));
+                lateralAction.lateralDisplacement = lateralDisplacement;
+                return;
             }
-            else if (targetLane == egoAgent->GetMainLocatorLane()->GetRightLane()) {
-                auto lateralDisplacement = -((egoAgent->GetMainLocatorLane()->GetWidth() / 2) + (targetLane->GetWidth() / 2));
-                lateralAction.lateralDisplacement =
-                    worldRepresentation.egoAgent->IsMovingInLaneDirection() ? lateralDisplacement : -lateralDisplacement;
-                lateralAction.indicator = IndicatorState::IndicatorState_Right;
+            if (egoAgent->GetLanePosition().lane == egoAgent->GetMainLocatorLane()->GetLeftLane()) {
+                auto lateralDisplacement =
+                    egoAgent->GetLanePosition().lane->GetWidth() / 2 + (egoAgent->GetMainLocatorLane()->GetWidth() / 2);
+                lateralAction.lateralDisplacement = lateralDisplacement;
+                return;
+            }
+        }
+
+        if (!worldInterpretation.targetLane) {
+            lateralAction = ResetLateralAction(egoAgent->GetIndicatorState());
+            return;
+        }
+
+        auto targetLane = *worldInterpretation.targetLane;
+
+        if (targetLane == egoAgent->GetMainLocatorLane()->GetLeftLane() || targetLane == egoAgent->GetMainLocatorLane()->GetRightLane()) {
+            if (NeighborLaneIsFree(targetLane)) {
+                if (targetLane == egoAgent->GetMainLocatorLane()->GetLeftLane()) {
+                    auto lateralDisplacement = (egoAgent->GetMainLocatorLane()->GetWidth() / 2) + (targetLane->GetWidth() / 2);
+                    lateralAction.lateralDisplacement =
+                        worldRepresentation.egoAgent->IsMovingInLaneDirection() ? lateralDisplacement : -lateralDisplacement;
+                    lateralAction.indicator = IndicatorState::IndicatorState_Left;
+                }
+                else if (targetLane == egoAgent->GetMainLocatorLane()->GetRightLane()) {
+                    auto lateralDisplacement = -((egoAgent->GetMainLocatorLane()->GetWidth() / 2) + (targetLane->GetWidth() / 2));
+                    lateralAction.lateralDisplacement =
+                        worldRepresentation.egoAgent->IsMovingInLaneDirection() ? lateralDisplacement : -lateralDisplacement;
+                    lateralAction.indicator = IndicatorState::IndicatorState_Right;
+                }
+                else {
+                    const std::string msg = "File: " + static_cast<std::string>(__FILE__) + " Line: " + std::to_string(__LINE__) +
+                                            " next lane in path is not a neighbor";
+                    Log(msg, error);
+                    throw std::logic_error(msg);
+                }
             }
             else {
-                const std::string msg = "File: " + static_cast<std::string>(__FILE__) + " Line: " + std::to_string(__LINE__) +
-                                        " next lane in path is not a neighbor";
-                Log(msg, error);
-                throw std::logic_error(msg);
+                lateralAction.lateralDisplacement = 0;
+                if (worldRepresentation.egoAgent->GetJunctionDistance().toNext < 20 &&
+                    worldRepresentation.egoAgent->GetJunctionDistance().toNext > 0 &&
+                    (!Common::AgentTouchesLane(egoAgent, egoAgent->GetLanePosition().lane->GetLeftLane()) &&
+                     !Common::AgentTouchesLane(egoAgent, egoAgent->GetLanePosition().lane->GetRightLane()))) {
+                    const_cast<WorldInterpretation &>(worldInterpretation).waitUntilTargetLaneIsFree = true;
+                }
             }
         }
         else {
-            lateralAction.lateralDisplacement = 0;
-            if (worldRepresentation.egoAgent->GetJunctionDistance().toNext < 20 &&
-                worldRepresentation.egoAgent->GetJunctionDistance().toNext > 0 &&
-                (!Common::AgentTouchesLane(egoAgent, egoAgent->GetLanePosition().lane->GetLeftLane()) &&
-                 !Common::AgentTouchesLane(egoAgent, egoAgent->GetLanePosition().lane->GetRightLane()))) {
-                const_cast<WorldInterpretation &>(worldInterpretation).waitUntilTargetLaneIsFree = true;
+            lateralAction = ResetLateralAction(egoAgent->GetIndicatorState());
+            if (TurningAtJunction()) {
+                lateralAction.indicator = SetIndicatorAtJunction(targetLane);
+                return;
             }
         }
     }
-    else {
-        lateralAction = ResetLateralAction(egoAgent->GetIndicatorState());
-        if (TurningAtJunction()) {
-            lateralAction.indicator = SetIndicatorAtJunction(targetLane);
-            return;
-        }
+    catch (...) {
+        std::string message =
+            "File: " + static_cast<std::string>(__FILE__) + " Line: " + std::to_string(__LINE__) + "unexpected exception LateralDecision ";
+        throw std::runtime_error(message);
     }
 }
 LateralAction LateralDecision::ResetLateralAction(IndicatorState currentIndicator) const {
@@ -94,6 +102,7 @@ LateralAction LateralDecision::ResetLateralAction(IndicatorState currentIndicato
     if (AgentIsTurningOnJunction()) {
         return lateralAction;
     }
+
     lateralAction.indicator = IndicatorState::IndicatorState_Off;
     return lateralAction;
 }
@@ -137,12 +146,6 @@ bool LateralDecision::NeighborLaneIsFree(const MentalInfrastructure::Lane *targe
             }
         }
     }
-    auto test = [](AgentInterpretation *a) -> std::string {
-        if (a != nullptr) {
-            return std::to_string(a->agent->GetID());
-        }
-        return " there is no agent";
-    };
     double upperAgentDistanceReferenceToBack = 0;
     if (upperAgent)
         upperAgentDistanceReferenceToBack = upperAgent->agent->GetLength() - upperAgent->agent->GetDistanceReferencePointToLeadingEdge();
@@ -157,14 +160,15 @@ bool LateralDecision::NeighborLaneIsFree(const MentalInfrastructure::Lane *targe
     double upperDistance = upperBound - egoS - distanceReferenceToEdgesUpperAgent;
     double lowerDistance = egoS - lowerBound - distanceReferenceToEdgesLowerAgent;
 
-    if ((!upperAgent || (upperDistance > (worldRepresentation.egoAgent->GetVelocity() * 3) && upperDistance > 5)) &&
+    if ((!upperAgent || (upperDistance > (worldRepresentation.egoAgent->GetVelocity() * 2) && upperDistance > 5)) &&
         (!lowerAgent || (lowerDistance > (lowerAgent->agent->GetVelocity() * 3) && lowerDistance > 5))) {
         return true;
     }
     return false;
 }
 bool LateralDecision::TurningAtJunction() const {
-    return (worldInterpretation.crossingInfo.phase == CrossingPhase::Deceleration_TWO ||
+    return ((worldInterpretation.crossingInfo.phase == CrossingPhase::Deceleration_TWO &&
+             worldRepresentation.egoAgent->GetJunctionDistance().toNext > 0) ||
             worldInterpretation.crossingInfo.phase == CrossingPhase::Crossing_Straight);
 }
 bool LateralDecision::AgentIsTurningOnJunction() const {

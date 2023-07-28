@@ -24,6 +24,11 @@ double TargetVelocityCalculation::Update(const WorldRepresentation &worldReprese
 
         return CalculateTargetVelocity(worldRepresentation, crossingInfo);
     }
+    catch (std::logic_error e) {
+        const std::string message = "File: " + static_cast<std::string>(__FILE__) + " Line: " + std::to_string(__LINE__) + " " + e.what();
+        Log(message, error);
+        throw std::logic_error(message);
+    }
     catch (...) {
         std::string message =
             "File: " + static_cast<std::string>(__FILE__) + " Line: " + std::to_string(__LINE__) + " error in update target velocity";
@@ -35,8 +40,6 @@ double TargetVelocityCalculation::Update(const WorldRepresentation &worldReprese
 double TargetVelocityCalculation::CalculateTargetVelocity(const WorldRepresentation &worldRepresentation, CrossingInfo crossingInfo) {
     double targetVelocity;
     DistributionEntry activeTargetDistribution(0, 0, 0, 0);
-    auto mmLane = worldRepresentation.egoAgent->GetLanePosition().lane;
-
     auto velocitySpecificRoad =
         velocityStatisticsSpecificRoads.find(worldRepresentation.egoAgent->GetLanePosition().lane->GetRoad()->GetOpenDriveId());
 

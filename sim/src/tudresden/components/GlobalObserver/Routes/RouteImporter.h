@@ -40,7 +40,7 @@ typedef std::variant<Import::RoadPosition, Import::LanePosition> Position;
 
 class RouteImporter {
 public:
-    RouteImporter(std::string path);
+    RouteImporter(const std::string &path);
     ~RouteImporter() = default;
 
     bool Import(const std::string &filename);

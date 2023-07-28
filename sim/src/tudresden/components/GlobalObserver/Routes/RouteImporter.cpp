@@ -11,7 +11,7 @@
 
 namespace GlobalObserver::Routes {
 
-RouteImporter::RouteImporter(std::string path) {
+RouteImporter::RouteImporter(const std::string &path) {
     if (!Import(path)) {
         std::cout << "Could not import: " + path << std::endl;
     }
@@ -129,11 +129,11 @@ Import::LanePosition RouteImporter::ImportLanePosition(QDomElement positionEleme
     try {
         lanePosition.laneId = std::stoi(laneIdString);
     }
-    catch (std::invalid_argument) {
+    catch (std::invalid_argument e) {
         std::string message = "LaneId must be integer";
         throw std::logic_error(message);
     }
-    catch (std::out_of_range) {
+    catch (std::out_of_range e) {
         std::string message = "LaneId is out of range";
         throw std::logic_error(message);
     }

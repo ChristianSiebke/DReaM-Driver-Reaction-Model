@@ -37,12 +37,12 @@ private:
 private:
     OWL::WorldData *worldData;
     std::shared_ptr<AABBTreeHandler> aabbTreeHandler;
-    std::shared_ptr<AABBTree> aabbTree;
-    std::vector<OdId> visible;
+    std::shared_ptr<AABBTree> aabbTree = nullptr;
+    std::vector<OdId> visible{};
 
-    double sensorDirection;
-    double minViewAngle;
-    double maxViewAngle;
-    double viewDistance;
-    Common::Vector2d driverPos;
+    double sensorDirection = 0;
+    double minViewAngle = 0;
+    double maxViewAngle = 0;
+    double viewDistance = 0;
+    Common::Vector2d driverPos = Common::Vector2d(0, 0);
 };

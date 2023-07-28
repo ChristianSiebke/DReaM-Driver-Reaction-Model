@@ -37,40 +37,40 @@ struct ConflictSituation {
     ~ConflictSituation() = default;
     DistanceToConflictArea egoDistance;
     DistanceToConflictArea oAgentDistance;
-    const MentalInfrastructure::ConflictArea *egoCA;
-    const MentalInfrastructure::ConflictArea *oAgentCA;
-    const MentalInfrastructure::Junction* junction= nullptr;
+    const MentalInfrastructure::ConflictArea *egoCA = nullptr;
+    const MentalInfrastructure::ConflictArea *oAgentCA = nullptr;
+    const MentalInfrastructure::Junction *junction = nullptr;
 };
 
 struct AgentInterpretation {
     AgentInterpretation(const AmbientAgentRepresentation* agent) : agent{agent} {}
     ~AgentInterpretation() {}
 
-    const AmbientAgentRepresentation* agent;
-    std::optional<CollisionPoint> collisionPoint;
-    std::optional<ConflictSituation> conflictSituation;
+    const AmbientAgentRepresentation *agent{nullptr};
+    std::optional<CollisionPoint> collisionPoint{std::nullopt};
+    std::optional<ConflictSituation> conflictSituation{std::nullopt};
     RightOfWay rightOfWay;
-    std::optional<double> relativeDistance;
+    std::optional<double> relativeDistance{std::nullopt};
     bool laneInLineWithEgoLane {false};
 };
 
 struct MemorizedTrafficSignal {
-    const MentalInfrastructure::TrafficSignal *trafficSignal;
+    const MentalInfrastructure::TrafficSignal *trafficSignal{nullptr};
     int firstTimeStamp;
     int lastTimeStamp;
 };
 
 struct VisibleTrafficSignals {
     // lane DReaMId -> TrafficSignals on that lane
-    std::unordered_map<DReaMId, std::list<const MentalInfrastructure::TrafficSignal *>> laneTrafficSignalMap;
+    std::unordered_map<DReaMId, std::list<const MentalInfrastructure::TrafficSignal *>> laneTrafficSignalMap{};
 
     // complete memory, signal DReaMId -> TrafficSignal
-    std::unordered_map<DReaMId, MemorizedTrafficSignal> *memory;
+    std::unordered_map<DReaMId, MemorizedTrafficSignal> *memory{};
 
     // speed limit information
-    const MentalInfrastructure::TrafficSign *upcomingSpeedLimitSign;
-    const MentalInfrastructure::TrafficSign *currentSpeedLimitSign;
-    const MentalInfrastructure::TrafficSign *previousSpeedLimitSign;
+    const MentalInfrastructure::TrafficSign *upcomingSpeedLimitSign{nullptr};
+    const MentalInfrastructure::TrafficSign *currentSpeedLimitSign{nullptr};
+    const MentalInfrastructure::TrafficSign *previousSpeedLimitSign{nullptr};
 
     std::optional<const MentalInfrastructure::TrafficSign *> GetSignForLane(DReaMId laneId,
                                                                             MentalInfrastructure::TrafficSignType type) const {
@@ -132,27 +132,29 @@ struct VisibleTrafficSignals {
 };
 
 struct WorldRepresentation {
-    const EgoAgentRepresentation* egoAgent;
-    const InfrastructureRepresentation* infrastructure;
-    const AmbientAgentRepresentations* agentMemory;
-    const VisibleTrafficSignals *trafficSignalMemory;
+    const EgoAgentRepresentation *egoAgent{nullptr};
+    const InfrastructureRepresentation *infrastructure{nullptr};
+    const AmbientAgentRepresentations *agentMemory{nullptr};
+    const VisibleTrafficSignals *trafficSignalMemory{nullptr};
+    std::vector<std::shared_ptr<GeneralAgentPerception>>
+        processedAgents{}; // Perceived agents detected after the reaction time and latency period have elapsed (needed for analysis)
 };
 
 struct WorldInterpretation {
     WorldInterpretation() {}
     //! Interpretation of the observed agents from the ego agent point of view
-    std::unordered_map<int, std::unique_ptr<AgentInterpretation>> interpretedAgents;
+    std::unordered_map<int, std::unique_ptr<AgentInterpretation>> interpretedAgents{};
     CrossingInfo crossingInfo;
     //! map holds right of way for observed agent
-    std::unordered_map<int, RightOfWay> rightOfWayMap;
+    std::unordered_map<int, RightOfWay> rightOfWayMap{};
     //! target velocity of ego agent
-    double targetVelocity;
+    double targetVelocity = std::numeric_limits<double>::max();
     //! next lane on route graph
-    std::optional<const MentalInfrastructure::Lane *> targetLane;
+    std::optional<const MentalInfrastructure::Lane *> targetLane = std::nullopt;
     // waiting till lane change is possible
     bool waitUntilTargetLaneIsFree = false;
    //! data for DroneAnalysis
-    std::unique_ptr<AnalysisSignal> analysisData;
+    std::unique_ptr<AnalysisSignal> analysisData{nullptr};
 };
 
 namespace CognitiveMap {
@@ -251,7 +253,7 @@ class AgentRepresentation {
           const;
 
       //! the internal information of the agent representation
-      std::shared_ptr<GeneralAgentPerception> internalData;
+      std::shared_ptr<GeneralAgentPerception> internalData{nullptr};
 };
 
 class AmbientAgentRepresentation : public AgentRepresentation {
@@ -334,8 +336,8 @@ class InfrastructureRepresentation {
         return infrastructure->GetConflictAreas();
     }
 
-  private:
-    std::shared_ptr<InfrastructurePerception> infrastructure;
+private:
+    std::shared_ptr<InfrastructurePerception> infrastructure{nullptr};
 };
 
 } // namespace CognitiveMap

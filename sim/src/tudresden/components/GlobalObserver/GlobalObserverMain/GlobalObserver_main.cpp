@@ -90,7 +90,7 @@ Main::ProfilesRouteConverter(ProfilesInterface *profile) {
                             throw std::logic_error(msg);
                         }
 
-                        for (auto i = 0; i < roads.size(); i++) {
+                        for (unsigned int i = 0; i < roads.size(); i++) {
                             Routes::Import::LanePosition lanePosition;
                             lanePosition.roadId = roads.at(i);
                             lanePosition.s = s.at(i);
@@ -119,8 +119,6 @@ Main::ProfilesRouteConverter(ProfilesInterface *profile) {
 }
 
 void Main::SetInitialRoute(AgentInterface *agent) {
-    scenarioRoutes;
-    profileCatalogRouteDistributions;
     auto it = std::find_if(scenarioRoutes.begin(), scenarioRoutes.end(),
                            [agent](auto element) { return element.first == agent->GetScenarioName(); });
     if (it != scenarioRoutes.end()) {

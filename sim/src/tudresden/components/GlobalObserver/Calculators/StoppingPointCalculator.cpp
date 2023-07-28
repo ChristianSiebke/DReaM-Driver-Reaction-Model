@@ -44,10 +44,7 @@ Line2d StoppingPointCalculator::CalcExtendedLine(const MentalInfrastructure::Lan
 
     lineStart.Add(copy);
 
-    Line2d line;
-    line.start = lineStart;
-    line.direction = laneDirection;
-
+    Line2d line(lineStart, laneDirection);
     return line;
 }
 
@@ -56,8 +53,6 @@ bool StoppingPointCalculator::CalcCrossingLines(const MentalInfrastructure::Lane
     auto incomingRoad = succLane->GetRoad();
     bool roadIsPredJunction = incomingRoad->IsPredecessorJunction() && incomingRoad->GetPredecessor() == junction;
     bool roadIsSuccJunction = incomingRoad->IsSuccessorJunction() && incomingRoad->GetSuccessor() == junction;
-
-    const MentalInfrastructure::Section *section = nullptr;
 
     if (!roadIsPredJunction && !roadIsSuccJunction)
         return false;
@@ -512,8 +507,9 @@ void StoppingPointCalculator::Populate() {
         for (auto road : junction->GetIncomingRoads()) {
             // TODO get last lanes of the road, not all of them (make method in road/lane)
             for (auto lane : road->GetLanes()) {
-                if (road->IsPredecessorJunction() && road->GetPredecessor()->GetOpenDriveId() == junctionId && lane->IsInRoadDirection() ||
-                    road->IsSuccessorJunction() && road->GetSuccessor()->GetOpenDriveId() == junctionId && !lane->IsInRoadDirection()) {
+                if ((road->IsPredecessorJunction() && road->GetPredecessor()->GetOpenDriveId() == junctionId &&
+                     lane->IsInRoadDirection()) ||
+                    (road->IsSuccessorJunction() && road->GetSuccessor()->GetOpenDriveId() == junctionId && !lane->IsInRoadDirection())) {
                     continue;
                 }
                 if (lane->GetType() != MentalInfrastructure::LaneType::Driving &&

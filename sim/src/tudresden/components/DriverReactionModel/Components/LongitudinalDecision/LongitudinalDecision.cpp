@@ -79,8 +79,8 @@ void LongitudinalDecision::Update() {
         throw std::runtime_error(message);
     }
     catch (...) {
-        std::string message =
-            "File: " + static_cast<std::string>(__FILE__) + " Line: " + std::to_string(__LINE__) + "unexpected exception ";
+        std::string message = "File: " + static_cast<std::string>(__FILE__) + " Line: " + std::to_string(__LINE__) +
+                              "unexpected exception LongitudinalDecision ";
         throw std::runtime_error(message);
     }
 }
@@ -96,8 +96,6 @@ double LongitudinalDecision::DetermineAccelerationWish() {
 
     for (auto &entry : worldInterpretation.interpretedAgents) {
         const auto &agent = entry.second;
-        anticipation.UpdateEqualPriorityCommunication(worldRepresentation.egoAgent->GetID(), agent);
-
         switch (actionStateHandler.GetState(agent)) {
         case ActionState::CollisionImminent: {
             //---debugging--
@@ -129,11 +127,6 @@ double LongitudinalDecision::DetermineAccelerationWish() {
                 worldRepresentation.egoAgent->GetVelocity() >= worldInterpretation.targetVelocity) {
                 double acceleration2 = anticipation.IDMBrakeStrategy(*agent->relativeDistance, agent->agent->GetVelocity(),
                                                                      worldRepresentation.egoAgent->GetVelocity());
-                if ((worldRepresentation.egoAgent->GetID() == 63 && agent->agent->GetID() == 79) ||
-                    (worldRepresentation.egoAgent->GetID() == 79 && agent->agent->GetID() == 63)) {
-                    std::cout << "acceleration= " << acceleration << " | acceleration2=" << acceleration2 << std::endl;
-                }
-
                 acceleration = (acceleration > acceleration2 && !agent->laneInLineWithEgoLane) &&
                                        worldRepresentation.egoAgent->GetLanePosition().lane->IsJunctionLane()
                                    ? acceleration
@@ -144,10 +137,6 @@ double LongitudinalDecision::DetermineAccelerationWish() {
                 double acceleration2 = anticipation.MaximumAccelerationWish(
                     worldInterpretation.targetVelocity, worldRepresentation.egoAgent->GetVelocity(),
                     worldRepresentation.egoAgent->GetVelocity() - agent->agent->GetVelocity(), *agent->relativeDistance);
-                if ((worldRepresentation.egoAgent->GetID() == 63 && agent->agent->GetID() == 79) ||
-                    (worldRepresentation.egoAgent->GetID() == 79 && agent->agent->GetID() == 63)) {
-                    std::cout << "acceleration= " << acceleration << " | acceleration2=" << acceleration2 << std::endl;
-                }
                 acceleration = (acceleration > acceleration2 && !agent->laneInLineWithEgoLane) &&
                                        worldRepresentation.egoAgent->GetLanePosition().lane->IsJunctionLane()
                                    ? acceleration

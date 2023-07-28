@@ -12,11 +12,25 @@
 #include "common/Definitions.h"
 #include "common/Helper.h"
 
-enum class ApproachDirection { Invalid, Left, Right, Ego, StraightAhead };
+enum class ApproachDirection { Invalid = 0, Left, Right, Ego, StraightAhead };
 
 struct Line2d {
     Common::Vector2d start;
     Common::Vector2d direction;
+
+    Line2d(const Line2d &) = default;
+    Line2d(Line2d &&) = default;
+    Line2d &operator=(const Line2d &) = default;
+    Line2d &operator=(Line2d &&) = default;
+
+    /*!
+     * create 2d vector from pair (x,y)
+     *
+     * \param[in] x     x-value
+     * \param[in] y     y-value
+     */
+    constexpr Line2d(Common::Vector2d start = {0, 0}, Common::Vector2d direction = {0, 0}) noexcept : start(start), direction(direction) {
+    }
 
     double distance(Common::Vector2d point) {
         Common::Vector2d pointToStart = start;
@@ -45,15 +59,15 @@ struct Line2d {
 
 struct CrossingLines {
     OdId roadId;
-    ApproachDirection appDir;
+    ApproachDirection appDir = ApproachDirection::Invalid;
 
-    Line2d outerLeftLine;
-    Line2d outerRightLine;
+    Line2d outerLeftLine{{0, 0}, {0, 0}};
+    Line2d outerRightLine{{0, 0}, {0, 0}};
 
-    Line2d centerLine;
+    Line2d centerLine{{0, 0}, {0, 0}};
 
-    Line2d innerLeftLine;
-    Line2d innerRightLine;
+    Line2d innerLeftLine{{0, 0}, {0, 0}};
+    Line2d innerRightLine{{0, 0}, {0, 0}};
 };
 
 struct SP_ROW_Data {

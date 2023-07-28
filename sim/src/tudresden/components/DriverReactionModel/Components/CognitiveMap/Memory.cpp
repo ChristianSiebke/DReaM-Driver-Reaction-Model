@@ -12,10 +12,18 @@
 
 namespace CognitiveMap {
 void Memory::UpdateWorldRepresentation(WorldRepresentation& worldRepresentation) {
-    worldRepresentation.egoAgent = UpdateEgoAgentRepresentation();
-    worldRepresentation.infrastructure = UpdateInfrastructureRepresentation();
-    worldRepresentation.agentMemory = UpdateAmbientAgentRepresentations();
-    worldRepresentation.trafficSignalMemory = UpdateVisibleTrafficSignals();
+    try {
+        worldRepresentation.egoAgent = UpdateEgoAgentRepresentation();
+        worldRepresentation.infrastructure = UpdateInfrastructureRepresentation();
+        worldRepresentation.agentMemory = UpdateAmbientAgentRepresentations();
+        worldRepresentation.trafficSignalMemory = UpdateVisibleTrafficSignals();
+        worldRepresentation.processedAgents = processedAgents;
+    }
+    catch (...) {
+        std::string message =
+            "File: " + static_cast<std::string>(__FILE__) + " Line: " + std::to_string(__LINE__) + " Update Memory failed";
+        throw std::logic_error(message);
+    }
 }
 
 const VisibleTrafficSignals *Memory::UpdateVisibleTrafficSignals() {
@@ -34,22 +42,21 @@ const InfrastructureRepresentation* Memory::UpdateInfrastructureRepresentation()
 
 const AmbientAgentRepresentations* Memory::UpdateAmbientAgentRepresentations() {
     AmbientAgentRepresentations newMemoryAgents;
-    auto perceivedAgents = reactionTime.PerceivedAgents();
-
-    std::for_each(perceivedAgents.rbegin(), perceivedAgents.rend(), [=, &newMemoryAgents](std::shared_ptr<GeneralAgentPerception> agent) {
+    processedAgents = reactionTime.PerceivedAgents();
+    std::for_each(processedAgents.rbegin(), processedAgents.rend(), [=, &newMemoryAgents](std::shared_ptr<GeneralAgentPerception> agent) {
         // initial processing time
         newMemoryAgents.push_back(std::make_unique<AmbientAgentRepresentation>(agent));
     });
-    auto anyOfCollectionHasSameID = [](const auto& collection, auto id) {
-        return std::any_of(collection.begin(), collection.end(), [id](const auto& agent) { return agent->GetID() == id; });
+    auto anyOfCollectionHasSameID = [](const auto &collection, auto id) {
+        return std::any_of(collection.begin(), collection.end(), [id](const auto &agent) { return agent->GetID() == id; });
     };
     auto agentIsOutdated = std::bind(anyOfCollectionHasSameID, std::ref(newMemoryAgents), std::placeholders::_1);
     auto agentOnInvalidLane = [](const auto &agent) { return agent->GetLanePosition().lane == nullptr; };
     auto agentExceedLifeTime = [this](const auto &agent) { return (agent->GetLifeTime() > behaviourData.cmBehaviour.memorytime); };
-    auto extrapolationFailed = [this](const auto& agent) {
+    auto extrapolationFailed = [this](const auto &agent) {
         return !agent->FindNewPositionInDistance(agent->ExtrapolateDistanceAlongLane(cycletime / 1000));
     };
-    auto agentIsInvalide = [=](auto& oldMemoryAgent) {
+    auto agentIsInvalide = [=](auto &oldMemoryAgent) {
         return agentOnInvalidLane(oldMemoryAgent) || agentExceedLifeTime(oldMemoryAgent) || extrapolationFailed(oldMemoryAgent);
     };
     auto eraseAgent = [=](auto &oldMemoryAgent) {
@@ -70,6 +77,7 @@ const AmbientAgentRepresentations* Memory::UpdateAmbientAgentRepresentations() {
     std::for_each(agentMemory.begin(), agentMemory.end(), [this](std::unique_ptr<AmbientAgentRepresentation>& memoryAgent) {
         memoryAgent = ExtrapolateAmbientAgent(memoryAgent.get());
     });
+
     // add new visual perceived agent
     std::move(newMemoryAgents.begin(), newMemoryAgents.end(), std::back_inserter(agentMemory));
     CutAmbientAgentRepresentationsIfCapacityExceeded(agentMemory);

@@ -38,7 +38,7 @@ public:
      *
      * return    steering angle
      */
-    double CalculateSteeringAngleTUDresden(int time, AgentVehicleType agentType);
+    double CalculateSteeringAngleTUDresden(int time, AgentInterface *agentType);
 
     /*!
     * \brief Sets the lateral input, which contains the desired lateral position.
@@ -105,8 +105,7 @@ protected:
     /** @} @} */
 
     //! Previous scheduling time (for calculation of cycle time lenght).
-    int timeLast {-100};
-    double last_steeringAngle{0};
+    int timeLast{-100};
     //! running average of  mean curvature up to NearPoint
     double meanCurvatureToNearPointSmoothLast{0.};
     //! running average of  mean curvature from NearPoint up to FarPoint

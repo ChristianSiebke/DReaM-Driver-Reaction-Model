@@ -74,7 +74,9 @@ void AABBTreeHandler::FirstExecution()
         }
         catch (std::invalid_argument const &ex)
         {
-            printf("Error while trying to add traffic sign with id %s to the AABBTree, ignoring.\nPlease be aware that only integer ids are supported.", obj->id);
+            printf("Error while trying to add traffic sign with id %s to the AABBTree, ignoring.\nPlease be aware that only integer ids "
+                   "are supported.",
+                   std::to_string(obj->id));
             continue;
         }
 
@@ -95,7 +97,7 @@ void AABBTreeHandler::FirstExecution()
         catch (std::invalid_argument const &ex) {
             printf("Error while trying to add traffic sign with id %s to the AABBTree, ignoring.\nPlease be aware that only integer ids "
                    "are supported.",
-                   obj->id);
+                   std::to_string(obj->id));
             continue;
         }
 

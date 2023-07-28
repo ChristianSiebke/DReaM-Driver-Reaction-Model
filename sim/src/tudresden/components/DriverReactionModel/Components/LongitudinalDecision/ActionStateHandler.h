@@ -27,7 +27,7 @@ class ActionStateHandler {
     bool CloseToConflictArea(const std::unique_ptr<AgentInterpretation> &oAgent, std::optional<ConflictSituation> cA) const;
     bool EgoHasRightOfWay(const std::unique_ptr<AgentInterpretation> &agent) const;
 
-    ActionState currentState;
+    ActionState currentState = ActionState::Start;
     const WorldRepresentation& worldRepresentation;
     const WorldInterpretation& worldInterpretation;
 };

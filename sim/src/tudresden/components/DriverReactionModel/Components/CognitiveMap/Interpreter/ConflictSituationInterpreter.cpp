@@ -27,7 +27,7 @@ void ConflictSituationInterpreter::Update(WorldInterpretation *interpretation, c
         timeMeasure2.EndTimePoint();
     }
     catch (std::logic_error e) {
-        std::string message = e.what();
+        const std::string message = "File: " + static_cast<std::string>(__FILE__) + " Line: " + std::to_string(__LINE__) + " " + e.what();
         Log(message, error);
         throw std::logic_error(message);
     }
@@ -43,11 +43,11 @@ std::optional<ConflictSituation>
 ConflictSituationInterpreter::PossibleConflictSituationAlongLane(const EgoAgentRepresentation *ego,
                                                                  const AmbientAgentRepresentation &observedAgent) const {
     auto egoLane = ego->GetLanePosition().lane;
-    for (auto i = 0; i < maxNumberLanesExtrapolation; i++) {
+    for (unsigned int i = 0; i < maxNumberLanesExtrapolation; i++) {
         if (!egoLane)
             break;
         auto observedLane = observedAgent.GetLanePosition().lane;
-        for (auto j = 0; j < maxNumberLanesExtrapolation; j++) {
+        for (unsigned int j = 0; j < maxNumberLanesExtrapolation; j++) {
             if (!observedLane)
                 break;
             if (auto cAEgo = egoLane->GetConflictAreaWithLane(observedLane)) {

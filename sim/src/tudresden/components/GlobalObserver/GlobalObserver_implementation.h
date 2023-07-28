@@ -69,7 +69,7 @@ private:
     std::shared_ptr<GlobalObserver::Main> globalObserverMain;
     std::shared_ptr<GlobalObserver::AnalysisDataRecorder> dataRecorder;
 
-    std::vector<OdId> visibleTrafficSignals;
-    std::vector<int> visibleAgents;
+    std::vector<OdId> visibleTrafficSignals{};
+    std::vector<int> visibleAgents{};
     AnalysisSignal analysisData;
 };

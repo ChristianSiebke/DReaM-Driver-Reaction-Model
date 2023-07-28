@@ -20,7 +20,7 @@ enum DReaMLogLevel { debug, warning, error, info };
 
 class Logger {
   public:
-      Logger(uint64_t agentId, std::string logPath, DReaMLogLevel defaultLogLevel = info);
+      Logger(uint64_t agentId, const std::string &logPath, DReaMLogLevel defaultLogLevel = info);
       ~Logger();
       void Log(const std::string &message, DReaMLogLevel level = info);
 

@@ -20,5 +20,5 @@ struct ObservedStaticObject : ObservedWorldObject
     ///
     /// \brief The type of this object.
     ///
-    RoadObjectType type;
+    RoadObjectType type = RoadObjectType::none;
 };

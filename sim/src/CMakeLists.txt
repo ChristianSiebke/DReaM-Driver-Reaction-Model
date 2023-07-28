@@ -19,6 +19,8 @@ configure_file(
   ${CMAKE_CURRENT_SOURCE_DIR}/common/version.h
 )
 
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
+
 add_subdirectory(common)
 add_subdirectory(components)
 add_subdirectory(core)

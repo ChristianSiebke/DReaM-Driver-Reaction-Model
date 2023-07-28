@@ -61,14 +61,14 @@ const std::unordered_map<CommonTrafficSign::Type, MentalInfrastructure::TrafficS
  * @brief All possible states of a traffic light.
  * Mirrors CommonTrafficLight::State
  */
-enum class TrafficLightState { Off, Green, Yellow, Red, RedYellow, YellowFlashing };
+enum class TrafficLightState { Off = 0, Green, Yellow, Red, RedYellow, YellowFlashing };
 
 /**
  * @brief All types of traffic lights.
  * Mirrors CommonTrafficLight::Type
  */
 enum class TrafficLightType {
-    Undefined,
+    Undefined = 0,
     ThreeLights,
     ThreeLightsLeft,
     ThreeLightsRight,

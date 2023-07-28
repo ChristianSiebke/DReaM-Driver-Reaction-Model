@@ -94,9 +94,8 @@ void BasicVisualSensor::AgentPerceptionThread(unsigned startIndex, unsigned endI
         if (agent->GetId() == egoAgent->GetId())
             continue;
 
-        if (viewDistance == 0.0) {
+        if (viewDistance == 0.0)
             continue;
-        }
 
         auto otherPosition = Common::Vector2d(agent->GetPositionX(), agent->GetPositionY());
         if ((otherPosition - driverPos).Length() > viewDistance * 1.1)
@@ -143,10 +142,11 @@ void BasicVisualSensor::AgentPerceptionThread(unsigned startIndex, unsigned endI
                     const auto &obj = std::dynamic_pointer_cast<ObservedWorldObject>(it->first);
                     const auto hitResult = obj->IsHitByRay(ray);
 
-                    if (hitResult < 0 || obj->id == egoAgent->GetId())
+                    if (hitResult < 0 || obj->id == egoAgent->GetId()) {
                         continue;
+                    }
 
-                    if (hitResult < distanceToPoint) {
+                    if (hitResult < distanceToPoint && agent->GetId() != obj->id) {
                         foundOccluding = true;
                         break;
                     }

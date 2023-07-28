@@ -13,7 +13,7 @@
 
 bool Logger::cleared = false;
 
-Logger::Logger(uint64_t agentId, std::string logPath, DReaMLogLevel defaultLevel) : agentId{agentId} {
+Logger::Logger(uint64_t agentId, const std::string &logPath, DReaMLogLevel defaultLevel) : agentId{agentId} {
     defaultLogLevel = defaultLevel;
     if (!cleared) {
         cleared = true;

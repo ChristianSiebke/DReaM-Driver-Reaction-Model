@@ -27,7 +27,13 @@ void FollowingInterpreter::Update(WorldInterpretation* interpretation, const Wor
             interpretation->interpretedAgents.at(agent->GetID())->laneInLineWithEgoLane = state.second;
         }
         timeMeasure4.EndTimePoint();
-    } catch (...) {
+    }
+    catch (std::logic_error e) {
+        const std::string message = "File: " + static_cast<std::string>(__FILE__) + " Line: " + std::to_string(__LINE__) + " " + e.what();
+        Log(message, error);
+        throw std::logic_error(message);
+    }
+    catch (...) {
         std::string message =
             "File: " + static_cast<std::string>(__FILE__) + " Line: " + std::to_string(__LINE__) + " Update followingInterpreter failed";
         Log(message, error);
@@ -51,6 +57,11 @@ std::pair<std::optional<double>, bool> FollowingInterpreter::FollowingState(cons
     double distanceReferenceToEdgesFollowing = oAgentDistanceReferenceToBack + egoAgentDistanceReferenceToFront;
     double distanceReferenceToEdgesLeading = oAgentDistanceReferenceToFront + egoAgentDistanceReferenceToBack;
 
+    if (representation.egoAgent->GetMainLocatorLane() == egoLane->GetLeftLane() ||
+        representation.egoAgent->GetMainLocatorLane() == egoLane->GetRightLane()) {
+        // lane change
+        return {std::nullopt, false};
+    }
     // following on same lane
     if ((observedLane == egoLane && egoLane != nullptr) ||
         (Common::AgentTouchesLane(&agent, egoLane) && observedLane->GetRoad() == egoLane->GetRoad())) {

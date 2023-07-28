@@ -54,7 +54,7 @@ public:
 
     AgentStateRecorder(AgentStateRecorder const &) = delete;
     AgentStateRecorder &operator=(AgentStateRecorder const &) = delete;
-    static std::shared_ptr<AgentStateRecorder> GetInstance(std::string resultPath) {
+    static std::shared_ptr<AgentStateRecorder> GetInstance(const std::string &resultPath) {
         if (!instance)
             instance = std::shared_ptr<AgentStateRecorder>(new AgentStateRecorder(resultPath));
         return instance;
@@ -95,7 +95,7 @@ public:
     static std::string GenerateHeader();
 
 private:
-    AgentStateRecorder(std::string inResultPath) {
+    AgentStateRecorder(const std::string &inResultPath) {
         resultPath = inResultPath;
     }
 
@@ -104,7 +104,7 @@ private:
     static std::shared_ptr<AgentStateRecorder> instance;
     static boost::property_tree::ptree simulationOutut;
     static std::string resultPath;
-    std::shared_ptr<InfrastructurePerception> infrastructurePerception;
+    std::shared_ptr<InfrastructurePerception> infrastructurePerception{nullptr};
     static boost::property_tree::ptree agentTree;
     static boost::property_tree::ptree sampleTree;
     static boost::property_tree::ptree samplesTree;

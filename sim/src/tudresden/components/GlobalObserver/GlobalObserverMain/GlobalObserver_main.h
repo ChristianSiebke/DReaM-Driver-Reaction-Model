@@ -86,7 +86,7 @@ public:
      * @brief Sets the profiles of the ProfileCatalog
      *
      */
-    static void SetScenarioConfigPath(std::string path) {
+    static void SetScenarioConfigPath(const std::string &path) {
         scenarioConfigPath = path;
     }
 
@@ -183,7 +183,7 @@ private:
 
     // agent perception related fields
     GlobalObserver::Converters::AgentPerceptionConverter apConverter;
-    std::unordered_map<int, std::shared_ptr<DetailedAgentPerception>> agentPerceptions;
+    std::unordered_map<int, std::shared_ptr<DetailedAgentPerception>> agentPerceptions{};
     bool agentPerceptionsCreated = false;
 
     GlobalObserver::Routes::RouteConverter routeConverter;

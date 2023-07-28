@@ -6,12 +6,12 @@ std::shared_ptr<AnalysisDataRecorder> AnalysisDataRecorder::instance = nullptr;
 std::string AnalysisDataRecorder::scenarioConfigPath = "";
 int AnalysisDataRecorder::runId = 0;
 int AnalysisDataRecorder::totalTime = 0;
-std::map<uint16_t, std::shared_ptr<std::vector<AgentData>>> AnalysisDataRecorder::analysisData;
-std::vector<TTCData> AnalysisDataRecorder::ttcData;
-std::vector<CollisionData> AnalysisDataRecorder::collisions;
-std::map<std::string, std::shared_ptr<std::map<DReaMDefinitions::AgentVehicleType, int>>> AnalysisDataRecorder::exitVehicleCounters;
+std::map<uint16_t, std::shared_ptr<std::vector<AgentData>>> AnalysisDataRecorder::analysisData{};
+std::vector<TTCData> AnalysisDataRecorder::ttcData{};
+std::vector<CollisionData> AnalysisDataRecorder::collisions{};
+std::map<std::string, std::shared_ptr<std::map<DReaMDefinitions::AgentVehicleType, int>>> AnalysisDataRecorder::exitVehicleCounters{};
 std::map<std::string, std::shared_ptr<std::map<DReaMDefinitions::AgentVehicleType, std::shared_ptr<std::vector<double>>>>>
-    AnalysisDataRecorder::exitVehicleVelocities;
+    AnalysisDataRecorder::exitVehicleVelocities{};
 
 void AnalysisDataRecorder::Trigger(std::shared_ptr<DetailedAgentPerception> ego, std::shared_ptr<InfrastructurePerception> infrastructure,
                                    AnalysisSignal data, int time) {
@@ -202,15 +202,12 @@ void AnalysisDataRecorder::CheckCollisions(std::vector<std::pair<int, std::share
         cd.runId = this->runId;
         cd.timestamp = time;
         cd.type = DetermineCollisionType(egoId, partner.first, egoData, partner.second, data);
-        if (cd.type < 0)
-            continue;
         collisions.emplace_back(cd);
     }
 }
 
 int AnalysisDataRecorder::DetermineCollisionType(int egoId, int otherId, std::shared_ptr<DetailedAgentPerception> egoData,
                                                  std::shared_ptr<DetailedAgentPerception> partnerData, AnalysisSignal data) {
-    std::cout << "other agent not in signal Log" << std::endl;
     if (analysisSignalLog.find(otherId) == analysisSignalLog.end()) {
         std::cout << "other agent not in signal Log" << std::endl;
     }

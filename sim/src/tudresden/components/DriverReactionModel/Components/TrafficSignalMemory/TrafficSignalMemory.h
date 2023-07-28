@@ -16,8 +16,10 @@ namespace TrafficSignalMemory {
 
 class TrafficSignalMemory {
 public:
-    TrafficSignalMemory(unsigned int maxElements, int maxTime) : maximumElementsInMemory{maxElements}, maximumTimeInMemoryMs{maxTime} {
-        visibleTrafficSignals = std::make_unique<VisibleTrafficSignals>();
+    TrafficSignalMemory(unsigned int maxElements, int maxTime) :
+        maximumElementsInMemory{maxElements},
+        maximumTimeInMemoryMs{maxTime},
+        visibleTrafficSignals(std::make_unique<VisibleTrafficSignals>()) {
     }
 
     VisibleTrafficSignals *Update(int timestamp, std::vector<const MentalInfrastructure::TrafficSignal *> input,
@@ -28,8 +30,8 @@ private:
     void InsertIntoVisibleTrafficSignals(const MentalInfrastructure::TrafficSignal *sign);
 
 private:
-    std::unordered_map<DReaMId, MemorizedTrafficSignal> memory;
-    std::unique_ptr<VisibleTrafficSignals> visibleTrafficSignals;
+    std::unordered_map<DReaMId, MemorizedTrafficSignal> memory{};
+    std::unique_ptr<VisibleTrafficSignals> visibleTrafficSignals{nullptr};
 
     const unsigned int maximumElementsInMemory;
     const int maximumTimeInMemoryMs;

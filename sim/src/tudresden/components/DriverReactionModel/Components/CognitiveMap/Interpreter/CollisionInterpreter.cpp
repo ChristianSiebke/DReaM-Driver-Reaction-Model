@@ -29,8 +29,6 @@ const int MAX_LANES_AHEAD = 2;
 // amount of vertices for generating a polygon based on an circle (for
 // pedestrians) e.g. 4 vertices will result in a rectangle
 const int CIRCLE_POLYGON_PRECISION = 8;
-// used for debug output
-const bool DEBUG_OUT = false;
 
 TimeMeasurement timeMeasure1("CollisionInterpreter.cpp");
 
@@ -39,6 +37,11 @@ void CollisionInterpreter::Update(WorldInterpretation *interpretation, const Wor
         timeMeasure1.StartTimePoint("CollisionInterpreter ");
         DetermineCollisionPoints(interpretation, representation);
         timeMeasure1.EndTimePoint();
+    }
+    catch (std::logic_error e) {
+        const std::string message = "File: " + static_cast<std::string>(__FILE__) + " Line: " + std::to_string(__LINE__) + " " + e.what();
+        Log(message, error);
+        throw std::logic_error(message);
     }
     catch (...) {
         std::string message =
@@ -50,28 +53,14 @@ void CollisionInterpreter::Update(WorldInterpretation *interpretation, const Wor
 
 void CollisionInterpreter::DetermineCollisionPoints(WorldInterpretation *interpretation, const WorldRepresentation &representation) {
     try {
-        Log("Calculating Collisionpoints");
-        numberCollisionPoints = 0;
         if (representation.agentMemory->empty()) {
             Log("No surrounding agents... returning...", DReaMLogLevel::warning);
             return;
         }
         for (const auto &agent : *representation.agentMemory) {
-            auto possibleCollisionPoint = CalculationCollisionPoint(representation, *agent);
             auto &agentInterpretation = interpretation->interpretedAgents.at(agent->GetID());
-            agentInterpretation->collisionPoint = possibleCollisionPoint;
-
-            if (possibleCollisionPoint) {
-                if (DEBUG_OUT)
-                    Log("No Collision with Agent:" + std::to_string(agent->GetID()) + " should occur.");
-            }
-            else {
-                if (DEBUG_OUT)
-                    Log("Collision with Agent:" + std::to_string(agent->GetID()) + " might occur!");
-                numberCollisionPoints++;
-            }
+            agentInterpretation->collisionPoint = CalculationCollisionPoint(representation, *agent);
         }
-        Log("Finished calculating collision points" + std::to_string(numberCollisionPoints) + " collision points, returning...");
     }
     catch (...) {
         std::string message =
@@ -85,6 +74,11 @@ std::optional<CollisionPoint> CollisionInterpreter::CalculationCollisionPoint(co
     std::vector<std::future<std::optional<CollisionPoint>>> futures;
     std::vector<CollisionPoint> resultCP;
 
+    if (representation.egoAgent->GetMainLocatorLane() == representation.egoAgent->GetLanePosition().lane->GetLeftLane() ||
+        representation.egoAgent->GetMainLocatorLane() == representation.egoAgent->GetLanePosition().lane->GetRightLane()) {
+        // lane change
+        return std::nullopt;
+    }
     double egoDistance = representation.egoAgent->ExtrapolateDistanceAlongLane(MAX_TIME);
     double observedDistance = observedAgent.ExtrapolateDistanceAlongLane(MAX_TIME);
 
@@ -154,7 +148,6 @@ std::optional<CollisionPoint> CollisionInterpreter::PerformCollisionPointCalcula
             possibleCollisionPoint.distanceCP = egoDistance;
             possibleCollisionPoint.oAgentID = observedAgent.GetID();
             possibleCollisionPoint.timeToCollision = time;
-            double decelTime = std::abs(representation.egoAgent->GetVelocity() / GetBehaviourData().adBehaviour.comfortDeceleration.mean);
             possibleCollisionPoint.collisionImminent = time <= GetBehaviourData().adBehaviour.collisionImminentMargin;
             return possibleCollisionPoint;
         }

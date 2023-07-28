@@ -153,7 +153,7 @@ private:
      */
 
     //! time of first collision
-    int timeOfFirstCollision;
+    int timeOfFirstCollision = 0;
 
     //! Stores th number of collisionData of the previous time step
     int previousNumberOfCollisionData = 0;

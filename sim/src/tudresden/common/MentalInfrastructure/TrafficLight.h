@@ -20,7 +20,7 @@ namespace MentalInfrastructure {
 
 class TrafficLight : public TrafficSignal {
 public:
-    TrafficLight(OdId openDriveId, DReaMId dreamId, const MentalInfrastructure::Road *road, double s, Common::Vector2d pos,
+    TrafficLight(const OdId &openDriveId, DReaMId dreamId, const MentalInfrastructure::Road *road, double s, Common::Vector2d pos,
                  TrafficLightType type) :
         TrafficSignal(openDriveId, dreamId, road, s, pos), type(type) {
     }

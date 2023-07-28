@@ -9,7 +9,7 @@ class Road;
 
 class TrafficSignal : public Element {
 public:
-    TrafficSignal(OdId openDriveId, DReaMId dreamId, const MentalInfrastructure::Road *road, double s, Common::Vector2d pos) :
+    TrafficSignal(const OdId &openDriveId, DReaMId dreamId, const MentalInfrastructure::Road *road, double s, Common::Vector2d pos) :
         Element(openDriveId, dreamId), road(road), s(s), position(pos) {
     }
     virtual ~TrafficSignal() {
@@ -37,7 +37,7 @@ public:
 
 protected:
     const MentalInfrastructure::Road *road;
-    std::vector<const MentalInfrastructure::Lane *> validLanes;
+    std::vector<const MentalInfrastructure::Lane *> validLanes{};
 
     double s;
     Common::Vector2d position;

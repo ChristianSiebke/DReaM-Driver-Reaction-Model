@@ -36,7 +36,7 @@ class BehaviourImporter {
       bool Import(const std::string &filename);
       std::shared_ptr<BehaviourData> GetBehaviourData(DReaMDefinitions::AgentVehicleType agentType);
 
-      static std::shared_ptr<BehaviourImporter> GetInstance(std::string path, LoggerInterface *loggerInterface) {
+      static std::shared_ptr<BehaviourImporter> GetInstance(const std::string &path, LoggerInterface *loggerInterface) {
           if (!instance)
               instance = std::shared_ptr<BehaviourImporter>(new BehaviourImporter(path, loggerInterface));
           return instance;
@@ -47,7 +47,7 @@ class BehaviourImporter {
       }
 
   private:
-      BehaviourImporter(std::string path, LoggerInterface *loggerInterface);
+      BehaviourImporter(const std::string &path, LoggerInterface *loggerInterface);
 
       bool ImportGroup(QDomElement &groupElement, StatisticsGroup &group);
       bool ImportSet(QDomElement &setElement, StatisticsSet &set);

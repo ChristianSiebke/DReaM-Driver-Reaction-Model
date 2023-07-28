@@ -135,6 +135,9 @@ LanePoint Lane::InterpolatePoint(double sLaneCoordinate) const
     {
         return lanePointsReference.back();
     }
+    if (upperPointIter == lanePointsReference.begin()) {
+        return lanePointsReference.front();
+    }
 
     auto lowerPointIter = std::prev(upperPointIter, 1);
     double upperDistanceTo_S_Coordinate = (*upperPointIter).sOffset - sLaneCoordinate;

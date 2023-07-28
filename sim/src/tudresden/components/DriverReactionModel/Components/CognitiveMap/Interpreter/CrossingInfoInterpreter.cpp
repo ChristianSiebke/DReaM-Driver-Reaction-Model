@@ -20,7 +20,6 @@ namespace Interpreter {
 void CrossingInfoInterpreter::Update(WorldInterpretation* interpretation, const WorldRepresentation& representation) {
     try {
         timeMeasure3.StartTimePoint("CrossingInfoInterpreter ");
-        (interpretation, representation);
         Localize(representation);
         UpdateStoppingPoints(representation);
         interpretation->crossingInfo = crossingInfo;
@@ -28,8 +27,8 @@ void CrossingInfoInterpreter::Update(WorldInterpretation* interpretation, const 
         interpretation->analysisData->targetDistributionOffset = targetVelocityCalculation.GetVelDistOffset();
         timeMeasure3.EndTimePoint();
     }
-    catch (std::logic_error e) {
-        std::string message = e.what();
+    catch (const std::logic_error &e) {
+        const std::string message = "File: " + static_cast<std::string>(__FILE__) + " Line: " + std::to_string(__LINE__) + " " + e.what();
         Log(message, error);
         throw std::logic_error(message);
     }
@@ -50,7 +49,6 @@ void CrossingInfoInterpreter::UpdateStoppingPoints(const WorldRepresentation& re
             representation.infrastructure->GetStoppingPoints(egoJunction->GetOpenDriveId(), egoLane->GetOwlId());
         crossingInfo.junctionOdId = egoJunction->GetOpenDriveId();
     }
-
     SetDistanceSP(representation.egoAgent, crossingInfo.egoStoppingPoints);
 }
 
@@ -63,24 +61,25 @@ void CrossingInfoInterpreter::DetermineCrossingType(const WorldRepresentation &r
     // assigning Crossing Type  until entrance intersecion
     auto nextJunction = representation.egoAgent->NextJunction();
     auto road = representation.egoAgent->GetLanePosition().lane->GetRoad();
-
     if (nextJunction && nextJunction->GetIncomingRoads().size() > 2) {
         if (representation.egoAgent->GetVehicleType() == DReaMDefinitions::AgentVehicleType::Car ||
             representation.egoAgent->GetVehicleType() == DReaMDefinitions::AgentVehicleType::Bicycle) {
             if (representation.egoAgent->GetIndicatorState() == IndicatorState::IndicatorState_Left) {
                 crossingInfo.type = CrossingType::Left;
             }
-            else if (representation.egoAgent->GetIndicatorState() ==
-                     IndicatorState::IndicatorState_Right) { // TODO move indicatorstate to DReaMDefinitions
+            else if (representation.egoAgent->GetIndicatorState() == IndicatorState::IndicatorState_Right) {
                 crossingInfo.type = CrossingType::Right;
             }
             else {
                 crossingInfo.type = CrossingType::Straight;
             }
         }
-        else if (representation.egoAgent->GetVehicleType() == DReaMDefinitions::AgentVehicleType::Pedestrian ||
-                 representation.egoAgent->GetVehicleType() == DReaMDefinitions::AgentVehicleType::Bicycle) {
+        else if (representation.egoAgent->GetVehicleType() == DReaMDefinitions::AgentVehicleType::Pedestrian) {
             crossingInfo.type = CrossingType::Straight;
+        }
+        else {
+            std::string message = __FILE__ " Line: " + std::to_string(__LINE__) + "AgentVehicleType is not yet considered";
+            throw std::logic_error(message);
         }
     }
     else if (road->IsOnJunction()) {

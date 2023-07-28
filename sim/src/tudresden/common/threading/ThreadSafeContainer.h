@@ -197,7 +197,7 @@ template <class T> class ThreadSafeVector {
     }
 
   private:
-    std::vector<T> data;
+    std::vector<T> data{};
     mutable std::mutex mtx;
 };
 

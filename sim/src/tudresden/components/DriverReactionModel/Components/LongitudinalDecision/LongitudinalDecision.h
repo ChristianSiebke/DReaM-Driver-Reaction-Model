@@ -37,7 +37,7 @@ public:
     std::vector<std::pair<double, int>> ActivateIfNeeded(const std::unordered_map<int, std::unique_ptr<AgentInterpretation>> &agents);
 
 private:
-    std::unordered_map<int, EmergencyBrakeInfo> emergencyBrake;
+    std::unordered_map<int, EmergencyBrakeInfo> emergencyBrake{};
     double minTimeEmergencyBrakeIsActive;
     int cycleTime;
 };
@@ -72,8 +72,8 @@ private:
     double DetermineAccelerationWish();
 
     double AgentCrashImminent(const std::unique_ptr<AgentInterpretation> &oAgent) const;
-    
-    double accelerationResult;
+
+    double accelerationResult = 0;
 
     const MentalInfrastructure::Road *currentRoad = nullptr;
     const WorldRepresentation &worldRepresentation;

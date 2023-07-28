@@ -17,7 +17,7 @@ namespace MentalInfrastructure {
 
 class TrafficSign : public TrafficSignal {
 public:
-    TrafficSign(OdId openDriveId, DReaMId dreamId, const MentalInfrastructure::Road *road, double s, Common::Vector2d pos, double v,
+    TrafficSign(const OdId &openDriveId, DReaMId dreamId, const MentalInfrastructure::Road *road, double s, Common::Vector2d pos, double v,
                 CommonTrafficSign::Type commonType) :
         TrafficSignal(openDriveId, dreamId, road, s, pos), value(v) {
         type = (trafficSignMapping.at(commonType));

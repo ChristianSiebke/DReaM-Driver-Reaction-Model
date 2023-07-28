@@ -166,7 +166,7 @@ public:
     double GetAngleToGoalWaypoint(WaypointData& goalWaypointAngle);
 
 private:
-    int mTime;                                          //!< time of the current similuation cycle in ms
+    int mTime = 0;                                      //!< time of the current similuation cycle in ms
     double mDT;                                         //!< cycle time
 
     // Vehicle Properties

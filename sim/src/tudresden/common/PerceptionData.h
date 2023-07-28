@@ -134,15 +134,15 @@ struct DetailedAgentPerception : GeneralAgentPerception {
 };
 
 struct LookupTableRoadNetwork {
-    std::unordered_map<OdId, const MentalInfrastructure::Road *> roads;
-    std::unordered_map<OwlId, const MentalInfrastructure::Lane *> lanes;
-    std::unordered_map<OdId, const MentalInfrastructure::TrafficSign *> trafficSigns;
+    std::unordered_map<OdId, const MentalInfrastructure::Road *> roads{};
+    std::unordered_map<OwlId, const MentalInfrastructure::Lane *> lanes{};
+    std::unordered_map<OdId, const MentalInfrastructure::TrafficSign *> trafficSigns{};
     // not const since these need to be updated
-    std::unordered_map<OdId, MentalInfrastructure::TrafficLight *> trafficLights;
+    std::unordered_map<OdId, MentalInfrastructure::TrafficLight *> trafficLights{};
 };
 
 struct StoppingPointData {
-    std::unordered_map<OdId, std::unordered_map<OwlId, std::unordered_map<StoppingPointType, StoppingPoint>>> stoppingPoints;
+    std::unordered_map<OdId, std::unordered_map<OwlId, std::unordered_map<StoppingPointType, StoppingPoint>>> stoppingPoints{};
 };
 
 struct InfrastructurePerception {
@@ -152,19 +152,29 @@ struct InfrastructurePerception {
     }
 
     const std::unordered_map<StoppingPointType, StoppingPoint> &GetStoppingPoints(OdId junctionId, OwlId laneId) const {
-        return stoppingPointData.stoppingPoints.at(junctionId).at(laneId);
+        try {
+            return stoppingPointData.stoppingPoints.at(junctionId).at(laneId);
+        }
+        catch (const std::out_of_range &e) {
+            auto lane = lookupTableRoadNetwork.lanes.at(laneId);
+            const std::string message = "File: " + static_cast<std::string>(__FILE__) + " Line: " + std::to_string(__LINE__) + " " +
+                                        e.what() + "| For selected junction:" + junctionId + " and lane:" + std::to_string(laneId) +
+                                        " (openDrive road id: " + lane->GetRoad()->GetOpenDriveId() +
+                                        ", openDrive lane id: " + lane->GetOpenDriveId() + ")  does not exist a stopping point";
+            throw std::logic_error(message);
+        }
     }
 
     const StoppingPointData &GetStoppingPointData() const {
         return stoppingPointData;
     }
 
-    std::vector<std::shared_ptr<const MentalInfrastructure::Junction>> junctions;
-    std::vector<std::shared_ptr<const MentalInfrastructure::Road>> roads;
-    std::vector<std::shared_ptr<const MentalInfrastructure::Lane>> lanes;
-    std::vector<std::shared_ptr<const MentalInfrastructure::Section>> sections;
-    std::vector<std::shared_ptr<const MentalInfrastructure::TrafficSign>> trafficSigns;
-    std::vector<std::shared_ptr<const MentalInfrastructure::TrafficLight>> trafficLights;
+    std::vector<std::shared_ptr<const MentalInfrastructure::Junction>> junctions{};
+    std::vector<std::shared_ptr<const MentalInfrastructure::Road>> roads{};
+    std::vector<std::shared_ptr<const MentalInfrastructure::Lane>> lanes{};
+    std::vector<std::shared_ptr<const MentalInfrastructure::Section>> sections{};
+    std::vector<std::shared_ptr<const MentalInfrastructure::TrafficSign>> trafficSigns{};
+    std::vector<std::shared_ptr<const MentalInfrastructure::TrafficLight>> trafficLights{};
 
     RoadmapGraph::RoadmapGraph graph;
     StoppingPointData stoppingPointData;
@@ -176,7 +186,8 @@ struct InfrastructurePerception {
     /*!
      * \brief map conflic area pairs to conflict position (junction id)
      */
-    std::unordered_map<OdId, std::vector<std::pair<MentalInfrastructure::ConflictArea, MentalInfrastructure::ConflictArea>>> conflictAreas;
+    std::unordered_map<OdId, std::vector<std::pair<MentalInfrastructure::ConflictArea, MentalInfrastructure::ConflictArea>>>
+        conflictAreas{};
 };
 
 struct DynamicInfrastructurePerception {

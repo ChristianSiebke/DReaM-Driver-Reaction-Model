@@ -21,6 +21,11 @@ void TargetLaneInterpreter::Update(WorldInterpretation *interpretation, const Wo
         interpretation->targetLane = TargetLane(representation);
         timeMeasure5.EndTimePoint();
     }
+    catch (std::logic_error e) {
+        const std::string message = "File: " + static_cast<std::string>(__FILE__) + " Line: " + std::to_string(__LINE__) + " " + e.what();
+        Log(message, error);
+        throw std::logic_error(message);
+    }
     catch (...) {
         std::string message =
             "File: " + static_cast<std::string>(__FILE__) + " Line: " + std::to_string(__LINE__) + " Update targetLaneInterpreter failed";

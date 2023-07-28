@@ -91,9 +91,10 @@ const GazeState DriverReactionModel::GetGazeState() {
 const AnalysisSignal DriverReactionModel::GetAnalysisSignal() {
     auto data = cognitiveMap->GetWorldInterpretation().analysisData.get();
     for (auto &agent : cognitiveMap->GetWorldInterpretation().interpretedAgents) {
-        if (agent.second->collisionPoint.has_value()) {
+        if (std::any_of(GetWorldRepresentation().processedAgents.begin(), GetWorldRepresentation().processedAgents.end(),
+                        [id = agent.first](std::shared_ptr<GeneralAgentPerception> processedAgent) { return processedAgent->id == id; }) &&
+            agent.second->collisionPoint.has_value()) {
             double ttc = agent.second->collisionPoint->timeToCollision;
-            std::cout << "TTC: " << ttc << std::endl;
             data->ttcs.insert(std::make_pair(agent.first, ttc));
         }
     }

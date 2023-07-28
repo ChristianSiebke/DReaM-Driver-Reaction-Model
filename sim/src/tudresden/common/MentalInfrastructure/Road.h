@@ -27,7 +27,7 @@ class TrafficLight;
 ///
 class Road : public Element {
   public:
-      Road(OdId openDriveId, DReaMId dreamId, double posX, double posY, double hdg, double length) :
+      Road(const OdId &openDriveId, DReaMId dreamId, double posX, double posY, double hdg, double length) :
           Element(openDriveId, dreamId), startPos(Common::Vector2d(posX, posY)), roadHdg(hdg), roadLength(length) {
       }
     ~Road() override {}
@@ -180,9 +180,9 @@ private:
     const Element *predecessor = nullptr;
     const Junction *junctionPtr = nullptr;
 
-    std::vector<const Lane *> lanes;
-    std::vector<const TrafficSign *> trafficSigns;
-    std::vector<const TrafficLight *> trafficLights;
+    std::vector<const Lane *> lanes{};
+    std::vector<const TrafficSign *> trafficSigns{};
+    std::vector<const TrafficLight *> trafficLights{};
 };
 
 } // namespace MentalInfrastructure

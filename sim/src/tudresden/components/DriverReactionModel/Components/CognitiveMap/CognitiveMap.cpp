@@ -39,10 +39,25 @@ CognitiveMap::CognitiveMap(int cycleTime, StochasticsInterface* stochastics, Log
 }
 
 void CognitiveMap::Update() {
-    UpdateWorldRepresentation();
-    ResetWorldInterpretation();
-    worldInterpreter.ExecuteTasks(&worldInterpretation, worldRepresentation);
-};
+    try {
+        UpdateWorldRepresentation();
+        ResetWorldInterpretation();
+        worldInterpreter.ExecuteTasks(&worldInterpretation, worldRepresentation);
+    }
+    catch (const std::runtime_error &error) {
+        const std::string msg = error.what();
+        throw std::runtime_error(msg);
+    }
+    catch (const std::logic_error &error) {
+        const std::string msg = error.what();
+        throw std::runtime_error(msg);
+    }
+    catch (...) {
+        std::string message =
+            "File: " + static_cast<std::string>(__FILE__) + " Line: " + std::to_string(__LINE__) + "unexpected exception CognitiveMap ";
+        throw std::runtime_error(message);
+    }
+}
 
 void CognitiveMap::UpdateInput(int time, std::shared_ptr<DetailedAgentPerception> egoAgent,
                                std::vector<std::shared_ptr<GeneralAgentPerception>> ambientAgents,

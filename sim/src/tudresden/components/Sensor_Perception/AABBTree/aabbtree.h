@@ -67,6 +67,6 @@ class AABBTree {
     void FixUpwardsTree(unsigned treeNodeIndex);
 
   private:
-    std::map<std::shared_ptr<AABBInterface>, unsigned> objectNodeIndexMap;
-    std::vector<AABBNode> nodes;
+      std::map<std::shared_ptr<AABBInterface>, unsigned> objectNodeIndexMap{};
+      std::vector<AABBNode> nodes{};
 };

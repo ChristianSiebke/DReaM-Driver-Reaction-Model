@@ -18,19 +18,20 @@
 namespace CognitiveMap {
 class ReactionTime {
   public:
-    ReactionTime(DistributionEntry inPercTime, DistributionEntry percLatency, double cycleTime, StochasticsInterface* stochastics)
-        : cycleTime{cycleTime} {
-        double drawnInPercTime = inPercTime.mean <= 0 ? 0 : stochastics->GetLogNormalDistributed(inPercTime.mean, inPercTime.std_deviation);
-        initialPerceptionTime = Common::ValueInBounds(inPercTime.min, drawnInPercTime, inPercTime.max);
+      ReactionTime(DistributionEntry inPercTime, DistributionEntry percLatency, double cycleTime, StochasticsInterface *stochastics) :
+          cycleTime{cycleTime}, stochastics{stochastics} {
+          double drawnInPercTime =
+              inPercTime.mean <= 0 ? 0 : stochastics->GetLogNormalDistributed(inPercTime.mean, inPercTime.std_deviation);
+          initialPerceptionTime = Common::ValueInBounds(inPercTime.min, drawnInPercTime, inPercTime.max);
 
-        double drawnPercLatency =
-            percLatency.mean <= 0 ? 0 : stochastics->GetLogNormalDistributed(percLatency.mean, percLatency.std_deviation);
+          double drawnPercLatency =
+              percLatency.mean <= 0 ? 0 : stochastics->GetLogNormalDistributed(percLatency.mean, percLatency.std_deviation);
 
-        perceptionLatency = Common::ValueInBounds(percLatency.min, drawnPercLatency, percLatency.max);
+          perceptionLatency = Common::ValueInBounds(percLatency.min, drawnPercLatency, percLatency.max);
 
-        auto bufferTime = inPercTime.max > percLatency.max ? inPercTime.max : percLatency.max;
-        bufferSize = static_cast<unsigned int>(std::round(bufferTime / (cycleTime / 1000))) + 1;
-    }
+          auto bufferTime = inPercTime.max > percLatency.max ? inPercTime.max : percLatency.max;
+          bufferSize = static_cast<unsigned int>(std::round(bufferTime / (cycleTime / 1000))) + 1;
+      }
 
     void Update(std::vector<std::shared_ptr<GeneralAgentPerception>> agents);
     void EraseAgent(int agentId);
@@ -45,9 +46,9 @@ class ReactionTime {
 
 private:
     // buffer the perceived agents to simulate processing time
-      std::deque<std::vector<std::shared_ptr<GeneralAgentPerception>>> perceivedAgentBuffer;
+      std::deque<std::vector<std::shared_ptr<GeneralAgentPerception>>> perceivedAgentBuffer{};
       // buffer the perceived agents to simulate processing time
-      std::unordered_map<int, double> processingAgentBuffer;
+      std::unordered_map<int, double> processingAgentBuffer{};
       unsigned int bufferSize;
       double cycleTime;
       double initialPerceptionTime;

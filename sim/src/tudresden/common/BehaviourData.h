@@ -74,8 +74,8 @@ typedef std::string IntersectionID;
 typedef std::map<IndicatorState, std::map<IntersectionSpot, std::shared_ptr<DistributionEntry>>> TurningVelocitis;
 
 struct ActionDecisionBehaviour {
-    std::map<IntersectionID, std::map<RoadID, TurningVelocitis>> velocityStatisticsIntersection;
-    std::map<std::string, std::shared_ptr<DistributionEntry>> velocityStatisticsSpecificRoads;
+    std::map<IntersectionID, std::map<RoadID, TurningVelocitis>> velocityStatisticsIntersection{};
+    std::map<std::string, std::shared_ptr<DistributionEntry>> velocityStatisticsSpecificRoads{};
     DistributionEntry defaultVelocity{0, 0, 0, 0};
     double collisionImminentMargin;
     double minDistanceStationaryTraffic;
@@ -98,31 +98,31 @@ struct CognitiveMapBehaviour {
 };
 
 struct ScanAreasOfInterest {
-    std::map<ScanAOI, DriverGaze> driverAOIs;
-    std::map<ScanAOI, MirrorGaze> mirrorAOIs;
+    std::map<ScanAOI, DriverGaze> driverAOIs{};
+    std::map<ScanAOI, MirrorGaze> mirrorAOIs{};
 };
 
 struct GazeMovementBehaviour {
     double foresightTime;
     double minForesightDistance;
     double observe_openingAngle;
-    std::shared_ptr<DistributionEntry> observe_fixationDuration;
+    std::shared_ptr<DistributionEntry> observe_fixationDuration = nullptr;
 
     ScanAreasOfInterest scanAOIs;
 
     double std_probabilityFixateLeadCar;
     double std_probabilityControlGlance;
-    std::map<ScanAOI, std::shared_ptr<DistributionEntry>> std_scanAOIProbabilities;
+    std::map<ScanAOI, std::shared_ptr<DistributionEntry>> std_scanAOIProbabilities{};
 
     double XInt_probabilityFixateLeadCar;
     double XInt_probabilityControlGlance;
     double XInt_viewingDepthIntoRoad;
-    std::map<CrossingPhase, std::map<ControlAOI, double>> XInt_controlAOIProbabilities;
+    std::map<CrossingPhase, std::map<ControlAOI, double>> XInt_controlAOIProbabilities{};
     std::map<IndicatorState, std::map<TrafficDensity, std::map<CrossingPhase, std::map<ScanAOI, std::shared_ptr<DistributionEntry>>>>>
-        XInt_scanAOIProbabilities;
+        XInt_scanAOIProbabilities{};
 
     double XInt_controlOpeningAngle;
-    std::shared_ptr<DistributionEntry> XInt_controlFixationDuration;
+    std::shared_ptr<DistributionEntry> XInt_controlFixationDuration = nullptr;
 };
 
 struct BehaviourData {

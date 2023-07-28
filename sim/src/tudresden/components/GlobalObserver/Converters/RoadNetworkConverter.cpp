@@ -197,10 +197,6 @@ const MentalInfrastructure::Road *RoadNetworkConverter::ConvertRoad(const OWL::I
 
     auto newRoad = std::make_shared<MentalInfrastructure::Road>(openDriveIdRoad, GenerateUniqueId(), posXStart, posYStart, hdg, length);
     infrastructurePerception->roads.push_back(newRoad);
-
-    const MentalInfrastructure::Section *lastSectionPtr = nullptr;
-
-    int secCtr = 0;
     for (auto section : sections) {
         for (auto lane : section->GetLanes()) {
             auto newLane = ConvertLane(lane);

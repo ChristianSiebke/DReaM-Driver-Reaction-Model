@@ -38,7 +38,7 @@ using StandardRoad = RoadSegments::Edge::StandardRoad;
 
 namespace GazeMovement {
 
-enum class SegmentType { NONE, XJunction, TJunction, StandardRoad };
+enum class SegmentType { NONE = 0, XJunction, TJunction, StandardRoad };
 
 class GazeMovement : public Component::ComponentInterface {
   public:

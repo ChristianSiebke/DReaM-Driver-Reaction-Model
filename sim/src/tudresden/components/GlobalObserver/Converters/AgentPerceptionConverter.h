@@ -82,6 +82,6 @@ private:
     std::shared_ptr<InfrastructurePerception> infrastructurePerception;
 
     std::unordered_map<int, std::shared_ptr<DetailedAgentPerception>> &agentPerceptions;
-    std::map<int, DReaMRoute::Waypoints> routeMapping;
+    std::map<int, DReaMRoute::Waypoints> routeMapping{};
 };
 } // namespace GlobalObserver::Converters

@@ -20,8 +20,24 @@ struct TimeToConflictArea {
     double vehicleBackToCAEnd;    // time until the end of the vehicle leaves the conflict area
 };
 
+struct Priority {
+    Priority(ConflictSituation conflictSituation, RightOfWay rightOfWay) : conflictSituation{conflictSituation}, rightOfWay{rightOfWay} {
+    }
+    ConflictSituation conflictSituation;
+    RightOfWay rightOfWay;
+
+    bool operator==(const Priority &in) {
+        return (conflictSituation.egoCA == in.conflictSituation.egoCA && conflictSituation.oAgentCA == in.conflictSituation.oAgentCA &&
+                rightOfWay.ego == in.rightOfWay.ego && rightOfWay.observed == in.rightOfWay.observed);
+    };
+    bool operator!=(const Priority &in) {
+        return (conflictSituation.egoCA != in.conflictSituation.egoCA || conflictSituation.oAgentCA != in.conflictSituation.oAgentCA ||
+                rightOfWay.ego != in.rightOfWay.ego || rightOfWay.observed != in.rightOfWay.observed);
+    };
+};
+
 class Anticipation {
-  public:
+public:
     Anticipation(const WorldRepresentation& worldRepresentation, const WorldInterpretation& worldInterpretation,
                  StochasticsInterface* stochastics, const LoggerInterface* loggerInterface, const BehaviourData& behaviourData)
         : worldRepresentation{worldRepresentation}, worldInterpretation{worldInterpretation}, stochastics{stochastics},
@@ -61,34 +77,8 @@ class Anticipation {
 
     double IDMBrakeStrategy(double distance, double velTarget, double currentVelocity) const;
 
-    void UpdateEqualPriorityCommunication(int egoAgentId, const std::unique_ptr<AgentInterpretation> &oAgent) {
-        auto oAgentId = oAgent->agent->GetID();
-
-        if (std::any_of(equalPriorityCommunication.begin(), equalPriorityCommunication.end(),
-                        [egoAgentId](std::pair<int, std::unordered_map<int, std::pair<std::optional<NumberOfPriorityAgentsOnIntersection>,
-                                                                                      std::optional<NumberOfPriorityAgentsOnIntersection>>>>
-                                         element) { return element.first == egoAgentId; })) {
-            if (!oAgent->conflictSituation.has_value()) {
-                equalPriorityCommunication.at(egoAgentId).erase(oAgentId);
-            }
-            for (auto it = equalPriorityCommunication.at(egoAgentId).cbegin(); it != equalPriorityCommunication.at(egoAgentId).cend();) {
-                if (std::none_of(worldInterpretation.interpretedAgents.begin(), worldInterpretation.interpretedAgents.end(),
-                                 [it](const auto &element) { return it->first == element.first; })) {
-                    it = equalPriorityCommunication.at(egoAgentId).erase(it);
-                }
-                else {
-                    it++;
-                }
-            }
-
-            if (equalPriorityCommunication.at(egoAgentId).empty()) {
-                equalPriorityCommunication.erase(egoAgentId);
-            }
-        }
-    }
-
 private:
-    void UpdatePriorityAgents(int oAgentID, const ConflictSituation &cA);
+    void UpdatePriorityAgents(int oAgentID, Priority priority);
     void DeletePriorityAgent(int oAgentID);
 
     TimeToConflictArea CalculateTimeToConflictAreaEgo(DistanceToConflictArea distance, double velocity) const;
@@ -106,16 +96,13 @@ private:
     const BehaviourData &GetBehaviourData() const {
         return behaviourData;
     }
-    static std::unordered_map<int, std::unordered_map<int, std::pair<std::optional<NumberOfPriorityAgentsOnIntersection>,
-                                                                     std::optional<NumberOfPriorityAgentsOnIntersection>>>>
-        equalPriorityCommunication;
     double maxEmergencyDeceleration;
     double comfortDeceleration;
-    std::unordered_map<int, ConflictSituation> priorityAgents{};
+    std::unordered_map<int, Priority> priorityAgents{};
     const WorldRepresentation &worldRepresentation;
     const WorldInterpretation &worldInterpretation;
     StochasticsInterface *stochastics;
     const LoggerInterface *loggerInterface;
     const BehaviourData &behaviourData;
-    };
+};
 } // namespace LongitudinalDecision

@@ -51,8 +51,6 @@ class CollisionInterpreter : public InterpreterInterface {
 
     polygon_t ConstructAgentPolygonRepresentation(const AgentRepresentation& data, const Common::Vector2d pos, const double hdg) const;
 
-    polygon_t ConstructPolygonRepresentation(const AgentRepresentation& data, const Common::Vector2d pos, const double hdg) const;
-
-    int numberCollisionPoints;
+    polygon_t ConstructPolygonRepresentation(const AgentRepresentation &data, const Common::Vector2d pos, const double hdg) const;
 };
 } // namespace Interpreter

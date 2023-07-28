@@ -83,8 +83,8 @@ private:
 
 private:
     std::string name;
-    std::unordered_map<std::string, std::vector<std::chrono::microseconds>> measuredTimes;
+    std::unordered_map<std::string, std::vector<std::chrono::microseconds>> measuredTimes{};
 
-    std::unordered_map<std::string, std::chrono::_V2::system_clock::time_point> openPoints;
+    std::unordered_map<std::string, std::chrono::_V2::system_clock::time_point> openPoints{};
     std::string lastIdentifier;
 };

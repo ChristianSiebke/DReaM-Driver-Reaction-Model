@@ -39,7 +39,7 @@ void RightOfWayInterpreter::Update(WorldInterpretation* interpretation, const Wo
             throw std::logic_error(msg);
         }
     } catch (std::logic_error e) {
-        std::string message = e.what();
+        const std::string message = "File: " + static_cast<std::string>(__FILE__) + " Line: " + std::to_string(__LINE__) + " " + e.what();
         Log(message, error);
         throw std::logic_error(message);
 
@@ -108,9 +108,8 @@ const MentalInfrastructure::Junction *RightOfWayInterpreter::NextJunction(const 
         return lane->GetPredecessors().front();
     };
     auto nextLane = [&](auto lane) { return agent.IsMovingInLaneDirection() ? successorLane(lane) : predecessorLane(lane); };
-    const MentalInfrastructure::Junction *egoJunction = nullptr;
     auto lane = agent.GetNextLane();
-    for (auto i = 0; i <= maxNumberLanesExtrapolation; i++) {
+    for (unsigned int i = 0; i <= maxNumberLanesExtrapolation; i++) {
         if (lane && lane->IsJunctionLane()) {
             return lane->GetRoad()->GetJunction();
         }
@@ -135,7 +134,7 @@ bool RightOfWayInterpreter::IsMovingTowardsJunction(const AgentRepresentation &a
     auto nextLane = [&](auto lane) { return agent.IsMovingInLaneDirection() ? successorLane(lane) : predecessorLane(lane); };
     auto currentLane = agent.GetLanePosition().lane;
     const MentalInfrastructure::Junction *agentJunction = nullptr;
-    for (auto i = 0; i <= maxNumberLanesExtrapolation; i++) {
+    for (unsigned int i = 0; i <= maxNumberLanesExtrapolation; i++) {
         if (currentLane && currentLane->IsJunctionLane()) {
             agentJunction = currentLane->GetRoad()->GetJunction();
             if (junction == agentJunction) {

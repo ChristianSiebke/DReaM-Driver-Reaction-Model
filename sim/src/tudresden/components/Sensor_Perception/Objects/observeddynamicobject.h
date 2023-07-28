@@ -17,15 +17,15 @@ struct ObservedDynamicObject : ObservedWorldObject {
     ///
     /// \brief Distance of the current Driver to the reference point of this object.
     ///
-    double distanceToReference;
+    double distanceToReference = std::numeric_limits<unsigned int>::max();
 
     ///
     /// \brief The velocity of this object in m/s.
     ///
-    double velocity;
+    double velocity = std::numeric_limits<unsigned int>::max();
 
     ///
     /// \brief The acceleration of this object in m/s^2.
     ///
-    double acceleration;
+    double acceleration = std::numeric_limits<unsigned int>::max();
 };

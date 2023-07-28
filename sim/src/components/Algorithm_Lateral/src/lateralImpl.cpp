@@ -133,6 +133,5 @@ void AlgorithmLateralImplementation::UpdateOutput(int localLinkId, std::shared_p
 
 void AlgorithmLateralImplementation::Trigger(int time)
 {
-    out_desiredSteeringWheelAngle =
-        steeringController.CalculateSteeringAngleTUDresden(time, GetAgent()->GetVehicleModelParameters().vehicleType);
+    out_desiredSteeringWheelAngle = steeringController.CalculateSteeringAngleTUDresden(time, GetAgent());
 }

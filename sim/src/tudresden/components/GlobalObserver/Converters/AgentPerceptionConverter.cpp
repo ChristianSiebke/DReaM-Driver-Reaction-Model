@@ -114,7 +114,7 @@ AgentPerceptionConverter::RouteUpdate(const AgentInterface *agent) const {
     auto rbegin = std::make_reverse_iterator(end);
     auto rend = std::make_reverse_iterator(begin);
 
-    std::vector<GlobalObserver::Routes::InternWaypoint> newRoute;
+    std::vector<GlobalObserver::Routes::InternWaypoint> newRoute{};
     auto currentLaneId = egoAgent.GetReferencePointPosition()->laneId;
     std::transform(
         rbegin, rend, std::back_inserter(newRoute), [&straightRouteGraph = straightRouteGraph, roads, &currentLaneId](auto element) {
@@ -193,8 +193,9 @@ std::shared_ptr<DetailedAgentPerception> AgentPerceptionConverter::ConvertAgent(
                                    referenceLaneDReaM->IsInRoadDirection()
                                        ? actualEgoAgent.GetReferencePointPosition()->roadPosition.s
                                        : referenceLaneDReaM->GetLength() - actualEgoAgent.GetReferencePointPosition()->roadPosition.s};
-    perceptionData.movingInLaneDirection = GeneralAgentPerception::IsMovingInLaneDirection(
-        perceptionData.lanePosition.lane, perceptionData.yaw, perceptionData.lanePosition.sCoordinate, perceptionData.velocity);
+    perceptionData.movingInLaneDirection =
+        GeneralAgentPerception::IsMovingInLaneDirection(perceptionData.lanePosition.lane, perceptionData.yaw,
+                                                        perceptionData.lanePosition.sCoordinate, perceptionData.velocity);
     perceptionData.brakeLight = agent->GetBrakeLight();
     perceptionData.indicatorState = agent->GetIndicatorState();
     perceptionData.nextLane =

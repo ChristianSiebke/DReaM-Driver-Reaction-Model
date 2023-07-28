@@ -158,8 +158,8 @@ struct RightOfWay {
     }
     RightOfWay(bool egoAgent, bool observedAgent) : ego{egoAgent}, observed{observedAgent} {
     }
-    bool ego;
-    bool observed;
+    bool ego{false};
+    bool observed{false};
 };
 
 enum class IntersectionSpot { NONE = 0, IntersectionEntry, IntersectionExit };
@@ -179,7 +179,7 @@ enum class CrossingPhase {
 enum class CrossingType { Random = -1, NA, Left, Straight, Right };
 
 enum class StoppingPointType {
-    NONE,
+    NONE = 0,
     Pedestrian_Right,
     Pedestrian_Left,
     Pedestrian_Crossing_ONE,
@@ -242,7 +242,7 @@ struct CollisionPoint {
 namespace DReaMRoute {
 struct Waypoint {
     OdId roadId{};
-    const MentalInfrastructure::Lane *lane;
+    const MentalInfrastructure::Lane *lane = nullptr;
     double s{};
     bool operator==(const Waypoint &rhs) const {
         return roadId == rhs.roadId && lane == rhs.lane && s == rhs.s;

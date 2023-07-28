@@ -128,7 +128,7 @@ public:
         runId = invocation;
     }
 
-    static void SetScenarioConfigPath(std::string path) {
+    static void SetScenarioConfigPath(const std::string &path) {
         scenarioConfigPath = path;
     }
 

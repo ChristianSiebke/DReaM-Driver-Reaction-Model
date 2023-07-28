@@ -32,25 +32,10 @@ struct JunctionConnection {
 ///
 class Junction : public Element {
 public:
-    Junction(OdId openDriveId, DReaMId dreamId) : Element(openDriveId, dreamId) {
+    Junction(const OdId &openDriveId, DReaMId dreamId) : Element(openDriveId, dreamId) {
     }
     ~Junction() override {
     }
-
-    ///
-    /// \brief Returns the road that connects two other roads.
-    /// \param from the the incoming road
-    /// \param to the target road
-    /// \return the connecting road (can be nullptr)
-    ///
-    const Road *GetRoadForConnection(const Road *from, const Road *to) const;
-
-    ///
-    /// \brief Returns all possible connections for a given incoming road.
-    /// \param from the incoming road
-    /// \return all possible target roads (can be empty)
-    ///
-    const std::vector<const Road *> GetPossibleConnections(const Road *from) const;
 
     ///
     /// \brief Returns all possible connection roads for a given incoming road.
@@ -58,13 +43,6 @@ public:
     /// \return all possible connecting roads (on the junction, can be empty)
     ///
     const std::vector<const Road *> GetConnectionRoads(const Road *from) const;
-
-    ///
-    /// \brief Returns the target road of a connecting road.
-    /// \param on the connecting road
-    /// \return the target road (can be nullptr if the road is not on the junction)
-    ///
-    const Road *GetNextRoad(const Road *on);
 
     ///
     /// \brief Returns all connecting roads of the junction.
@@ -96,8 +74,8 @@ public:
     void AddConnection(const Road *from, const Road *with, const Road *to);
 
 private:
-    std::vector<const Road *> roadsOnJunction;
-    std::vector<JunctionConnection> connections;
-    std::vector<const Road *> incomingRoads;
+    std::vector<const Road *> roadsOnJunction{};
+    std::vector<JunctionConnection> connections{};
+    std::vector<const Road *> incomingRoads{};
 };
 } // namespace MentalInfrastructure

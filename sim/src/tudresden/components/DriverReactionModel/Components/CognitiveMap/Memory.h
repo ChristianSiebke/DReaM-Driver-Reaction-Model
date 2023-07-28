@@ -20,13 +20,14 @@ struct WorldRepresentation;
 namespace CognitiveMap {
 class Memory {
   public:
-    Memory(int cycletime, const BehaviourData& behaviourData, StochasticsInterface* stochastics)
-        : cycletime{static_cast<double>(cycletime)}, behaviourData{behaviourData},
+      Memory(int cycletime, const BehaviourData &behaviourData, StochasticsInterface *stochastics) :
+          cycletime{static_cast<double>(cycletime)},
+          behaviourData{behaviourData},
           reactionTime(behaviourData.cmBehaviour.initialPerceptionTime, behaviourData.cmBehaviour.perceptionLatency, cycletime,
-                       stochastics) {
-        trafficSignalMemory = std::make_unique<TrafficSignalMemory::TrafficSignalMemory>(
-            behaviourData.cmBehaviour.trafficSig_memoryCapacity, behaviourData.cmBehaviour.trafficSig_memorytime);
-    }
+                       stochastics),
+          trafficSignalMemory(std::make_unique<TrafficSignalMemory::TrafficSignalMemory>(
+              behaviourData.cmBehaviour.trafficSig_memoryCapacity, behaviourData.cmBehaviour.trafficSig_memorytime)) {
+      }
     Memory(const Memory&) = delete;
     Memory(Memory&&) = delete;
     Memory& operator=(const Memory&) = delete;
@@ -42,7 +43,7 @@ class Memory {
     void UpdateSensorInput(int time, std::shared_ptr<DetailedAgentPerception> egoAgent,
                            std::vector<std::shared_ptr<GeneralAgentPerception>> agents,
                            std::shared_ptr<InfrastructurePerception> infrastruct,
-                           std::vector<const MentalInfrastructure::TrafficSignal *> s) {
+                           const std::vector<const MentalInfrastructure::TrafficSignal *> &s) {
         timestamp = time;
         egoAgentPerception = egoAgent;
         infrastructurePerception = infrastruct;
@@ -70,21 +71,22 @@ class Memory {
     void CutAmbientAgentRepresentationsIfCapacityExceeded(AmbientAgentRepresentations& agentMemory);
 
     // perceived data
-    std::shared_ptr<InfrastructurePerception> infrastructurePerception;
-    std::shared_ptr<DetailedAgentPerception> egoAgentPerception;
-    std::vector<const MentalInfrastructure::TrafficSignal *> lastSeenTrafficSignals;
+    std::shared_ptr<InfrastructurePerception> infrastructurePerception{nullptr};
+    std::shared_ptr<DetailedAgentPerception> egoAgentPerception{nullptr};
+    std::vector<const MentalInfrastructure::TrafficSignal *> lastSeenTrafficSignals{};
 
     // current active data
     EgoAgentRepresentation egoAgent;
     InfrastructureRepresentation infrastructure;
-    AmbientAgentRepresentations agentMemory;
+    AmbientAgentRepresentations agentMemory{};
+    std::vector<std::shared_ptr<GeneralAgentPerception>> processedAgents{};
 
-    int timestamp;
+    int timestamp = 0;
     double cycletime; // Important, otherwise all calculations are rounded with int!
     const BehaviourData& behaviourData;
     ReactionTime reactionTime;
 
     // sub components
-    std::unique_ptr<TrafficSignalMemory::TrafficSignalMemory> trafficSignalMemory;
+    std::unique_ptr<TrafficSignalMemory::TrafficSignalMemory> trafficSignalMemory{nullptr};
 };
 } // namespace CognitiveMap

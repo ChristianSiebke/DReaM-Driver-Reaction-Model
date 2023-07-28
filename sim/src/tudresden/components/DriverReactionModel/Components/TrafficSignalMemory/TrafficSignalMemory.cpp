@@ -23,7 +23,7 @@ void UpdateSpeedLimits(VisibleTrafficSignals *visibleTrafficSignals, DetailedAge
     const MentalInfrastructure::TrafficSign *lastPassedSpeedLimitSign = nullptr;
 
     if (signsOnLane.size() > 1) {
-        for (int i = 0; i < signsOnLane.size() - 1; i++) {
+        for (unsigned int i = 0; i < signsOnLane.size() - 1; i++) {
             if (ego->movingInLaneDirection) {
                 if (signsOnLane[i]->GetS() < ego->lanePosition.sCoordinate && signsOnLane[i + 1]->GetS() > ego->lanePosition.sCoordinate &&
                     (int)signsOnLane[i]->GetType() > 100) {
