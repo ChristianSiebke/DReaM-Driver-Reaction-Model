@@ -24,7 +24,7 @@ double TargetVelocityCalculation::Update(const WorldRepresentation &worldReprese
 
         return CalculateTargetVelocity(worldRepresentation, crossingInfo);
     }
-    catch (std::logic_error e) {
+    catch (std::logic_error &e) {
         const std::string message = "File: " + static_cast<std::string>(__FILE__) + " Line: " + std::to_string(__LINE__) + " " + e.what();
         Log(message, error);
         throw std::logic_error(message);
@@ -43,11 +43,11 @@ double TargetVelocityCalculation::CalculateTargetVelocity(const WorldRepresentat
     auto velocitySpecificRoad =
         velocityStatisticsSpecificRoads.find(worldRepresentation.egoAgent->GetLanePosition().lane->GetRoad()->GetOpenDriveId());
 
-    if (worldRepresentation.egoAgent->GetVehicleType() == DReaMDefinitions::AgentVehicleType::Car ||
-        worldRepresentation.egoAgent->GetVehicleType() == DReaMDefinitions::AgentVehicleType::Motorbike ||
-        worldRepresentation.egoAgent->GetVehicleType() == DReaMDefinitions::AgentVehicleType::Truck ||
-        worldRepresentation.egoAgent->GetVehicleType() == DReaMDefinitions::AgentVehicleType::Pedestrian ||
-        worldRepresentation.egoAgent->GetVehicleType() == DReaMDefinitions::AgentVehicleType::Bicycle) {
+    if (activeVelocityDistributions && (worldRepresentation.egoAgent->GetVehicleType() == DReaMDefinitions::AgentVehicleType::Car ||
+                                        worldRepresentation.egoAgent->GetVehicleType() == DReaMDefinitions::AgentVehicleType::Motorbike ||
+                                        worldRepresentation.egoAgent->GetVehicleType() == DReaMDefinitions::AgentVehicleType::Truck ||
+                                        worldRepresentation.egoAgent->GetVehicleType() == DReaMDefinitions::AgentVehicleType::Pedestrian ||
+                                        worldRepresentation.egoAgent->GetVehicleType() == DReaMDefinitions::AgentVehicleType::Bicycle)) {
         if ((crossingInfo.phase <= CrossingPhase::Deceleration_TWO && crossingInfo.phase > CrossingPhase::Approach) ||
             (crossingInfo.type == CrossingType::Straight &&
              worldRepresentation.egoAgent->GetIndicatorState() != IndicatorState::IndicatorState_Off)) {

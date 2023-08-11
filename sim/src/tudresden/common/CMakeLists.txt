@@ -32,7 +32,6 @@ add_openpass_target(
     Helper.cpp
     PerceptionData.cpp    
     WorldRepresentation.cpp
-    libs/magic_enum.hpp
  
   INCDIRS
     ${OPENPASS_SIMCORE_DIR}/core

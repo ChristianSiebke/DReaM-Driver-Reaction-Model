@@ -15,47 +15,11 @@ namespace GazeMovement {
 
 void GazeMovement::Update() {
     if (durationCounter >= currentGazeState.fixationDuration || Common::CollisionImminent(worldInterpretation.interpretedAgents)) {
-        DetermineGazeState();
+        currentGazeState = DetermineGazeState();
         durationCounter = 0;
     }
     UpdateUFOVAngle();
     durationCounter += GetCycleTime();
-}
-
-void GazeMovement::DetermineGazeState() {
-    // TODO update old agents
-    double random = GetStochastic()->GetUniformDistributed(0, 1);
-    UpdateRoadSegment();
-
-    if (auto collisionPoint = Common::ClosestCollisionPointByTime(worldInterpretation.interpretedAgents)) {
-        if (collisionPoint->collisionImminent) {
-            currentGazeState = PerformAgentObserveGlance(collisionPoint->oAgentID);
-            return;
-        }
-    }
-
-    if (auto possibleConflictAgent = Common::AgentWithClosestConflictPoint(worldInterpretation.interpretedAgents)) {
-        // TODO set probability
-        if (0.3 >= random) {
-            currentGazeState = PerformAgentObserveGlance(*possibleConflictAgent);
-            return;
-        }
-    }
-
-    if (auto id = Common::LeadingCarID(worldInterpretation.interpretedAgents)) {
-        // TODO min distance for leading condition?
-        if (ProbabilityToFixateLeadCar() >= random) {
-            currentGazeState = PerformAgentObserveGlance(*id);
-            return;
-        }
-    }
-    CrossingPhase phase = worldInterpretation.crossingInfo.phase;
-
-    if (ProbabilityToPerformControlGlance() > random && phase != CrossingPhase::Exit) {
-        currentGazeState = PerformControlGaze(phase);
-        return;
-    }
-    currentGazeState = PerformScanGaze(phase);
 
     if (currentGazeState.fixationState.first == GazeType::NONE ||
         (currentGazeState.fixationState.first == GazeType::ScanGlance &&
@@ -74,12 +38,73 @@ void GazeMovement::DetermineGazeState() {
     }
 }
 
+GazeState GazeMovement::DetermineGazeState() {
+    // TODO update old agents
+    double random = GetStochastic()->GetUniformDistributed(0, 1);
+    UpdateRoadSegment();
+
+    if (auto collisionPoint = Common::ClosestCollisionPointByTime(worldInterpretation.interpretedAgents)) {
+        if (collisionPoint->collisionImminent) {
+            return PerformAgentObserveGlance(collisionPoint->oAgentID);
+        }
+    }
+
+    if (!turningAtJunctionShoulderCheckDecision && worldInterpretation.targetLane &&
+        worldRepresentation.egoAgent->GetNextLane() == *worldInterpretation.targetLane) {
+        turningAtJunctionShoulderCheckDecision = true;
+        if (0.7 >= random || worldRepresentation.egoAgent->GetVehicleType() == DReaMDefinitions::AgentVehicleType::Bicycle) {
+            if (worldInterpretation.triggerShoulderCheckDecision == ScanAOI::ShoulderCheckLeft) {
+                return PerformShoulderCheckLeft(worldInterpretation.triggerShoulderCheckDecision);
+            }
+            else if (worldInterpretation.triggerShoulderCheckDecision == ScanAOI::ShoulderCheckRight) {
+                return PerformShoulderCheckRight(worldInterpretation.triggerShoulderCheckDecision);
+            }
+        }
+    }
+    if (0.7 >= random || worldRepresentation.egoAgent->GetVehicleType() == DReaMDefinitions::AgentVehicleType::Bicycle) {
+        if (worldInterpretation.triggerShoulderCheckDecision == ScanAOI::ShoulderCheckLeft) {
+            return PerformShoulderCheckLeft(worldInterpretation.triggerShoulderCheckDecision);
+        }
+        else if (worldInterpretation.triggerShoulderCheckDecision == ScanAOI::ShoulderCheckRight) {
+            return PerformShoulderCheckRight(worldInterpretation.triggerShoulderCheckDecision);
+        }
+    }
+
+    if (worldInterpretation.triggerShoulderCheckDecision == ScanAOI::OuterLeftRVM && 0.5 >= random) {
+        return PerformMirrowGaze(worldInterpretation.triggerShoulderCheckDecision);
+    }
+    if (worldInterpretation.triggerShoulderCheckDecision == ScanAOI::OuterRightRVM && 0.5 >= random) {
+        return PerformMirrowGaze(worldInterpretation.triggerShoulderCheckDecision);
+    }
+
+    if (auto possibleConflictAgent = Common::AgentWithClosestConflictPoint(worldInterpretation.interpretedAgents)) {
+        // TODO set probability
+        if (0.3 >= random) {
+            return PerformAgentObserveGlance(*possibleConflictAgent);
+        }
+    }
+
+    if (auto id = Common::LeadingCarID(worldInterpretation.interpretedAgents)) {
+        if (ProbabilityToFixateLeadCar() >= random) {
+            return PerformAgentObserveGlance(*id);
+        }
+    }
+
+    CrossingPhase phase = worldInterpretation.crossingInfo.phase;
+
+    if (ProbabilityToPerformControlGlance() > random && phase != CrossingPhase::Exit) {
+        return PerformControlGaze(phase);
+    }
+    return PerformScanGaze(phase);
+}
+
 void GazeMovement::UpdateRoadSegment() {
     if (worldInterpretation.crossingInfo.phase >= CrossingPhase::Approach) {
         auto nextJunction = worldRepresentation.egoAgent->NextJunction();
         if (nextJunction != nullptr) {
             if (nextJunction->GetIncomingRoads().size() == 4) {
                 if (currentSegmentType != SegmentType::XJunction) {
+                    turningAtJunctionShoulderCheckDecision = false;
                     roadSegment = std::make_unique<XJunction>(worldRepresentation, GetStochastic(), GetBehaviourData());
                     currentSegmentType = SegmentType::XJunction;
                 }
@@ -114,6 +139,7 @@ void GazeMovement::UpdateRoadSegment() {
                 }
 
                 if (currentSegmentType != SegmentType::TJunction) {
+                    turningAtJunctionShoulderCheckDecision = false;
                     roadSegment = std::make_unique<TJunction>(worldRepresentation, GetStochastic(), GetBehaviourData(), layout);
                     currentSegmentType = SegmentType::TJunction;
                 }

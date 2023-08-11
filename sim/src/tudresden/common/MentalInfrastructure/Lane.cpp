@@ -205,7 +205,7 @@ std::optional<NextDirectionLanes> Lane::NextLanes(bool movingInLaneDirection) co
     }
     if (nextLanes.size() == 1) {
         result.straightLanes.push_back(nextLanes.front());
-        return std::move(result);
+        return result;
     }
 
     // calculate direction vector of current lane at its end
@@ -238,7 +238,7 @@ std::optional<NextDirectionLanes> Lane::NextLanes(bool movingInLaneDirection) co
             result.rightLanes.push_back(nextLane);
         }
     }
-    return std::move(result);
+    return result;
 }
 
 const MentalInfrastructure::Lane *Lane::NextLane(IndicatorState indicatorState, bool movingInLaneDirection)const {

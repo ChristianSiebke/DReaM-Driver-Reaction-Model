@@ -109,7 +109,8 @@ std::unique_ptr<AmbientAgentRepresentation> Memory::ExtrapolateAmbientAgent(cons
         data.junctionDistance = GeneralAgentPerception::CalculateJunctionDistance(data, newRoad, newPosition->lane);
 
         return std::make_unique<AmbientAgentRepresentation>(std::make_shared<GeneralAgentPerception>(data), agent->GetLifeTime());
-    } catch (std::out_of_range error) {
+    }
+    catch (std::out_of_range &error) {
         auto msg = __FILE__ " Line: " + std::to_string(__LINE__) + error.what() + " Extrapolation failed ";
         throw std::logic_error(msg);
     }

@@ -26,6 +26,7 @@ void LateralDecision::Update() {
     try {
         const_cast<WorldInterpretation &>(worldInterpretation).waitUntilTargetLaneIsFree = false;
         auto egoAgent = worldRepresentation.egoAgent;
+        // abort lane change TODO: encapsulate in function
         if (egoAgent->GetMainLocatorLane() != egoAgent->GetLanePosition().lane &&
             (!NeighborLaneIsFree(egoAgent->GetMainLocatorLane()) ||
              (worldInterpretation.targetLane && *worldInterpretation.targetLane != egoAgent->GetMainLocatorLane()))) {
@@ -42,8 +43,8 @@ void LateralDecision::Update() {
                 return;
             }
         }
-
-        if (!worldInterpretation.targetLane) {
+        const_cast<WorldInterpretation &>(worldInterpretation).triggerShoulderCheckDecision = TriggerLateralGaze();
+        if (!worldInterpretation.targetLane || *worldInterpretation.targetLane == worldRepresentation.egoAgent->GetLanePosition().lane) {
             lateralAction = ResetLateralAction(egoAgent->GetIndicatorState());
             return;
         }
@@ -57,12 +58,14 @@ void LateralDecision::Update() {
                     lateralAction.lateralDisplacement =
                         worldRepresentation.egoAgent->IsMovingInLaneDirection() ? lateralDisplacement : -lateralDisplacement;
                     lateralAction.indicator = IndicatorState::IndicatorState_Left;
+                    const_cast<WorldInterpretation &>(worldInterpretation).triggerShoulderCheckDecision = ScanAOI::ShoulderCheckLeft;
                 }
                 else if (targetLane == egoAgent->GetMainLocatorLane()->GetRightLane()) {
                     auto lateralDisplacement = -((egoAgent->GetMainLocatorLane()->GetWidth() / 2) + (targetLane->GetWidth() / 2));
                     lateralAction.lateralDisplacement =
                         worldRepresentation.egoAgent->IsMovingInLaneDirection() ? lateralDisplacement : -lateralDisplacement;
                     lateralAction.indicator = IndicatorState::IndicatorState_Right;
+                    const_cast<WorldInterpretation &>(worldInterpretation).triggerShoulderCheckDecision = ScanAOI::ShoulderCheckRight;
                 }
                 else {
                     const std::string msg = "File: " + static_cast<std::string>(__FILE__) + " Line: " + std::to_string(__LINE__) +
@@ -89,12 +92,75 @@ void LateralDecision::Update() {
             }
         }
     }
+    catch (std::logic_error &e) {
+        const std::string msg =
+            "File: " + static_cast<std::string>(__FILE__) + " Line: " + std::to_string(__LINE__) + static_cast<std::string>(e.what());
+        Log(msg, error);
+        throw std::runtime_error(msg);
+    }
+    catch (std::runtime_error &e) {
+        const std::string msg =
+            "File: " + static_cast<std::string>(__FILE__) + " Line: " + std::to_string(__LINE__) + static_cast<std::string>(e.what());
+        Log(msg, error);
+        throw std::runtime_error(msg);
+    }
     catch (...) {
         std::string message =
             "File: " + static_cast<std::string>(__FILE__) + " Line: " + std::to_string(__LINE__) + "unexpected exception LateralDecision ";
         throw std::runtime_error(message);
     }
 }
+ScanAOI LateralDecision::TriggerLateralGaze() const {
+    auto egoAgent = worldRepresentation.egoAgent;
+    auto targetLane = *worldInterpretation.targetLane;
+    auto nextLanes = egoAgent->GetLanePosition().lane->NextLanes(egoAgent->IsMovingInLaneDirection());
+    // turning at intersections
+    if (nextLanes &&
+        std::any_of(nextLanes->rightLanes.begin(), nextLanes->rightLanes.end(),
+                    [targetLane](const MentalInfrastructure::Lane *lane) { return lane == targetLane; }) &&
+        !nextLanes->straightLanes.empty() && egoAgent->GetJunctionDistance().toNext < 5) {
+        return ScanAOI::ShoulderCheckRight;
+    }
+
+    // lane change
+    auto route = worldRepresentation.egoAgent->GetRoute();
+    auto laneIterStart =
+        std::find_if(route.begin(), route.end(), [targetLane](DReaMRoute::Waypoint element) { return element.lane == targetLane; });
+
+    if (laneIterStart->lane == egoAgent->GetLanePosition().lane->GetLeftLane()) {
+        return ScanAOI::OuterLeftRVM;
+    }
+    if (laneIterStart->lane == egoAgent->GetLanePosition().lane->GetRightLane()) {
+        return ScanAOI::OuterRightRVM;
+    }
+    auto laneIterNext = laneIterStart;
+    std::advance(laneIterNext, 1);
+    if (route.end() == laneIterNext) {
+        return ScanAOI::NONE;
+    }
+
+    if (egoAgent->GetLanePosition().lane->GetLeftLane() == laneIterNext->lane &&
+        5 > (laneIterStart->s - egoAgent->GetLanePosition().sCoordinate)) {
+        return ScanAOI::OuterLeftRVM;
+    }
+    if (egoAgent->GetLanePosition().lane->GetRightLane() == laneIterNext->lane &&
+        5 > (laneIterStart->s - egoAgent->GetLanePosition().sCoordinate)) {
+        return ScanAOI::OuterRightRVM;
+    }
+
+    if (egoAgent->GetNextLane() && egoAgent->GetNextLane()->GetLeftLane() == laneIterNext->lane &&
+        2 > (laneIterStart->s - laneIterStart->lane->GetFirstPoint()->sOffset) +
+                (egoAgent->GetLanePosition().lane->GetLength() - egoAgent->GetLanePosition().sCoordinate)) {
+        return ScanAOI::OuterLeftRVM;
+    }
+    if (egoAgent->GetNextLane() && egoAgent->GetNextLane()->GetRightLane() == laneIterNext->lane &&
+        2 > (laneIterStart->s - laneIterStart->lane->GetFirstPoint()->sOffset) +
+                (egoAgent->GetLanePosition().lane->GetLength() - egoAgent->GetLanePosition().sCoordinate)) {
+        return ScanAOI::OuterRightRVM;
+    }
+    return ScanAOI::NONE;
+}
+
 LateralAction LateralDecision::ResetLateralAction(IndicatorState currentIndicator) const {
     LateralAction lateralAction;
     lateralAction.lateralDisplacement = 0;
@@ -178,7 +244,7 @@ bool LateralDecision::AgentIsTurningOnJunction() const {
 IndicatorState LateralDecision::SetIndicatorAtJunction(const MentalInfrastructure::Lane *targetLane) const {
     try {
         auto lanesPtr =
-            worldRepresentation.egoAgent->GetMainLocatorLane()->NextLanes(worldRepresentation.egoAgent->IsMovingInLaneDirection());
+            worldRepresentation.egoAgent->GetLanePosition().lane->NextLanes(worldRepresentation.egoAgent->IsMovingInLaneDirection());
         if (lanesPtr) {
             if (std::any_of(lanesPtr->leftLanes.begin(), lanesPtr->leftLanes.end(),
                             [targetLane](auto element) { return element == targetLane; })) {
@@ -193,6 +259,7 @@ IndicatorState LateralDecision::SetIndicatorAtJunction(const MentalInfrastructur
                 auto route = worldRepresentation.egoAgent->GetRoute();
                 auto laneIter = std::find_if(route.begin(), route.end(),
                                              [targetLane](DReaMRoute::Waypoint element) { return element.lane == targetLane; });
+
                 std::advance(laneIter, 1);
 
                 if (route.end() == laneIter) {
@@ -216,10 +283,7 @@ IndicatorState LateralDecision::SetIndicatorAtJunction(const MentalInfrastructur
                 return IndicatorState::IndicatorState_Off;
             }
             else {
-                const std::string msg = "File: " + static_cast<std::string>(__FILE__) + " Line: " + std::to_string(__LINE__) +
-                                        " Indicator cannot be calculated";
-                Log(msg, error);
-                throw std::logic_error(msg);
+                return worldRepresentation.egoAgent->GetIndicatorState();
             }
         }
         const std::string msg =
@@ -227,7 +291,7 @@ IndicatorState LateralDecision::SetIndicatorAtJunction(const MentalInfrastructur
         Log(msg, error);
         throw std::logic_error(msg);
     }
-    catch (std::logic_error e) {
+    catch (std::logic_error &e) {
         const std::string msg =
             "File: " + static_cast<std::string>(__FILE__) + " Line: " + std::to_string(__LINE__) + static_cast<std::string>(e.what());
         Log(msg, error);

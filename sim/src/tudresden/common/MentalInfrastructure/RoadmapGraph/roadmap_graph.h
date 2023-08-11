@@ -61,8 +61,8 @@ public:
     void AddPredecessor(RoadmapNode *);
 
 private:
-    std::list<const RoadmapNode *> successorNodes;
-    std::list<const RoadmapNode *> predecessorNodes;
+    std::list<const RoadmapNode *> successorNodes{};
+    std::list<const RoadmapNode *> predecessorNodes{};
 
     const MentalInfrastructure::Lane *lane;
     const OdId OdLaneId;

@@ -145,10 +145,6 @@ class AlgorithmDReaMImplementation : public AlgorithmInterface {
     //! All infrastructure perception information of sensor_DriverPerception
     std::shared_ptr<InfrastructurePerception> infrastructurePerception;
 
-    // Driver Behaviour Model
-
-    DriverReactionModel DReaM;
-
     //**************************************************
     // Output-----------------------------------------
     //**************************************************
@@ -193,5 +189,7 @@ class AlgorithmDReaMImplementation : public AlgorithmInterface {
     Logger logger;
     LoggerInterface loggerInterface;
     ObservationInterface *observerInstance{nullptr};
+    // Driver Behaviour Model
+    DriverReactionModel DReaM;
     //-END-reaction time--//
 };

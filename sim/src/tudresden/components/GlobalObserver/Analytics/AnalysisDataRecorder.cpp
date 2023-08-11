@@ -13,8 +13,7 @@ std::map<std::string, std::shared_ptr<std::map<DReaMDefinitions::AgentVehicleTyp
 std::map<std::string, std::shared_ptr<std::map<DReaMDefinitions::AgentVehicleType, std::shared_ptr<std::vector<double>>>>>
     AnalysisDataRecorder::exitVehicleVelocities{};
 
-void AnalysisDataRecorder::Trigger(std::shared_ptr<DetailedAgentPerception> ego, std::shared_ptr<InfrastructurePerception> infrastructure,
-                                   AnalysisSignal data, int time) {
+void AnalysisDataRecorder::Trigger(std::shared_ptr<DetailedAgentPerception> ego, AnalysisSignal data, int time) {
     if (time > runtime)
         runtime = time;
 

@@ -129,11 +129,11 @@ Import::LanePosition RouteImporter::ImportLanePosition(QDomElement positionEleme
     try {
         lanePosition.laneId = std::stoi(laneIdString);
     }
-    catch (std::invalid_argument e) {
+    catch (std::invalid_argument &e) {
         std::string message = "LaneId must be integer";
         throw std::logic_error(message);
     }
-    catch (std::out_of_range e) {
+    catch (std::out_of_range &e) {
         std::string message = "LaneId is out of range";
         throw std::logic_error(message);
     }

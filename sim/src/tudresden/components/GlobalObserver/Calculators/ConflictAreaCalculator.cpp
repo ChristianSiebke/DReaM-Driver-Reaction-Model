@@ -120,6 +120,11 @@ ConflictAreaCalculator::IntersectionPoints(const MentalInfrastructure::LanePoint
         else if (std::abs(pSDistance2) < 0.001) {
             pS = p2->sOffset;
         }
+        else {
+            std::string message = "File: " + static_cast<std::string>(__FILE__) + " Line: " + std::to_string(__LINE__) +
+                                  "IntersectionPoints can not be calculated";
+            throw std::runtime_error(message);
+        }
 
         if (qSDistance1 > 0 && qSDistance2 > 0) {
             qS = ((q1->sOffset / qSDistance1) + (q2->sOffset / qSDistance2)) / ((1 / qSDistance1) + (1 / qSDistance2));
@@ -129,6 +134,11 @@ ConflictAreaCalculator::IntersectionPoints(const MentalInfrastructure::LanePoint
         }
         else if (std::abs(qSDistance2) < 0.001) {
             qS = q2->sOffset;
+        }
+        else {
+            std::string message = "File: " + static_cast<std::string>(__FILE__) + " Line: " + std::to_string(__LINE__) +
+                                  "IntersectionPoints can not be calculated";
+            throw std::runtime_error(message);
         }
         return {{{point->x, point->y, p1->hdg, pS}, {point->x, point->y, q1->hdg, qS}}};
     }

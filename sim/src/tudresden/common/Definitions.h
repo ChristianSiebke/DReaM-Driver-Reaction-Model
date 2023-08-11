@@ -46,9 +46,22 @@ enum class AgentVehicleType { NONE = -2, Undefined = -1, Car = 0, Pedestrian, Mo
 }
 
 // fixation area of interests
-enum class ScanAOI { NONE, Right, Straight, Left, InnerRVM, OuterLeftRVM, OuterRightRVM, Dashboard, Other };
-enum class ControlAOI { NONE, Right, Left, Oncoming };
 enum class GazeType { NONE, ScanGlance, ObserveGlance, ControlGlance };
+enum class ScanAOI {
+    NONE,
+    Right,
+    Straight,
+    Left,
+    InnerRVM,
+    OuterLeftRVM,
+    OuterRightRVM,
+    Dashboard,
+    Other,
+    ShoulderCheckRight,
+    ShoulderCheckLeft
+};
+enum class ControlAOI { NONE, Right, Left, Oncoming };
+
 enum class TrafficDensity { NONE, LOW, MODERATE, HIGH };
 
 enum class TJunctionLayout { LeftRight, LeftStraight, StraightRight };

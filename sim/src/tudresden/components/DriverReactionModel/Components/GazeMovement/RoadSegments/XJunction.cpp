@@ -198,9 +198,6 @@ const Common::Vector2d *XJunction::FixationPointForCGOnXJunction(const std::vect
     return fixPoint;
 }
 
-double XJunction::LookUpFixationDuration(CrossingPhase phase, ScanAOI aoi) {
-}
-
 AOIProbabilities XJunction::LookUpControlAOIProbability(CrossingPhase phase) {
     AOIProbabilities aoiProbs;
 

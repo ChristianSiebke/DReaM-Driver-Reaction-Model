@@ -153,7 +153,8 @@ struct WorldInterpretation {
     std::optional<const MentalInfrastructure::Lane *> targetLane = std::nullopt;
     // waiting till lane change is possible
     bool waitUntilTargetLaneIsFree = false;
-   //! data for DroneAnalysis
+    ScanAOI triggerShoulderCheckDecision = ScanAOI::NONE;
+    //! data for DroneAnalysis
     std::unique_ptr<AnalysisSignal> analysisData{nullptr};
 };
 

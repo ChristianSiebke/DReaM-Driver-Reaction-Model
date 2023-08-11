@@ -74,7 +74,7 @@ void AABBTreeHandler::FirstExecution()
         }
         catch (std::invalid_argument const &ex)
         {
-            printf("Error while trying to add traffic sign with id %s to the AABBTree, ignoring.\nPlease be aware that only integer ids "
+            printf("Error while trying to add traffic sign with id %s to the AABBTree, ignoring.\n Please be aware that only integer ids "
                    "are supported.",
                    std::to_string(obj->id));
             continue;
@@ -95,10 +95,10 @@ void AABBTreeHandler::FirstExecution()
             obj->id = std::stoi(trafficLight->GetId());
         }
         catch (std::invalid_argument const &ex) {
-            printf("Error while trying to add traffic sign with id %s to the AABBTree, ignoring.\nPlease be aware that only integer ids "
-                   "are supported.",
-                   std::to_string(obj->id));
-            continue;
+            std::string message = "File: " + static_cast<std::string>(__FILE__) + " Line: " + std::to_string(__LINE__) +
+                                  " Error while trying to add traffic sign with id " + std::to_string(obj->id) +
+                                  "to the AABBTree, ignoring.Please be aware that only integer ids are supported.";
+            throw std::runtime_error(message);
         }
 
         aabbTree->InsertObject(obj);

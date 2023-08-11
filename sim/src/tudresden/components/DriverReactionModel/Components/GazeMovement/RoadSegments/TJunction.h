@@ -33,8 +33,6 @@ protected:
 
     virtual AOIProbabilities LookUpControlAOIProbability(CrossingPhase phase) override;
 
-    virtual double LookUpFixationDuration(CrossingPhase phase, ScanAOI aoi) override;
-
     /**
      * @brief View in the specified direction (ControlAOI) to check for approaching vehicles.
      * @param ControlAOI  view direction

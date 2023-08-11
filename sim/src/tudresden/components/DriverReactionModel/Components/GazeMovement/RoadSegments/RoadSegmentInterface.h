@@ -32,40 +32,48 @@ class RoadSegmentInterface {
 
     virtual GazeState ControlGlance(CrossingPhase phase) = 0;
 
+    virtual GazeState ShoulderCheckRight(ScanAOI gaze);
+    virtual GazeState ShoulderCheckLeft(ScanAOI gaze);
+    virtual GazeState MirrowGaze(ScanAOI aoi);
     double UpdateUFOVAngle(GazeState currentGazeState);
 
-    virtual double GetProbabilityToFixateLeadCar() { return probabilityFixateLeadCar; }
+    virtual double GetProbabilityToFixateLeadCar() {
+        return probabilityFixateLeadCar;
+    }
 
-    virtual double GetProbabilityToPerformControlGlance() { return probabilityControlGlance; }
+    virtual double GetProbabilityToPerformControlGlance() {
+        return probabilityControlGlance;
+    }
 
-    virtual const std::vector<Common::Vector2d>& GetControlFixationPoints() { return controlFixationPoints; }
+        virtual const std::vector<Common::Vector2d> &GetControlFixationPoints() {
+        return controlFixationPoints;
+        }
 
-  protected:
-    virtual AOIProbabilities LookUpScanAOIProbability(CrossingPhase phase) = 0;
+    protected:
+        virtual AOIProbabilities LookUpScanAOIProbability(CrossingPhase phase) = 0;
 
-    virtual AOIProbabilities LookUpControlAOIProbability(CrossingPhase phase) = 0;
+        virtual AOIProbabilities LookUpControlAOIProbability(CrossingPhase phase) = 0;
 
-    virtual double LookUpFixationDuration(CrossingPhase phase, ScanAOI aoi) = 0;
-    /****************************************
-     * HELPER METHODS
-     ****************************************/
-    virtual AOIProbabilities ScaleProbabilitiesToOneAndEliminateNegativeProbabilities(AOIProbabilities aoiProbs);
+        /****************************************
+         * HELPER METHODS
+         ****************************************/
+        virtual AOIProbabilities ScaleProbabilitiesToOneAndEliminateNegativeProbabilities(AOIProbabilities aoiProbs);
 
-    virtual Common::Vector2d CalculateForesightVector(double foresightRange);
+        virtual Common::Vector2d CalculateForesightVector(double foresightRange);
 
-    double ScanUFOVAngle(ScanAOI aoi);
-    double CalculateGlobalViewingAngle(Common::Vector2d viewVector) const;
+        double ScanUFOVAngle(ScanAOI aoi);
+        double CalculateGlobalViewingAngle(Common::Vector2d viewVector) const;
 
-    // have to be set by subclasses!
-    double probabilityFixateLeadCar = 0;
-    double probabilityControlGlance = 0;
+        // have to be set by subclasses!
+        double probabilityFixateLeadCar = 0;
+        double probabilityControlGlance = 0;
 
-    //!  all possible control points that could be fixated during the control
-    //!  glance
-    std::vector<Common::Vector2d> controlFixationPoints{};
-    const WorldRepresentation& worldRepresentation;
-    StochasticsInterface* stochastics;
-    const BehaviourData& behaviourData;
+        //!  all possible control points that could be fixated during the control
+        //!  glance
+        std::vector<Common::Vector2d> controlFixationPoints{};
+        const WorldRepresentation &worldRepresentation;
+        StochasticsInterface *stochastics;
+        const BehaviourData &behaviourData;
 };
 
 namespace Node {

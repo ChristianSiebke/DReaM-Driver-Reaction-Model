@@ -1,5 +1,7 @@
 #include "AgentPerceptionConverter.h"
 
+#include <cassert>
+
 #include "WorldDataQuery.h"
 #include "egoAgent.h"
 
@@ -28,7 +30,7 @@ void AgentPerceptionConverter::SetInitialRoute(AgentInterface *agent, std::vecto
                          this->infrastructurePerception->lookupTableRoadNetwork.lanes.at(route.back().lane)->IsInRoadDirection()},
             roadGraph);
         auto target = vertex1;
-        RoadGraphVertex vertex2;
+        RoadGraphVertex vertex2 = 0;
         for (auto iter = route.rbegin(); iter != route.rend(); iter++) {
             if (route.back().roadId == iter->roadId) {
                 continue;
@@ -40,6 +42,7 @@ void AgentPerceptionConverter::SetInitialRoute(AgentInterface *agent, std::vecto
             add_edge(vertex2, vertex1, roadGraph);
             vertex1 = vertex2;
         }
+        assert((vertex2 == 0) && " Vertex is 0");
         const_cast<AgentInterface *>(agent)->GetEgoAgent().SetRoadGraph(std::move(roadGraph), vertex2, target);
     }
 }
@@ -92,7 +95,7 @@ AgentPerceptionConverter::RouteUpdate(const AgentInterface *agent) const {
     RoadGraphVertex wayPoint = targetVertex;
     auto vertex1 = add_vertex(get(RouteElement(), branchedGraph, wayPoint), straightRouteGraph);
     auto newTarget = vertex1;
-    RoadGraphVertex vertex2;
+    RoadGraphVertex vertex2 = 0;
     while (wayPoint != root) {
         for (auto [edge, edgesEnd] = edges(branchedGraph); edge != edgesEnd; ++edge) {
             if (target(*edge, branchedGraph) == wayPoint) {
@@ -104,6 +107,7 @@ AgentPerceptionConverter::RouteUpdate(const AgentInterface *agent) const {
             }
         }
     }
+    assert((vertex2 == 0) && " Vertex is 0");
     auto newRoot = vertex2;
 
     auto worldData = static_cast<OWL::WorldData *>(world->GetWorldData());

@@ -38,7 +38,7 @@ using StandardRoad = RoadSegments::Edge::StandardRoad;
 
 namespace GazeMovement {
 
-enum class SegmentType { NONE = 0, XJunction, TJunction, StandardRoad };
+enum class SegmentType { NONE, XJunction, TJunction, StandardRoad };
 
 class GazeMovement : public Component::ComponentInterface {
   public:
@@ -57,9 +57,11 @@ class GazeMovement : public Component::ComponentInterface {
     const std::vector<Common::Vector2d>& GetSegmentControlFixationPoints() { return roadSegment->GetControlFixationPoints(); }
 
   private:
-    void DetermineGazeState();
+      GazeState DetermineGazeState();
 
-    void UpdateUFOVAngle() { currentGazeState.ufovAngle = roadSegment->UpdateUFOVAngle(currentGazeState); }
+      void UpdateUFOVAngle() {
+          currentGazeState.ufovAngle = roadSegment->UpdateUFOVAngle(currentGazeState);
+      }
 
     void UpdateRoadSegment();
 
@@ -68,6 +70,15 @@ class GazeMovement : public Component::ComponentInterface {
     GazeState PerformScanGaze(CrossingPhase phase) { return roadSegment->ScanGlance(phase); }
 
     GazeState PerformAgentObserveGlance(int agentId) { return roadSegment->AgentObserveGlance(agentId); }
+    GazeState PerformShoulderCheckRight(ScanAOI gaze) {
+          return roadSegment->ShoulderCheckRight(gaze);
+    };
+    GazeState PerformShoulderCheckLeft(ScanAOI gaze) {
+          return roadSegment->ShoulderCheckLeft(gaze);
+    };
+    GazeState PerformMirrowGaze(ScanAOI gaze) {
+          return roadSegment->MirrowGaze(gaze);
+    };
 
     double ProbabilityToFixateLeadCar() { return roadSegment->GetProbabilityToFixateLeadCar(); }
 
@@ -80,6 +91,7 @@ class GazeMovement : public Component::ComponentInterface {
 
     std::unique_ptr<RoadSegmentInterface> roadSegment{nullptr};
     SegmentType currentSegmentType = SegmentType::NONE;
+    bool turningAtJunctionShoulderCheckDecision = false;
 
     int durationCounter = 0;
 };

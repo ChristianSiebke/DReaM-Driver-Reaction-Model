@@ -26,7 +26,7 @@ void ConflictSituationInterpreter::Update(WorldInterpretation *interpretation, c
         }
         timeMeasure2.EndTimePoint();
     }
-    catch (std::logic_error e) {
+    catch (std::logic_error &e) {
         const std::string message = "File: " + static_cast<std::string>(__FILE__) + " Line: " + std::to_string(__LINE__) + " " + e.what();
         Log(message, error);
         throw std::logic_error(message);

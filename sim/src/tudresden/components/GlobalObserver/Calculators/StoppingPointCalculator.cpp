@@ -211,7 +211,6 @@ StoppingPoint StoppingPointCalculator::CalculateStoppingPoint(const MentalInfras
     double minDistance = static_cast<double>(INFINITY);
 
     bool minPointNotAtEnd = false;
-    bool minPointAtNext = false;
 
     // loop over all points on ego lane
     // determine point with minimum distance

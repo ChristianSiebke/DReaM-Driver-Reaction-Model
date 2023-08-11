@@ -29,8 +29,6 @@ class StandardRoad : public Road {
     virtual AOIProbabilities LookUpScanAOIProbability(CrossingPhase phase) override;
 
     virtual AOIProbabilities LookUpControlAOIProbability(CrossingPhase phase) override;
-
-    virtual double LookUpFixationDuration(CrossingPhase phase, ScanAOI aoi) override;
 };
 
 } // namespace Edge

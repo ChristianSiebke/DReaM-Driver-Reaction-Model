@@ -16,7 +16,15 @@ double RoadSegmentInterface::UpdateUFOVAngle(GazeState currentGazeState) {
     double ufovAngle;
     switch (currentGazeState.fixationState.first) {
     case GazeType::ScanGlance:
-        ufovAngle = ScanUFOVAngle(static_cast<ScanAOI>(currentGazeState.fixationState.second));
+        if (currentGazeState.fixationState.second == static_cast<int>(ScanAOI::ShoulderCheckLeft)) {
+            ufovAngle = ShoulderCheckLeft(ScanAOI::ShoulderCheckLeft).ufovAngle;
+        }
+        else if (currentGazeState.fixationState.second == static_cast<int>(ScanAOI::ShoulderCheckRight)) {
+            ufovAngle = ShoulderCheckRight(ScanAOI::ShoulderCheckRight).ufovAngle;
+        }
+        else {
+            ufovAngle = ScanUFOVAngle(static_cast<ScanAOI>(currentGazeState.fixationState.second));
+        }
         break;
     case GazeType::ObserveGlance:
         if (auto oAgent = Common::FindAgentById(currentGazeState.target.fixationAgent, *worldRepresentation.agentMemory)) {
@@ -104,9 +112,8 @@ double RoadSegmentInterface::CalculateGlobalViewingAngle(Common::Vector2d viewVe
 
 GazeState RoadSegmentInterface::AgentObserveGlance(int agentId) {
     GazeState gazeState;
-    ObservationAOI oAOI = Common::FindAgentById(agentId, *worldRepresentation.agentMemory)->GetVehicleType();
 
-    gazeState.fixationState = {GazeType::ObserveGlance, static_cast<int>(oAOI)};
+    gazeState.fixationState = {GazeType::ObserveGlance, agentId};
     gazeState.target.fixationAgent = agentId;
     gazeState.openingAngle = behaviourData.gmBehaviour.observe_openingAngle;
     DistributionEntry *de = behaviourData.gmBehaviour.observe_fixationDuration.get();
@@ -157,6 +164,46 @@ GazeState RoadSegmentInterface::ScanGlance(CrossingPhase phase) {
         // no agents visible, opening angle too
         gazeState.openingAngle = 0;
         gazeState.viewDistance = 0;
+    }
+    return gazeState;
+}
+
+GazeState RoadSegmentInterface::ShoulderCheckRight(ScanAOI gaze) {
+    GazeState gazeState;
+    gazeState.fixationState = {GazeType::ScanGlance, static_cast<int>(gaze)};
+    gazeState.ufovAngle = worldRepresentation.egoAgent->GetYawAngle() + 110 * (M_PI / 180);
+    gazeState.openingAngle = behaviourData.gmBehaviour.observe_openingAngle;
+    DistributionEntry *de = behaviourData.gmBehaviour.observe_fixationDuration.get();
+    double dist = stochastics->GetNormalDistributed(de->mean, de->std_deviation);
+    gazeState.fixationDuration = Common::ValueInBounds(de->min, dist, de->max);
+    return gazeState;
+}
+GazeState RoadSegmentInterface::ShoulderCheckLeft(ScanAOI gaze) {
+    GazeState gazeState;
+    gazeState.fixationState = {GazeType::ScanGlance, static_cast<int>(gaze)};
+    gazeState.ufovAngle = worldRepresentation.egoAgent->GetYawAngle() - 110 * (M_PI / 180);
+    gazeState.openingAngle = behaviourData.gmBehaviour.observe_openingAngle;
+    DistributionEntry *de = behaviourData.gmBehaviour.observe_fixationDuration.get();
+    double dist = stochastics->GetNormalDistributed(de->mean, de->std_deviation);
+    gazeState.fixationDuration = Common::ValueInBounds(de->min, dist, de->max);
+    return gazeState;
+}
+
+GazeState RoadSegmentInterface::MirrowGaze(ScanAOI aoi) {
+    GazeState gazeState;
+    if (behaviourData.gmBehaviour.scanAOIs.mirrorAOIs.find(aoi) != behaviourData.gmBehaviour.scanAOIs.mirrorAOIs.end()) {
+        gazeState.fixationState = {GazeType::ScanGlance, static_cast<int>(aoi)};
+        gazeState.openingAngle = behaviourData.gmBehaviour.scanAOIs.mirrorAOIs.at(aoi).openingAngle;
+        gazeState.mirrorGaze = true;
+        gazeState.mirrorPos = behaviourData.gmBehaviour.scanAOIs.mirrorAOIs.at(aoi).pos;
+        Distribution de = behaviourData.gmBehaviour.scanAOIs.mirrorAOIs.at(aoi).fixationDuration;
+        double dist = stochastics->GetNormalDistributed(de.mean, de.std_deviation);
+        gazeState.fixationDuration = Common::ValueInBounds(de.min, dist, de.max);
+        gazeState.viewDistance = 100;
+    }
+    else {
+        std::string message = __FILE__ " Line: " + std::to_string(__LINE__) + "AOI does not exist";
+        throw std::runtime_error(message);
     }
     return gazeState;
 }

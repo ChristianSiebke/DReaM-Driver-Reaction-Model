@@ -40,7 +40,7 @@ void DriverReactionModel::UpdateDReaM(int time, std::shared_ptr<DetailedAgentPer
                                       std::vector<const MentalInfrastructure::TrafficSignal *> trafficSignals) {
     UpdateInput(time, egoAgent, ambientAgents, infrastructure, trafficSignals);
     UpdateComponents();
-    UpdateAgentStateRecorder(time, egoAgent->id, infrastructure);
+    UpdateAgentStateRecorder(egoAgent->id, infrastructure);
 }
 
 void DriverReactionModel::UpdateInput(int time, std::shared_ptr<DetailedAgentPerception> egoAgent,
@@ -65,13 +65,13 @@ void DriverReactionModel::UpdateComponents() {
     timeMeasure.EndTimePoint();
 }
 
-void DriverReactionModel::UpdateAgentStateRecorder(int time, int id, std::shared_ptr<InfrastructurePerception> infrastructure) {
+void DriverReactionModel::UpdateAgentStateRecorder(int id, std::shared_ptr<InfrastructurePerception> infrastructure) {
     std::vector<GeneralAgentPerception> observedAgents;
     for (const auto &oAgent : *(GetWorldRepresentation().agentMemory)) {
         observedAgents.push_back(oAgent->GetInternalData());
     }
 
-    agentStateRecorder->BufferTimeStep(time, id, GetGazeState(), observedAgents, GetWorldInterpretation().crossingInfo,
+    agentStateRecorder->BufferTimeStep(id, GetGazeState(), observedAgents, GetWorldInterpretation().crossingInfo,
                                        GetSegmentControlFixationPoints(), GetWorldRepresentation().trafficSignalMemory->memory);
     agentStateRecorder->AddInfrastructurePerception(infrastructure);
 }

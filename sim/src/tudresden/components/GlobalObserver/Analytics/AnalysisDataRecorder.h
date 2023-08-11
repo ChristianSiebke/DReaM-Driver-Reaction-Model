@@ -109,8 +109,7 @@ public:
      *
      * @param time current time in the simulation
      */
-    void Trigger(std::shared_ptr<DetailedAgentPerception> ego, std::shared_ptr<InfrastructurePerception> infrastructure,
-                 AnalysisSignal data, int time);
+    void Trigger(std::shared_ptr<DetailedAgentPerception> ego, AnalysisSignal data, int time);
 
     /**
      * @brief Resets the instance of AnalysisDataRecorder.

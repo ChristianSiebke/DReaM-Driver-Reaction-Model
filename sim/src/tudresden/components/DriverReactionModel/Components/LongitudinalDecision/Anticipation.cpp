@@ -395,8 +395,6 @@ double Anticipation::ApproachingStoppingPoint(double sFrontEgo, double tEndObser
 double Anticipation::AccelerationIfPriorityAgentExist(const std::unique_ptr<AgentInterpretation> &observedAgent,
                                                       const std::optional<ConflictSituation> &conflictSituation,
                                                       const TimeToConflictArea &tObserved, double freeAccelerationEgo) {
-    auto oAgent = observedAgent->agent;
-    auto oAgentID = oAgent->GetID();
     if (observedAgent->rightOfWay.ego == false && observedAgent->rightOfWay.observed == false) {
         if ((observedAgent->agent->GetAcceleration() == 0.0 && observedAgent->agent->GetVelocity() == 0.0) ||
             worldRepresentation.egoAgent->GetJunctionDistance().on > observedAgent->agent->GetJunctionDistance().on ||

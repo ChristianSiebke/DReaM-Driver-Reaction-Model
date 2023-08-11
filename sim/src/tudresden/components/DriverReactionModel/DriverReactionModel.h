@@ -56,7 +56,7 @@ class DriverReactionModel {
                        std::shared_ptr<InfrastructurePerception> infrastructure,
                        std::vector<const MentalInfrastructure::TrafficSignal *> trafficSignals);
       void UpdateComponents();
-      void UpdateAgentStateRecorder(int time, int id, std::shared_ptr<InfrastructurePerception> infrastructure);
+      void UpdateAgentStateRecorder(int id, std::shared_ptr<InfrastructurePerception> infrastructure);
 
       std::shared_ptr<AgentStateRecorder::AgentStateRecorder> agentStateRecorder{nullptr};
       std::shared_ptr<BehaviourData> behaviourData{nullptr};

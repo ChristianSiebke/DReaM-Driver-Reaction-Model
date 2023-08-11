@@ -36,6 +36,7 @@ public:
     }
 
 private:
+    ScanAOI TriggerLateralGaze() const;
     bool NeighborLaneIsFree(const MentalInfrastructure::Lane *targetLane) const;
     bool TurningAtJunction() const;
     LateralAction ResetLateralAction(IndicatorState currentIndicator) const;

@@ -101,7 +101,7 @@ public:
             Segment edge({area.outer()[i].x(), area.outer()[i].y()}, {area.outer()[i + 1].x(), area.outer()[i + 1].y()});
             Segment raySegment({ray.origin.x, ray.origin.y}, {ray.direction.x * 1000, ray.direction.y * 1000});
 
-            std::vector<Point2d> output;
+            std::vector<Point2d> output{};
             boost::geometry::intersection(edge, raySegment, output);
 
             if (!output.empty()) {

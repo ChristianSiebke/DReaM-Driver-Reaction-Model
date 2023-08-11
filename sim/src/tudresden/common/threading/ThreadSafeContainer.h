@@ -50,8 +50,8 @@ template <class T> class ThreadSafeUnorderedSet {
     }
 
   private:
-    std::unordered_set<T> data;
-    mutable std::mutex mtx;
+      std::unordered_set<T> data{};
+      mutable std::mutex mtx;
 };
 
 ///
@@ -99,8 +99,8 @@ template <class T, class C> class ThreadSafeUnorderedMap {
     }
 
   private:
-    std::unordered_map<T, C> data;
-    mutable std::mutex mtx;
+      std::unordered_map<T, C> data{};
+      mutable std::mutex mtx;
 };
 
 ///

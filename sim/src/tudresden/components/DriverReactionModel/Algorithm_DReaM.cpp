@@ -39,6 +39,7 @@ extern "C" ALGORITHM_DReaM_SHARED_EXPORT ModelInterface *OpenPASS_CreateInstance
         const CallbackInterface *callbacks)
 {
     Callbacks = callbacks;
+    Q_UNUSED(world);
 
     try
     {

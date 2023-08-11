@@ -38,7 +38,7 @@ void RightOfWayInterpreter::Update(WorldInterpretation* interpretation, const Wo
             auto msg = __FILE__ " Line: " + std::to_string(__LINE__) + " rightOfWayMap does not have the same size like agents in memory ";
             throw std::logic_error(msg);
         }
-    } catch (std::logic_error e) {
+    } catch (std::logic_error &e) {
         const std::string message = "File: " + static_cast<std::string>(__FILE__) + " Line: " + std::to_string(__LINE__) + " " + e.what();
         Log(message, error);
         throw std::logic_error(message);

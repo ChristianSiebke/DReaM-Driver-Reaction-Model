@@ -9,13 +9,16 @@
  *****************************************************************************/
 
 #include "StandardRoad.h"
+
+#include <cassert>
+
 #include <qglobal.h>
 
 namespace RoadSegments {
 namespace Edge {
 
-GazeState StandardRoad::ControlGlance(CrossingPhase phase){
-    // on standard road exist no special control gazes
+GazeState StandardRoad::ControlGlance(CrossingPhase phase) { // on standard road exist no special control gazes
+    assert(true && " Function should never executed");
 };
 
 AOIProbabilities StandardRoad::LookUpScanAOIProbability(CrossingPhase phase) {
@@ -38,11 +41,9 @@ AOIProbabilities StandardRoad::LookUpScanAOIProbability(CrossingPhase phase) {
     return scaledAOIProbs;
 };
 
-AOIProbabilities StandardRoad::LookUpControlAOIProbability(CrossingPhase phase){
-    // on standard road exist no special control gazes
+AOIProbabilities StandardRoad::LookUpControlAOIProbability(CrossingPhase phase) { // on standard road exist no special control gazes
+    assert(true && " Function should never executed");
 };
-
-double StandardRoad::LookUpFixationDuration(CrossingPhase phase, ScanAOI aoi){};
 
 } // namespace Edge
 } // namespace RoadSegments

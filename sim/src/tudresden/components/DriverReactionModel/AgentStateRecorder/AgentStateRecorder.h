@@ -46,6 +46,8 @@
 
 namespace AgentStateRecorder {
 
+constexpr bool RECORD_DReaMOUTPUT = true;
+
 class EXPORT AgentStateRecorder {
 public:
     ~AgentStateRecorder() {
@@ -67,26 +69,29 @@ public:
     void AddInfrastructurePerception(std::shared_ptr<InfrastructurePerception> infrastructurePerception);
 
     static void BufferRuns(int runId) {
-        cyclesTree.add("Header", GenerateHeader());
-        cyclesTree.add_child("Samples", samplesTree);
-        runResultTree.add_child("Cyclics", std::move(cyclesTree));
-        runResultTree.put("<xmlattr>.RunId", std::to_string(runId));
-        runResultsTree.add_child("RunResult", std::move(runResultTree));
-        cyclesTree.clear();
-        samplesTree.clear();
-        runResultTree.clear();
+        if (RECORD_DReaMOUTPUT) {
+            cyclesTree.add("Header", GenerateHeader());
+            cyclesTree.add_child("Samples", samplesTree);
+            runResultTree.add_child("Cyclics", std::move(cyclesTree));
+            runResultTree.put("<xmlattr>.RunId", std::to_string(runId));
+            runResultsTree.add_child("RunResult", std::move(runResultTree));
+            cyclesTree.clear();
+            samplesTree.clear();
+            runResultTree.clear();
+        }
     };
 
     static void BufferSamples(int time) {
-        sampleTree.put("<xmlattr>.time", std::to_string(time));
-        samplesTree.add_child("Sample", sampleTree);
-        agentTree.clear();
-        sampleTree.clear();
+        if (RECORD_DReaMOUTPUT) {
+            sampleTree.put("<xmlattr>.time", std::to_string(time));
+            samplesTree.add_child("Sample", sampleTree);
+            agentTree.clear();
+            sampleTree.clear();
+        }
     };
 
-    void BufferTimeStep(const int &time, const int &agentId, const GazeState &gazeState,
-                        const std::vector<GeneralAgentPerception> &observedAgents, const CrossingInfo &crossingInfo,
-                        const std::vector<Common::Vector2d> &segmentControlFixationPoints,
+    void BufferTimeStep(const int &agentId, const GazeState &gazeState, const std::vector<GeneralAgentPerception> &observedAgents,
+                        const CrossingInfo &crossingInfo, const std::vector<Common::Vector2d> &segmentControlFixationPoints,
                         const std::unordered_map<DReaMId, MemorizedTrafficSignal> *trafficSignals);
 
     //! All information saved in the agentStateRecorder is written into an xml file

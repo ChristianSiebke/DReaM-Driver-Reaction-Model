@@ -88,12 +88,12 @@ struct ActionDecisionBehaviour {
 };
 
 struct CognitiveMapBehaviour {
-    unsigned int memoryCapacity;
+    int memoryCapacity;
     int memorytime;
     DistributionEntry initialPerceptionTime{0, 0, 0, 0};
     DistributionEntry perceptionLatency{0, 0, 0, 0};
 
-    unsigned int trafficSig_memoryCapacity;
+    int trafficSig_memoryCapacity;
     int trafficSig_memorytime;
 };
 
