@@ -111,6 +111,9 @@ void LateralDecision::Update() {
     }
 }
 ScanAOI LateralDecision::TriggerLateralGaze() const {
+    if (!worldInterpretation.targetLane.has_value())
+        return ScanAOI::NONE;
+
     auto egoAgent = worldRepresentation.egoAgent;
     auto targetLane = *worldInterpretation.targetLane;
     auto nextLanes = egoAgent->GetLanePosition().lane->NextLanes(egoAgent->IsMovingInLaneDirection());
@@ -118,7 +121,7 @@ ScanAOI LateralDecision::TriggerLateralGaze() const {
     if (nextLanes &&
         std::any_of(nextLanes->rightLanes.begin(), nextLanes->rightLanes.end(),
                     [targetLane](const MentalInfrastructure::Lane *lane) { return lane == targetLane; }) &&
-        !nextLanes->straightLanes.empty() && egoAgent->GetJunctionDistance().toNext < 5) {
+        !nextLanes->straightLanes.empty() && (egoAgent->GetJunctionDistance().toNext < 5 && egoAgent->GetJunctionDistance().toNext > 0)) {
         return ScanAOI::ShoulderCheckRight;
     }
 
@@ -133,8 +136,17 @@ ScanAOI LateralDecision::TriggerLateralGaze() const {
     if (laneIterStart->lane == egoAgent->GetLanePosition().lane->GetRightLane()) {
         return ScanAOI::OuterRightRVM;
     }
+
+    if (route.end() == laneIterStart) {
+        const std::string msg =
+            "File: " + static_cast<std::string>(__FILE__) + " Line: " + std::to_string(__LINE__) + " can not find target lane in route";
+        Log(msg, error);
+        throw std::logic_error(msg);
+    }
+
     auto laneIterNext = laneIterStart;
     std::advance(laneIterNext, 1);
+
     if (route.end() == laneIterNext) {
         return ScanAOI::NONE;
     }

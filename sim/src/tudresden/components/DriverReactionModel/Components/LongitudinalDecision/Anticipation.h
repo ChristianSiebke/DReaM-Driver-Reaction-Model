@@ -16,8 +16,8 @@
 namespace LongitudinalDecision {
 typedef int NumberOfPriorityAgentsOnIntersection;
 struct TimeToConflictArea {
-    double vehicleFrontToCAStart; // time until the front of the vehicle reach conflict area
-    double vehicleBackToCAEnd;    // time until the end of the vehicle leaves the conflict area
+    double vehicleFrontToCAStart {0}; // time until the front of the vehicle reach conflict area
+    double vehicleBackToCAEnd{0};     // time until the end of the vehicle leaves the conflict area
 };
 
 struct Priority {

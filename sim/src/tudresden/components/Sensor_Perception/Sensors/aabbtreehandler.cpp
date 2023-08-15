@@ -20,105 +20,124 @@ AABBTreeHandler::AABBTreeHandler(WorldInterface *world) :
 
 void AABBTreeHandler::FirstExecution()
 {
-    auto worldData = static_cast<OWL::WorldData *>(world->GetWorldData());
-    // previously, these for loops could be skipped by using 'auto stationaryObjects = worldData->GetStationaryObjects();'
-    // but this method returns OWL::Implementations::StationaryObject instead of OWL::Interfaces::StationaryObject which results in
-    // faulty linking. Until this is fixed in OpenPass these loops will do since they are only called once.
-    std::list<const OWL::Interfaces::StationaryObject *> stationaryObjects;
-    for (const auto &road : worldData->GetRoads()) {
-        for (const auto &section : road.second->GetSections()) {
-            for (const auto &lane : section->GetLanes()) {
-                for (const auto &worldObject : lane->GetWorldObjects(true)) {
-                    auto stationaryObject = dynamic_cast<const OWL::Interfaces::StationaryObject *>(worldObject.second);
-                    if (stationaryObject != nullptr)
-                        stationaryObjects.push_back(stationaryObject);
-                }
+    try {
+        auto worldData = static_cast<OWL::WorldData *>(world->GetWorldData());
+        // previously, these for loops could be skipped by using 'auto stationaryObjects = worldData->GetStationaryObjects();'
+        // but this method returns OWL::Implementations::StationaryObject instead of OWL::Interfaces::StationaryObject which results in
+        // faulty linking. Until this is fixed in OpenPass these loops will do since they are only called once.
+        std::list<const OWL::Interfaces::StationaryObject *> stationaryObjects;
+        for (const auto &road : worldData->GetRoads()) {
+            for (const auto &section : road.second->GetSections()) {
+                for (const auto &lane : section->GetLanes()) {
+                    for (const auto &worldObject : lane->GetWorldObjects(true)) {
+                        auto stationaryObject = dynamic_cast<const OWL::Interfaces::StationaryObject *>(worldObject.second);
+                        if (stationaryObject != nullptr)
+                            stationaryObjects.push_back(stationaryObject);
+                    }
 
-                for (const auto &worldObject : lane->GetWorldObjects(false)) {
-                    auto stationaryObject = dynamic_cast<const OWL::Interfaces::StationaryObject *>(worldObject.second);
-                    if (stationaryObject != nullptr)
-                        stationaryObjects.push_back(stationaryObject);
+                    for (const auto &worldObject : lane->GetWorldObjects(false)) {
+                        auto stationaryObject = dynamic_cast<const OWL::Interfaces::StationaryObject *>(worldObject.second);
+                        if (stationaryObject != nullptr)
+                            stationaryObjects.push_back(stationaryObject);
+                    }
                 }
             }
         }
-    }
+        auto trafficSigns = worldData->GetTrafficSigns();
+        auto trafficLights = worldData->GetTrafficLights();
+        auto agents = world->GetAgents();
 
-    auto trafficSigns = worldData->GetTrafficSigns();
-    auto trafficLights = worldData->GetTrafficLights();
-    auto agents = world->GetAgents();
+        // initial tree generated (size = size of all objects in the world)
+        aabbTree = std::make_shared<AABBTree>(stationaryObjects.size() + trafficSigns.size() + agents.size());
 
-    // initial tree generated (size = size of all objects in the world)
-    aabbTree = std::make_shared<AABBTree>(stationaryObjects.size() + trafficSigns.size() + agents.size());
+        for (const auto &stationaryObject : stationaryObjects) {
+            auto obj = std::make_shared<ObservedStaticObject>();
+            obj->area = ConstructPolygon(stationaryObject);
+            obj->RecalculateAABB();
+            obj->objectType = ObservedObjectType::Building;
+            obj->id = stationaryObject->GetId();
 
-    for (const auto &stationaryObject : stationaryObjects) {
-        auto obj = std::make_shared<ObservedStaticObject>();
-        obj->area = ConstructPolygon(stationaryObject);
-        obj->RecalculateAABB();
-        obj->objectType = ObservedObjectType::Building;
-        obj->id = stationaryObject->GetId();
-
-        aabbTree->InsertObject(obj);
-        this->stationaryObjects.push_back(obj);
-    }
-
-    for (const auto &[_, trafficSign] : trafficSigns)
-    {
-        auto obj = std::make_shared<ObservedTrafficSignal>();
-        obj->area = ConstructPolygon(trafficSign);
-        obj->RecalculateAABB();
-        obj->objectType = ObservedObjectType::TrafficSign;
-        obj->referencePosition = Common::Vector2d(trafficSign->GetReferencePointPosition().x, trafficSign->GetReferencePointPosition().y);
-        try
-        {
-            obj->id = std::stoi(trafficSign->GetId());
+            aabbTree->InsertObject(obj);
+            this->stationaryObjects.push_back(obj);
         }
-        catch (std::invalid_argument const &ex)
-        {
-            printf("Error while trying to add traffic sign with id %s to the AABBTree, ignoring.\n Please be aware that only integer ids "
-                   "are supported.",
-                   std::to_string(obj->id));
-            continue;
-        }
+        for (const auto &[_, trafficSign] : trafficSigns) {
+            auto obj = std::make_shared<ObservedTrafficSignal>();
+            obj->area = ConstructPolygon(trafficSign);
+            obj->RecalculateAABB();
+            obj->objectType = ObservedObjectType::TrafficSign;
+            obj->referencePosition =
+                Common::Vector2d(trafficSign->GetReferencePointPosition().x, trafficSign->GetReferencePointPosition().y);
 
-        aabbTree->InsertObject(obj);
-        this->trafficSignals.push_back(obj);
-        this->trafficSignalsMappingReversed.insert(std::make_pair(obj, trafficSign->GetId()));
-    }
-
-    for (const auto &[_, trafficLight] : trafficLights) {
-        auto obj = std::make_shared<ObservedTrafficSignal>();
-        obj->area = ConstructPolygon(trafficLight);
-        obj->RecalculateAABB();
-        obj->objectType = ObservedObjectType::TrafficLight;
-        obj->referencePosition = Common::Vector2d(trafficLight->GetReferencePointPosition().x, trafficLight->GetReferencePointPosition().y);
-        try {
-            obj->id = std::stoi(trafficLight->GetId());
-        }
-        catch (std::invalid_argument const &ex) {
-            std::string message = "File: " + static_cast<std::string>(__FILE__) + " Line: " + std::to_string(__LINE__) +
-                                  " Error while trying to add traffic sign with id " + std::to_string(obj->id) +
-                                  "to the AABBTree, ignoring.Please be aware that only integer ids are supported.";
-            throw std::runtime_error(message);
+            try {
+                obj->id = std::stoi(trafficSign->GetId());
+            }
+            catch (std::invalid_argument const &ex) {
+                printf(
+                    "Error while trying to add traffic sign with id %s to the AABBTree, ignoring.\n Please be aware that only integer ids "
+                    "are supported.",
+                    std::to_string(obj->id));
+                continue;
+            }
+            aabbTree->InsertObject(obj);
+            this->trafficSignals.push_back(obj);
+            this->trafficSignalsMappingReversed.insert(std::make_pair(obj, trafficSign->GetId()));
         }
 
-        aabbTree->InsertObject(obj);
-        this->trafficSignals.push_back(obj);
-        this->trafficSignalsMappingReversed.insert(std::make_pair(obj, trafficLight->GetId()));
+        for (const auto &[_, trafficLight] : trafficLights) {
+            auto obj = std::make_shared<ObservedTrafficSignal>();
+            obj->area = ConstructPolygon(trafficLight);
+            obj->RecalculateAABB();
+            obj->objectType = ObservedObjectType::TrafficLight;
+            obj->referencePosition =
+                Common::Vector2d(trafficLight->GetReferencePointPosition().x, trafficLight->GetReferencePointPosition().y);
+            try {
+                obj->id = std::stoi(trafficLight->GetId());
+            }
+            catch (std::invalid_argument const &ex) {
+                std::string message = "File: " + static_cast<std::string>(__FILE__) + " Line: " + std::to_string(__LINE__) +
+                                      " Error while trying to add traffic sign with id " + std::to_string(obj->id) +
+                                      "to the AABBTree, ignoring.Please be aware that only integer ids are supported.";
+                throw std::runtime_error(message);
+            }
+            aabbTree->InsertObject(obj);
+            this->trafficSignals.push_back(obj);
+            this->trafficSignalsMappingReversed.insert(std::make_pair(obj, trafficLight->GetId()));
+        }
+
+        for (const auto &[_, agent] : agents) {
+            auto obj = std::make_shared<ObservedDynamicObject>();
+            obj->area = ConstructPolygon(agent);
+            obj->RecalculateAABB();
+            obj->objectType = ObservedObjectType::MovingObject;
+            obj->id = agent->GetId();
+
+            aabbTree->InsertObject(obj);
+            this->agentsMapping.insert(std::make_pair(agent, obj));
+            this->agents.push_back(agent);
+            this->agentObjects.push_back(obj);
+            // this->agentsInversed.insert(std::make_pair(obj, agent));
+        }
     }
 
-    for (const auto &[_, agent] : agents)
-    {
-        auto obj = std::make_shared<ObservedDynamicObject>();
-        obj->area = ConstructPolygon(agent);
-        obj->RecalculateAABB();
-        obj->objectType = ObservedObjectType::MovingObject;
-        obj->id = agent->GetId();
-
-        aabbTree->InsertObject(obj);
-        this->agentsMapping.insert(std::make_pair(agent, obj));
-        this->agents.push_back(agent);
-        this->agentObjects.push_back(obj);
-        // this->agentsInversed.insert(std::make_pair(obj, agent));
+    catch (const char *error) {
+        const std::string msg = "File: " + static_cast<std::string>(__FILE__) + " Line: " + std::to_string(__LINE__);
+        throw std::runtime_error(msg);
+    }
+    catch (const std::string &error) {
+        const std::string msg = "File: " + static_cast<std::string>(__FILE__) + " Line: " + std::to_string(__LINE__);
+        throw std::runtime_error(msg);
+    }
+    catch (const std::out_of_range &error) {
+        const std::string msg = "File: " + static_cast<std::string>(__FILE__) + " Line: " + std::to_string(__LINE__) + " " + error.what();
+        throw std::runtime_error(msg);
+    }
+    catch (const std::runtime_error &error) {
+        const std::string msg = "File: " + static_cast<std::string>(__FILE__) + " Line: " + std::to_string(__LINE__) + " " + error.what();
+        throw std::runtime_error(msg);
+    }
+    catch (const std::logic_error &error) {
+        const std::string msg = "File: " + static_cast<std::string>(__FILE__) + " Line: " + std::to_string(__LINE__) + " " + error.what();
+        throw std::runtime_error(msg);
     }
 }
 
@@ -140,7 +159,7 @@ std::shared_ptr<AABBTree> AABBTreeHandler::GetCurrentAABBTree(int timestamp)
     {
         if (agentsMapping.find(agent) != agentsMapping.end())
         {
-            auto toUpdate = this->agentsMapping[agent];
+            auto toUpdate = this->agentsMapping.at(agent);
             toUpdate->area = ConstructPolygon(agent);
             toUpdate->RecalculateAABB();
             aabbTree->UpdateObject(toUpdate);

@@ -468,8 +468,8 @@ uint16_t AnalysisDataRecorder::ComputeGroup(GroupingData &data) {
     else {
         return 0b1111111111;
     }
-    uint16_t obstructed = data.obstructed ? 0b0000010000 : 0b0000000000 + data.obstructed2 ? 0b0000100000 : 0b0000000000;
-    uint16_t following = data.following ? 0b0000000100 : 0b0000000000 + data.following2 ? 0b0000001000 : 0b0000000000;
+    uint16_t obstructed = (data.obstructed ? 0b0000010000 : 0b0000000000) + (data.obstructed2 ? 0b0000100000 : 0b0000000000);
+    uint16_t following = (data.following ? 0b0000000100 : 0b0000000000) + (data.following2 ? 0b0000001000 : 0b0000000000);
     uint16_t profile;
     std::sort(data.velocityProfile.begin(), data.velocityProfile.end());
     int median = data.velocityProfile.at(data.velocityProfile.size() / 2);

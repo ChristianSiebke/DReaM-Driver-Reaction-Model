@@ -98,10 +98,10 @@ public:
         double length = std::numeric_limits<double>::max();
         bool hit = false;
         for (unsigned i = 0; i < area.outer().size() - 1; i++) {
-            Segment edge({area.outer()[i].x(), area.outer()[i].y()}, {area.outer()[i + 1].x(), area.outer()[i + 1].y()});
+            Segment edge({area.outer().at(i).x(), area.outer().at(i).y()}, {area.outer().at(i + 1).x(), area.outer().at(i + 1).y()});
             Segment raySegment({ray.origin.x, ray.origin.y}, {ray.direction.x * 1000, ray.direction.y * 1000});
 
-            std::vector<Point2d> output{};
+            std::vector<Point2d> output;
             boost::geometry::intersection(edge, raySegment, output);
 
             if (!output.empty()) {

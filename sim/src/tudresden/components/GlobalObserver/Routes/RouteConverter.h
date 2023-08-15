@@ -18,9 +18,9 @@
 namespace GlobalObserver::Routes {
 
 struct InternWaypoint {
-    OdId roadId{};
-    OwlId lane;
-    double s{};
+    OdId roadId{""};
+    OwlId lane{999};
+    double s{-999};
 };
 
 class RouteConverter {

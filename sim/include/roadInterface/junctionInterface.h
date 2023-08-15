@@ -10,9 +10,10 @@
 #ifndef JUNCTIONINTERFACE
 #define JUNCTIONINTERFACE
 
+#include <map>
+#include <memory>
 
 #include "connectionInterface.h"
-#include <map>
 
 struct Priority
 {
@@ -38,7 +39,7 @@ public:
 
     virtual void AddPriority(Priority priority) = 0;
 
-    virtual std::map<std::string, ConnectionInterface*> GetConnections() const = 0;
+    virtual std::map<std::string, std::shared_ptr<ConnectionInterface>> GetConnections() const = 0;
 
     virtual const std::vector<Priority>& GetPriorities() const = 0;
 

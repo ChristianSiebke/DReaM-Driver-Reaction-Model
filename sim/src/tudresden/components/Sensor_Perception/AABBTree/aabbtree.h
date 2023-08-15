@@ -22,7 +22,7 @@
 
 struct AABBNode {
     AABB aabb;
-    std::shared_ptr<AABBInterface> object;
+    std::shared_ptr<AABBInterface> object = nullptr;
 
     unsigned parentNodeIndex;
     unsigned leftNodeIndex;

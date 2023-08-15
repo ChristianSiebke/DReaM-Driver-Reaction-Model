@@ -42,7 +42,6 @@ void AgentPerceptionConverter::SetInitialRoute(AgentInterface *agent, std::vecto
             add_edge(vertex2, vertex1, roadGraph);
             vertex1 = vertex2;
         }
-        assert((vertex2 == 0) && " Vertex is 0");
         const_cast<AgentInterface *>(agent)->GetEgoAgent().SetRoadGraph(std::move(roadGraph), vertex2, target);
     }
 }
@@ -107,7 +106,6 @@ AgentPerceptionConverter::RouteUpdate(const AgentInterface *agent) const {
             }
         }
     }
-    assert((vertex2 == 0) && " Vertex is 0");
     auto newRoot = vertex2;
 
     auto worldData = static_cast<OWL::WorldData *>(world->GetWorldData());

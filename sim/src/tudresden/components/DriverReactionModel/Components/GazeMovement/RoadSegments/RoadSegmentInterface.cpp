@@ -332,7 +332,7 @@ void Junction::SortControlFixPoints(std::vector<Common::Vector2d> &controlFixPoi
 
     std::map<double, Common::Vector2d> sortedFixationPointsByViewAngle;
     for (size_t i = 0; i < viewAngles.size(); ++i) {
-        if (!sortedFixationPointsByViewAngle.insert(std::make_pair(viewAngles[i], controlFixPointsOnXJunction[i])).second) {
+        if (!sortedFixationPointsByViewAngle.insert(std::make_pair(viewAngles.at(i), controlFixPointsOnXJunction.at(i))).second) {
             std::string message = __FILE__ " Line: " + std::to_string(__LINE__) + "view Angle is not unique!";
             throw std::runtime_error(message);
         }

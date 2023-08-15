@@ -68,12 +68,12 @@ void BasicVisualSensor::ThreadedAgentPerception(bool useThreads) {
         // Multithread execution
         for (unsigned i = 0; i < nb_threads; ++i) {
             unsigned start = i * batch_size;
-            my_threads[i] = std::thread([this](unsigned s, unsigned e) { AgentPerceptionThread(s, e); }, start, start + batch_size);
+            my_threads.at(i) = std::thread([this](unsigned s, unsigned e) { AgentPerceptionThread(s, e); }, start, start + batch_size);
         }
 
         // for all elements that are left
         int start = nb_threads * batch_size;
-        my_threads[nb_threads] =
+        my_threads.at(nb_threads) =
             std::thread([this](unsigned s, unsigned e) { AgentPerceptionThread(s, e); }, start, start + batch_remainder);
 
         // Wait for the other thread to finish their task
@@ -88,8 +88,8 @@ void BasicVisualSensor::ThreadedAgentPerception(bool useThreads) {
 
 void BasicVisualSensor::AgentPerceptionThread(unsigned startIndex, unsigned endIndex) {
     for (unsigned i = startIndex; i < endIndex; i++) {
-        const auto obj = aabbTreeHandler->agentObjects[i];
-        const auto agent = aabbTreeHandler->agents[i];
+        const auto obj = aabbTreeHandler->agentObjects.at(i);
+        const auto agent = aabbTreeHandler->agents.at(i);
 
         if (agent->GetId() == egoAgent->GetId())
             continue;

@@ -233,7 +233,11 @@ double Anticipation::TravelTimeObserved(double distance, bool egoInsideConflictA
     if (distance <= 0) {
         return 0;
     }
-    double estimatedTargetVelocityObsevedAgent = worldInterpretation.targetVelocity;
+    // limit estiamated target velocity for bicycle
+    double estimatedTargetVelocityObsevedAgent =
+        observedAgent->agent->GetVehicleType() == DReaMDefinitions::AgentVehicleType::Bicycle && worldInterpretation.targetVelocity > 6
+            ? 6
+            : worldInterpretation.targetVelocity;
     if (estimatedTargetVelocityObsevedAgent < velocity && acceleration > -0.1) {
         estimatedTargetVelocityObsevedAgent = velocity;
     }

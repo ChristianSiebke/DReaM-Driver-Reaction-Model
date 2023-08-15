@@ -22,9 +22,9 @@ class Road;
 /// \brief Struct to encapsulate the conenction information for one connection of a junction.
 ///
 struct JunctionConnection {
-    const Road *from;
-    const Road *with;
-    const Road *to;
+    const Road *from = nullptr;
+    const Road *with = nullptr;
+    const Road *to = nullptr;
 };
 
 ///

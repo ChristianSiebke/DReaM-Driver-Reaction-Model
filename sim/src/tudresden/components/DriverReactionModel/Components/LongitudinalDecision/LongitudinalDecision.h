@@ -65,7 +65,7 @@ public:
         return accelerationResult;
     }
     //--debugging
-    std::string debuggingState;
+    std::string debuggingState{""};
     //--debugging
 
 private:

@@ -25,26 +25,26 @@ void UpdateSpeedLimits(VisibleTrafficSignals *visibleTrafficSignals, DetailedAge
     if (signsOnLane.size() > 1) {
         for (unsigned int i = 0; i < signsOnLane.size() - 1; i++) {
             if (ego->movingInLaneDirection) {
-                if (signsOnLane[i]->GetS() < ego->lanePosition.sCoordinate && signsOnLane[i + 1]->GetS() > ego->lanePosition.sCoordinate &&
-                    (int)signsOnLane[i]->GetType() > 100) {
-                    lastPassedSpeedLimitSign = signsOnLane[i];
+                if (signsOnLane.at(i)->GetS() < ego->lanePosition.sCoordinate &&
+                    signsOnLane.at(i + 1)->GetS() > ego->lanePosition.sCoordinate && (int)signsOnLane.at(i)->GetType() > 100) {
+                    lastPassedSpeedLimitSign = signsOnLane.at(i);
                     break;
                 }
             }
             else {
-                if (signsOnLane[i]->GetS() > ego->lanePosition.sCoordinate && signsOnLane[i + 1]->GetS() < ego->lanePosition.sCoordinate &&
-                    (int)signsOnLane[i]->GetType() > 100) {
-                    lastPassedSpeedLimitSign = signsOnLane[i];
+                if (signsOnLane.at(i)->GetS() > ego->lanePosition.sCoordinate &&
+                    signsOnLane.at(i + 1)->GetS() < ego->lanePosition.sCoordinate && (int)signsOnLane.at(i)->GetType() > 100) {
+                    lastPassedSpeedLimitSign = signsOnLane.at(i);
                     break;
                 }
             }
         }
     }
     else if (signsOnLane.size() == 1) {
-        if (ego->movingInLaneDirection && ego->lanePosition.sCoordinate > signsOnLane[0]->GetS())
-            lastPassedSpeedLimitSign = signsOnLane[0];
-        else if (!ego->movingInLaneDirection && ego->lanePosition.sCoordinate < signsOnLane[0]->GetS())
-            lastPassedSpeedLimitSign = signsOnLane[0];
+        if (ego->movingInLaneDirection && ego->lanePosition.sCoordinate > signsOnLane.at(0)->GetS())
+            lastPassedSpeedLimitSign = signsOnLane.at(0);
+        else if (!ego->movingInLaneDirection && ego->lanePosition.sCoordinate < signsOnLane.at(0)->GetS())
+            lastPassedSpeedLimitSign = signsOnLane.at(0);
     }
 
     if (lastPassedSpeedLimitSign != nullptr) {
@@ -88,8 +88,8 @@ VisibleTrafficSignals *TrafficSignalMemory::Update(int timestamp, std::vector<co
         std::sort(toSort.begin(), toSort.end(), VectorCompare());
 
         for (auto i = toSort.size(); i >= overhead; i--) {
-            EraseFromVisibleTrafficSignals(toSort[i].second.trafficSignal);
-            memory.erase(toSort[i].first);
+            EraseFromVisibleTrafficSignals(toSort.at(i).second.trafficSignal);
+            memory.erase(toSort.at(i).first);
         }
     }
 
@@ -102,7 +102,7 @@ void TrafficSignalMemory::InsertIntoVisibleTrafficSignals(const MentalInfrastruc
     auto validLanes = signal->GetValidLanes();
     for (const auto &lane : validLanes) {
         if (visibleTrafficSignals->laneTrafficSignalMap.find(lane->GetDReaMId()) == visibleTrafficSignals->laneTrafficSignalMap.end()) {
-            std::list<const MentalInfrastructure::TrafficSignal *> tmp;
+            std::list<const MentalInfrastructure::TrafficSignal *> tmp{};
             tmp.push_back(signal);
             visibleTrafficSignals->laneTrafficSignalMap.insert(std::make_pair(lane->GetDReaMId(), tmp));
         }
@@ -119,7 +119,7 @@ void TrafficSignalMemory::EraseFromVisibleTrafficSignals(const MentalInfrastruct
     auto validLanes = signal->GetValidLanes();
     for (const auto &lane : validLanes) {
         if (visibleTrafficSignals->laneTrafficSignalMap.find(lane->GetDReaMId()) != visibleTrafficSignals->laneTrafficSignalMap.end()) {
-            visibleTrafficSignals->laneTrafficSignalMap[lane->GetDReaMId()].remove(signal);
+            visibleTrafficSignals->laneTrafficSignalMap.at(lane->GetDReaMId()).remove(signal);
         }
     }
 }

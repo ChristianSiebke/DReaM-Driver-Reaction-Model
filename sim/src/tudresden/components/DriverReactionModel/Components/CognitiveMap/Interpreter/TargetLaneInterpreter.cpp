@@ -55,6 +55,10 @@ std::optional<const MentalInfrastructure::Lane *> TargetLaneInterpreter::TargetL
         targetWP = std::next(targetWP);
     }
     else {
+        if (waypoints.end() == targetWP) {
+            // agent reach target
+            return std::nullopt;
+        }
         return targetWP->lane;
     }
 

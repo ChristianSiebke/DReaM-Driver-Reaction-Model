@@ -18,7 +18,7 @@ Junction::~Junction()
 
 ConnectionInterface *Junction::AddConnection(std::string id, std::string incomingRoadId, std::string connectingRoadId, ContactPointType contactPoint)
 {
-    Connection *connection = new (std::nothrow) Connection(id,incomingRoadId,connectingRoadId,contactPoint);
+    std::shared_ptr<ConnectionInterface> connection = std::make_shared<Connection>(id, incomingRoadId, connectingRoadId, contactPoint);
 
     if(!connection)
     {
@@ -27,7 +27,7 @@ ConnectionInterface *Junction::AddConnection(std::string id, std::string incomin
 
     connections.insert({id, connection});
 
-    return connection;
+    return connection.get();
 }
 
 void Junction::AddPriority(Priority priority)
@@ -35,8 +35,7 @@ void Junction::AddPriority(Priority priority)
     priorities.emplace_back(priority);
 }
 
-std::map<std::string, ConnectionInterface *> Junction::GetConnections() const
-{
+std::map<std::string, std::shared_ptr<ConnectionInterface>> Junction::GetConnections() const {
     return connections;
 }
 

@@ -17,7 +17,7 @@ class FakeJunction : public JunctionInterface
 {
   public:
     MOCK_METHOD4(AddConnection, ConnectionInterface *(std::string, std::string, std::string, ContactPointType));
-    MOCK_CONST_METHOD0(GetConnections, std::map<std::string, ConnectionInterface *>());
+    MOCK_CONST_METHOD0(GetConnections, std::map<std::string, std::shared_ptr<ConnectionInterface>>());
     MOCK_CONST_METHOD0(GetId, std::string());
     MOCK_METHOD1(AddPriority, void (Priority priority));
     MOCK_CONST_METHOD0(GetPriorities, const std::vector<Priority>& ());

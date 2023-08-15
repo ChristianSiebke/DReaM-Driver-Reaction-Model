@@ -186,16 +186,16 @@ ConflictAreaCalculator::CalculateConflictAreas(const MentalInfrastructure::Lane 
 
     std::vector<std::pair<MentalInfrastructure::LanePoint, MentalInfrastructure::LanePoint>> cAPoints;
     for (unsigned int i = 0; i < leftLeft.first.size(); i++) {
-        cAPoints.push_back(std::make_pair(leftLeft.first[i], leftLeft.second[i]));
+        cAPoints.push_back(std::make_pair(leftLeft.first.at(i), leftLeft.second.at(i)));
     }
     for (unsigned int i = 0; i < leftRight.first.size(); i++) {
-        cAPoints.push_back(std::make_pair(leftRight.first[i], leftRight.second[i]));
+        cAPoints.push_back(std::make_pair(leftRight.first.at(i), leftRight.second.at(i)));
     }
     for (unsigned int i = 0; i < rightLeft.first.size(); i++) {
-        cAPoints.push_back(std::make_pair(rightLeft.first[i], rightLeft.second[i]));
+        cAPoints.push_back(std::make_pair(rightLeft.first.at(i), rightLeft.second.at(i)));
     }
     for (unsigned int i = 0; i < rightRight.first.size(); i++) {
-        cAPoints.push_back(std::make_pair(rightRight.first[i], rightRight.second[i]));
+        cAPoints.push_back(std::make_pair(rightRight.first.at(i), rightRight.second.at(i)));
     }
     auto findPartnerPointWithMaxS = [cAPoints](std::vector<MentalInfrastructure::LanePoint> points) {
         double s = -1;

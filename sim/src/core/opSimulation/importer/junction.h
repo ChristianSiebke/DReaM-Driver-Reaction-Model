@@ -32,7 +32,7 @@ public:
 
     virtual void AddPriority(Priority priority) override;
 
-    virtual std::map<std::string, ConnectionInterface*> GetConnections() const override;
+    virtual std::map<std::string, std::shared_ptr<ConnectionInterface>> GetConnections() const override;
 
     virtual const std::vector<Priority>& GetPriorities() const override;
 
@@ -40,7 +40,7 @@ public:
 
 private:
     std::string id;
-    std::map<std::string, ConnectionInterface*> connections;
+    std::map<std::string, std::shared_ptr<ConnectionInterface>> connections;
     std::vector<Priority> priorities;
 };
 

@@ -38,9 +38,9 @@ struct TrajectoryData {
     std::vector<double> timeHeadway;
 };
 struct GroupingData {
-    std::string startRoadOdId;
-    std::string endRoadOdId;
-    DReaMDefinitions::AgentVehicleType agentType;
+    std::string startRoadOdId = "";
+    std::string endRoadOdId = "";
+    DReaMDefinitions::AgentVehicleType agentType = DReaMDefinitions::AgentVehicleType::NONE;
     bool secondJunction = false;
     int obstructionCounter = 0;
     int followingTarget = -1;
@@ -50,31 +50,31 @@ struct GroupingData {
     bool obstructed2 = false;
     bool following2 = false;
     // vector of: offset to velocity distribution mean in relation to std deviation
-    std::vector<double> velocityProfile;
+    std::vector<double> velocityProfile{};
 };
 
 struct AgentData {
-    int runId;
-    int agentId;
-    DReaMDefinitions::AgentVehicleType agentType;
-    uint8_t group;
+    int runId = -1;
+    int agentId = -1;
+    DReaMDefinitions::AgentVehicleType agentType = DReaMDefinitions::AgentVehicleType::NONE;
+    uint16_t group = 1;
     TrajectoryData td;
 };
 
 struct TTCData {
-    int runId;
-    int egoId;
-    int otherId;
+    int runId = -1;
+    int egoId = -1;
+    int otherId = -1;
 
-    double minTTC;
+    double minTTC = -1;
 };
 
 struct CollisionData {
-    int timestamp;
-    int runId;
-    int egoId;
-    int otherId;
-    int type;
+    int timestamp = -1;
+    int runId = -1;
+    int egoId = -1;
+    int otherId = -1;
+    int type = -1;
 };
 
 class DLL_EXPORT AnalysisDataRecorder {

@@ -137,7 +137,7 @@ TEST(SceneryConverter, RefactoringSafeguard_DoNotDelete)
     ON_CALL(connectingRoad, GetLaneSections()).WillByDefault(ReturnRef(stubLaneSections));
 
     FakeJunction stubJunction;
-    std::map<std::string, ConnectionInterface*> stubConnections = {{"", &stubConnection}};
+    std::map<std::string, std::shared_ptr<ConnectionInterface>> stubConnections = {{"", &stubConnection}};
     ON_CALL(stubJunction, GetConnections()).WillByDefault(Return(stubConnections));
 
     auto [status, error_message] = Internal::ConnectJunction(

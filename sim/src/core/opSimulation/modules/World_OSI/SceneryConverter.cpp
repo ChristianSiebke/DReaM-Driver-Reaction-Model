@@ -42,7 +42,7 @@ ConversionStatus ConnectJunction(const SceneryInterface *scenery, const Junction
 {
     for (auto &entry : junction->GetConnections())
     {
-        ConnectionInterface *connection = entry.second;
+        ConnectionInterface *connection = entry.second.get();
 
         std::string incomingRoadId = connection->GetIncommingRoadId();
         auto *incomingRoad = scenery->GetRoad(incomingRoadId);
