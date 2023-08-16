@@ -63,7 +63,7 @@ bool BehaviourImporter::Import(const std::string& filename) {
                 return false;
             }
 
-            StatisticsGroup group(id);
+            DReaM::StatisticsGroup group(id);
             if (!ImportGroup(groupElement, group)) {
                 return false;
             }
@@ -77,7 +77,7 @@ bool BehaviourImporter::Import(const std::string& filename) {
     return true;
 }
 
-bool BehaviourImporter::ImportGroup(QDomElement& groupElement, StatisticsGroup& group) {
+bool BehaviourImporter::ImportGroup(QDomElement &groupElement, DReaM::StatisticsGroup &group) {
     QDomElement subgroupElement;
     if (SimulationCommon::GetFirstChildElement(groupElement, "group", subgroupElement)) {
         while (!subgroupElement.isNull()) {
@@ -87,7 +87,7 @@ bool BehaviourImporter::ImportGroup(QDomElement& groupElement, StatisticsGroup& 
                 return false;
             }
 
-            StatisticsGroup subgroup(id);
+            DReaM::StatisticsGroup subgroup(id);
             if (!ImportGroup(subgroupElement, subgroup)) {
                 return false;
             }
@@ -107,7 +107,7 @@ bool BehaviourImporter::ImportGroup(QDomElement& groupElement, StatisticsGroup& 
                 return false;
             }
 
-            StatisticsSet set(id);
+            DReaM::StatisticsSet set(id);
             if (!ImportSet(setElement, set)) {
                 return false;
             }
@@ -121,7 +121,7 @@ bool BehaviourImporter::ImportGroup(QDomElement& groupElement, StatisticsGroup& 
     return true;
 }
 
-bool BehaviourImporter::ImportSet(QDomElement& setElement, StatisticsSet& set) {
+bool BehaviourImporter::ImportSet(QDomElement &setElement, DReaM::StatisticsSet &set) {
     QDomElement entryElement;
     if (SimulationCommon::GetFirstChildElement(setElement, "entry", entryElement)) {
         while (!entryElement.isNull()) {
@@ -144,15 +144,13 @@ bool BehaviourImporter::ImportSet(QDomElement& setElement, StatisticsSet& set) {
     return true;
 }
 
-bool BehaviourImporter::ImportEntry(QDomElement& entryElement, std::string id, StatisticsSet& set) {
-
+bool BehaviourImporter::ImportEntry(QDomElement &entryElement, std::string id, DReaM::StatisticsSet &set) {
     // entry type
     std::string type;
     if (!SimulationCommon::ParseAttributeString(entryElement, "type", type)) {
         return false;
     }
-
-    if (type == "distribution") {
+    if (type == "NormalDistribution") {
         // distribution mean
         double mean;
         if (!SimulationCommon::ParseAttributeDouble(entryElement, "mean", mean)) {
@@ -180,9 +178,39 @@ bool BehaviourImporter::ImportEntry(QDomElement& entryElement, std::string id, S
             return false;
         }
 
-        set.entries.insert(std::make_pair(id, std::make_shared<DistributionEntry>(mean, std_dev, min, max)));
-    } else if (type == "parameter") {
+        set.entries.insert(std::make_pair(id, std::make_shared<DReaM::NormalDistribution>(mean, std_dev, min, max)));
+    }
+    else if (type == "LogNormalDistribution") {
+        // distribution mean
+        double sigma;
+        if (!SimulationCommon::ParseAttributeDouble(entryElement, "sigma", sigma)) {
+            auto msg = set.identifier + " " + id + "   \" sigma \" Attribute is missing";
+            Log(msg);
+            return false;
+        }
+        // distribution std deviation
+        double mu;
+        if (!SimulationCommon::ParseAttributeDouble(entryElement, "mu", mu)) {
+            auto msg = set.identifier + " " + id + "   \" mu \" Attribute is missing";
+            Log(msg);
+            return false;
+        }
+        double min;
+        if (!SimulationCommon::ParseAttributeDouble(entryElement, "min", min)) {
+            auto msg = set.identifier + " " + id + "   \" min \" Attribute is missing";
+            Log(msg);
+            return false;
+        }
+        double max;
+        if (!SimulationCommon::ParseAttributeDouble(entryElement, "max", max)) {
+            auto msg = set.identifier + " " + id + "   \" max \" Attribute is missing";
+            Log(msg);
+            return false;
+        }
 
+        set.entries.insert(std::make_pair(id, std::make_shared<DReaM::LogNormalDistribution>(sigma, mu, min, max)));
+    }
+    else if (type == "parameter") {
         double value;
         if (!SimulationCommon::ParseAttributeDouble(entryElement, "value", value)) {
             auto msg = set.identifier + " " + id + "   \" value \" Attribute is missing";
@@ -190,8 +218,9 @@ bool BehaviourImporter::ImportEntry(QDomElement& entryElement, std::string id, S
             return false;
         }
 
-        set.entries.insert(std::make_pair(id, std::make_shared<StandardDoubleEntry>(value)));
-    } else {
+        set.entries.insert(std::make_pair(id, std::make_shared<DReaM::StandardDoubleEntry>(value)));
+    }
+    else {
         // TODO account for other types
         return false;
     }

@@ -18,7 +18,7 @@
 namespace CognitiveMap {
 class ReactionTime {
   public:
-      ReactionTime(DistributionEntry inPercTime, DistributionEntry percLatency, double cycleTime, StochasticsInterface *stochastics) :
+      ReactionTime(DReaM::NormalDistribution inPercTime, DReaM::NormalDistribution percLatency, double cycleTime, StochasticsInterface *stochastics) :
           cycleTime{cycleTime}, stochastics{stochastics} {
           double drawnInPercTime =
               inPercTime.mean <= 0 ? 0 : stochastics->GetLogNormalDistributed(inPercTime.mean, inPercTime.std_deviation);

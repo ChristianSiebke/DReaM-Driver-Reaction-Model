@@ -23,6 +23,68 @@ using OdId = std::string;
 using OwlId = uint64_t;
 using DReaMId = uint64_t;
 
+//********** General XML Data **********
+namespace DReaM {
+class StatisticsEntry {
+public:
+    virtual ~StatisticsEntry() {
+    }
+    std::string id = "0";
+};
+class NormalDistribution : public StatisticsEntry {
+public:
+    double mean;
+    double std_deviation;
+    double min;
+    double max;
+
+    NormalDistribution(double m, double stdd, double min, double max) : mean(m), std_deviation(stdd), min(min), max(max) {
+    }
+    virtual ~NormalDistribution() {
+    }
+};
+
+class LogNormalDistribution : public StatisticsEntry {
+public:
+    double sigma;
+    double mu;
+    double min;
+    double max;
+
+    LogNormalDistribution(double sigma, double mu, double min, double max) : sigma(sigma), mu(mu), min(min), max(max) {
+    }
+    virtual ~LogNormalDistribution() {
+    }
+};
+
+class StandardDoubleEntry : public StatisticsEntry {
+public:
+    double value;
+
+    StandardDoubleEntry(double v) : value(v) {
+    }
+    virtual ~StandardDoubleEntry() {
+    }
+};
+
+struct StatisticsSet {
+    std::string identifier;
+    std::map<std::string, std::shared_ptr<StatisticsEntry>> entries;
+
+    StatisticsSet(std::string id) : identifier(id) {
+    }
+};
+
+struct StatisticsGroup {
+    std::string identifier;
+    std::map<std::string, StatisticsSet> sets;
+    std::map<std::string, StatisticsGroup> groups;
+
+    StatisticsGroup(std::string id) : identifier(id) {
+    }
+};
+} // namespace DReaM
+
 constexpr OwlId OwlInvalidId = std::numeric_limits<uint64_t>::max();
 
 //-----------------------------------------------------------------------------
@@ -62,32 +124,18 @@ enum class ScanAOI {
 };
 enum class ControlAOI { NONE, Right, Left, Oncoming };
 
-enum class TrafficDensity { NONE, LOW, MODERATE, HIGH };
-
 enum class TJunctionLayout { LeftRight, LeftStraight, StraightRight };
-
-struct Distribution {
-    double mean;
-    double std_deviation;
-    double min;
-    double max;
-
-    Distribution() {
-    }
-    Distribution(double m, double stdd, double min, double max) : mean(m), std_deviation(stdd), min(min), max(max) {
-    }
-};
 
 struct DriverGaze {
     double direction;
     double openingAngle;
-    Distribution fixationDuration;
+    DReaM::NormalDistribution fixationDuration{0, 0, 0, 0};
 };
 
 struct MirrorGaze {
     double direction;
     double openingAngle;
-    Distribution fixationDuration;
+    DReaM::NormalDistribution fixationDuration{0, 0, 0, 0};
 
     Common::Vector2d pos;
 };
@@ -105,9 +153,6 @@ struct GazeState {
     double openingAngle{-999};
     double viewDistance{100}; // TODO calculate
     int fixationDuration{-999};
-
-    bool godMode = false;
-
     bool mirrorGaze = false;
     Common::Vector2d mirrorPos{0, 0};
 };

@@ -42,17 +42,23 @@ public:
                  StochasticsInterface* stochastics, const LoggerInterface* loggerInterface, const BehaviourData& behaviourData)
         : worldRepresentation{worldRepresentation}, worldInterpretation{worldInterpretation}, stochastics{stochastics},
           loggerInterface{loggerInterface}, behaviourData{behaviourData} {
-        DistributionEntry maxEmergencyDecelDistribution = GetBehaviourData().adBehaviour.maxEmergencyDeceleration;
+        DReaM::NormalDistribution maxEmergencyDecelDistribution = GetBehaviourData().adBehaviour.maxEmergencyDeceleration;
         double emergencyDec = -stochastics->GetLogNormalDistributed(std::abs(maxEmergencyDecelDistribution.mean),
                                                                     maxEmergencyDecelDistribution.std_deviation);
         maxEmergencyDeceleration =
             Common::ValueInBounds(maxEmergencyDecelDistribution.min, emergencyDec, maxEmergencyDecelDistribution.max);
 
-        DistributionEntry comfortDecelerationDistribution = GetBehaviourData().adBehaviour.comfortDeceleration;
+        DReaM::NormalDistribution comfortDecelerationDistribution = GetBehaviourData().adBehaviour.comfortDeceleration;
         double drawnComfortDec = -stochastics->GetLogNormalDistributed(std::abs(comfortDecelerationDistribution.mean),
                                                                        comfortDecelerationDistribution.std_deviation);
         comfortDeceleration =
             Common::ValueInBounds(comfortDecelerationDistribution.min, drawnComfortDec, comfortDecelerationDistribution.max);
+
+        DReaM::LogNormalDistribution timeGapAcceptanceDistribution = GetBehaviourData().adBehaviour.timeGapAcceptance;
+        double drawnTimeGapAcceptance =
+            stochastics->GetLogNormalDistributedMuSigma(timeGapAcceptanceDistribution.mu, timeGapAcceptanceDistribution.sigma);
+        timeGapAcceptance =
+            Common::ValueInBounds(timeGapAcceptanceDistribution.min, drawnTimeGapAcceptance, timeGapAcceptanceDistribution.max);
     }
     double IntersectionGap(const std::unique_ptr<AgentInterpretation> &agent);
 
@@ -69,7 +75,7 @@ public:
     double MaximumAccelerationWish(double velTarget, double velCurrent, double dv, double sDiff) const;
     double CalculatePhaseAcceleration() const;
 
-    double Deceleration(const std::unique_ptr<AgentInterpretation>& observedAgent) const;
+    double Deceleration(const std::unique_ptr<AgentInterpretation> &observedAgent) const;
     double GetMaxEmergencyAcceleration() const {
         return maxEmergencyDeceleration;
     }
@@ -98,6 +104,7 @@ private:
     }
     double maxEmergencyDeceleration;
     double comfortDeceleration;
+    double timeGapAcceptance;
     std::unordered_map<int, Priority> priorityAgents{};
     const WorldRepresentation &worldRepresentation;
     const WorldInterpretation &worldInterpretation;

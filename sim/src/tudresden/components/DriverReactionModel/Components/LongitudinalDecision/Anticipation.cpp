@@ -29,7 +29,7 @@ double Anticipation::IntersectionGap(const std::unique_ptr<AgentInterpretation> 
     auto tEgo = CalculateTimeToConflictAreaEgo(conflictSituation->egoDistance, worldRepresentation.egoAgent->GetVelocity());
     auto tObserved = CalculateTimeToConflictAreaObserved(*conflictSituation, observedAgent);
 
-    if (tEgo.vehicleFrontToCAStart - tObserved.vehicleBackToCAEnd >= GetBehaviourData().adBehaviour.timeGapAcceptance) {
+    if (tEgo.vehicleFrontToCAStart - tObserved.vehicleBackToCAEnd >= timeGapAcceptance) {
         // observed agent pass conflict area until ego reaches conflict area
         return freeAccelerationEgo;
     }
@@ -77,8 +77,8 @@ double Anticipation::IntersectionGap(const std::unique_ptr<AgentInterpretation> 
                                         observedAgent.get());
     }
 
-    if (tEgo.vehicleFrontToCAStart - tObserved.vehicleBackToCAEnd >= GetBehaviourData().adBehaviour.timeGapAcceptance ||
-        tObserved.vehicleFrontToCAStart - tEgo.vehicleBackToCAEnd >= GetBehaviourData().adBehaviour.timeGapAcceptance ||
+    if (tEgo.vehicleFrontToCAStart - tObserved.vehicleBackToCAEnd >= timeGapAcceptance ||
+        tObserved.vehicleFrontToCAStart - tEgo.vehicleBackToCAEnd >= timeGapAcceptance ||
         (tObserved.vehicleFrontToCAStart - tEgo.vehicleBackToCAEnd >= 1 && observedAgent->rightOfWay.ego) ||
         (tObserved.vehicleFrontToCAStart - tEgo.vehicleBackToCAEnd > 0 &&
          (conflictSituation->egoDistance.vehicleFrontToCAStart < 1 ||

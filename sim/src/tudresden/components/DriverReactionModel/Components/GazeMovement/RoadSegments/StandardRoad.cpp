@@ -26,7 +26,7 @@ AOIProbabilities StandardRoad::LookUpScanAOIProbability(CrossingPhase phase) {
     // probabilities according to /no traffic /IndicatorState_Off/ phase =approach study of TU Dresden
     if (phase == CrossingPhase::NONE) {
         for(auto& prob : behaviourData.gmBehaviour.std_scanAOIProbabilities) {
-            DistributionEntry* de = prob.second.get();
+            DReaM::NormalDistribution* de = prob.second.get();
             double dist = stochastics->GetNormalDistributed(de->mean, de->std_deviation);
             double value = Common::ValueInBounds(de->min, dist, de->max);
             aoiProbs.push_back(std::make_pair(static_cast<int>(prob.first), value));

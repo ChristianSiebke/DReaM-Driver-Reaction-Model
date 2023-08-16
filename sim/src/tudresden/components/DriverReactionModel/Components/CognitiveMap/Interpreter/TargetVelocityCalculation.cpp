@@ -39,7 +39,7 @@ double TargetVelocityCalculation::Update(const WorldRepresentation &worldReprese
 
 double TargetVelocityCalculation::CalculateTargetVelocity(const WorldRepresentation &worldRepresentation, CrossingInfo crossingInfo) {
     double targetVelocity;
-    DistributionEntry activeTargetDistribution(0, 0, 0, 0);
+    DReaM::NormalDistribution activeTargetDistribution(0, 0, 0, 0);
     auto velocitySpecificRoad =
         velocityStatisticsSpecificRoads.find(worldRepresentation.egoAgent->GetLanePosition().lane->GetRoad()->GetOpenDriveId());
 
@@ -79,7 +79,7 @@ double TargetVelocityCalculation::CalculateTargetVelocity(const WorldRepresentat
     return targetVelocity;
 }
 
-void TargetVelocityCalculation::CalculateVelDistOffset(double targetVelocity, DistributionEntry activeTargetDistribution) {
+void TargetVelocityCalculation::CalculateVelDistOffset(double targetVelocity, DReaM::NormalDistribution activeTargetDistribution) {
     if (activeTargetDistribution.std_deviation == 0.0) {
         velocityDistributionOffset = 0;
         return;

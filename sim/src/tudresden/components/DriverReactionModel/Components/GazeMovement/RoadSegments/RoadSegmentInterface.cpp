@@ -116,7 +116,7 @@ GazeState RoadSegmentInterface::AgentObserveGlance(int agentId) {
     gazeState.fixationState = {GazeType::ObserveGlance, agentId};
     gazeState.target.fixationAgent = agentId;
     gazeState.openingAngle = behaviourData.gmBehaviour.observe_openingAngle;
-    DistributionEntry *de = behaviourData.gmBehaviour.observe_fixationDuration.get();
+    DReaM::NormalDistribution *de = behaviourData.gmBehaviour.observe_fixationDuration.get();
     double dist = stochastics->GetNormalDistributed(de->mean, de->std_deviation);
     gazeState.fixationDuration = Common::ValueInBounds(de->min, dist, de->max);
     return gazeState;
@@ -137,7 +137,7 @@ GazeState RoadSegmentInterface::ScanGlance(CrossingPhase phase) {
 
     if (behaviourData.gmBehaviour.scanAOIs.driverAOIs.find(aoi) != behaviourData.gmBehaviour.scanAOIs.driverAOIs.end()) {
         gazeState.openingAngle = behaviourData.gmBehaviour.scanAOIs.driverAOIs.at(aoi).openingAngle;
-        Distribution de = behaviourData.gmBehaviour.scanAOIs.driverAOIs.at(aoi).fixationDuration;
+        DReaM::NormalDistribution de = behaviourData.gmBehaviour.scanAOIs.driverAOIs.at(aoi).fixationDuration;
         double dist = stochastics->GetNormalDistributed(de.mean, de.std_deviation);
         gazeState.fixationDuration = Common::ValueInBounds(de.min, dist, de.max);
         gazeState.viewDistance = 100;
@@ -146,16 +146,15 @@ GazeState RoadSegmentInterface::ScanGlance(CrossingPhase phase) {
         gazeState.openingAngle = behaviourData.gmBehaviour.scanAOIs.mirrorAOIs.at(aoi).openingAngle;
         gazeState.mirrorGaze = true;
         gazeState.mirrorPos = behaviourData.gmBehaviour.scanAOIs.mirrorAOIs.at(aoi).pos;
-        Distribution de = behaviourData.gmBehaviour.scanAOIs.mirrorAOIs.at(aoi).fixationDuration;
+        DReaM::NormalDistribution de = behaviourData.gmBehaviour.scanAOIs.mirrorAOIs.at(aoi).fixationDuration;
         double dist = stochastics->GetNormalDistributed(de.mean, de.std_deviation);
         gazeState.fixationDuration = Common::ValueInBounds(de.min, dist, de.max);
         gazeState.viewDistance = 100;
     }
     else {
-        gazeState.openingAngle = 0;
-        gazeState.godMode = true;
-        gazeState.viewDistance = 100;
-        gazeState.fixationDuration = 400;
+        std::string message =
+            __FILE__ " Line: " + std::to_string(__LINE__) + " AOI: " + std::to_string(static_cast<int>(aoi)) + " does not exist";
+        throw std::runtime_error(message);
     }
 
     gazeState.fixationState = {GazeType::ScanGlance, static_cast<int>(aoi)};
@@ -173,7 +172,7 @@ GazeState RoadSegmentInterface::ShoulderCheckRight(ScanAOI gaze) {
     gazeState.fixationState = {GazeType::ScanGlance, static_cast<int>(gaze)};
     gazeState.ufovAngle = worldRepresentation.egoAgent->GetYawAngle() + 110 * (M_PI / 180);
     gazeState.openingAngle = behaviourData.gmBehaviour.observe_openingAngle;
-    DistributionEntry *de = behaviourData.gmBehaviour.observe_fixationDuration.get();
+    DReaM::NormalDistribution *de = behaviourData.gmBehaviour.observe_fixationDuration.get();
     double dist = stochastics->GetNormalDistributed(de->mean, de->std_deviation);
     gazeState.fixationDuration = Common::ValueInBounds(de->min, dist, de->max);
     return gazeState;
@@ -183,7 +182,7 @@ GazeState RoadSegmentInterface::ShoulderCheckLeft(ScanAOI gaze) {
     gazeState.fixationState = {GazeType::ScanGlance, static_cast<int>(gaze)};
     gazeState.ufovAngle = worldRepresentation.egoAgent->GetYawAngle() - 110 * (M_PI / 180);
     gazeState.openingAngle = behaviourData.gmBehaviour.observe_openingAngle;
-    DistributionEntry *de = behaviourData.gmBehaviour.observe_fixationDuration.get();
+    DReaM::NormalDistribution *de = behaviourData.gmBehaviour.observe_fixationDuration.get();
     double dist = stochastics->GetNormalDistributed(de->mean, de->std_deviation);
     gazeState.fixationDuration = Common::ValueInBounds(de->min, dist, de->max);
     return gazeState;
@@ -196,13 +195,13 @@ GazeState RoadSegmentInterface::MirrowGaze(ScanAOI aoi) {
         gazeState.openingAngle = behaviourData.gmBehaviour.scanAOIs.mirrorAOIs.at(aoi).openingAngle;
         gazeState.mirrorGaze = true;
         gazeState.mirrorPos = behaviourData.gmBehaviour.scanAOIs.mirrorAOIs.at(aoi).pos;
-        Distribution de = behaviourData.gmBehaviour.scanAOIs.mirrorAOIs.at(aoi).fixationDuration;
+        DReaM::NormalDistribution de = behaviourData.gmBehaviour.scanAOIs.mirrorAOIs.at(aoi).fixationDuration;
         double dist = stochastics->GetNormalDistributed(de.mean, de.std_deviation);
         gazeState.fixationDuration = Common::ValueInBounds(de.min, dist, de.max);
         gazeState.viewDistance = 100;
     }
     else {
-        std::string message = __FILE__ " Line: " + std::to_string(__LINE__) + "AOI does not exist";
+        std::string message = __FILE__ " Line: " + std::to_string(__LINE__) + " AOI does not exist";
         throw std::runtime_error(message);
     }
     return gazeState;

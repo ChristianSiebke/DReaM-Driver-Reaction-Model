@@ -49,16 +49,16 @@ class BehaviourImporter {
   private:
       BehaviourImporter(const std::string &path, LoggerInterface *loggerInterface);
 
-      bool ImportGroup(QDomElement &groupElement, StatisticsGroup &group);
-      bool ImportSet(QDomElement &setElement, StatisticsSet &set);
-      bool ImportEntry(QDomElement &entryElement, std::string id, StatisticsSet &set);
+      bool ImportGroup(QDomElement &groupElement, DReaM::StatisticsGroup &group);
+      bool ImportSet(QDomElement &setElement, DReaM::StatisticsSet &set);
+      bool ImportEntry(QDomElement &entryElement, std::string id, DReaM::StatisticsSet &set);
       void Log(const std::string &message, DReaMLogLevel level = info) const {
           loggerInterface->Log(message, level);
       }
 
       static std::shared_ptr<BehaviourImporter> instance;
       static std::map<DReaMDefinitions::AgentVehicleType, std::shared_ptr<BehaviourData>> behaviourDataMap;
-      StatisticsGroup mainGroup{"-1"};
+      DReaM::StatisticsGroup mainGroup{"-1"};
       LoggerInterface *loggerInterface;
 };
 

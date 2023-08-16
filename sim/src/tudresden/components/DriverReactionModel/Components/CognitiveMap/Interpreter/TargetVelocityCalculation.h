@@ -47,7 +47,7 @@ private:
     void Log(const std::string &message, DReaMLogLevel level = info) const {
         loggerInterface->Log(message, level);
     }
-    void CalculateVelDistOffset(double targetVelocity, DistributionEntry activeTargetDistribution);
+    void CalculateVelDistOffset(double targetVelocity, DReaM::NormalDistribution activeTargetDistribution);
 
     std::map<IntersectionSpot, double> phaseVelocities{};
     std::map<std::string, double> velocityStatisticsSpecificRoads{};
@@ -57,7 +57,7 @@ private:
     StochasticsInterface *stochastics;
     const LoggerInterface *loggerInterface;
     const BehaviourData &behaviourData;
-    const std::map<IntersectionSpot, std::shared_ptr<DistributionEntry>> *activeVelocityDistributions = nullptr;
+    const std::map<IntersectionSpot, std::shared_ptr<DReaM::NormalDistribution>> *activeVelocityDistributions = nullptr;
     double velocityDistributionOffset = std::numeric_limits<double>::max();
 };
 } // namespace Interpreter

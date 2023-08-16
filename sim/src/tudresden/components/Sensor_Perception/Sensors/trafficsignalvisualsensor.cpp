@@ -18,14 +18,9 @@ void TrafficSignalVisualSensor::Trigger(int timestamp, GazeState gazeState, std:
         driverPos.Add(relMirrorPos);
     }
 
-    if (gazeState.godMode) {
-        minViewAngle = -M_PI;
-        maxViewAngle = M_PI;
-    }
-    else {
-        minViewAngle = -gazeState.openingAngle / 2.0;
-        maxViewAngle = gazeState.openingAngle / 2.0;
-    }
+    minViewAngle = -gazeState.openingAngle / 2.0;
+    maxViewAngle = gazeState.openingAngle / 2.0;
+
     viewDistance = gazeState.viewDistance;
 
     aabbTree = aabbTreeHandler->GetCurrentAABBTree(timestamp);

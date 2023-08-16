@@ -162,7 +162,7 @@ GazeState TJunction::ControlGlanceOnRoad(ControlAOI aoi) {
     gazeState.fixationState = {GazeType::ControlGlance, static_cast<int>(aoi)};
     gazeState.target.fixationPoint = *fixationPoint;
     gazeState.openingAngle = behaviourData.gmBehaviour.XInt_controlOpeningAngle;
-    DistributionEntry *de = behaviourData.gmBehaviour.XInt_controlFixationDuration.get();
+    DReaM::NormalDistribution *de = behaviourData.gmBehaviour.XInt_controlFixationDuration.get();
     double dist = stochastics->GetNormalDistributed(de->mean, de->std_deviation);
     gazeState.fixationDuration = Common::ValueInBounds(de->min, dist, de->max);
     return gazeState;
@@ -220,7 +220,7 @@ GazeState TJunction::ControlGlanceOnTJunction(ControlAOI aoi, CrossingPhase phas
     gazeState.fixationState = {GazeType::ControlGlance, static_cast<int>(aoi)};
     gazeState.target.fixationPoint = *fixationPoint;
     gazeState.openingAngle = behaviourData.gmBehaviour.XInt_controlOpeningAngle;
-    DistributionEntry *de = behaviourData.gmBehaviour.XInt_controlFixationDuration.get();
+    DReaM::NormalDistribution *de = behaviourData.gmBehaviour.XInt_controlFixationDuration.get();
     double dist = stochastics->GetNormalDistributed(de->mean, de->std_deviation);
     gazeState.fixationDuration = Common::ValueInBounds(de->min, dist, de->max);
     return gazeState;
@@ -346,20 +346,6 @@ AOIProbabilities TJunction::LookUpControlAOIProbability(CrossingPhase phase) {
 }
 
 AOIProbabilities TJunction::LookUpScanAOIProbability(CrossingPhase phase) {
-    // TODO move magic number to behaviour
-    size_t UpperBoundaryModerateTrafficDensity = 4;
-    TrafficDensity dens;
-    if (worldRepresentation.agentMemory->size() == 0) {
-        dens = TrafficDensity::LOW;
-    }
-    else if (0 < worldRepresentation.agentMemory->size() &&
-             worldRepresentation.agentMemory->size() <= UpperBoundaryModerateTrafficDensity) {
-        dens = TrafficDensity::MODERATE;
-    }
-    else {
-        dens = TrafficDensity::HIGH;
-    }
-
     IndicatorState ind = worldRepresentation.egoAgent->GetIndicatorState();
     if (ind == IndicatorState::IndicatorState_Warn) {
         std::string message = __FILE__ " Line: " + std::to_string(__LINE__) + "No Handling For Indicator State Warn!";
@@ -368,8 +354,8 @@ AOIProbabilities TJunction::LookUpScanAOIProbability(CrossingPhase phase) {
 
     AOIProbabilities aoiProbs;
     try {
-        for (auto &prob : behaviourData.gmBehaviour.XInt_scanAOIProbabilities.at(ind).at(dens).at(phase)) {
-            DistributionEntry *de = prob.second.get();
+        for (auto &prob : behaviourData.gmBehaviour.XInt_scanAOIProbabilities.at(ind).at(phase)) {
+            DReaM::NormalDistribution *de = prob.second.get();
             double dist = stochastics->GetNormalDistributed(de->mean, de->std_deviation);
             double value = Common::ValueInBounds(de->min, dist, de->max);
             aoiProbs.push_back(std::make_pair(static_cast<int>(prob.first), value));

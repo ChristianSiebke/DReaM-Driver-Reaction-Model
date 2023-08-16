@@ -34,14 +34,10 @@ void BasicVisualSensor::Trigger(int timestamp, GazeState gazeState, std::optiona
         driverPos.Add(relMirrorPos);
     }
 
-    if (gazeState.godMode) {
-        minViewAngle = -M_PI;
-        maxViewAngle = M_PI;
-    }
-    else {
+
         minViewAngle = -gazeState.openingAngle / 2.0;
         maxViewAngle = gazeState.openingAngle / 2.0;
-    }
+    
     viewDistance = gazeState.viewDistance;
     timeMeasureAABB.StartTimePoint("Trigger AABB");
     aabbTree = aabbTreeHandler->GetCurrentAABBTree(timestamp); // this updates the aabb tree (if needed)
