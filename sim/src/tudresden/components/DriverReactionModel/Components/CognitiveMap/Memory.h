@@ -73,13 +73,13 @@ class Memory {
     // perceived data
     std::shared_ptr<InfrastructurePerception> infrastructurePerception{nullptr};
     std::shared_ptr<DetailedAgentPerception> egoAgentPerception{nullptr};
-    std::vector<const MentalInfrastructure::TrafficSignal *> lastSeenTrafficSignals{};
+    std::vector<const MentalInfrastructure::TrafficSignal *> lastSeenTrafficSignals;
 
     // current active data
     EgoAgentRepresentation egoAgent;
     InfrastructureRepresentation infrastructure;
-    AmbientAgentRepresentations agentMemory{};
-    std::vector<std::shared_ptr<GeneralAgentPerception>> processedAgents{};
+    AmbientAgentRepresentations agentMemory;
+    std::vector<std::shared_ptr<GeneralAgentPerception>> processedAgents;
 
     int timestamp = 0;
     double cycletime; // Important, otherwise all calculations are rounded with int!

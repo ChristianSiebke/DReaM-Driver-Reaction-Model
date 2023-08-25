@@ -22,6 +22,7 @@ void AnalysisDataRecorder::Trigger(std::shared_ptr<DetailedAgentPerception> ego,
     auto lane = ego->lanePosition.lane;
     auto s = ego->lanePosition.sCoordinate;
     double vel = ego->velocity;
+    assert(!ego->route.empty());
     auto startRoadId = ego->route.front().roadId;
     auto exitRoadId = ego->route.back().roadId;
     if (startRoadId == "0")

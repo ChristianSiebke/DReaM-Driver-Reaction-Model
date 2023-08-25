@@ -86,6 +86,10 @@ const AmbientAgentRepresentations* Memory::UpdateAmbientAgentRepresentations() {
 
 std::unique_ptr<AmbientAgentRepresentation> Memory::ExtrapolateAmbientAgent(const AmbientAgentRepresentation* agent) {
     auto newPosition = agent->FindNewPositionInDistance(agent->ExtrapolateDistanceAlongLane(cycletime / 1000));
+    if (!newPosition.has_value()) {
+        auto msg = __FILE__ " Line: " + std::to_string(__LINE__) + " Extrapolation failed ";
+        throw std::logic_error(msg);
+    }
     try {
         GeneralAgentPerception data = agent->GetInternalData();
         const auto newRoad = newPosition->lane->GetRoad();

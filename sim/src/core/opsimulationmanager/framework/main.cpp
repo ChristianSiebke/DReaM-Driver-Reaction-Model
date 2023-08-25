@@ -123,9 +123,10 @@ extern "C" Q_DECL_EXPORT int run(int argc, char* argv[])
     LOG_INTERN(LogLevel::DebugCore) << "simulation: " << simulation;
     LOG_INTERN(LogLevel::DebugCore) << "libraries: " << opSimulationManagerConfig.libraries;
     LOG_INTERN(LogLevel::DebugCore) << "number of simulations: " << opSimulationManagerConfig.simulationConfigs.size();
-
-    for (const auto& simulationConfig : opSimulationManagerConfig.simulationConfigs)
-    {
+    QElapsedTimer timer;
+    timer.start();
+    qDebug() << "Simulation starts ";
+    for (const auto &simulationConfig : opSimulationManagerConfig.simulationConfigs) {
         CreateResultPathIfNecessary(simulationConfig.results);
 
         Arguments arguments
@@ -175,6 +176,8 @@ extern "C" Q_DECL_EXPORT int run(int argc, char* argv[])
     }
     QThreadPool::globalInstance()->waitForDone();
         #endif // USESIMULATIONLIBRARY
+    qDebug() << "Simulation time elapsed: " << timer.elapsed() << " ms";
+    LOG_INTERN(LogLevel::Error) << "Simulation time elapsed: " << timer.elapsed() << " ms";
 
     LOG_INTERN(LogLevel::DebugCore) << "## opSimulationManager finished ##";
     return 0;

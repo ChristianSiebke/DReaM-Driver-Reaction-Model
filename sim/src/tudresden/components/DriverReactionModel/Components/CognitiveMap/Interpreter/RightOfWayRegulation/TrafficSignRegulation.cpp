@@ -15,6 +15,7 @@ RightOfWay TrafficSignRegulationGermany::VehicleVsVehicleROW(const AgentRepresen
                                                              const ConflictSituation &conflictSituation) {
     RightOfWay egoPriority(true, false);
     RightOfWay observedAgentPriority(false, true);
+    assert(!conflictSituation.oAgentCA->lane->GetPredecessors().empty() && !conflictSituation.egoCA->lane->GetPredecessors().empty());
 
     const MentalInfrastructure::TrafficSign *oAgentSign = nullptr;
     if (conflictSituation.junction != observedAgent.NextJunction() &&

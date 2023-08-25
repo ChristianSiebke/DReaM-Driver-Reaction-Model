@@ -140,10 +140,10 @@ class AlgorithmDReaMImplementation : public AlgorithmInterface {
     std::vector<const MentalInfrastructure::TrafficSignal*> trafficSignals;
 
     //! Ego perception information of sensor_DriverPerception
-    std::shared_ptr<DetailedAgentPerception> egoPerception;
+    std::shared_ptr<DetailedAgentPerception> egoPerception = nullptr;
 
     //! All infrastructure perception information of sensor_DriverPerception
-    std::shared_ptr<InfrastructurePerception> infrastructurePerception;
+    std::shared_ptr<InfrastructurePerception> infrastructurePerception = nullptr;
 
     //**************************************************
     // Output-----------------------------------------
@@ -185,7 +185,7 @@ class AlgorithmDReaMImplementation : public AlgorithmInterface {
 
     double out_longitudinalAccelerationWish = 0;
     GazeState outGazeState;
-    std::vector<Common::Vector2d> segmentControlFixPoints{};
+    std::vector<Common::Vector2d> segmentControlFixPoints;
     Logger logger;
     LoggerInterface loggerInterface;
     ObservationInterface *observerInstance{nullptr};

@@ -33,12 +33,12 @@ public:
 };
 class NormalDistribution : public StatisticsEntry {
 public:
-    double mean;
-    double std_deviation;
-    double min;
-    double max;
+    double mean{0};
+    double std_deviation{0};
+    double min{0};
+    double max{0};
 
-    NormalDistribution(double m, double stdd, double min, double max) : mean(m), std_deviation(stdd), min(min), max(max) {
+    NormalDistribution(double m, double stdd, double min, double max) : mean{m}, std_deviation{stdd}, min{min}, max{max} {
     }
     virtual ~NormalDistribution() {
     }
@@ -46,10 +46,10 @@ public:
 
 class LogNormalDistribution : public StatisticsEntry {
 public:
-    double sigma;
-    double mu;
-    double min;
-    double max;
+    double sigma{0};
+    double mu{0};
+    double min{0};
+    double max{0};
 
     LogNormalDistribution(double sigma, double mu, double min, double max) : sigma(sigma), mu(mu), min(min), max(max) {
     }
@@ -59,28 +59,28 @@ public:
 
 class StandardDoubleEntry : public StatisticsEntry {
 public:
-    double value;
+    double value{0};
 
-    StandardDoubleEntry(double v) : value(v) {
+    StandardDoubleEntry(double v) : value{v} {
     }
     virtual ~StandardDoubleEntry() {
     }
 };
 
 struct StatisticsSet {
-    std::string identifier;
+    std::string identifier{""};
     std::map<std::string, std::shared_ptr<StatisticsEntry>> entries;
 
-    StatisticsSet(std::string id) : identifier(id) {
+    StatisticsSet(std::string id) : identifier{id} {
     }
 };
 
 struct StatisticsGroup {
-    std::string identifier;
+    std::string identifier{""};
     std::map<std::string, StatisticsSet> sets;
     std::map<std::string, StatisticsGroup> groups;
 
-    StatisticsGroup(std::string id) : identifier(id) {
+    StatisticsGroup(std::string id) : identifier{id} {
     }
 };
 } // namespace DReaM
@@ -127,17 +127,16 @@ enum class ControlAOI { NONE, Right, Left, Oncoming };
 enum class TJunctionLayout { LeftRight, LeftStraight, StraightRight };
 
 struct DriverGaze {
-    double direction;
-    double openingAngle;
+    double direction{0};
+    double openingAngle{0};
     DReaM::NormalDistribution fixationDuration{0, 0, 0, 0};
 };
 
 struct MirrorGaze {
-    double direction;
-    double openingAngle;
+    double direction{0};
+    double openingAngle{0};
     DReaM::NormalDistribution fixationDuration{0, 0, 0, 0};
-
-    Common::Vector2d pos;
+    Common::Vector2d pos{0, 0};
 };
 
 struct FixationTarget {
@@ -272,7 +271,7 @@ struct CrossingInfo {
 
     // the id of the junction that the stopping point belongs to
     OdId junctionOdId{""};
-    StoppingPointMap egoStoppingPoints{};
+    StoppingPointMap egoStoppingPoints;
 };
 
 /**
@@ -322,5 +321,5 @@ struct AnalysisSignal {
     double targetVelocity = -1.0;
     double targetDistributionOffset = std::numeric_limits<double>::max();
     double maxComfortDeceleration = std::numeric_limits<double>::max();
-    std::map<int, double> ttcs{};
+    std::map<int, double> ttcs;
 };

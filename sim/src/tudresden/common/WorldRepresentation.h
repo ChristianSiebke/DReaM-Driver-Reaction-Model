@@ -56,16 +56,16 @@ struct AgentInterpretation {
 
 struct MemorizedTrafficSignal {
     const MentalInfrastructure::TrafficSignal *trafficSignal{nullptr};
-    int firstTimeStamp;
-    int lastTimeStamp;
+    int firstTimeStamp{-999};
+    int lastTimeStamp{-999};
 };
 
 struct VisibleTrafficSignals {
     // lane DReaMId -> TrafficSignals on that lane
-    std::unordered_map<DReaMId, std::list<const MentalInfrastructure::TrafficSignal *>> laneTrafficSignalMap{};
+    std::unordered_map<DReaMId, std::list<const MentalInfrastructure::TrafficSignal *>> laneTrafficSignalMap;
 
     // complete memory, signal DReaMId -> TrafficSignal
-    std::unordered_map<DReaMId, MemorizedTrafficSignal> *memory{};
+    std::unordered_map<DReaMId, MemorizedTrafficSignal> *memory{nullptr};
 
     // speed limit information
     const MentalInfrastructure::TrafficSign *upcomingSpeedLimitSign{nullptr};
@@ -109,6 +109,7 @@ struct VisibleTrafficSignals {
         return toReturn;
     }
     const MentalInfrastructure::TrafficSign *GetRightOfWaySignsForLane(const MentalInfrastructure::Lane *lane) const {
+        assert(lane != nullptr);
         auto laneSigns = GetSignsForLane(lane->GetDReaMId());
         auto iter = std::find_if(laneSigns.begin(), laneSigns.end(), [](const MentalInfrastructure::TrafficSign *element) {
             return static_cast<int>(element->GetType()) > 0 && static_cast<int>(element->GetType()) <= 100;
@@ -137,16 +138,16 @@ struct WorldRepresentation {
     const AmbientAgentRepresentations *agentMemory{nullptr};
     const VisibleTrafficSignals *trafficSignalMemory{nullptr};
     std::vector<std::shared_ptr<GeneralAgentPerception>>
-        processedAgents{}; // Perceived agents detected after the reaction time and latency period have elapsed (needed for analysis)
+        processedAgents; // Perceived agents detected after the reaction time and latency period have elapsed (needed for analysis)
 };
 
 struct WorldInterpretation {
     WorldInterpretation() {}
     //! Interpretation of the observed agents from the ego agent point of view
-    std::unordered_map<int, std::unique_ptr<AgentInterpretation>> interpretedAgents{};
+    std::unordered_map<int, std::unique_ptr<AgentInterpretation>> interpretedAgents;
     CrossingInfo crossingInfo;
     //! map holds right of way for observed agent
-    std::unordered_map<int, RightOfWay> rightOfWayMap{};
+    std::unordered_map<int, RightOfWay> rightOfWayMap;
     //! target velocity of ego agent
     double targetVelocity = std::numeric_limits<double>::max();
     //! next lane on route graph

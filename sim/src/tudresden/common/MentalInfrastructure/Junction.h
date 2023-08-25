@@ -74,8 +74,8 @@ public:
     void AddConnection(const Road *from, const Road *with, const Road *to);
 
 private:
-    std::vector<const Road *> roadsOnJunction{};
-    std::vector<JunctionConnection> connections{};
-    std::vector<const Road *> incomingRoads{};
+    std::vector<const Road *> roadsOnJunction;
+    std::vector<JunctionConnection> connections;
+    std::vector<const Road *> incomingRoads;
 };
 } // namespace MentalInfrastructure

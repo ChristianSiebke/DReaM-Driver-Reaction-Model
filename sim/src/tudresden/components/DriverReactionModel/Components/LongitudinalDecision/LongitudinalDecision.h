@@ -23,9 +23,9 @@ namespace LongitudinalDecision {
 using emergencyState = bool;
 using timeEmergencyBrakeActive = int;
 struct EmergencyBrakeInfo {
-    bool emergencyState;
-    int timeEmergencyBrakeActive;
-    double deceleration;
+    bool emergencyState = false;
+    int timeEmergencyBrakeActive = -1;
+    double deceleration = 1;
 };
 
 class MinEmergencyBrakeDelay {
@@ -37,7 +37,7 @@ public:
     std::vector<std::pair<double, int>> ActivateIfNeeded(const std::unordered_map<int, std::unique_ptr<AgentInterpretation>> &agents);
 
 private:
-    std::unordered_map<int, EmergencyBrakeInfo> emergencyBrake{};
+    std::unordered_map<int, EmergencyBrakeInfo> emergencyBrake;
     double minTimeEmergencyBrakeIsActive;
     int cycleTime;
 };

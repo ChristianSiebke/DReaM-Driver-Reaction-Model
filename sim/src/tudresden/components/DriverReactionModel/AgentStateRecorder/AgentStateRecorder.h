@@ -46,7 +46,7 @@
 
 namespace AgentStateRecorder {
 
-constexpr bool RECORD_DReaMOUTPUT = true;
+constexpr bool RECORD_DReaMOUTPUT = false;
 
 class EXPORT AgentStateRecorder {
 public:
@@ -105,11 +105,11 @@ private:
     }
 
     boost::property_tree::ptree AddInfrastructureData(std::shared_ptr<InfrastructurePerception> infrastructure);
+    std::string StoppingTypeToString(StoppingPointType);
 
     static std::shared_ptr<AgentStateRecorder> instance;
     static boost::property_tree::ptree simulationOutut;
     static std::string resultPath;
-    std::shared_ptr<InfrastructurePerception> infrastructurePerception{nullptr};
     static boost::property_tree::ptree agentTree;
     static boost::property_tree::ptree sampleTree;
     static boost::property_tree::ptree samplesTree;
@@ -117,7 +117,6 @@ private:
     static boost::property_tree::ptree runResultTree;
     static boost::property_tree::ptree runResultsTree;
     static boost::property_tree::ptree infrastuctureTree;
-
-    std::string StoppingTypeToString(StoppingPointType);
+    std::shared_ptr<InfrastructurePerception> infrastructurePerception{nullptr};
 };
 } // namespace AgentStateRecorder

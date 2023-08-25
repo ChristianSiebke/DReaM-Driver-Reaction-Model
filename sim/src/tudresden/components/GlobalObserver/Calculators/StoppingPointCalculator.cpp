@@ -21,7 +21,12 @@ Line2d StoppingPointCalculator::CalcExtendedLine(const MentalInfrastructure::Lan
     bool rightWay = (roadIsPredJunction && lane->IsInRoadDirection()) || (roadIsSuccJunction && !lane->IsInRoadDirection());
     auto pointsList = lane->GetLanePoints();
     auto secondLast = [](bool rightWay, auto pointsList) {
-        return rightWay ? std::next(pointsList.begin(), 1) : std::prev(pointsList.end(), 2);
+        if (pointsList.size() > 2) {
+            return rightWay ? std::next(pointsList.begin(), 1) : std::prev(pointsList.end(), 2);
+        }
+        else {
+            return rightWay ? std::next(pointsList.begin(), 1) : pointsList.begin();
+        }
     };
     auto last = [](bool rightWay, auto lane) { return rightWay ? lane->GetFirstPoint() : lane->GetLastPoint(); };
 

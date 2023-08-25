@@ -28,11 +28,11 @@ public:
 
 private:
     std::optional<const MentalInfrastructure::Lane *> TargetLane(const WorldRepresentation &representation);
-   
-    DReaMRoute::Waypoints waypoints{};
+
+    DReaMRoute::Waypoints waypoints;
     DReaMRoute::Waypoints::iterator targetWP;
     DReaMRoute::Waypoints::iterator lastTimeStepWP;
     const MentalInfrastructure::Lane *egoLane = nullptr;
-    std::list<const RoadmapGraph::RoadmapNode *> path{};
+    std::list<const RoadmapGraph::RoadmapNode *> path;
 };
 } // namespace Interpreter

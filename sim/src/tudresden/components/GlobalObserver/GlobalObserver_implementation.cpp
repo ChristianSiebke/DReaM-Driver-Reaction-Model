@@ -5,7 +5,7 @@
 #include <qglobal.h>
 
 #include "Common/TimeMeasurement.hpp"
-TimeMeasurement timeMeasure("GlobalObserver.cpp");
+TimeMeasurement timeMeasureGlobalObserver("GlobalObserver.cpp");
 
 void GlobalObserver_Implementation::UpdateInput(int localLinkId, const std::shared_ptr<SignalInterface const> &data, int time) {
     Q_UNUSED(time);
@@ -107,9 +107,9 @@ void GlobalObserver_Implementation::UpdateOutput(int localLinkId, std::shared_pt
 }
 
 void GlobalObserver_Implementation::Trigger(int time) {
-    timeMeasure.StartTimePoint("Trigger GlobalObserver");
+    timeMeasureGlobalObserver.StartTimePoint("Trigger GlobalObserver");
     globalObserverMain->Trigger(time);
-    timeMeasure.EndTimePoint();
+    timeMeasureGlobalObserver.EndTimePoint();
     dataRecorder->Trigger(globalObserverMain->GetDetailedAgentPerception(GetAgent()->GetId()), analysisData, time);
 
     std::vector<std::pair<int, std::shared_ptr<DetailedAgentPerception>>> cps;

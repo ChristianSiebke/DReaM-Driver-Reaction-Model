@@ -72,6 +72,8 @@ std::optional<const MentalInfrastructure::Lane *> TargetLaneInterpreter::TargetL
     lastTimeStepWP = targetWP;
     egoLane = egoAgent->GetMainLocatorLane();
 
+    assert(!path.empty());
+
     auto laneIter = path.begin();
     std::advance(laneIter, 1);
     if (path.end() == laneIter) {

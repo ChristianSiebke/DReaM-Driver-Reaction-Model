@@ -175,6 +175,7 @@ GazeState RoadSegmentInterface::ShoulderCheckRight(ScanAOI gaze) {
     DReaM::NormalDistribution *de = behaviourData.gmBehaviour.observe_fixationDuration.get();
     double dist = stochastics->GetNormalDistributed(de->mean, de->std_deviation);
     gazeState.fixationDuration = Common::ValueInBounds(de->min, dist, de->max);
+    gazeState.viewDistance = 100;
     return gazeState;
 }
 GazeState RoadSegmentInterface::ShoulderCheckLeft(ScanAOI gaze) {
@@ -185,6 +186,7 @@ GazeState RoadSegmentInterface::ShoulderCheckLeft(ScanAOI gaze) {
     DReaM::NormalDistribution *de = behaviourData.gmBehaviour.observe_fixationDuration.get();
     double dist = stochastics->GetNormalDistributed(de->mean, de->std_deviation);
     gazeState.fixationDuration = Common::ValueInBounds(de->min, dist, de->max);
+    gazeState.viewDistance = 100;
     return gazeState;
 }
 
@@ -330,7 +332,7 @@ void Junction::SortControlFixPoints(std::vector<Common::Vector2d> &controlFixPoi
                    [this](Common::Vector2d element) { return CalculateGlobalViewingAngle(element); });
 
     std::map<double, Common::Vector2d> sortedFixationPointsByViewAngle;
-    for (size_t i = 0; i < viewAngles.size(); ++i) {
+    for (size_t i = 0; i < viewAngles.size(); i++) {
         if (!sortedFixationPointsByViewAngle.insert(std::make_pair(viewAngles.at(i), controlFixPointsOnXJunction.at(i))).second) {
             std::string message = __FILE__ " Line: " + std::to_string(__LINE__) + "view Angle is not unique!";
             throw std::runtime_error(message);

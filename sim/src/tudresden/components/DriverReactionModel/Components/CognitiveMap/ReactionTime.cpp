@@ -31,7 +31,7 @@ std::vector<std::shared_ptr<GeneralAgentPerception>> ReactionTime::PerceivedAgen
                   [this](const std::shared_ptr<GeneralAgentPerception> agent) {
                       processingAgentBuffer.insert({agent->id, 0});
                   });
-    std::vector<std::shared_ptr<GeneralAgentPerception>> result{};
+    std::vector<std::shared_ptr<GeneralAgentPerception>> result;
     auto latencyElementPosition = static_cast<unsigned int>(std::round(perceptionLatency / (cycleTime / 1000)));
     for (auto agent : processingAgentBuffer) {
         if (agent.second < initialPerceptionTime)
@@ -40,7 +40,7 @@ std::vector<std::shared_ptr<GeneralAgentPerception>> ReactionTime::PerceivedAgen
             std::copy_if(perceivedAgentBuffer.at(latencyElementPosition).begin(), perceivedAgentBuffer.at(latencyElementPosition).end(),
                          std::back_inserter(result),
                          [agent](std::shared_ptr<GeneralAgentPerception> element) { return element->id == agent.first; });
-        }
+    }
     // update agents time since first perception
     for (auto& element : processingAgentBuffer) {
         element.second += cycleTime / 1000;

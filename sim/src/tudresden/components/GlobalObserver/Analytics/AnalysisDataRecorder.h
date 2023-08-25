@@ -168,18 +168,18 @@ private:
     static std::vector<CollisionData> collisions;
     static int totalTime;
 
-    std::map<int, TrajectoryData> trajectoryData{};
-    std::map<int, GroupingData> groupingData{};
-    std::map<int, bool> relevantAgents{};
-    std::map<int, const MentalInfrastructure::Lane *> lastLane{};
-    std::map<int, const MentalInfrastructure::Road *> lastRoad{};
-    std::map<int, uint64_t> lastS{};
-    std::map<int, std::shared_ptr<std::map<int, double>>> minTTCs{};
-    std::map<int, std::shared_ptr<std::list<int>>> collisionPartners{};
-    std::map<int, AnalysisSignal> analysisSignalLog{};
+    std::map<int, TrajectoryData> trajectoryData;
+    std::map<int, GroupingData> groupingData;
+    std::map<int, bool> relevantAgents;
+    std::map<int, const MentalInfrastructure::Lane *> lastLane;
+    std::map<int, const MentalInfrastructure::Road *> lastRoad;
+    std::map<int, uint64_t> lastS;
+    std::map<int, std::shared_ptr<std::map<int, double>>> minTTCs;
+    std::map<int, std::shared_ptr<std::list<int>>> collisionPartners;
+    std::map<int, AnalysisSignal> analysisSignalLog;
 
-    std::map<std::string, double> observationStartS{};
-    std::map<std::string, double> observationEndS{};
+    std::map<std::string, double> observationStartS;
+    std::map<std::string, double> observationEndS;
 
     int runtime = 0;
 

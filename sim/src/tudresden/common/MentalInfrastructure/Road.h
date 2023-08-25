@@ -180,9 +180,9 @@ private:
     const Element *predecessor = nullptr;
     const Junction *junctionPtr = nullptr;
 
-    std::vector<const Lane *> lanes{};
-    std::vector<const TrafficSign *> trafficSigns{};
-    std::vector<const TrafficLight *> trafficLights{};
+    std::vector<const Lane *> lanes;
+    std::vector<const TrafficSign *> trafficSigns;
+    std::vector<const TrafficLight *> trafficLights;
 };
 
 } // namespace MentalInfrastructure

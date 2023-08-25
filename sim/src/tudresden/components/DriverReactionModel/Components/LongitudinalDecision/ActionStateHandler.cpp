@@ -10,8 +10,7 @@
 
 #include "ActionStateHandler.h"
 
-    ActionState
-    ActionStateHandler::GetState(const std::unique_ptr <AgentInterpretation> &agent) {
+ActionState ActionStateHandler::GetState(const std::unique_ptr<AgentInterpretation> &agent) {
     currentState = ActionState::Start;
     while (currentState != ActionState::End) {
         if (DetermineNextState(agent)) {
@@ -50,8 +49,8 @@ bool ActionStateHandler::DetermineNextState(const std::unique_ptr<AgentInterpret
             return agent->collisionPoint.has_value() && agent->collisionPoint->collisionImminent;
         case ActionState::Following:
             if (agent->relativeDistance.has_value()) {
-                if (agent->conflictSituation->oAgentDistance.vehicleFrontToCAStart < 0 ||
-                    agent->conflictSituation->egoDistance.vehicleFrontToCAStart < 0) {
+                if (agent->conflictSituation.has_value() && (agent->conflictSituation->oAgentDistance.vehicleFrontToCAStart < 0 ||
+                                                             agent->conflictSituation->egoDistance.vehicleFrontToCAStart < 0)) {
                     return true;
                 }
                 else if (agent->relativeDistance < 0 && !agent->laneInLineWithEgoLane) {

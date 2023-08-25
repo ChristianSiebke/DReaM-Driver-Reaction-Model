@@ -26,14 +26,14 @@ void UpdateSpeedLimits(VisibleTrafficSignals *visibleTrafficSignals, DetailedAge
         for (unsigned int i = 0; i < signsOnLane.size() - 1; i++) {
             if (ego->movingInLaneDirection) {
                 if (signsOnLane.at(i)->GetS() < ego->lanePosition.sCoordinate &&
-                    signsOnLane.at(i + 1)->GetS() > ego->lanePosition.sCoordinate && (int)signsOnLane.at(i)->GetType() > 100) {
+                    signsOnLane.at(i + 1)->GetS() > ego->lanePosition.sCoordinate && static_cast<int>(signsOnLane.at(i)->GetType()) > 100) {
                     lastPassedSpeedLimitSign = signsOnLane.at(i);
                     break;
                 }
             }
             else {
                 if (signsOnLane.at(i)->GetS() > ego->lanePosition.sCoordinate &&
-                    signsOnLane.at(i + 1)->GetS() < ego->lanePosition.sCoordinate && (int)signsOnLane.at(i)->GetType() > 100) {
+                    signsOnLane.at(i + 1)->GetS() < ego->lanePosition.sCoordinate && static_cast<int>(signsOnLane.at(i)->GetType()) > 100) {
                     lastPassedSpeedLimitSign = signsOnLane.at(i);
                     break;
                 }
@@ -71,9 +71,8 @@ VisibleTrafficSignals *TrafficSignalMemory::Update(int timestamp, std::vector<co
     // in loop element removal based on https://stackoverflow.com/questions/8234779/how-to-remove-from-a-map-while-iterating-it
     for (auto it = memory.cbegin(); it != memory.cend() /* not hoisted */; /* no increment */) {
         if (timestamp - it->second.lastTimeStamp > maximumTimeInMemoryMs) {
-            auto toErase = it++;
-            EraseFromVisibleTrafficSignals(toErase->second.trafficSignal);
-            memory.erase(toErase);
+            EraseFromVisibleTrafficSignals(it->second.trafficSignal);
+            it = memory.erase(it);
         }
         else {
             ++it;
@@ -81,13 +80,13 @@ VisibleTrafficSignals *TrafficSignalMemory::Update(int timestamp, std::vector<co
     }
 
     // checking if the memory capacity is exceeded
-    auto overhead = memory.size() - maximumTimeInMemoryMs;
+    int overhead = memory.size() - maximumTimeInMemoryMs;
     if (overhead > 0) {
         // sort signs based on their last appearance
         std::vector<std::pair<DReaMId, MemorizedTrafficSignal>> toSort(memory.begin(), memory.end());
         std::sort(toSort.begin(), toSort.end(), VectorCompare());
 
-        for (auto i = toSort.size(); i >= overhead; i--) {
+        for (auto i = toSort.size() - 1; i >= overhead; i--) {
             EraseFromVisibleTrafficSignals(toSort.at(i).second.trafficSignal);
             memory.erase(toSort.at(i).first);
         }
@@ -102,12 +101,12 @@ void TrafficSignalMemory::InsertIntoVisibleTrafficSignals(const MentalInfrastruc
     auto validLanes = signal->GetValidLanes();
     for (const auto &lane : validLanes) {
         if (visibleTrafficSignals->laneTrafficSignalMap.find(lane->GetDReaMId()) == visibleTrafficSignals->laneTrafficSignalMap.end()) {
-            std::list<const MentalInfrastructure::TrafficSignal *> tmp{};
+            std::list<const MentalInfrastructure::TrafficSignal *> tmp;
             tmp.push_back(signal);
             visibleTrafficSignals->laneTrafficSignalMap.insert(std::make_pair(lane->GetDReaMId(), tmp));
         }
         else {
-            auto &trafficSignalList = visibleTrafficSignals->laneTrafficSignalMap[lane->GetDReaMId()];
+            auto &trafficSignalList = visibleTrafficSignals->laneTrafficSignalMap.at(lane->GetDReaMId());
             if (std::find(trafficSignalList.begin(), trafficSignalList.end(), signal) == trafficSignalList.end()) {
                 trafficSignalList.push_back(signal);
             }

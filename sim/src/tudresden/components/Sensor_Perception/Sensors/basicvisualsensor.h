@@ -40,7 +40,7 @@ private:
 private:
     OWL::WorldData *worldData;
     std::shared_ptr<AABBTreeHandler> aabbTreeHandler;
-    std::shared_ptr<AABBTree> aabbTree =nullptr;
+    std::shared_ptr<AABBTree> aabbTree = nullptr;
     ThreadSafeVector<int> visible;
 
     double sensorDirection = 0;

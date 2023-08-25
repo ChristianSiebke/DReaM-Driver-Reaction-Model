@@ -19,7 +19,7 @@ namespace MentalInfrastructure {
 class Element
 {
 public:
-    Element(const OdId &openDriveId, const DReaMId dreamId) : openDriveId(openDriveId), dreamId(dreamId) {
+    Element(const OdId &openDriveId, const DReaMId dreamId) : openDriveId{openDriveId}, dreamId{dreamId} {
     }
     virtual ~Element()
     {

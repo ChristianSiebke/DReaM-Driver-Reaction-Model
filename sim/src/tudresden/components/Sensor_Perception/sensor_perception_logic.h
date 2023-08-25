@@ -24,7 +24,7 @@ typedef boost::geometry::model::polygon<BoostVector2d> Polygon2d;
 ///
 class SensorPerceptionLogic {
 public:
-    SensorPerceptionLogic(AgentInterface *agent, WorldInterface *world) : driver(agent), world(world) {
+    SensorPerceptionLogic(AgentInterface *agent, WorldInterface *world) : driver{agent}, world{world} {
         aabbTreeHandler = AABBTreeHandler::GetInstance(world);
         visualSensor = std::make_shared<BasicVisualSensor>(agent, world);
         trafficSignalVisualSensor = std::make_shared<TrafficSignalVisualSensor>(agent, world);

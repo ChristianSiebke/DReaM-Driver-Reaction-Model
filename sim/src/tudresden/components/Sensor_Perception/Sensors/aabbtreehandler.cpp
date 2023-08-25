@@ -73,9 +73,9 @@ void AABBTreeHandler::FirstExecution()
             }
             catch (std::invalid_argument const &ex) {
                 printf(
-                    "Error while trying to add traffic sign with id %s to the AABBTree, ignoring.\n Please be aware that only integer ids "
+                    "Error while trying to add traffic sign with id %d to the AABBTree, ignoring.\n Please be aware that only integer ids "
                     "are supported.",
-                    std::to_string(obj->id));
+                    obj->id);
                 continue;
             }
             aabbTree->InsertObject(obj);
@@ -155,10 +155,8 @@ std::shared_ptr<AABBTree> AABBTreeHandler::GetCurrentAABBTree(int timestamp)
 
     auto worldAgents = world->GetAgents();
 
-    for (const auto &[_, agent] : worldAgents)
-    {
-        if (agentsMapping.find(agent) != agentsMapping.end())
-        {
+    for (const auto &[_, agent] : worldAgents) {
+        if (agentsMapping.find(agent) != agentsMapping.end()) {
             auto toUpdate = this->agentsMapping.at(agent);
             toUpdate->area = ConstructPolygon(agent);
             toUpdate->RecalculateAABB();
@@ -190,8 +188,14 @@ std::shared_ptr<AABBTree> AABBTreeHandler::GetCurrentAABBTree(int timestamp)
             auto agentObjectsIter =
                 std::find_if(agentObjects.begin(), agentObjects.end(),
                              [iter](const std::shared_ptr<ObservedDynamicObject> &element) { return element->id == iter->first->GetId(); });
-            agentObjects.erase(agentObjectsIter);
+
+            if (agentObjectsIter == agentObjects.end()) {
+                std::string message = "File: " + static_cast<std::string>(__FILE__) + " Line: " + std::to_string(__LINE__) +
+                                      " dynamic object does not exist in agentObjects map ";
+                throw std::runtime_error(message);
+            }
             aabbTree->RemoveObject(*agentObjectsIter);
+            agentObjects.erase(agentObjectsIter);
             iter = agentsMapping.erase(iter);
         }
         else

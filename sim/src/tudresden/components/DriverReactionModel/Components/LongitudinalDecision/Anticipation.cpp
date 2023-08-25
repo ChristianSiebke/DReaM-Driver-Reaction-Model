@@ -17,8 +17,9 @@ double Anticipation::IntersectionGap(const std::unique_ptr<AgentInterpretation> 
     auto oAgent = observedAgent->agent;
     auto oAgentID = oAgent->GetID();
     auto conflictSituation = observedAgent->conflictSituation;
-    double freeAccelerationEgo = CalculatePhaseAcceleration();
+    assert(conflictSituation.has_value());
 
+    double freeAccelerationEgo = CalculatePhaseAcceleration();
     UpdatePriorityAgents(oAgentID, {*conflictSituation, observedAgent->rightOfWay});
     if (conflictSituation->oAgentDistance.vehicleBackToCAEnd <= 0 || conflictSituation->egoDistance.vehicleBackToCAEnd <= 0) {
         // observed or ego agent has passed conflict area
@@ -33,13 +34,23 @@ double Anticipation::IntersectionGap(const std::unique_ptr<AgentInterpretation> 
         // observed agent pass conflict area until ego reaches conflict area
         return freeAccelerationEgo;
     }
+    if (tObserved.vehicleFrontToCAStart - tEgo.vehicleBackToCAEnd >= 0 &&
+        (conflictSituation->egoDistance.vehicleFrontToCAStart <
+             -(conflictSituation->egoCA->end.sOffset - conflictSituation->egoCA->start.sOffset) &&
+         conflictSituation->egoDistance.vehicleBackToCAEnd <
+             (conflictSituation->egoCA->end.sOffset - conflictSituation->egoCA->start.sOffset) / 2)) {
+        return freeAccelerationEgo;
+    }
 
     if (Common::AgentTouchesLane(observedAgent->agent, conflictSituation->egoCA->lane)) {
         return ApproachingStoppingPoint(conflictSituation->egoDistance.vehicleFrontToCAStart, tObserved.vehicleBackToCAEnd,
                                         observedAgent.get());
     }
 
-    if ((oAgent->GetAcceleration() == 0.0 && oAgent->GetVelocity() == 0.0) && observedAgent->rightOfWay.ego) {
+    if ((oAgent->GetAcceleration() == 0.0 && oAgent->GetVelocity() == 0.0) &&
+        (observedAgent->rightOfWay.ego ||
+         (conflictSituation->junction && (conflictSituation->junction != oAgent->NextJunction() &&
+                                          conflictSituation->junction != oAgent->GetLanePosition().lane->GetRoad()->GetJunction())))) {
         //  check whether agent can pass
         if (observedAgent->collisionPoint) {
             return ApproachingStoppingPoint(conflictSituation->egoDistance.vehicleFrontToCAStart, tObserved.vehicleBackToCAEnd,
@@ -54,7 +65,7 @@ double Anticipation::IntersectionGap(const std::unique_ptr<AgentInterpretation> 
         return freeAccelerationEgo;
     }
 
-    if ((oAgent->GetAcceleration() == 0.0 && oAgent->GetVelocity() == 0.0) &&
+    if ((oAgent->GetAcceleration() == 0.0 && oAgent->GetVelocity() == 0.0 && conflictSituation->oAgentDistance.vehicleFrontToCAStart > 0) &&
         std::any_of(priorityAgents.begin(), priorityAgents.end(), [this, conflictSituation](auto element) {
             return Common::AgentTouchesLane(worldRepresentation.egoAgent, element.second.conflictSituation.oAgentCA->lane) ||
                    (!Common::AgentTouchesLane(worldRepresentation.egoAgent, element.second.conflictSituation.oAgentCA->lane) &&
@@ -175,7 +186,12 @@ double Anticipation::TravelTime(double distance, double distanceAcceleration, do
         t1 = 0;
     }
     else if (acceleration == 0.0) {
-        t1 = distanceAcceleration / velocity;
+        if (velocity == 0.0) {
+            t1 = std::numeric_limits<double>::infinity();
+        }
+        else {
+            t1 = distanceAcceleration / velocity;
+        }
     }
     else if (interimResult < 0) {
         t1 = std::numeric_limits<double>::infinity();
@@ -198,6 +214,8 @@ double Anticipation::TravelTime(double distance, double distanceAcceleration, do
             return 0;
         }
         else if (acceleration == 0.0) {
+            if (velocity == 0.0)
+                return std::numeric_limits<double>::infinity();
             return distance / velocity;
         }
         else if (interimResult < 0) {
@@ -214,6 +232,8 @@ double Anticipation::TravelTime(double distance, double distanceAcceleration, do
     }
 
     double sConstantSpeed = distance - distanceAcceleration;
+    if (vTarget == 0)
+        return std::numeric_limits<double>::infinity();
     double t2 = sConstantSpeed / vTarget;
     result = t1 + t2;
 
@@ -251,13 +271,15 @@ double Anticipation::TravelTimeObserved(double distance, bool egoInsideConflictA
         // observed will probably stop
         if (velocity < estimatedTargetVelocityObsevedAgent &&
             (acceleration < 0 &&
-             GetBehaviourData().adBehaviour.comfortDeceleration.min / 2 < ComfortAccelerationWish(0, velocity, velocity, distance))) {
+             (GetBehaviourData().adBehaviour.comfortDeceleration.min / 2) < ComfortAccelerationWish(0, velocity, velocity, distance))) {
             return std::numeric_limits<double>::infinity();
         }
 
         double interimResult = (velocity * velocity) + (2 * acceleration * distance);
 
         if (acceleration == 0.0) {
+            if (velocity == 0.0)
+                return std::numeric_limits<double>::infinity();
             return distance / velocity;
         }
         else if (interimResult < 0) {
@@ -295,7 +317,13 @@ double Anticipation::IDMAcceleration(double velTarget, double velCurrent, double
                                (2.0 * std::sqrt(GetBehaviourData().adBehaviour.maxAcceleration * std::abs(comfortDeceleration)))));
         sWish += GetBehaviourData().adBehaviour.minDistanceStationaryTraffic;
         // interaction term
-        double aInt = std::pow((sWish / sDiff), 2.0);
+        double aInt;
+        if (sDiff == 0.0) {
+            aInt = std::numeric_limits<double>::infinity();
+        }
+        else {
+            aInt = std::pow((sWish / sDiff), 2.0);
+        }
         aWish = GetBehaviourData().adBehaviour.maxAcceleration * (aFree - aInt);
     }
     return aWish;
@@ -361,8 +389,14 @@ double Anticipation::IDMBrakeStrategy(double distance, double velTarget, double 
                   ((currentVelocity * (currentVelocity - velTarget)) /
                    (2.0 * std::sqrt(GetBehaviourData().adBehaviour.maxAcceleration * std::abs(comfortDeceleration))));
 
-    auto a = -GetBehaviourData().adBehaviour.maxAcceleration * ((s_star * s_star) / (distance * distance));
-    return Common::ValueInBounds(GetBehaviourData().adBehaviour.comfortDeceleration.min, a, GetBehaviourData().adBehaviour.maxAcceleration);
+    if (distance == 0.0) {
+        return GetBehaviourData().adBehaviour.maxAcceleration;
+    }
+    else {
+        auto a = -GetBehaviourData().adBehaviour.maxAcceleration * ((s_star * s_star) / (distance * distance));
+        return Common::ValueInBounds(GetBehaviourData().adBehaviour.comfortDeceleration.min, a,
+                                     GetBehaviourData().adBehaviour.maxAcceleration);
+    }
 }
 
 double Anticipation::ApproachingStoppingPoint(double sFrontEgo, double tEndObserved, const AgentInterpretation *observedAgent) const {
@@ -373,7 +407,7 @@ double Anticipation::ApproachingStoppingPoint(double sFrontEgo, double tEndObser
     }
 
     double aIDM = MaximumAccelerationWish(0, egoAgent->GetVelocity(), egoAgent->GetVelocity(), s);
-    if (aIDM < behaviourData.adBehaviour.comfortDeceleration.min && observedAgent->rightOfWay.ego) {
+    if (aIDM < behaviourData.adBehaviour.comfortDeceleration.min && observedAgent->rightOfWay.ego && tEndObserved > 0) {
         // ego slows down so that when it enters the conflict area, the observed agent has already passed the conflict area.
         double a = (2 * (sFrontEgo - (worldRepresentation.egoAgent->GetVelocity() * tEndObserved))) / (tEndObserved * tEndObserved);
         a = Common::ValueInBounds(maxEmergencyDeceleration, a, GetBehaviourData().adBehaviour.maxAcceleration);

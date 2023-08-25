@@ -32,13 +32,13 @@ void LateralDecision::Update() {
              (worldInterpretation.targetLane && *worldInterpretation.targetLane != egoAgent->GetMainLocatorLane()))) {
             if (egoAgent->GetLanePosition().lane == egoAgent->GetMainLocatorLane()->GetRightLane()) {
                 auto lateralDisplacement =
-                    -(egoAgent->GetLanePosition().lane->GetWidth() / 2 + (egoAgent->GetMainLocatorLane()->GetWidth() / 2));
+                    -((egoAgent->GetLanePosition().lane->GetWidth() / 2) + (egoAgent->GetMainLocatorLane()->GetWidth() / 2));
                 lateralAction.lateralDisplacement = lateralDisplacement;
                 return;
             }
             if (egoAgent->GetLanePosition().lane == egoAgent->GetMainLocatorLane()->GetLeftLane()) {
                 auto lateralDisplacement =
-                    egoAgent->GetLanePosition().lane->GetWidth() / 2 + (egoAgent->GetMainLocatorLane()->GetWidth() / 2);
+                    (egoAgent->GetLanePosition().lane->GetWidth() / 2) + (egoAgent->GetMainLocatorLane()->GetWidth() / 2);
                 lateralAction.lateralDisplacement = lateralDisplacement;
                 return;
             }
@@ -50,6 +50,7 @@ void LateralDecision::Update() {
         }
 
         auto targetLane = *worldInterpretation.targetLane;
+        assert(targetLane != nullptr);
 
         if (targetLane == egoAgent->GetMainLocatorLane()->GetLeftLane() || targetLane == egoAgent->GetMainLocatorLane()->GetRightLane()) {
             if (NeighborLaneIsFree(targetLane)) {
@@ -130,18 +131,18 @@ ScanAOI LateralDecision::TriggerLateralGaze() const {
     auto laneIterStart =
         std::find_if(route.begin(), route.end(), [targetLane](DReaMRoute::Waypoint element) { return element.lane == targetLane; });
 
-    if (laneIterStart->lane == egoAgent->GetLanePosition().lane->GetLeftLane()) {
-        return ScanAOI::OuterLeftRVM;
-    }
-    if (laneIterStart->lane == egoAgent->GetLanePosition().lane->GetRightLane()) {
-        return ScanAOI::OuterRightRVM;
-    }
-
     if (route.end() == laneIterStart) {
         const std::string msg =
             "File: " + static_cast<std::string>(__FILE__) + " Line: " + std::to_string(__LINE__) + " can not find target lane in route";
         Log(msg, error);
         throw std::logic_error(msg);
+    }
+
+    if (laneIterStart->lane == egoAgent->GetLanePosition().lane->GetLeftLane()) {
+        return ScanAOI::OuterLeftRVM;
+    }
+    if (laneIterStart->lane == egoAgent->GetLanePosition().lane->GetRightLane()) {
+        return ScanAOI::OuterRightRVM;
     }
 
     auto laneIterNext = laneIterStart;
@@ -272,6 +273,12 @@ IndicatorState LateralDecision::SetIndicatorAtJunction(const MentalInfrastructur
                 auto laneIter = std::find_if(route.begin(), route.end(),
                                              [targetLane](DReaMRoute::Waypoint element) { return element.lane == targetLane; });
 
+                if (route.end() == laneIter) {
+                    const std::string msg = "File: " + static_cast<std::string>(__FILE__) + " Line: " + std::to_string(__LINE__) +
+                                            " can not find target lane in route";
+                    Log(msg, error);
+                    throw std::logic_error(msg);
+                }
                 std::advance(laneIter, 1);
 
                 if (route.end() == laneIter) {
@@ -279,10 +286,12 @@ IndicatorState LateralDecision::SetIndicatorAtJunction(const MentalInfrastructur
                 }
 
                 lanesPtr = targetLane->NextLanes(worldRepresentation.egoAgent->IsMovingInLaneDirection());
-                if (targetLane->GetLength() + (worldRepresentation.egoAgent->GetLanePosition().lane->GetLength() -
-                                               (worldRepresentation.egoAgent->GetLanePosition().sCoordinate +
-                                                worldRepresentation.egoAgent->GetDistanceReferencePointToLeadingEdge())) <=
-                    DecelerationTWODistance) {
+
+                if (lanesPtr.has_value() &&
+                    (targetLane->GetLength() + (worldRepresentation.egoAgent->GetLanePosition().lane->GetLength() -
+                                                (worldRepresentation.egoAgent->GetLanePosition().sCoordinate +
+                                                 worldRepresentation.egoAgent->GetDistanceReferencePointToLeadingEdge())) <=
+                     DecelerationTWODistance)) {
                     if (std::any_of(lanesPtr->leftLanes.begin(), lanesPtr->leftLanes.end(),
                                     [laneIter](auto element) { return element == (*laneIter).lane; })) {
                         return IndicatorState::IndicatorState_Left;

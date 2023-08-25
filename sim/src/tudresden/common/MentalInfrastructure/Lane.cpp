@@ -210,7 +210,11 @@ std::optional<NextDirectionLanes> Lane::NextLanes(bool movingInLaneDirection) co
 
     // calculate direction vector of current lane at its end
     auto pointsCurrentLane = this->GetLanePoints();
-    auto pointCL = std::prev((pointsCurrentLane).end(), 2);
+    auto pointCL = pointsCurrentLane.begin();
+    if (pointsCurrentLane.size() > 2) {
+        pointCL = std::prev((pointsCurrentLane).end(), 2);
+    }
+
     Common::Vector2d currentDirection(this->GetLastPoint()->x - pointCL->x, this->GetLastPoint()->y - pointCL->y);
     if (!movingInLaneDirection) {
         pointCL = std::next((pointsCurrentLane).begin(), 1);
@@ -220,7 +224,11 @@ std::optional<NextDirectionLanes> Lane::NextLanes(bool movingInLaneDirection) co
     for (auto nextLane : nextLanes) {
         auto pointsNextLane = nextLane->GetLanePoints();
         // calculate direction vector of successor lane
-        auto pointNL = std::prev(pointsNextLane.end(), 2);
+        auto pointNL = pointsNextLane.begin();
+        if (pointsNextLane.size() > 2) {
+            pointNL = std::prev(pointsNextLane.end(), 2);
+        }
+
         Common::Vector2d successorDirection(nextLane->GetLastPoint()->x - pointNL->x, nextLane->GetLastPoint()->y - pointNL->y);
         if (!movingInLaneDirection) {
             pointNL = std::next(pointsNextLane.begin(), 1);

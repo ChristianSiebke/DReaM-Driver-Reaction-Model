@@ -16,10 +16,11 @@
 struct AABB {
 
   public:
-    AABB() : minX(0.0), minY(0.0f), maxX(0.0f), maxY(0.0f), surfaceArea(0.0f) {}
-    AABB(double minX, double minY, double maxX, double maxY) : minX(minX), minY(minY), maxX(maxX), maxY(maxY) {
-        surfaceArea = CalculateSurfaceArea();
-    }
+      AABB() : minX{0.0}, minY{0.0}, maxX{0.0}, maxY{0.0}, surfaceArea{0.0} {
+      }
+      AABB(double minX, double minY, double maxX, double maxY) : minX{minX}, minY{minY}, maxX{maxX}, maxY{maxY} {
+          surfaceArea = CalculateSurfaceArea();
+      }
 
     bool Contains(const AABB& other) const { return other.minX >= minX && other.maxX < maxX && other.minY >= minY && other.maxY <= maxY; }
 

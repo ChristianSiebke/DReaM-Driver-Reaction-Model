@@ -50,9 +50,9 @@ protected:
      */
     GazeState ControlGlanceOnXJunction(ControlAOI aoi, CrossingPhase phase);
 
-    const Common::Vector2d *FixationPointForCGOnXJunction(const std::vector<Common::Vector2d> &controlFixPoints, CrossingPhase phase,
-                                                          ControlAOI aoi);
-    const Common::Vector2d *FixationPointForCGOnRoad(const std::vector<Common::Vector2d> &controlFixPoints, ControlAOI aoi);
+    Common::Vector2d FixationPointForCGOnXJunction(const std::vector<Common::Vector2d> &controlFixPoints, CrossingPhase phase,
+                                                   ControlAOI aoi);
+    Common::Vector2d FixationPointForCGOnRoad(const std::vector<Common::Vector2d> &controlFixPoints, ControlAOI aoi);
 };
 } // namespace Node
 } // namespace RoadSegments

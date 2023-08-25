@@ -7,7 +7,7 @@
 #include "Common/TimeMeasurement.hpp"
 #include "RouteCalculation.h"
 
-TimeMeasurement timeMeasure("Sensor.cpp");
+TimeMeasurement timeMeasureSensor("Sensor.cpp");
 
 void Sensor_Perception_Implementation::UpdateInput(int localLinkId, const std::shared_ptr<SignalInterface const> &data, int time) {
     Q_UNUSED(time);
@@ -61,14 +61,13 @@ void Sensor_Perception_Implementation::UpdateOutput(int localLinkId, std::shared
 
 void Sensor_Perception_Implementation::Trigger(int time) {
     try {
-        std::optional<Common::Vector2d> mPos;
+        std::optional<Common::Vector2d> mPos{std::nullopt};
         if (currentGazeState.mirrorGaze)
             mPos.emplace(currentGazeState.mirrorPos);
-        else
-            mPos.reset();
-        timeMeasure.StartTimePoint("Trigger Sensor");
+
+        timeMeasureSensor.StartTimePoint("Trigger Sensor");
         sensorPerceptionLogic.Trigger(time, currentGazeState, mPos);
-        timeMeasure.EndTimePoint();
+        timeMeasureSensor.EndTimePoint();
     }
 catch (const char *error) {
     const std::string msg = COMPONENTNAME + " " + error;

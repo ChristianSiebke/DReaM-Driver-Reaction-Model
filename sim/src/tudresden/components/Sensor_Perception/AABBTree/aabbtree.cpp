@@ -14,15 +14,15 @@
 #include <stack>
 
 AABBTree::AABBTree(unsigned initialSize) :
-    rootNodeIndex(AABB_NULL_NODE), allocatedNodeCount(0), nextFreeNodeIndex(0), nodeCapacity(initialSize), growthSize(initialSize)
-{
+    rootNodeIndex{AABB_NULL_NODE}, allocatedNodeCount{0}, nextFreeNodeIndex{0}, nodeCapacity{initialSize}, growthSize{initialSize} {
+    assert(initialSize > 0);
     nodes.resize(initialSize);
     for (unsigned nodeIndex = 0; nodeIndex < initialSize; nodeIndex++)
     {
-        auto &node = nodes[nodeIndex];
+        auto &node = nodes.at(nodeIndex);
         node.nextNodeIndex = nodeIndex + 1;
     }
-    nodes[initialSize - 1].nextNodeIndex = AABB_NULL_NODE;
+    nodes.at(initialSize - 1).nextNodeIndex = AABB_NULL_NODE;
 }
 
 AABBTree::~AABBTree()
@@ -41,15 +41,15 @@ unsigned AABBTree::AllocateNode()
 
         for (unsigned nodeIndex = allocatedNodeCount; nodeIndex < nodeCapacity; nodeIndex++)
         {
-            AABBNode &node = nodes[nodeIndex];
+            AABBNode &node = nodes.at(nodeIndex);
             node.nextNodeIndex = nodeIndex + 1;
         }
-        nodes[nodeCapacity - 1].nextNodeIndex = AABB_NULL_NODE;
+        nodes.at(nodeCapacity - 1).nextNodeIndex = AABB_NULL_NODE;
         nextFreeNodeIndex = allocatedNodeCount;
     }
 
     unsigned nodeIndex = nextFreeNodeIndex;
-    AABBNode &allocatedNode = nodes[nodeIndex];
+    AABBNode &allocatedNode = nodes.at(nodeIndex);
     allocatedNode.parentNodeIndex = AABB_NULL_NODE;
     allocatedNode.leftNodeIndex = AABB_NULL_NODE;
     allocatedNode.rightNodeIndex = AABB_NULL_NODE;
@@ -61,27 +61,28 @@ unsigned AABBTree::AllocateNode()
 
 void AABBTree::DeAllocateNode(unsigned int nodeIndex)
 {
-    AABBNode &deallocatedNode = nodes[nodeIndex];
+    AABBNode &deallocatedNode = nodes.at(nodeIndex);
     deallocatedNode.nextNodeIndex = nextFreeNodeIndex;
     nextFreeNodeIndex = nodeIndex;
+    assert(allocatedNodeCount > 0);
     allocatedNodeCount--;
 }
 
 void AABBTree::InsertObject(const std::shared_ptr<AABBInterface> &object)
 {
     auto nodeIndex = AllocateNode();
-    AABBNode &node = nodes[nodeIndex];
+    AABBNode &node = nodes.at(nodeIndex);
 
     node.aabb = object->GetAABB();
     node.object = object;
 
     InsertLeaf(nodeIndex);
-    objectNodeIndexMap[object] = nodeIndex;
+    objectNodeIndexMap.insert({object, nodeIndex});
 }
 
 void AABBTree::RemoveObject(const std::shared_ptr<AABBInterface> &object)
 {
-    unsigned nodeIndex = objectNodeIndexMap[object];
+    unsigned nodeIndex = objectNodeIndexMap.at(object);
     RemoveLeaf(nodeIndex);
     DeAllocateNode(nodeIndex);
     objectNodeIndexMap.erase(object);
@@ -94,7 +95,7 @@ void AABBTree::UpdateObject(const std::shared_ptr<AABBInterface> &object)
         InsertObject(object);
     }
 
-    unsigned nodeIndex = objectNodeIndexMap[object];
+    unsigned nodeIndex = objectNodeIndexMap.at(object);
     UpdateLeaf(nodeIndex, object->GetAABB());
 }
 
@@ -113,7 +114,7 @@ std::forward_list<std::shared_ptr<AABBInterface>> AABBTree::QueryOverlaps(const 
         if (nodeIndex == AABB_NULL_NODE)
             continue;
 
-        const auto &node = nodes[nodeIndex];
+        const auto &node = nodes.at(nodeIndex);
         if (node.aabb.Overlaps(testAABB))
         {
             if (node.IsLeaf() && node.object != object)
@@ -149,7 +150,7 @@ std::shared_ptr<AABBInterface> AABBTree::FindClosestByRay(const Ray &ray, bool e
         if (nodeIndex == AABB_NULL_NODE)
             continue;
 
-        const auto &node = nodes[nodeIndex];
+        const auto &node = nodes.at(nodeIndex);
         double distance = -__DBL_MAX__;
 
         if (node.aabb.HitsBox(ray, distance))
@@ -167,7 +168,6 @@ std::shared_ptr<AABBInterface> AABBTree::FindClosestByRay(const Ray &ray, bool e
             }
         }
     }
-
     return excludeFirst ? lastObject : object;
 }
 
@@ -185,7 +185,7 @@ std::list<std::pair<std::shared_ptr<AABBInterface>, double>> AABBTree::QueryRay(
         if (nodeIndex == AABB_NULL_NODE)
             continue;
 
-        auto &node = nodes[nodeIndex];
+        auto &node = nodes.at(nodeIndex);
         double distance = -__DBL_MAX__;
 
         if (node.aabb.HitsBox(ray, distance))
@@ -207,9 +207,9 @@ std::list<std::pair<std::shared_ptr<AABBInterface>, double>> AABBTree::QueryRay(
 
 void AABBTree::InsertLeaf(unsigned int leafNodeIndex)
 {
-    assert(nodes[leafNodeIndex].parentNodeIndex == AABB_NULL_NODE);
-    assert(nodes[leafNodeIndex].leftNodeIndex == AABB_NULL_NODE);
-    assert(nodes[leafNodeIndex].rightNodeIndex == AABB_NULL_NODE);
+    assert(nodes.at(leafNodeIndex).parentNodeIndex == AABB_NULL_NODE);
+    assert(nodes.at(leafNodeIndex).leftNodeIndex == AABB_NULL_NODE);
+    assert(nodes.at(leafNodeIndex).rightNodeIndex == AABB_NULL_NODE);
 
     if (rootNodeIndex == AABB_NULL_NODE)
     {
@@ -218,34 +218,31 @@ void AABBTree::InsertLeaf(unsigned int leafNodeIndex)
     }
 
     unsigned treeNodeIndex = rootNodeIndex;
-    while (!nodes[treeNodeIndex].IsLeaf())
-    {
-        unsigned leftNodeIndex = nodes[treeNodeIndex].leftNodeIndex;
-        unsigned rightNodeIndex = nodes[treeNodeIndex].rightNodeIndex;
+    while (!nodes.at(treeNodeIndex).IsLeaf()) {
+        unsigned leftNodeIndex = nodes.at(treeNodeIndex).leftNodeIndex;
+        unsigned rightNodeIndex = nodes.at(treeNodeIndex).rightNodeIndex;
 
-        AABB combinedAABB = nodes[treeNodeIndex].aabb.Merge(nodes[leafNodeIndex].aabb);
+        AABB combinedAABB = nodes.at(treeNodeIndex).aabb.Merge(nodes.at(leafNodeIndex).aabb);
 
-        float newParentNodeCost = 2.0f * combinedAABB.surfaceArea;
-        float minimumPushDownCost = 2.0f * (combinedAABB.surfaceArea - nodes[treeNodeIndex].aabb.surfaceArea);
+        double newParentNodeCost = 2.0 * combinedAABB.surfaceArea;
+        double minimumPushDownCost = 2.0 * (combinedAABB.surfaceArea - nodes.at(treeNodeIndex).aabb.surfaceArea);
 
-        float costLeft, costRight;
-        if (nodes[leftNodeIndex].IsLeaf())
-        {
-            costLeft = nodes[leafNodeIndex].aabb.Merge(nodes[leftNodeIndex].aabb).surfaceArea + minimumPushDownCost;
+        double costLeft, costRight;
+        if (nodes.at(leftNodeIndex).IsLeaf()) {
+            costLeft = nodes.at(leafNodeIndex).aabb.Merge(nodes.at(leftNodeIndex).aabb).surfaceArea + minimumPushDownCost;
         }
         else
         {
-            AABB newLeftAabb = nodes[leafNodeIndex].aabb.Merge(nodes[leftNodeIndex].aabb);
-            costLeft = (newLeftAabb.surfaceArea - nodes[leftNodeIndex].aabb.surfaceArea) + minimumPushDownCost;
+            AABB newLeftAabb = nodes.at(leafNodeIndex).aabb.Merge(nodes.at(leftNodeIndex).aabb);
+            costLeft = (newLeftAabb.surfaceArea - nodes.at(leftNodeIndex).aabb.surfaceArea) + minimumPushDownCost;
         }
-        if (nodes[rightNodeIndex].IsLeaf())
-        {
-            costRight = nodes[leafNodeIndex].aabb.Merge(nodes[rightNodeIndex].aabb).surfaceArea + minimumPushDownCost;
+        if (nodes.at(rightNodeIndex).IsLeaf()) {
+            costRight = nodes.at(leafNodeIndex).aabb.Merge(nodes.at(rightNodeIndex).aabb).surfaceArea + minimumPushDownCost;
         }
         else
         {
-            AABB newRightAabb = nodes[leafNodeIndex].aabb.Merge(nodes[rightNodeIndex].aabb);
-            costRight = (newRightAabb.surfaceArea - nodes[rightNodeIndex].aabb.surfaceArea) + minimumPushDownCost;
+            AABB newRightAabb = nodes.at(leafNodeIndex).aabb.Merge(nodes.at(rightNodeIndex).aabb);
+            costRight = (newRightAabb.surfaceArea - nodes.at(rightNodeIndex).aabb.surfaceArea) + minimumPushDownCost;
         }
 
         if (newParentNodeCost < costLeft && newParentNodeCost < costRight)
@@ -255,14 +252,15 @@ void AABBTree::InsertLeaf(unsigned int leafNodeIndex)
     }
 
     unsigned leafSiblingIndex = treeNodeIndex;
-    unsigned oldParentIndex = nodes[leafSiblingIndex].parentNodeIndex;
+    unsigned oldParentIndex = nodes.at(leafSiblingIndex).parentNodeIndex;
     unsigned newParentIndex = AllocateNode();
-    nodes[newParentIndex].parentNodeIndex = oldParentIndex;
-    nodes[newParentIndex].aabb = nodes[leafNodeIndex].aabb.Merge(nodes[leafSiblingIndex].aabb);
-    nodes[newParentIndex].leftNodeIndex = leafSiblingIndex;
-    nodes[newParentIndex].rightNodeIndex = leafNodeIndex;
-    nodes[leafNodeIndex].parentNodeIndex = newParentIndex;
-    nodes[leafSiblingIndex].parentNodeIndex = newParentIndex;
+
+    nodes.at(newParentIndex).parentNodeIndex = oldParentIndex;
+    nodes.at(newParentIndex).aabb = nodes.at(leafNodeIndex).aabb.Merge(nodes.at(leafSiblingIndex).aabb);
+    nodes.at(newParentIndex).leftNodeIndex = leafSiblingIndex;
+    nodes.at(newParentIndex).rightNodeIndex = leafNodeIndex;
+    nodes.at(leafNodeIndex).parentNodeIndex = newParentIndex;
+    nodes.at(leafSiblingIndex).parentNodeIndex = newParentIndex;
 
     if (oldParentIndex == AABB_NULL_NODE)
     {
@@ -270,7 +268,7 @@ void AABBTree::InsertLeaf(unsigned int leafNodeIndex)
     }
     else
     {
-        auto &oldParent = nodes[oldParentIndex];
+        auto &oldParent = nodes.at(oldParentIndex);
         if (oldParent.leftNodeIndex == leafSiblingIndex)
         {
             oldParent.leftNodeIndex = newParentIndex;
@@ -281,7 +279,7 @@ void AABBTree::InsertLeaf(unsigned int leafNodeIndex)
         }
     }
 
-    treeNodeIndex = nodes[leafNodeIndex].parentNodeIndex;
+    treeNodeIndex = nodes.at(leafNodeIndex).parentNodeIndex;
     FixUpwardsTree(treeNodeIndex);
 }
 
@@ -293,18 +291,18 @@ void AABBTree::RemoveLeaf(unsigned int leafNodeIndex)
         return;
     }
 
-    auto &leafNode = nodes[leafNodeIndex];
+    auto &leafNode = nodes.at(leafNodeIndex);
     unsigned parentNodeIndex = leafNode.parentNodeIndex;
-    const auto &parentNode = nodes[parentNodeIndex];
+    const auto &parentNode = nodes.at(parentNodeIndex);
     unsigned grandParentNodeIndex = parentNode.parentNodeIndex;
     unsigned siblingNodeIndex = parentNode.leftNodeIndex == leafNodeIndex ? parentNode.rightNodeIndex : parentNode.leftNodeIndex;
 
     assert(siblingNodeIndex != AABB_NULL_NODE);
-    auto &siblingNode = nodes[siblingNodeIndex];
+    auto &siblingNode = nodes.at(siblingNodeIndex);
 
     if (grandParentNodeIndex != AABB_NULL_NODE)
     {
-        auto &grandParentNode = nodes[grandParentNodeIndex];
+        auto &grandParentNode = nodes.at(grandParentNodeIndex);
         if (grandParentNode.leftNodeIndex == parentNodeIndex)
         {
             grandParentNode.leftNodeIndex = siblingNodeIndex;
@@ -331,7 +329,7 @@ void AABBTree::RemoveLeaf(unsigned int leafNodeIndex)
 
 void AABBTree::UpdateLeaf(unsigned int leafNodeIndex, const AABB &aabb)
 {
-    auto &node = nodes[leafNodeIndex];
+    auto &node = nodes.at(leafNodeIndex);
 
     if (node.aabb.Contains(aabb))
         return;
@@ -345,11 +343,11 @@ void AABBTree::FixUpwardsTree(unsigned treeNodeIndex)
 {
     while (treeNodeIndex != AABB_NULL_NODE)
     {
-        auto &treeNode = nodes[treeNodeIndex];
+        auto &treeNode = nodes.at(treeNodeIndex);
 
         assert(treeNode.leftNodeIndex != AABB_NULL_NODE && treeNode.rightNodeIndex != AABB_NULL_NODE);
 
-        treeNode.aabb = nodes[treeNode.leftNodeIndex].aabb.Merge(nodes[treeNode.rightNodeIndex].aabb);
+        treeNode.aabb = nodes.at(treeNode.leftNodeIndex).aabb.Merge(nodes.at(treeNode.rightNodeIndex).aabb);
         treeNodeIndex = treeNode.parentNodeIndex;
     }
 }

@@ -23,25 +23,25 @@ boost::property_tree::ptree AgentStateRecorder::infrastuctureTree;
 
 // string representations of enum values, can easily be accessed using array[(int) enum_value]
 
-const std::string gazeTypes[] = {"NONE", "ScanGlance", "ObserveGlance", "ControlGlance"};
-const std::string scanAOIs[] = {"NONE",
-                                "Right",
-                                "Straight",
-                                "Left",
-                                "InnerRVM",
-                                "OuterLeftRVM",
-                                "OuterRightRVM",
-                                "Dashboard",
-                                "Other",
-                                "ShoulderCheckRight",
-                                "ShoulderCheckLeft"};
-const std::string controlAOI[] = {"NONE", "Right", "Left", "Oncoming"};
+std::vector<std::string> gazeTypes = {"NONE", "ScanGlance", "ObserveGlance", "ControlGlance"};
+std::vector<std::string> scanAOIs = {"NONE",
+                                     "Right",
+                                     "Straight",
+                                     "Left",
+                                     "InnerRVM",
+                                     "OuterLeftRVM",
+                                     "OuterRightRVM",
+                                     "Dashboard",
+                                     "Other",
+                                     "ShoulderCheckRight",
+                                     "ShoulderCheckLeft"};
+std::vector<std::string> controlAOI = {"NONE", "Right", "Left", "Oncoming"};
 
-const std::string crossingTypes[] = {"NA", "Left", "Right", "Straight", "Random"};
-const std::string crossingPhases[] = {
+std::vector<std::string> crossingTypes = {"NA", "Left", "Right", "Straight", "Random"};
+std::vector<std::string> crossingPhases = {
     "NONE",           "Approach", "Deceleration_ONE", "Deceleration_TWO", "Crossing_Left_ONE", "Crossing_Left_TWO", "Crossing_Straight",
     "Crossing_Right", "Exit"};
-const std::string stoppingPointTypes[] = {
+std::vector<std::string> stoppingPointTypes = {
     "NONE",         "Pedestrian_Right", "Pedestrian_Left", "Pedestrian_Crossing_ONE", "Pedestrian_Crossing_TWO",
     "Vehicle_Left", "Vehicle_Crossroad"};
 
@@ -61,12 +61,12 @@ void AgentStateRecorder::BufferTimeStep(const int &agentId, const GazeState &gaz
 
         // gaze information:
         // <GazeType>, <ScanAOI>, <ufovAngle>, <openingAngle>, <viewDistance>
-        outputLine += gazeTypes[static_cast<int>(gazeState.fixationState.first)] + ",";
+        outputLine += gazeTypes.at(static_cast<int>(gazeState.fixationState.first)) + ",";
         if (gazeState.fixationState.first == GazeType::ScanGlance) {
-            outputLine += scanAOIs[gazeState.fixationState.second] + ",";
+            outputLine += scanAOIs.at(gazeState.fixationState.second) + ",";
         }
         else if (gazeState.fixationState.first == GazeType::ControlGlance) {
-            outputLine += controlAOI[gazeState.fixationState.second] + ",";
+            outputLine += controlAOI.at(gazeState.fixationState.second) + ",";
         }
         else if (gazeState.fixationState.first == GazeType::ObserveGlance) {
             outputLine += "Agent:" + std::to_string(gazeState.fixationState.second) + ",";
@@ -96,8 +96,8 @@ void AgentStateRecorder::BufferTimeStep(const int &agentId, const GazeState &gaz
 
         // crossingType & crossingPhase:
         // <crossingType>, <crossingPhase>
-        outputLine += crossingTypes[(int)crossingInfo.type] + ",";
-        outputLine += crossingPhases[(int)crossingInfo.phase] + ",";
+        outputLine += crossingTypes.at(static_cast<int>(crossingInfo.type)) + ",";
+        outputLine += crossingPhases.at(static_cast<int>(crossingInfo.phase)) + ",";
 
         // fixation points:
         // [{<x> | <y>} | { ... }]
@@ -185,7 +185,7 @@ boost::property_tree::ptree AgentStateRecorder::AddInfrastructureData(std::share
                     stoppingPointTree.put("<xmlattr>.posY", doubleToString(point.posY));
                     stoppingPointTree.put("<xmlattr>.road", point.road->GetOpenDriveId());
                     stoppingPointTree.put("<xmlattr>.lane", point.lane->GetOpenDriveId());
-                    stoppingPointTree.put("<xmlattr>.type", stoppingPointTypes[(int)type]);
+                    stoppingPointTree.put("<xmlattr>.type", stoppingPointTypes.at(static_cast<int>(type)));
                     laneTree.add_child("Point", stoppingPointTree);
                 }
             }

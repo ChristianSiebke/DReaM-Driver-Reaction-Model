@@ -108,7 +108,7 @@ private:
     std::unordered_map<const RoadmapNode *, std::pair<double, const RoadmapNode *>>
     InitializeDijkstra(const std::shared_ptr<RoadmapNode> &node) const;
 
-    std::unordered_map<const MentalInfrastructure::Lane *, std::shared_ptr<RoadmapNode>> nodes{};
-    std::unordered_map<OdId, std::unordered_map<OwlId, const RoadmapNode *>> OdMapping{};
+    std::unordered_map<const MentalInfrastructure::Lane *, std::shared_ptr<RoadmapNode>> nodes;
+    std::unordered_map<OdId, std::unordered_map<OwlId, const RoadmapNode *>> OdMapping;
 };
 } // namespace RoadmapGraph

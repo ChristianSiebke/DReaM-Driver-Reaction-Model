@@ -54,7 +54,6 @@ void CollisionInterpreter::Update(WorldInterpretation *interpretation, const Wor
 void CollisionInterpreter::DetermineCollisionPoints(WorldInterpretation *interpretation, const WorldRepresentation &representation) {
     try {
         if (representation.agentMemory->empty()) {
-            Log("No surrounding agents... returning...", DReaMLogLevel::warning);
             return;
         }
         for (const auto &agent : *representation.agentMemory) {

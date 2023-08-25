@@ -25,7 +25,7 @@ struct InternWaypoint {
 
 class RouteConverter {
 public:
-    RouteConverter(WorldInterface *world) : world(world){};
+    RouteConverter(WorldInterface *world) : world{world}{};
     std::vector<InternWaypoint> Convert(std::vector<Import::Position> route);
     OwlId GetLane(OdId roadId, int laneId, double s) const;
     OwlId GetLane(OdId roadId, double t, double s) const;

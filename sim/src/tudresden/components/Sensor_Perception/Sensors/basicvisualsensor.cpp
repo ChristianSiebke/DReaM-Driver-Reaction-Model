@@ -16,12 +16,6 @@
 TimeMeasurement timeMeasureAABB("AABB.cpp");
 TimeMeasurement timeMeasureBasicSensor("BasicSensor.cpp");
 
-#define MEASURE_TIME false
-
-#if MEASURE_TIME
-#include <chrono>
-#endif
-
 void BasicVisualSensor::Trigger(int timestamp, GazeState gazeState, std::optional<Common::Vector2d> mirrorPos) {
     // use threads for operations
     bool useThreads = false;
@@ -76,16 +70,14 @@ void BasicVisualSensor::ThreadedAgentPerception(bool useThreads) {
         std::for_each(my_threads.begin(), my_threads.end(), std::mem_fn(&std::thread::join));
     }
     else {
-        for (unsigned i = 0; i < nb_elements; ++i) {
-            AgentPerceptionThread(i, i + 1);
-        }
+        AgentPerceptionThread(0, aabbTreeHandler->agents.size());
     }
 }
 
 void BasicVisualSensor::AgentPerceptionThread(unsigned startIndex, unsigned endIndex) {
-    for (unsigned i = startIndex; i < endIndex; i++) {
-        const auto obj = aabbTreeHandler->agentObjects.at(i);
-        const auto agent = aabbTreeHandler->agents.at(i);
+    for (unsigned k = startIndex; k < endIndex; k++) {
+        const auto obj = aabbTreeHandler->agentObjects.at(k);
+        const auto agent = aabbTreeHandler->agents.at(k);
 
         if (agent->GetId() == egoAgent->GetId())
             continue;
@@ -101,8 +93,8 @@ void BasicVisualSensor::AgentPerceptionThread(unsigned startIndex, unsigned endI
         bool hitAgent = false;
 
         for (unsigned i = 0; i < points.size() - 1; i++) {
-            auto currentPoint = Common::Vector2d(points[i].x(), points[i].y());
-            auto nextPoint = Common::Vector2d(points[i + 1].x(), points[i + 1].y());
+            auto currentPoint = Common::Vector2d(points.at(i).x(), points.at(i).y());
+            auto nextPoint = Common::Vector2d(points.at(i + 1).x(), points.at(i + 1).y());
 
             auto edge = nextPoint - currentPoint;
             auto distance = edge.Length();
@@ -135,14 +127,14 @@ void BasicVisualSensor::AgentPerceptionThread(unsigned startIndex, unsigned endI
                 auto distanceToPoint = rayDirection.Length();
 
                 for (auto it = queryResult.begin(); it != queryResult.end(); ++it) {
-                    const auto &obj = std::dynamic_pointer_cast<ObservedWorldObject>(it->first);
-                    const auto hitResult = obj->IsHitByRay(ray);
+                    const auto obji = std::dynamic_pointer_cast<ObservedWorldObject>(it->first);
+                    const auto hitResult = obji->IsHitByRay(ray);
 
-                    if (hitResult < 0 || obj->id == egoAgent->GetId()) {
+                    if (hitResult < 0 || obji->id == egoAgent->GetId()) {
                         continue;
                     }
 
-                    if (hitResult < distanceToPoint && agent->GetId() != obj->id) {
+                    if (hitResult < distanceToPoint && agent->GetId() != obji->id) {
                         foundOccluding = true;
                         break;
                     }

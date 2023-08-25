@@ -111,6 +111,12 @@ double LongitudinalDecision::DetermineAccelerationWish() {
             //---debugging--
             debuggingState += "A:" + std::to_string(agent->agent->GetID()) + " Following|";
             //---debugging--
+            if (!agent->relativeDistance.has_value()) {
+                std::string message = "File: " + static_cast<std::string>(__FILE__) + " Line: " + std::to_string(__LINE__) +
+                                      " Error in Following state calculation ";
+                throw std::logic_error(message);
+            }
+
             if ((agent->conflictSituation && agent->conflictSituation->oAgentDistance.vehicleFrontToCAStart > 0) &&
                 (agent->agent->GetVelocity() == 0 && !agent->laneInLineWithEgoLane)) {
                 debuggingState += " XX|";

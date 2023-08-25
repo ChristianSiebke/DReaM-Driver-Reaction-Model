@@ -73,10 +73,8 @@ GazeState XJunction::ControlGlance(CrossingPhase phase) {
 
 GazeState XJunction::ControlGlanceOnRoad(ControlAOI aoi) {
     GazeState gazeState;
-
-    auto fixationPoint = FixationPointForCGOnRoad(controlFixPointsOnRoads, aoi);
     gazeState.fixationState = {GazeType::ControlGlance, static_cast<int>(aoi)};
-    gazeState.target.fixationPoint = *fixationPoint;
+    gazeState.target.fixationPoint = FixationPointForCGOnRoad(controlFixPointsOnRoads, aoi);
     gazeState.openingAngle = behaviourData.gmBehaviour.XInt_controlOpeningAngle;
     DReaM::NormalDistribution *de = behaviourData.gmBehaviour.XInt_controlFixationDuration.get();
     double dist = stochastics->GetNormalDistributed(de->mean, de->std_deviation);
@@ -84,16 +82,16 @@ GazeState XJunction::ControlGlanceOnRoad(ControlAOI aoi) {
     return gazeState;
 }
 
-const Common::Vector2d *XJunction::FixationPointForCGOnRoad(const std::vector<Common::Vector2d> &fixPoints, ControlAOI aoi) {
-    const Common::Vector2d *fixPoint;
+Common::Vector2d XJunction::FixationPointForCGOnRoad(const std::vector<Common::Vector2d> &fixPoints, ControlAOI aoi) {
+    Common::Vector2d fixPoint;
     if (aoi == ControlAOI::Right) {
-        fixPoint = &fixPoints.at(0);
+        fixPoint = fixPoints.at(0);
     }
     else if (aoi == ControlAOI::Oncoming) {
-        fixPoint = &fixPoints.at(1);
+        fixPoint = fixPoints.at(1);
     }
     else if (aoi == ControlAOI::Left) {
-        fixPoint = &fixPoints.at(2);
+        fixPoint = fixPoints.at(2);
     }
     else {
         std::string message = __FILE__ " Line: " + std::to_string(__LINE__) + "unknown ControlAOI";
@@ -104,10 +102,8 @@ const Common::Vector2d *XJunction::FixationPointForCGOnRoad(const std::vector<Co
 
 GazeState XJunction::ControlGlanceOnXJunction(ControlAOI aoi, CrossingPhase phase) {
     GazeState gazeState;
-
-    auto fixationPoint = FixationPointForCGOnXJunction(controlFixPointsOnJunction, phase, aoi);
     gazeState.fixationState = {GazeType::ControlGlance, static_cast<int>(aoi)};
-    gazeState.target.fixationPoint = *fixationPoint;
+    gazeState.target.fixationPoint = FixationPointForCGOnXJunction(controlFixPointsOnJunction, phase, aoi);
     gazeState.openingAngle = behaviourData.gmBehaviour.XInt_controlOpeningAngle;
     DReaM::NormalDistribution *de = behaviourData.gmBehaviour.XInt_controlFixationDuration.get();
     double dist = stochastics->GetNormalDistributed(de->mean, de->std_deviation);
@@ -115,21 +111,21 @@ GazeState XJunction::ControlGlanceOnXJunction(ControlAOI aoi, CrossingPhase phas
     return gazeState;
 }
 
-const Common::Vector2d *XJunction::FixationPointForCGOnXJunction(const std::vector<Common::Vector2d> &fixPoints, CrossingPhase phase,
-                                                                 ControlAOI aoi) {
-    const Common::Vector2d *fixPoint;
+Common::Vector2d XJunction::FixationPointForCGOnXJunction(const std::vector<Common::Vector2d> &fixPoints, CrossingPhase phase,
+                                                          ControlAOI aoi) {
+    Common::Vector2d fixPoint;
     switch (phase) {
     case CrossingPhase::Deceleration_ONE:
         [[fallthrough]];
     case CrossingPhase::Deceleration_TWO:
         if (aoi == ControlAOI::Right) {
-            fixPoint = &fixPoints.at(0);
+            fixPoint = fixPoints.at(0);
         }
         else if (aoi == ControlAOI::Oncoming) {
-            fixPoint = &fixPoints.at(2);
+            fixPoint = fixPoints.at(2);
         }
         else if (aoi == ControlAOI::Left) {
-            fixPoint = &fixPoints.at(4);
+            fixPoint = fixPoints.at(4);
         }
         else {
             std::string message = __FILE__ " Line: " + std::to_string(__LINE__) + "useful field of view angle can not be calculated!";
@@ -138,13 +134,13 @@ const Common::Vector2d *XJunction::FixationPointForCGOnXJunction(const std::vect
         break;
     case CrossingPhase::Crossing_Straight:
         if (aoi == ControlAOI::Right) {
-            fixPoint = &fixPoints.at(1);
+            fixPoint = fixPoints.at(1);
         }
         else if (aoi == ControlAOI::Oncoming) {
-            fixPoint = &fixPoints.at(2);
+            fixPoint = fixPoints.at(2);
         }
         else if (aoi == ControlAOI::Left) {
-            fixPoint = &fixPoints.at(3);
+            fixPoint = fixPoints.at(3);
         }
         else {
             std::string message = __FILE__ " Line: " + std::to_string(__LINE__) + "useful field of view angle can not be calculated!";
@@ -153,10 +149,10 @@ const Common::Vector2d *XJunction::FixationPointForCGOnXJunction(const std::vect
         break;
     case CrossingPhase::Crossing_Right:
         if (aoi == ControlAOI::Right) {
-            fixPoint = &fixPoints.at(0);
+            fixPoint = fixPoints.at(0);
         }
         else if (aoi == ControlAOI::Left) {
-            fixPoint = &fixPoints.at(1);
+            fixPoint = fixPoints.at(1);
         }
         else {
             std::string message = __FILE__ " Line: " + std::to_string(__LINE__) + "useful field of view angle can not be calculated!";
@@ -165,13 +161,13 @@ const Common::Vector2d *XJunction::FixationPointForCGOnXJunction(const std::vect
         break;
     case CrossingPhase::Crossing_Left_ONE:
         if (aoi == ControlAOI::Right) {
-            fixPoint = &fixPoints.at(3);
+            fixPoint = fixPoints.at(3);
         }
         else if (aoi == ControlAOI::Oncoming) {
-            fixPoint = &fixPoints.at(2);
+            fixPoint = fixPoints.at(2);
         }
         else if (aoi == ControlAOI::Left) {
-            fixPoint = &fixPoints.at(4);
+            fixPoint = fixPoints.at(4);
         }
         else {
             std::string message = __FILE__ " Line: " + std::to_string(__LINE__) + "useful field of view angle can not be calculated!";
@@ -180,10 +176,10 @@ const Common::Vector2d *XJunction::FixationPointForCGOnXJunction(const std::vect
         break;
     case CrossingPhase::Crossing_Left_TWO:
         if (aoi == ControlAOI::Right) {
-            fixPoint = &fixPoints.at(3);
+            fixPoint = fixPoints.at(3);
         }
         else if (aoi == ControlAOI::Left) {
-            fixPoint = &fixPoints.at(4);
+            fixPoint = fixPoints.at(4);
         }
         else {
             std::string message = __FILE__ " Line: " + std::to_string(__LINE__) + "useful field of view angle can not be calculated!";

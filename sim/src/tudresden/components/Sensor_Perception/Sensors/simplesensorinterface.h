@@ -14,7 +14,7 @@
 
 class SimpleSensorInterface {
 public:
-    SimpleSensorInterface(const AgentInterface *egoAgent, WorldInterface *world) : egoAgent(egoAgent), world(world) {
+    SimpleSensorInterface(const AgentInterface *egoAgent, WorldInterface *world) : egoAgent{egoAgent}, world{world} {
     }
     SimpleSensorInterface(const SimpleSensorInterface &) = delete;
     SimpleSensorInterface(SimpleSensorInterface &&) = delete;

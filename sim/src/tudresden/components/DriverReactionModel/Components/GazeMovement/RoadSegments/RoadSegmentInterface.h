@@ -70,7 +70,7 @@ class RoadSegmentInterface {
 
         //!  all possible control points that could be fixated during the control
         //!  glance
-        std::vector<Common::Vector2d> controlFixationPoints{};
+        std::vector<Common::Vector2d> controlFixationPoints;
         const WorldRepresentation &worldRepresentation;
         StochasticsInterface *stochastics;
         const BehaviourData &behaviourData;
@@ -94,8 +94,8 @@ protected:
     void SortControlFixPoints(std::vector<Common::Vector2d> &controlFixPointsOnXJunction) const;
 
     double viewingDepthIntoRoad; // how far the driver see along the road.
-    std::vector<Common::Vector2d> controlFixPointsOnJunction{};
-    std::vector<Common::Vector2d> controlFixPointsOnRoads{};
+    std::vector<Common::Vector2d> controlFixPointsOnJunction;
+    std::vector<Common::Vector2d> controlFixPointsOnRoads;
 };
 } // namespace Node
 

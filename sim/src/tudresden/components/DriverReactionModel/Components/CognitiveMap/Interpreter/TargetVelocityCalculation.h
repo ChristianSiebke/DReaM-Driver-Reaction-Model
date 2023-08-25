@@ -49,8 +49,8 @@ private:
     }
     void CalculateVelDistOffset(double targetVelocity, DReaM::NormalDistribution activeTargetDistribution);
 
-    std::map<IntersectionSpot, double> phaseVelocities{};
-    std::map<std::string, double> velocityStatisticsSpecificRoads{};
+    std::map<IntersectionSpot, double> phaseVelocities;
+    std::map<std::string, double> velocityStatisticsSpecificRoads;
     double defaultVelocity;
     const MentalInfrastructure::Road *lastRoad = nullptr;
     IndicatorState lastIndicatorState = IndicatorState::IndicatorState_Off;

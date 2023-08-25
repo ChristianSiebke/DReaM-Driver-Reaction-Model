@@ -10,7 +10,7 @@
 
 class TimeMeasurement {
 public:
-    TimeMeasurement(std::string title) : name(title) {
+    TimeMeasurement(std::string title) : name{title} {
     }
 
     ~TimeMeasurement() {
@@ -56,12 +56,12 @@ public:
         if (openPoints.find(actualIdentifier) == openPoints.end()) {
             throw std::invalid_argument("This identifer does not exist.");
         }
-        auto time = std::chrono::duration_cast<std::chrono::microseconds>(endTimePoint - openPoints[actualIdentifier]);
+        auto time = std::chrono::duration_cast<std::chrono::microseconds>(endTimePoint - openPoints.at(actualIdentifier));
         if (measuredTimes.find(actualIdentifier) == measuredTimes.end()) {
             std::vector<std::chrono::microseconds> tmp;
             measuredTimes.insert(std::make_pair(actualIdentifier, tmp));
         }
-        measuredTimes[actualIdentifier].push_back(time);
+        measuredTimes.at(actualIdentifier).push_back(time);
         openPoints.erase(actualIdentifier);
     }
 
@@ -77,14 +77,14 @@ private:
     double CalculateMedian(std::vector<std::chrono::microseconds> values) {
         std::sort(values.begin(), values.end());
         if (values.size() % 2 != 0)
-            return (double)values[values.size() / 2].count();
-        return (double)((double)values[(values.size() - 1) / 2].count() + (double)values[values.size() / 2].count()) / 2.0;
+            return (double)values.at(values.size() / 2).count();
+        return (double)((double)values.at((values.size() - 1) / 2).count() + (double)values.at(values.size() / 2).count()) / 2.0;
     }
 
 private:
-    std::string name;
-    std::unordered_map<std::string, std::vector<std::chrono::microseconds>> measuredTimes{};
+    std::string name{""};
+    std::unordered_map<std::string, std::vector<std::chrono::microseconds>> measuredTimes;
 
-    std::unordered_map<std::string, std::chrono::_V2::system_clock::time_point> openPoints{};
-    std::string lastIdentifier;
+    std::unordered_map<std::string, std::chrono::_V2::system_clock::time_point> openPoints;
+    std::string lastIdentifier{""};
 };

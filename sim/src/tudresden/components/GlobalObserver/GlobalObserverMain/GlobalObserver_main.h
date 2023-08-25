@@ -140,9 +140,9 @@ public:
 
 private:
     Main(WorldInterface *world, StochasticsInterface *stochastics) :
-        world(world),
-        stochastics(stochastics),
-        infrastructurePerception(std::make_shared<InfrastructurePerception>()),
+        world{world},
+        stochastics{stochastics},
+        infrastructurePerception{std::make_shared<InfrastructurePerception>()},
         rnConverter(world, infrastructurePerception),
         caCalculator(infrastructurePerception),
         rgCalculator(infrastructurePerception),
@@ -183,7 +183,7 @@ private:
 
     // agent perception related fields
     GlobalObserver::Converters::AgentPerceptionConverter apConverter;
-    std::unordered_map<int, std::shared_ptr<DetailedAgentPerception>> agentPerceptions{};
+    std::unordered_map<int, std::shared_ptr<DetailedAgentPerception>> agentPerceptions;
     bool agentPerceptionsCreated = false;
 
     GlobalObserver::Routes::RouteConverter routeConverter;

@@ -30,7 +30,7 @@ class WorldInterpreter {
     void SetSecondaryTask(std::unique_ptr<Interpreter::InterpreterInterface> task);
 
 private:
-    std::vector<std::unique_ptr<Interpreter::InterpreterInterface>> primaryTasks{};
-    std::vector<std::unique_ptr<Interpreter::InterpreterInterface>> secondaryTasks{};
+    std::vector<std::unique_ptr<Interpreter::InterpreterInterface>> primaryTasks;
+    std::vector<std::unique_ptr<Interpreter::InterpreterInterface>> secondaryTasks;
 };
 } // namespace Interpreter

@@ -49,7 +49,7 @@ GazeState GazeMovement::DetermineGazeState() {
         }
     }
 
-    if (!turningAtJunctionShoulderCheckDecision && worldInterpretation.targetLane &&
+    if ((!turningAtJunctionShoulderCheckDecision && worldInterpretation.targetLane) &&
         worldRepresentation.egoAgent->GetNextLane() == *worldInterpretation.targetLane) {
         turningAtJunctionShoulderCheckDecision = true;
         if (0.68 >= random || worldRepresentation.egoAgent->GetVehicleType() == DReaMDefinitions::AgentVehicleType::Bicycle) {
@@ -61,7 +61,7 @@ GazeState GazeMovement::DetermineGazeState() {
             }
         }
     }
-    if (0.7 >= random || worldRepresentation.egoAgent->GetVehicleType() == DReaMDefinitions::AgentVehicleType::Bicycle) {
+    if (0.68 >= random || worldRepresentation.egoAgent->GetVehicleType() == DReaMDefinitions::AgentVehicleType::Bicycle) {
         if (worldInterpretation.triggerShoulderCheckDecision == ScanAOI::ShoulderCheckLeft) {
             return PerformShoulderCheckLeft(worldInterpretation.triggerShoulderCheckDecision);
         }

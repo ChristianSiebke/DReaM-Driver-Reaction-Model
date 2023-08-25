@@ -85,10 +85,10 @@ struct GeneralAgentPerception : ObjectPerception {
     IndicatorState indicatorState = IndicatorState::IndicatorState_Warn;
 
     // positional information (at reference point)
-    LanePosition lanePosition{};
-    std::map<std::string, RoadInterval> touchedRoads{};
-    const MentalInfrastructure::Lane *nextLane;
-    JunctionDistance junctionDistance{};
+    LanePosition lanePosition;
+    std::map<std::string, RoadInterval> touchedRoads;
+    const MentalInfrastructure::Lane *nextLane = nullptr;
+    JunctionDistance junctionDistance;
 
 public:
     /**
@@ -128,21 +128,21 @@ struct DetailedAgentPerception : GeneralAgentPerception {
 
     // additional road information
     double laneWidth = std::numeric_limits<double>::min();
-    MainLocatorInformation mainLocatorInformation{};
+    MainLocatorInformation mainLocatorInformation;
 
-    DReaMRoute::Waypoints route{};
+    DReaMRoute::Waypoints route;
 };
 
 struct LookupTableRoadNetwork {
-    std::unordered_map<OdId, const MentalInfrastructure::Road *> roads{};
-    std::unordered_map<OwlId, const MentalInfrastructure::Lane *> lanes{};
-    std::unordered_map<OdId, const MentalInfrastructure::TrafficSign *> trafficSigns{};
+    std::unordered_map<OdId, const MentalInfrastructure::Road *> roads;
+    std::unordered_map<OwlId, const MentalInfrastructure::Lane *> lanes;
+    std::unordered_map<OdId, const MentalInfrastructure::TrafficSign *> trafficSigns;
     // not const since these need to be updated
-    std::unordered_map<OdId, MentalInfrastructure::TrafficLight *> trafficLights{};
+    std::unordered_map<OdId, MentalInfrastructure::TrafficLight *> trafficLights;
 };
 
 struct StoppingPointData {
-    std::unordered_map<OdId, std::unordered_map<OwlId, std::unordered_map<StoppingPointType, StoppingPoint>>> stoppingPoints{};
+    std::unordered_map<OdId, std::unordered_map<OwlId, std::unordered_map<StoppingPointType, StoppingPoint>>> stoppingPoints;
 };
 
 struct InfrastructurePerception {
@@ -169,12 +169,12 @@ struct InfrastructurePerception {
         return stoppingPointData;
     }
 
-    std::vector<std::shared_ptr<const MentalInfrastructure::Junction>> junctions{};
-    std::vector<std::shared_ptr<const MentalInfrastructure::Road>> roads{};
-    std::vector<std::shared_ptr<const MentalInfrastructure::Lane>> lanes{};
-    std::vector<std::shared_ptr<const MentalInfrastructure::Section>> sections{};
-    std::vector<std::shared_ptr<const MentalInfrastructure::TrafficSign>> trafficSigns{};
-    std::vector<std::shared_ptr<const MentalInfrastructure::TrafficLight>> trafficLights{};
+    std::vector<std::shared_ptr<const MentalInfrastructure::Junction>> junctions;
+    std::vector<std::shared_ptr<const MentalInfrastructure::Road>> roads;
+    std::vector<std::shared_ptr<const MentalInfrastructure::Lane>> lanes;
+    std::vector<std::shared_ptr<const MentalInfrastructure::Section>> sections;
+    std::vector<std::shared_ptr<const MentalInfrastructure::TrafficSign>> trafficSigns;
+    std::vector<std::shared_ptr<const MentalInfrastructure::TrafficLight>> trafficLights;
 
     RoadmapGraph::RoadmapGraph graph;
     StoppingPointData stoppingPointData;
@@ -187,7 +187,7 @@ struct InfrastructurePerception {
      * \brief map conflic area pairs to conflict position (junction id)
      */
     std::unordered_map<OdId, std::vector<std::pair<MentalInfrastructure::ConflictArea, MentalInfrastructure::ConflictArea>>>
-        conflictAreas{};
+        conflictAreas;
 };
 
 struct DynamicInfrastructurePerception {

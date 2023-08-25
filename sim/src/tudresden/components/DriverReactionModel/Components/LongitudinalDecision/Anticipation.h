@@ -105,7 +105,7 @@ private:
     double maxEmergencyDeceleration;
     double comfortDeceleration;
     double timeGapAcceptance;
-    std::unordered_map<int, Priority> priorityAgents{};
+    std::unordered_map<int, Priority> priorityAgents;
     const WorldRepresentation &worldRepresentation;
     const WorldInterpretation &worldInterpretation;
     StochasticsInterface *stochastics;

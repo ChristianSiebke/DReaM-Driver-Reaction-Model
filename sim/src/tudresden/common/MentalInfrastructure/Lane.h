@@ -56,9 +56,9 @@ struct ConflictArea
  *
  */
 struct NextDirectionLanes {
-    std::vector<const MentalInfrastructure::Lane *> rightLanes{};
-    std::vector<const MentalInfrastructure::Lane *> leftLanes{};
-    std::vector<const MentalInfrastructure::Lane *> straightLanes{};
+    std::vector<const MentalInfrastructure::Lane *> rightLanes;
+    std::vector<const MentalInfrastructure::Lane *> leftLanes;
+    std::vector<const MentalInfrastructure::Lane *> straightLanes;
 };
 
 ///
@@ -68,7 +68,7 @@ class Lane : public Element
 {
 public:
     Lane(const OdId &openDriveId, DReaMId dreamId, OwlId owlId, double length, LaneType type, bool inRoadDirection) :
-        Element(openDriveId, dreamId), owlId(owlId), length(length), type(type), inRoadDirection(inRoadDirection) {
+        Element(openDriveId, dreamId), owlId{owlId}, length{length}, type{type}, inRoadDirection{inRoadDirection} {
     }
     ~Lane() override
     {
@@ -309,14 +309,14 @@ public:
         bool inRoadDirection;
 
         const Road *road = nullptr;
-        std::list<LanePoint> lanePointsLeftSide{};
-        std::list<LanePoint> lanePointsReference{};
-        std::list<LanePoint> lanePointsRightSide{};
+        std::list<LanePoint> lanePointsLeftSide;
+        std::list<LanePoint> lanePointsReference;
+        std::list<LanePoint> lanePointsRightSide;
 
-        std::unordered_map<const Lane *, const ConflictArea> conflictAreas{};
+        std::unordered_map<const Lane *, const ConflictArea> conflictAreas;
 
-        std::vector<const Lane *> predecessors{};
-        std::vector<const Lane *> successors{};
+        std::vector<const Lane *> predecessors;
+        std::vector<const Lane *> successors;
         const Lane *leftLane = nullptr;
         const Lane *rightLane = nullptr;
 

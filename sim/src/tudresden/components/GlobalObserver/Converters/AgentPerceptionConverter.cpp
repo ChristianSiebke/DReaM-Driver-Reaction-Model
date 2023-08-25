@@ -148,19 +148,6 @@ Common::Vector2d AgentPerceptionConverter::GetDriverPosition(const AgentInterfac
 }
 
 std::shared_ptr<DetailedAgentPerception> AgentPerceptionConverter::ConvertAgent(const AgentInterface *agent) {
-    const auto &actualEgoAgent = const_cast<AgentInterface *>(agent)->GetEgoAgent();
-    auto worldData = static_cast<OWL::WorldData *>(world->GetWorldData());
-    WorldDataQuery helper(*worldData);
-
-    auto referenceLane =
-        &helper.GetLaneByOdId(actualEgoAgent.GetReferencePointPosition()->roadId, actualEgoAgent.GetReferencePointPosition()->laneId,
-                              actualEgoAgent.GetReferencePointPosition()->roadPosition.s);
-    auto referenceLaneDReaM = infrastructurePerception->lookupTableRoadNetwork.lanes.at(referenceLane->GetId());
-    auto mainLocatorLane =
-        &helper.GetLaneByOdId(actualEgoAgent.GetMainLocatePosition().roadId, actualEgoAgent.GetMainLocatePosition().laneId,
-                              actualEgoAgent.GetMainLocatePosition().roadPosition.s);
-    auto mainLocatorLaneDReaM = infrastructurePerception->lookupTableRoadNetwork.lanes.at(mainLocatorLane->GetId());
-
     DReaMRoute::Waypoints dreamRoute;
     if (CheckForRouteUpdate(agent)) {
         auto newRouteOptional = RouteUpdate(agent);
@@ -175,6 +162,26 @@ std::shared_ptr<DetailedAgentPerception> AgentPerceptionConverter::ConvertAgent(
     else {
         dreamRoute = routeMapping.at(agent->GetId());
     }
+    const auto &actualEgoAgent = const_cast<AgentInterface *>(agent)->GetEgoAgent();
+
+    auto worldData = static_cast<OWL::WorldData *>(world->GetWorldData());
+
+    WorldDataQuery helper(*worldData);
+    auto referenceLane =
+        &helper.GetLaneByOdId(actualEgoAgent.GetReferencePointPosition()->roadId, actualEgoAgent.GetReferencePointPosition()->laneId,
+                              actualEgoAgent.GetReferencePointPosition()->roadPosition.s);
+    if (!referenceLane->Exists()) {
+        std::cout << "lane is invalide="
+                  << " Agent= " << agent->GetId() << " lane id =" << actualEgoAgent.GetReferencePointPosition()->laneId << std::endl;
+    }
+
+    auto referenceLaneDReaM = infrastructurePerception->lookupTableRoadNetwork.lanes.at(referenceLane->GetId());
+
+    auto mainLocatorLane =
+        &helper.GetLaneByOdId(actualEgoAgent.GetMainLocatePosition().roadId, actualEgoAgent.GetMainLocatePosition().laneId,
+                              actualEgoAgent.GetMainLocatePosition().roadPosition.s);
+
+    auto mainLocatorLaneDReaM = infrastructurePerception->lookupTableRoadNetwork.lanes.at(mainLocatorLane->GetId());
 
     DetailedAgentPerception perceptionData;
 
@@ -216,6 +223,7 @@ std::shared_ptr<DetailedAgentPerception> AgentPerceptionConverter::ConvertAgent(
         actualEgoAgent.GetLaneCurvature(),                                                                        // curvature
         perceptionData.movingInLaneDirection ? actualEgoAgent.GetRelativeYaw() : -actualEgoAgent.GetRelativeYaw() // heading
     };
+
     perceptionData.route = dreamRoute;
 
     return std::make_shared<DetailedAgentPerception>(perceptionData);

@@ -144,9 +144,7 @@ int main(int argc, char* argv[])
         exit(EXIT_FAILURE);
     }
 
-    qDebug() << "Simulation time elapsed: " << timer.elapsed() << " ms";
-
-    LOG_INTERN(LogLevel::DebugCore) << "Simulation time elapsed: " << timer.elapsed() << " ms";
+    LOG_INTERN(LogLevel::Error) << "Simulation time elapsed: " << timer.elapsed() << " ms";
     LOG_INTERN(LogLevel::DebugCore) << "end simulation";
 
     return 0;
@@ -158,7 +156,6 @@ void SetupLogging(LogLevel logLevel, const std::string& logFile, const std::vect
     QDir logFileDir = QFileInfo(QString::fromStdString(logFile)).absoluteDir();
     logFileDir.mkpath(".");
     LogOutputPolicy::SetFile(logFilePath.absolutePath().toStdString());
-
     LogFile::ReportingLevel() = logLevel;
     LOG_INTERN(LogLevel::DebugCore) << std::endl << std::endl << "### simulation start ##";
 

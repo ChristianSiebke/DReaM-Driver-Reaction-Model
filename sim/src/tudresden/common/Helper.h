@@ -41,7 +41,10 @@ template <typename T>
 bool anyElementOfCollectionIsElementOfOtherCollection(T collectionA, T collectionB)
 {
     return std::any_of(collectionA.begin(), collectionA.end(), [collectionB](const auto &elementA) {
-        return std::any_of(collectionB.begin(), collectionB.end(), [elementA](const auto &elementB) { return (elementA == elementB); });
+        return std::any_of(collectionB.begin(), collectionB.end(), [elementA](const auto &elementB) {
+            assert(elementA != nullptr && elementB != nullptr);
+            return (elementA == elementB);
+        });
     });
 };
 

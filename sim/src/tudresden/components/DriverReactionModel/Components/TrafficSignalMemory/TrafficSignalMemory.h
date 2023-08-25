@@ -30,7 +30,7 @@ private:
     void InsertIntoVisibleTrafficSignals(const MentalInfrastructure::TrafficSignal *sign);
 
 private:
-    std::unordered_map<DReaMId, MemorizedTrafficSignal> memory{};
+    std::unordered_map<DReaMId, MemorizedTrafficSignal> memory;
     std::unique_ptr<VisibleTrafficSignals> visibleTrafficSignals{nullptr};
 
     const unsigned int maximumElementsInMemory;

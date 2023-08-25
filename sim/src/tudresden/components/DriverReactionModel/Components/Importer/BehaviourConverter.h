@@ -29,7 +29,7 @@ private:
         loggerInterface->Log(message, level);
     }
 
-    std::map<DReaMDefinitions::AgentVehicleType, std::shared_ptr<BehaviourData>> behaviourMap{};
+    std::map<DReaMDefinitions::AgentVehicleType, std::shared_ptr<BehaviourData>> behaviourMap;
     LoggerInterface* loggerInterface;
 };
 

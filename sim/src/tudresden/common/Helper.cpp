@@ -218,10 +218,6 @@ double AngleBetween2d(const Vector2d &vectorA, const Vector2d &vectorB) {
 }
 
 std::optional<Vector2d> IntersectionPoint(Vector2d p1, Vector2d p2, Vector2d q1, Vector2d q2) {
-    double m1 = (p2.y - p1.y) / (p2.x - p1.x);
-    double n1 = ((p1.y * p2.x) - (p2.y * p1.x)) / (p2.x - p1.x);
-    double m2 = (q2.y - q1.y) / (q2.x - q1.x);
-    double n2 = ((q1.y * q2.x) - (q2.y * q1.x)) / (q2.x - q1.x);
     if (p1 == q1) {
         return std::optional<Vector2d>{{p1.x, p1.y}};
     }
@@ -234,6 +230,34 @@ std::optional<Vector2d> IntersectionPoint(Vector2d p1, Vector2d p2, Vector2d q1,
     else if (p2 == q2) {
         return std::optional<Vector2d>{{p2.x, p2.y}};
     }
+
+    if ((p2.x - p1.x) == 0.0) {
+        double x = p2.x;
+        if ((q2.x - q1.x) == 0.0) {
+            if (std::abs(p2.x - q2.x) < 0.0001) {
+                return std::optional<Vector2d>{{p1.x, p1.y}};
+            }
+            else {
+                return std::nullopt;
+            }
+        }
+        double m2 = (q2.y - q1.y) / (q2.x - q1.x);
+        double n2 = ((q1.y * q2.x) - (q2.y * q1.x)) / (q2.x - q1.x);
+        double y = m2 * x + n2;
+        return std::optional<Vector2d>{{x, y}};
+    }
+    else if ((q2.x - q1.x) == 0.0) {
+        double x = q2.x;
+        double m1 = (p2.y - p1.y) / (p2.x - p1.x);
+        double n1 = ((p1.y * p2.x) - (p2.y * p1.x)) / (p2.x - p1.x);
+        double y = m1 * x + n1;
+        return std::optional<Vector2d>{{x, y}};
+    }
+
+    double m1 = (p2.y - p1.y) / (p2.x - p1.x);
+    double n1 = ((p1.y * p2.x) - (p2.y * p1.x)) / (p2.x - p1.x);
+    double m2 = (q2.y - q1.y) / (q2.x - q1.x);
+    double n2 = ((q1.y * q2.x) - (q2.y * q1.x)) / (q2.x - q1.x);
 
     if (m1 - m2 == 0.0)
         return std::nullopt;
@@ -311,8 +335,10 @@ bool AgentTouchesLane(const AgentRepresentation *agent, const MentalInfrastructu
     return std::any_of(agent->GetTouchedRoads().begin(), agent->GetTouchedRoads().end(),
                        [lane](std::pair<std::string, RoadInterval> touchedRoad) {
                            return touchedRoad.first == lane->GetRoad()->GetOpenDriveId() &&
-                                  std::any_of(touchedRoad.second.lanes.begin(), touchedRoad.second.lanes.end(),
-                                              [lane](int touchedLaneId) { return touchedLaneId == std::stoi(lane->GetOpenDriveId()); });
+                                  std::any_of(touchedRoad.second.lanes.begin(), touchedRoad.second.lanes.end(), [lane](int touchedLaneId) {
+                                      assert(lane != nullptr);
+                                      return touchedLaneId == std::stoi(lane->GetOpenDriveId());
+                                  });
                        });
 }
 

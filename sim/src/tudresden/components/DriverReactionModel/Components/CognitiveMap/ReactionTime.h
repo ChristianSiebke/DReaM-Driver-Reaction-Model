@@ -46,9 +46,9 @@ class ReactionTime {
 
 private:
     // buffer the perceived agents to simulate processing time
-      std::deque<std::vector<std::shared_ptr<GeneralAgentPerception>>> perceivedAgentBuffer{};
+      std::deque<std::vector<std::shared_ptr<GeneralAgentPerception>>> perceivedAgentBuffer;
       // buffer the perceived agents to simulate processing time
-      std::unordered_map<int, double> processingAgentBuffer{};
+      std::unordered_map<int, double> processingAgentBuffer;
       unsigned int bufferSize;
       double cycleTime;
       double initialPerceptionTime;

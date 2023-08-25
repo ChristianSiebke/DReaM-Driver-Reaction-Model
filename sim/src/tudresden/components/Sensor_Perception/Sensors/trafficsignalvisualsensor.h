@@ -38,7 +38,7 @@ private:
     OWL::WorldData *worldData;
     std::shared_ptr<AABBTreeHandler> aabbTreeHandler;
     std::shared_ptr<AABBTree> aabbTree = nullptr;
-    std::vector<OdId> visible{};
+    std::vector<OdId> visible;
 
     double sensorDirection = 0;
     double minViewAngle = 0;

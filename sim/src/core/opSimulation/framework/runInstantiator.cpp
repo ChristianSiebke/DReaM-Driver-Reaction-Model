@@ -87,12 +87,12 @@ bool RunInstantiator::ExecuteRun()
     {
         RunResult runResult;
 
-        LOG_INTERN(LogLevel::DebugCore) << std::endl
+        LOG_INTERN(LogLevel::Error) << std::endl
                                         << "### run number: " << invocation << " ###";
         auto seed = static_cast<std::uint32_t>(experimentConfig.randomSeed + invocation);
         if (!InitRun(seed, environmentConfig, profiles, runResult))
         {
-            LOG_INTERN(LogLevel::DebugCore) << std::endl
+            LOG_INTERN(LogLevel::Error) << std::endl
                                             << "### run initialization failed ###";
             break;
         }
@@ -102,7 +102,7 @@ bool RunInstantiator::ExecuteRun()
         scheduler_state = scheduler.Run(0, scenario.GetEndTime(), runResult, eventNetwork);
         if (scheduler_state == core::scheduling::Scheduler::FAILURE)
         {
-            LOG_INTERN(LogLevel::DebugCore) << std::endl
+            LOG_INTERN(LogLevel::Error) << std::endl
                                             << "### run aborted ###";
             break;
         }

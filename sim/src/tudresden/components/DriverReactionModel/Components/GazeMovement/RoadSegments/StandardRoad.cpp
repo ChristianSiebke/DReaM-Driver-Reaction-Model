@@ -18,12 +18,11 @@ namespace RoadSegments {
 namespace Edge {
 
 GazeState StandardRoad::ControlGlance(CrossingPhase phase) { // on standard road exist no special control gazes
-    assert(true && " Function should never executed");
+    assert(false && " Function should never executed");
 };
 
 AOIProbabilities StandardRoad::LookUpScanAOIProbability(CrossingPhase phase) {
     AOIProbabilities aoiProbs;
-    // probabilities according to /no traffic /IndicatorState_Off/ phase =approach study of TU Dresden
     if (phase == CrossingPhase::NONE) {
         for(auto& prob : behaviourData.gmBehaviour.std_scanAOIProbabilities) {
             DReaM::NormalDistribution* de = prob.second.get();
@@ -42,7 +41,7 @@ AOIProbabilities StandardRoad::LookUpScanAOIProbability(CrossingPhase phase) {
 };
 
 AOIProbabilities StandardRoad::LookUpControlAOIProbability(CrossingPhase phase) { // on standard road exist no special control gazes
-    assert(true && " Function should never executed");
+    assert(false && " Function should never executed");
 };
 
 } // namespace Edge

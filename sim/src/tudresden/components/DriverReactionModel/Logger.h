@@ -35,7 +35,7 @@ class Logger {
 
         char result[100] = {0};
         static DWORD first = GetTickCount();
-        std::sprintf(result, "%s.%03ld", buffer, (long)(GetTickCount() - first) % 1000);
+        std::sprintf(result, "%s.%03ld", buffer, (static_cast<long>(GetTickCount()) - first) % 1000);
         return result;
     }
 
