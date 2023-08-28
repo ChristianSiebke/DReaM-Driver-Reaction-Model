@@ -14,6 +14,7 @@
 namespace GazeMovement {
 
 void GazeMovement::Update() {
+    UpdateRoadSegment();
     if (durationCounter >= currentGazeState.fixationDuration || Common::CollisionImminent(worldInterpretation.interpretedAgents)) {
         currentGazeState = DetermineGazeState();
         durationCounter = 0;
@@ -41,7 +42,6 @@ void GazeMovement::Update() {
 GazeState GazeMovement::DetermineGazeState() {
     // TODO update old agents
     double random = GetStochastic()->GetUniformDistributed(0, 1);
-    UpdateRoadSegment();
 
     if (auto collisionPoint = Common::ClosestCollisionPointByTime(worldInterpretation.interpretedAgents)) {
         if (collisionPoint->collisionImminent) {
@@ -115,10 +115,14 @@ void GazeMovement::UpdateRoadSegment() {
                     return std::find_if(lanes.begin(), lanes.end(), [id](auto element) { return element->GetOpenDriveId() == id; });
                 };
 
-                auto lane = std::stoi(worldRepresentation.egoAgent->GetLanePosition().lane->GetOpenDriveId()) < 0
-                                ? *findCorrespondinglaneToId("-1")
-                                : *findCorrespondinglaneToId("1");
-                auto nextLanes = lane->NextLanes(worldRepresentation.egoAgent->IsMovingInLaneDirection());
+                auto laneiter = std::stoi(worldRepresentation.egoAgent->GetLanePosition().lane->GetOpenDriveId()) < 0
+                                    ? findCorrespondinglaneToId("-1")
+                                    : findCorrespondinglaneToId("1");
+                if (laneiter == lanes.end()) {
+                    std::string message = __FILE__ " Line: " + std::to_string(__LINE__) + " invalid T-Junction layout";
+                    throw std::runtime_error(message);
+                }
+                auto nextLanes = (*laneiter)->NextLanes(worldRepresentation.egoAgent->IsMovingInLaneDirection());
                 if (nextLanes == std::nullopt) {
                     std::string message = __FILE__ " Line: " + std::to_string(__LINE__) + "unknown successor lanes";
                     throw std::runtime_error(message);

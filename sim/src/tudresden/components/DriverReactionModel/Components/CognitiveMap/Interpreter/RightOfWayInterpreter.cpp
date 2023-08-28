@@ -100,20 +100,12 @@ std::optional<JunctionSituation> RightOfWayInterpreter::JunctionSituation(const 
     return std::nullopt;
 }
 const MentalInfrastructure::Junction *RightOfWayInterpreter::NextJunction(const AgentRepresentation &agent) const {
-    auto successorLane = [&agent](auto lane) { return lane->NextLane(agent.GetIndicatorState(), agent.IsMovingInLaneDirection()); };
-    auto predecessorLane = [](auto lane) -> const MentalInfrastructure::Lane * {
-        if (lane->GetPredecessors().empty()) {
-            return nullptr;
-        }
-        return lane->GetPredecessors().front();
-    };
-    auto nextLane = [&](auto lane) { return agent.IsMovingInLaneDirection() ? successorLane(lane) : predecessorLane(lane); };
     auto lane = agent.GetNextLane();
     for (unsigned int i = 0; i <= maxNumberLanesExtrapolation; i++) {
         if (lane && lane->IsJunctionLane()) {
             return lane->GetRoad()->GetJunction();
         }
-        lane = lane ? nextLane(lane) : nullptr;
+        lane = lane ? lane->NextLane(agent.GetIndicatorState(), agent.IsMovingInLaneDirection()) : nullptr;
     }
     return nullptr;
 }
@@ -122,16 +114,6 @@ bool RightOfWayInterpreter::IsMovingTowardsJunction(const AgentRepresentation &a
                                                     const MentalInfrastructure::Junction *junction) const {
     if (!junction)
         return false;
-    auto successorLane = [&agent](auto currentLane) {
-        return currentLane->NextLane(agent.GetIndicatorState(), agent.IsMovingInLaneDirection());
-    };
-    auto predecessorLane = [](auto currentLane) -> const MentalInfrastructure::Lane * {
-        if (currentLane->GetPredecessors().empty()) {
-            return nullptr;
-        }
-        return currentLane->GetPredecessors().front();
-    };
-    auto nextLane = [&](auto lane) { return agent.IsMovingInLaneDirection() ? successorLane(lane) : predecessorLane(lane); };
     auto currentLane = agent.GetLanePosition().lane;
     const MentalInfrastructure::Junction *agentJunction = nullptr;
     for (unsigned int i = 0; i <= maxNumberLanesExtrapolation; i++) {
@@ -141,7 +123,7 @@ bool RightOfWayInterpreter::IsMovingTowardsJunction(const AgentRepresentation &a
                 return true;
             }
         }
-        currentLane = currentLane ? nextLane(currentLane) : nullptr;
+        currentLane = currentLane ? currentLane->NextLane(agent.GetIndicatorState(), agent.IsMovingInLaneDirection()) : nullptr;
     }
     return junction == agentJunction;
 }

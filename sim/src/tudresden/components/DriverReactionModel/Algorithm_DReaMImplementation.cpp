@@ -153,8 +153,6 @@ void AlgorithmDReaMImplementation::Trigger(int time) {
         out_indicatorState = static_cast<int>(DReaM.GetLateralAction().indicator);
         out_longitudinalAccelerationWish = DReaM.GetAcceleration();
         outGazeState = DReaM.GetGazeState();
-        segmentControlFixPoints = DReaM.GetSegmentControlFixationPoints();
-
         // LateralOutput**************************
         out_laneWidth = DReaM.GetWorldRepresentation().egoAgent->GetLaneWidth();
         out_lateral_displacement = DReaM.GetWorldRepresentation().egoAgent->GetLateralDisplacement() -

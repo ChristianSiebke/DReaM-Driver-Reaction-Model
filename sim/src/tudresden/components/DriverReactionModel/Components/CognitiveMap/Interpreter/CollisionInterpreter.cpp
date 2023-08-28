@@ -52,19 +52,12 @@ void CollisionInterpreter::Update(WorldInterpretation *interpretation, const Wor
 }
 
 void CollisionInterpreter::DetermineCollisionPoints(WorldInterpretation *interpretation, const WorldRepresentation &representation) {
-    try {
-        if (representation.agentMemory->empty()) {
-            return;
-        }
-        for (const auto &agent : *representation.agentMemory) {
-            auto &agentInterpretation = interpretation->interpretedAgents.at(agent->GetID());
-            agentInterpretation->collisionPoint = CalculationCollisionPoint(representation, *agent);
-        }
+    if (representation.agentMemory->empty()) {
+        return;
     }
-    catch (...) {
-        std::string message =
-            "File: " + static_cast<std::string>(__FILE__) + " Line: " + std::to_string(__LINE__) + " Update collision points failed";
-        Log(message, error);
+    for (const auto &agent : *representation.agentMemory) {
+        auto &agentInterpretation = interpretation->interpretedAgents.at(agent->GetID());
+        agentInterpretation->collisionPoint = CalculationCollisionPoint(representation, *agent);
     }
 }
 

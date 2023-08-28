@@ -74,8 +74,6 @@ private:
     double AgentCrashImminent(const std::unique_ptr<AgentInterpretation> &oAgent) const;
 
     double accelerationResult = 0;
-
-    const MentalInfrastructure::Road *currentRoad = nullptr;
     const WorldRepresentation &worldRepresentation;
     const WorldInterpretation &worldInterpretation;
 

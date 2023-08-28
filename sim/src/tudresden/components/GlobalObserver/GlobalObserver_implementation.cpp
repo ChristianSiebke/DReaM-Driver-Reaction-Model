@@ -107,15 +107,48 @@ void GlobalObserver_Implementation::UpdateOutput(int localLinkId, std::shared_pt
 }
 
 void GlobalObserver_Implementation::Trigger(int time) {
-    timeMeasureGlobalObserver.StartTimePoint("Trigger GlobalObserver");
-    globalObserverMain->Trigger(time);
-    timeMeasureGlobalObserver.EndTimePoint();
-    dataRecorder->Trigger(globalObserverMain->GetDetailedAgentPerception(GetAgent()->GetId()), analysisData, time);
+    try {
+        timeMeasureGlobalObserver.StartTimePoint("Trigger GlobalObserver");
+        globalObserverMain->Trigger(time);
+        timeMeasureGlobalObserver.EndTimePoint();
 
-    std::vector<std::pair<int, std::shared_ptr<DetailedAgentPerception>>> cps;
-    for (auto &pair : GetAgent()->GetCollisionPartners()) {
-        cps.emplace_back(std::make_pair(pair.second, globalObserverMain->GetDetailedAgentPerception(pair.second)));
+        dataRecorder->Trigger(globalObserverMain->GetDetailedAgentPerception(GetAgent()->GetId()), analysisData, time);
+
+        std::vector<std::pair<int, std::shared_ptr<DetailedAgentPerception>>> cps;
+        for (auto &pair : GetAgent()->GetCollisionPartners()) {
+            cps.emplace_back(std::make_pair(pair.second, globalObserverMain->GetDetailedAgentPerception(pair.second)));
+        }
+        dataRecorder->CheckCollisions(cps, GetAgent()->GetId(), globalObserverMain->GetDetailedAgentPerception(GetAgent()->GetId()),
+                                      analysisData, time);
     }
-    dataRecorder->CheckCollisions(cps, GetAgent()->GetId(), globalObserverMain->GetDetailedAgentPerception(GetAgent()->GetId()),
-                                  analysisData, time);
+    catch (const char *error) {
+        const std::string msg = COMPONENTNAME + " " + error;
+        LOG(CbkLogLevel::Error, msg);
+        throw std::runtime_error(msg);
+    }
+    catch (const std::string &error) {
+        const std::string msg = COMPONENTNAME + " " + error;
+        LOG(CbkLogLevel::Error, msg);
+        throw std::runtime_error(msg);
+    }
+    catch (const std::out_of_range &error) {
+        const std::string msg = COMPONENTNAME + " " + error.what();
+        LOG(CbkLogLevel::Error, msg);
+        throw std::runtime_error(msg);
+    }
+    catch (const std::runtime_error &error) {
+        const std::string msg = COMPONENTNAME + " " + error.what();
+        LOG(CbkLogLevel::Error, msg);
+        throw std::runtime_error(msg);
+    }
+    catch (const std::logic_error &error) {
+        const std::string msg = COMPONENTNAME + " " + error.what();
+        LOG(CbkLogLevel::Error, msg);
+        throw std::runtime_error(msg);
+    }
+    catch (...) {
+        const std::string msg = COMPONENTNAME + " ";
+        LOG(CbkLogLevel::Error, msg);
+        throw std::runtime_error(msg);
+    }
 }

@@ -70,6 +70,10 @@ RoadmapGraph::RoadmapGraph(std::vector<std::shared_ptr<const MentalInfrastructur
 
 const std::list<const RoadmapNode *> RoadmapGraph::FindShortestPath(const MentalInfrastructure::Lane *start,
                                                                     const MentalInfrastructure::Lane *end) const {
+    if (start == nullptr || end == nullptr) {
+        const std::string msg = "File: " + static_cast<std::string>(__FILE__) + " Line: " + std::to_string(__LINE__) + " error";
+        throw std::runtime_error(msg);
+    }
     const auto &startNode = nodes.at(start);
     const auto endNode = nodes.at(end).get();
 

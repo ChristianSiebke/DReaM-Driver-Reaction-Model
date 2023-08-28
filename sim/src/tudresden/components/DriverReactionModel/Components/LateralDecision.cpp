@@ -27,6 +27,7 @@ void LateralDecision::Update() {
         const_cast<WorldInterpretation &>(worldInterpretation).waitUntilTargetLaneIsFree = false;
         auto egoAgent = worldRepresentation.egoAgent;
         // abort lane change TODO: encapsulate in function
+
         if (egoAgent->GetMainLocatorLane() != egoAgent->GetLanePosition().lane &&
             (!NeighborLaneIsFree(egoAgent->GetMainLocatorLane()) ||
              (worldInterpretation.targetLane && *worldInterpretation.targetLane != egoAgent->GetMainLocatorLane()))) {
@@ -51,6 +52,11 @@ void LateralDecision::Update() {
 
         auto targetLane = *worldInterpretation.targetLane;
         assert(targetLane != nullptr);
+        if (egoAgent->GetMainLocatorLane() == nullptr) {
+            const std::string msg = "File: " + static_cast<std::string>(__FILE__) + " Line: " + std::to_string(__LINE__) + " error";
+
+            throw std::runtime_error(msg);
+        }
 
         if (targetLane == egoAgent->GetMainLocatorLane()->GetLeftLane() || targetLane == egoAgent->GetMainLocatorLane()->GetRightLane()) {
             if (NeighborLaneIsFree(targetLane)) {

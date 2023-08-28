@@ -82,6 +82,8 @@ CollisionManipulator::CrashInfo CollisionManipulator::CalculateCrash(AgentInterf
                                                     timeOfFirstContact))
     {
         std::cout << "PostCrash Calculation failed" << std::endl;
+        const std::string msg = "PostCrash Calculation failed ";
+        LOG(CbkLogLevel::Error, msg);
     }
 
     agent->SetPostCrashVelocity({true,

@@ -185,7 +185,6 @@ class AlgorithmDReaMImplementation : public AlgorithmInterface {
 
     double out_longitudinalAccelerationWish = 0;
     GazeState outGazeState;
-    std::vector<Common::Vector2d> segmentControlFixPoints;
     Logger logger;
     LoggerInterface loggerInterface;
     ObservationInterface *observerInstance{nullptr};

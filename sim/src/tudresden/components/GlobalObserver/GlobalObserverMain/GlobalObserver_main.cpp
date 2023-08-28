@@ -158,24 +158,56 @@ void Main::SetInitialRoute(AgentInterface *agent) {
 }
 
 void Main::Trigger(int time) {
-    if (time == lastConversionTime)
-        return;
-    // tracking the timestamp to avoid doubling of conversion
-    lastConversionTime = time;
+    try {
+        if (time == lastConversionTime)
+            return;
+        // tracking the timestamp to avoid doubling of conversion
+        lastConversionTime = time;
 
-    // converting the infrastructure
-    rnConverter.Populate();
+        // converting the infrastructure
+        rnConverter.Populate();
 
-    // generating additional infrastructure data (conflict areas, stopping points, roadmap graph)
-    if (!staticInfrastructureCreated) {
-        rgCalculator.Populate();
-        spCalculator.Populate();
-        caCalculator.Populate();
-        staticInfrastructureCreated = true;
+        // generating additional infrastructure data (conflict areas, stopping points, roadmap graph)
+        if (!staticInfrastructureCreated) {
+            rgCalculator.Populate();
+            spCalculator.Populate();
+            caCalculator.Populate();
+            staticInfrastructureCreated = true;
+        }
+
+        // converting all agents
+        apConverter.Populate();
     }
+    catch (const char *error) {
+        std::string msg = "File: " + static_cast<std::string>(__FILE__) + " Line: " + std::to_string(__LINE__) + " error";
 
-    // converting all agents
-    apConverter.Populate();
+        throw std::runtime_error(msg);
+    }
+    catch (const std::string &error) {
+        std::string msg = "File: " + static_cast<std::string>(__FILE__) + " Line: " + std::to_string(__LINE__) + " error";
+
+        throw std::runtime_error(msg);
+    }
+    catch (const std::out_of_range &error) {
+        std::string msg = "File: " + static_cast<std::string>(__FILE__) + " Line: " + std::to_string(__LINE__) + error.what();
+
+        throw std::runtime_error(msg);
+    }
+    catch (const std::runtime_error &error) {
+        std::string msg = "File: " + static_cast<std::string>(__FILE__) + " Line: " + std::to_string(__LINE__) + error.what();
+
+        throw std::runtime_error(msg);
+    }
+    catch (const std::logic_error &error) {
+        std::string msg = "File: " + static_cast<std::string>(__FILE__) + " Line: " + std::to_string(__LINE__) + error.what();
+
+        throw std::runtime_error(msg);
+    }
+    catch (...) {
+        std::string msg = "File: " + static_cast<std::string>(__FILE__) + " Line: " + std::to_string(__LINE__);
+
+        throw std::runtime_error(msg);
+    }
 }
 
 void Main::TriggerRoadNetworkConversion() {
@@ -183,7 +215,14 @@ void Main::TriggerRoadNetworkConversion() {
 }
 
 std::shared_ptr<DetailedAgentPerception> Main::GetDetailedAgentPerception(int agentId) {
-    return agentPerceptions.at(agentId);
+    try {
+        return agentPerceptions.at(agentId);
+    }
+    catch (const std::out_of_range &error) {
+        const std::string msg = static_cast<std::string>(__FILE__) + " Line: " + std::to_string(__LINE__) + error.what() +
+                                "Agent id=" + std::to_string(agentId) + " does not exist anymore";
+        throw std::runtime_error(msg);
+    }
 }
 
 std::vector<std::shared_ptr<GeneralAgentPerception>> Main::GetGeneralAgentPerception(std::vector<int> agentIds) {

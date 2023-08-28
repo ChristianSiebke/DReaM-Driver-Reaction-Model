@@ -72,11 +72,11 @@ void AABBTreeHandler::FirstExecution()
                 obj->id = std::stoi(trafficSign->GetId());
             }
             catch (std::invalid_argument const &ex) {
-                printf(
-                    "Error while trying to add traffic sign with id %d to the AABBTree, ignoring.\n Please be aware that only integer ids "
-                    "are supported.",
-                    obj->id);
-                continue;
+                std::string message = "File: " + static_cast<std::string>(__FILE__) + " Line: " + std::to_string(__LINE__) +
+                                      " Error while trying to add traffic sign with id " + std::to_string(obj->id) +
+                                      "to the AABBTree, ignoring. Please be aware that only integer ids are supported.";
+
+                throw std::runtime_error(message);
             }
             aabbTree->InsertObject(obj);
             this->trafficSignals.push_back(obj);

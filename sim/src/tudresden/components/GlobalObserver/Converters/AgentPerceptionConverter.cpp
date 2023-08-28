@@ -170,9 +170,9 @@ std::shared_ptr<DetailedAgentPerception> AgentPerceptionConverter::ConvertAgent(
     auto referenceLane =
         &helper.GetLaneByOdId(actualEgoAgent.GetReferencePointPosition()->roadId, actualEgoAgent.GetReferencePointPosition()->laneId,
                               actualEgoAgent.GetReferencePointPosition()->roadPosition.s);
-    if (!referenceLane->Exists()) {
-        std::cout << "lane is invalide="
-                  << " Agent= " << agent->GetId() << " lane id =" << actualEgoAgent.GetReferencePointPosition()->laneId << std::endl;
+    if (!referenceLane || !referenceLane->Exists()) {
+        auto msg = "File: " + static_cast<std::string>(__FILE__) + " Line: " + std::to_string(__LINE__) + " invalid lane ";
+        throw std::runtime_error(msg);
     }
 
     auto referenceLaneDReaM = infrastructurePerception->lookupTableRoadNetwork.lanes.at(referenceLane->GetId());
@@ -181,6 +181,10 @@ std::shared_ptr<DetailedAgentPerception> AgentPerceptionConverter::ConvertAgent(
         &helper.GetLaneByOdId(actualEgoAgent.GetMainLocatePosition().roadId, actualEgoAgent.GetMainLocatePosition().laneId,
                               actualEgoAgent.GetMainLocatePosition().roadPosition.s);
 
+    if (!mainLocatorLane || !mainLocatorLane->Exists()) {
+        auto msg = "File: " + static_cast<std::string>(__FILE__) + " Line: " + std::to_string(__LINE__) + " invalid lane ";
+        throw std::runtime_error(msg);
+    }
     auto mainLocatorLaneDReaM = infrastructurePerception->lookupTableRoadNetwork.lanes.at(mainLocatorLane->GetId());
 
     DetailedAgentPerception perceptionData;
@@ -192,7 +196,10 @@ std::shared_ptr<DetailedAgentPerception> AgentPerceptionConverter::ConvertAgent(
     perceptionData.length = agent->GetLength();
     perceptionData.refPosition = Common::Vector2d(agent->GetPositionX(), agent->GetPositionY());
     perceptionData.touchedRoads = actualEgoAgent.GetAgent()->GetObjectPosition().touchedRoads;
-
+    if (perceptionData.touchedRoads.empty()) {
+        auto msg = "File: " + static_cast<std::string>(__FILE__) + " Line: " + std::to_string(__LINE__) + " error ";
+        throw std::runtime_error(msg);
+    }
     // general agent information
     perceptionData.vehicleType = (DReaMDefinitions::AgentVehicleType)agent->GetVehicleModelParameters().vehicleType;
     perceptionData.distanceReferencePointToLeadingEdge = agent->GetDistanceReferencePointToLeadingEdge();

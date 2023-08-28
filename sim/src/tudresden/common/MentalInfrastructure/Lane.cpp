@@ -255,6 +255,9 @@ const MentalInfrastructure::Lane *Lane::NextLane(IndicatorState indicatorState, 
         if (!movingInLaneDirection) {
             nextLanePointers = this->GetPredecessors();
         }
+        if (nextLanePointers.size() == 0) {
+            return nullptr;
+        }
 
         if (nextLanePointers.size() == 1) {
             return nextLanePointers.front();
