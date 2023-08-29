@@ -50,15 +50,14 @@ std::optional<const MentalInfrastructure::Lane *> TargetLaneInterpreter::TargetL
 
     auto currentRoad = egoAgent->GetLanePosition().lane->GetRoad()->GetOpenDriveId();
     auto currentSCoordinate = egoAgent->GetLanePosition().sCoordinate;
-
+    if (waypoints.end() == targetWP) {
+        // agent reach target
+        return std::nullopt;
+    }
     if ((targetWP->roadId == currentRoad && targetWP->lane == egoAgent->GetLanePosition().lane) && targetWP->s <= currentSCoordinate) {
         targetWP = std::next(targetWP);
     }
     else {
-        if (waypoints.end() == targetWP) {
-            // agent reach target
-            return std::nullopt;
-        }
         return targetWP->lane;
     }
 

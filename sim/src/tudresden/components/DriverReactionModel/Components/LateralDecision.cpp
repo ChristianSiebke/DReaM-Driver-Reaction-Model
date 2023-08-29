@@ -118,7 +118,7 @@ void LateralDecision::Update() {
     }
 }
 ScanAOI LateralDecision::TriggerLateralGaze() const {
-    if (!worldInterpretation.targetLane.has_value())
+    if (!worldInterpretation.targetLane.has_value() || (*worldInterpretation.targetLane) == nullptr)
         return ScanAOI::NONE;
 
     auto egoAgent = worldRepresentation.egoAgent;
@@ -138,10 +138,10 @@ ScanAOI LateralDecision::TriggerLateralGaze() const {
         std::find_if(route.begin(), route.end(), [targetLane](DReaMRoute::Waypoint element) { return element.lane == targetLane; });
 
     if (route.end() == laneIterStart) {
-        const std::string msg =
-            "File: " + static_cast<std::string>(__FILE__) + " Line: " + std::to_string(__LINE__) + " can not find target lane in route";
-        Log(msg, error);
-        throw std::logic_error(msg);
+        const std::string msg = "File: " + static_cast<std::string>(__FILE__) + " Line: " + std::to_string(__LINE__) +
+                                "  Agent:" + std::to_string(worldRepresentation.egoAgent->GetID()) + "changed  route";
+        Log(msg, debug);
+        return ScanAOI::NONE;
     }
 
     if (laneIterStart->lane == egoAgent->GetLanePosition().lane->GetLeftLane()) {
