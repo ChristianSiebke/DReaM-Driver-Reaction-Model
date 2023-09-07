@@ -148,12 +148,12 @@ struct GazeState {
     // includes gaze type and fixated AOI
     std::pair<GazeType, int> fixationState{GazeType::NONE, static_cast<int>(ScanAOI::NONE)};
     FixationTarget target;
-    double ufovAngle{-999};
-    double openingAngle{-999};
-    double viewDistance{100}; // TODO calculate
+    double directionUFOV{-999}; // UFOV --> useful field of view
+    double openingAngle{-999};  //// TODO: !caution value is degree --> switch output visualization to radiant
+    double viewDistance{-999};  // TODO: define by behaviour.xml
     int fixationDuration{-999};
     bool mirrorGaze = false;
-    Common::Vector2d mirrorPos{0, 0};
+    Common::Vector2d startPosUFOV{std::numeric_limits<double>::max(), std::numeric_limits<double>::max()};
 };
 
 struct SpeedLimit {

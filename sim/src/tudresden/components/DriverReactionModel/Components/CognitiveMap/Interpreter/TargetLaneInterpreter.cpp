@@ -57,7 +57,7 @@ std::optional<const MentalInfrastructure::Lane *> TargetLaneInterpreter::TargetL
     if ((targetWP->roadId == currentRoad && targetWP->lane == egoAgent->GetLanePosition().lane) && targetWP->s <= currentSCoordinate) {
         targetWP = std::next(targetWP);
     }
-    else {
+    else if (targetWP->roadId == currentRoad && targetWP->lane == egoAgent->GetLanePosition().lane) {
         return targetWP->lane;
     }
 

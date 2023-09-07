@@ -19,7 +19,7 @@ void GazeMovement::Update() {
         currentGazeState = DetermineGazeState();
         durationCounter = 0;
     }
-    UpdateUFOVAngle();
+    UpdateUFOV();
     durationCounter += GetCycleTime();
 
     if (currentGazeState.fixationState.first == GazeType::NONE ||
@@ -33,7 +33,10 @@ void GazeMovement::Update() {
         (currentGazeState.fixationState.first == GazeType::ControlGlance &&
          std::fabs(currentGazeState.target.fixationPoint.x - (-999)) < 0.0001 &&
          std::fabs(currentGazeState.target.fixationPoint.y - (-999)) < 0.0001) ||
-        std::fabs(currentGazeState.openingAngle - (-999)) < 0.0001 || std::fabs(currentGazeState.fixationDuration - (-999)) < 0.0001) {
+        std::fabs(currentGazeState.openingAngle - (-999)) < 0.0001 || std::fabs(currentGazeState.fixationDuration - (-999)) < 0.0001 ||
+        std::fabs(currentGazeState.directionUFOV - (-999)) < 0.0001 || std::fabs(currentGazeState.viewDistance - (-999) < 0.0001) ||
+        (currentGazeState.startPosUFOV.x == std::numeric_limits<double>::max() &&
+         currentGazeState.startPosUFOV.y == std::numeric_limits<double>::max())) {
         std::string message = __FILE__ " Line: " + std::to_string(__LINE__) + " Current GazeState is not complete";
         throw std::runtime_error(message);
     }
@@ -75,13 +78,6 @@ GazeState GazeMovement::DetermineGazeState() {
     }
     if (worldInterpretation.triggerShoulderCheckDecision == ScanAOI::OuterRightRVM && 0.5 >= random) {
         return PerformMirrowGaze(worldInterpretation.triggerShoulderCheckDecision);
-    }
-
-    if (auto possibleConflictAgent = Common::AgentWithClosestConflictPoint(worldInterpretation.interpretedAgents)) {
-        // TODO set probability
-        if (0.3 >= random) {
-            return PerformAgentObserveGlance(*possibleConflictAgent);
-        }
     }
 
     if (auto id = Common::LeadingCarID(worldInterpretation.interpretedAgents)) {

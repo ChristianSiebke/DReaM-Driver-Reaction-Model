@@ -66,12 +66,7 @@ void DriverReactionModel::UpdateComponents() {
 }
 
 void DriverReactionModel::UpdateAgentStateRecorder(int id, std::shared_ptr<InfrastructurePerception> infrastructure) {
-    std::vector<GeneralAgentPerception> observedAgents;
-    for (const auto &oAgent : *(GetWorldRepresentation().agentMemory)) {
-        observedAgents.push_back(oAgent->GetInternalData());
-    }
-
-    agentStateRecorder->BufferTimeStep(id, GetGazeState(), observedAgents, GetWorldInterpretation().crossingInfo,
+    agentStateRecorder->BufferTimeStep(id, GetGazeState(), *GetWorldRepresentation().agentMemory, GetWorldInterpretation().crossingInfo,
                                        GetSegmentControlFixationPoints(), GetWorldRepresentation().trafficSignalMemory->memory);
     agentStateRecorder->AddInfrastructurePerception(infrastructure);
 }

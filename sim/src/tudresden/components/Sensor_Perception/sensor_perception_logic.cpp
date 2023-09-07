@@ -12,7 +12,7 @@
 #include <Objects/observedstaticobject.h>
 #include <Objects/observeddynamicobject.h>
 
-void SensorPerceptionLogic::Trigger(int timestamp, GazeState gazeState, std::optional<Common::Vector2d> mirrorPos) {
-    visualSensor->Trigger(timestamp, gazeState, mirrorPos);
-    trafficSignalVisualSensor->Trigger(timestamp, gazeState, mirrorPos);
+void SensorPerceptionLogic::Trigger(int timestamp, GazeState gazeState) {
+    visualSensor->Trigger(timestamp, gazeState);
+    trafficSignalVisualSensor->Trigger(timestamp, gazeState);
 }

@@ -9,17 +9,11 @@
  *****************************************************************************/
 #include "trafficsignalvisualsensor.h"
 
-void TrafficSignalVisualSensor::Trigger(int timestamp, GazeState gazeState, std::optional<Common::Vector2d> mirrorPos) {
-    sensorDirection = gazeState.ufovAngle;
-    driverPos = Common::Vector2d(egoAgent->GetPositionX(), egoAgent->GetPositionY());
-    if (mirrorPos.has_value()) {
-        auto relMirrorPos = mirrorPos.value();
-        relMirrorPos.Rotate(egoAgent->GetYaw());
-        driverPos.Add(relMirrorPos);
-    }
-
-    minViewAngle = -gazeState.openingAngle / 2.0;
-    maxViewAngle = gazeState.openingAngle / 2.0;
+void TrafficSignalVisualSensor::Trigger(int timestamp, GazeState gazeState) {
+    sensorDirection = gazeState.directionUFOV;
+    startPosUFOV = gazeState.startPosUFOV;
+    minViewAngle = (-gazeState.openingAngle * (M_PI / 180)) / 2.0; // TODO: switch output visualization to radiant
+    maxViewAngle = (gazeState.openingAngle * (M_PI / 180)) / 2.0;  // TODO: switch output visualization to radiant
 
     viewDistance = gazeState.viewDistance;
 
@@ -35,9 +29,9 @@ void TrafficSignalVisualSensor::DynamicInfrastructurePerceptionMethod() {
     }
 
     //  for (const auto &trafficSignal : aabbTreeHandler->trafficSignals) {
-    //      auto rayDirection = trafficSignal->referencePosition - driverPos;
+    //      auto rayDirection = trafficSignal->referencePosition - startPosUFOV;
     //
-    //      const Ray ray(driverPos, rayDirection);
+    //      const Ray ray(startPosUFOV, rayDirection);
     //      // transform point to local sensor funnel direction
     //      rayDirection.Rotate(-sensorDirection);
     //

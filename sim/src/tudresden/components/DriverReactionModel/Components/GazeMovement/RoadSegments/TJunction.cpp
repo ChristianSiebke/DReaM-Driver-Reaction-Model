@@ -163,7 +163,10 @@ GazeState TJunction::ControlGlanceOnRoad(ControlAOI aoi) {
     gazeState.openingAngle = behaviourData.gmBehaviour.XInt_controlOpeningAngle;
     DReaM::NormalDistribution *de = behaviourData.gmBehaviour.XInt_controlFixationDuration.get();
     double dist = stochastics->GetNormalDistributed(de->mean, de->std_deviation);
+    gazeState.viewDistance = 100;
     gazeState.fixationDuration = Common::ValueInBounds(de->min, dist, de->max);
+    gazeState.mirrorGaze = false;
+    gazeState.startPosUFOV = worldRepresentation.egoAgent->GetGlobalDriverPosition();
     return gazeState;
 }
 
@@ -219,7 +222,10 @@ GazeState TJunction::ControlGlanceOnTJunction(ControlAOI aoi, CrossingPhase phas
     gazeState.openingAngle = behaviourData.gmBehaviour.XInt_controlOpeningAngle;
     DReaM::NormalDistribution *de = behaviourData.gmBehaviour.XInt_controlFixationDuration.get();
     double dist = stochastics->GetNormalDistributed(de->mean, de->std_deviation);
+    gazeState.viewDistance = 100;
     gazeState.fixationDuration = Common::ValueInBounds(de->min, dist, de->max);
+    gazeState.mirrorGaze = false;
+    gazeState.startPosUFOV = worldRepresentation.egoAgent->GetGlobalDriverPosition();
     return gazeState;
 }
 

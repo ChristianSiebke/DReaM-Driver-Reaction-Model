@@ -72,14 +72,16 @@ bool AgentPerceptionConverter::CheckForRouteUpdate(const AgentInterface *agent) 
     direction = agent->GetVelocity() >= 0 ? direction : !direction;
     auto nextLanes = direction ? referenceLane->GetNext() : referenceLane->GetPrevious();
 
-    return (!egoAgent.HasValidRoute()) || (routeMapping.find(agent->GetId()) == routeMapping.end()) ||
-           (egoAgent.GetRootOfWayToTargetGraph() == 0 && nextLanes.size() > 0);
+    return (!egoAgent.HasValidRoute()) || !egoAgent.GetReferencePointPosition() ||
+           (routeMapping.find(agent->GetId()) == routeMapping.end()) || (egoAgent.GetRootOfWayToTargetGraph() == 0 && nextLanes.size() > 0);
 }
 
 std::optional<std::vector<GlobalObserver::Routes::InternWaypoint>>
 AgentPerceptionConverter::RouteUpdate(const AgentInterface *agent) const {
     const auto &egoAgent = const_cast<AgentInterface *>(agent)->GetEgoAgent();
-
+    auto worldData = static_cast<OWL::WorldData *>(world->GetWorldData());
+    auto roads = worldData->GetRoads();
+    WorldDataQuery helper(*worldData);
     constexpr int maxDepth = 10;
     const auto &roadIds = agent->GetRoads(MeasurementPoint::Front);
     if (roadIds.empty()) {
@@ -88,29 +90,42 @@ AgentPerceptionConverter::RouteUpdate(const AgentInterface *agent) const {
     auto [branchedGraph, root] =
         world->GetRoadGraph(CommonHelper::GetRoadWithLowestHeading(agent->GetObjectPosition().referencePoint, *world), maxDepth);
     std::map<RoadGraph::edge_descriptor, double> weights = world->GetEdgeWeights(branchedGraph);
-    auto targetVertex = RouteCalculation::SampleRoute(branchedGraph, root, weights, *stochastics);
 
+    RoadGraphVertex vertex2;
+    RoadGraphVertex newTarget;
+    bool sampleRoute = true;
     auto straightRouteGraph = RoadGraph{};
-    RoadGraphVertex wayPoint = targetVertex;
-    auto vertex1 = add_vertex(get(RouteElement(), branchedGraph, wayPoint), straightRouteGraph);
-    auto newTarget = vertex1;
-    RoadGraphVertex vertex2 = 0;
-    while (wayPoint != root) {
-        for (auto [edge, edgesEnd] = edges(branchedGraph); edge != edgesEnd; ++edge) {
-            if (target(*edge, branchedGraph) == wayPoint) {
-                wayPoint = source(*edge, branchedGraph);
-                vertex2 = add_vertex(get(RouteElement(), branchedGraph, wayPoint), straightRouteGraph);
-                add_edge(vertex2, vertex1, straightRouteGraph);
-                vertex1 = vertex2;
-                break;
+
+    while (sampleRoute) {
+        straightRouteGraph = RoadGraph{};
+        RoadGraphVertex targetVertex = RouteCalculation::SampleRoute(branchedGraph, root, weights, *stochastics);
+        RoadGraphVertex wayPoint = targetVertex;
+        auto vertex1 = add_vertex(get(RouteElement(), branchedGraph, wayPoint), straightRouteGraph);
+
+        newTarget = vertex1;
+        while (wayPoint != root) {
+            for (auto [edge, edgesEnd] = edges(branchedGraph); edge != edgesEnd; ++edge) {
+                if (target(*edge, branchedGraph) == wayPoint) {
+                    wayPoint = source(*edge, branchedGraph);
+                    vertex2 = add_vertex(get(RouteElement(), branchedGraph, wayPoint), straightRouteGraph);
+                    add_edge(vertex2, vertex1, straightRouteGraph);
+                    vertex1 = vertex2;
+                    break;
+                }
             }
         }
+        auto [begin, end] = vertices(straightRouteGraph);
+        auto startRoad = roads.at(get(RouteElement(), straightRouteGraph, *begin).roadId);
+        auto referenceLane = &helper.GetLaneByOdId(egoAgent.GetMainLocatePosition().roadId, egoAgent.GetMainLocatePosition().laneId,
+                                                   egoAgent.GetMainLocatePosition().roadPosition.s);
+        auto referenceLaneDReaM = infrastructurePerception->lookupTableRoadNetwork.lanes.at(referenceLane->GetId());
+        auto nextLane = referenceLaneDReaM->NextLane(egoAgent.GetAgent()->GetIndicatorState(), true);
+        referenceLane->GetNext();
+        if (nextLane->GetRoad()->GetOpenDriveId() == get(RouteElement(), straightRouteGraph, *std::prev(end, 1)).roadId ||
+            nextLane->GetRoad()->GetOpenDriveId() == get(RouteElement(), straightRouteGraph, *std::prev(end, 2)).roadId)
+            sampleRoute = false;
     }
     auto newRoot = vertex2;
-
-    auto worldData = static_cast<OWL::WorldData *>(world->GetWorldData());
-    auto roads = worldData->GetRoads();
-    WorldDataQuery helper(*worldData);
 
     auto [begin, end] = vertices(straightRouteGraph);
     auto rbegin = std::make_reverse_iterator(end);

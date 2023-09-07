@@ -36,7 +36,7 @@ class RoadSegmentInterface {
     virtual GazeState ShoulderCheckLeft(ScanAOI gaze);
     virtual GazeState MirrowGaze(ScanAOI aoi);
     double UpdateUFOVAngle(GazeState currentGazeState);
-
+    Common::Vector2d UpdateStartPosUFOV(GazeState currentGazeState);
     virtual double GetProbabilityToFixateLeadCar() {
         return probabilityFixateLeadCar;
     }

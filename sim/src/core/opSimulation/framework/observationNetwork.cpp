@@ -15,61 +15,44 @@
 #include "bindings/observationBinding.h"
 #include "observationModule.h"
 #include "scheduler/runResult.h"
+bool Write_Output = false;
 
 namespace core {
-
-ObservationNetwork::~ObservationNetwork()
-{
+ObservationNetwork::~ObservationNetwork() {
     Clear();
 }
 
-void ObservationNetwork::Clear()
-{
-    for (auto& items : modules)
-    {
+void ObservationNetwork::Clear() {
+    for (auto &items : modules) {
         delete items.second;
     }
 
     modules.clear();
 
-    for (auto& [library, binding] : *bindings)
-    {
+    for (auto &[library, binding] : *bindings) {
         binding.Unload();
     }
 }
 
-bool ObservationNetwork::Instantiate(const ObservationInstanceCollection& observationInstances,
-                                     StochasticsInterface* stochastics,
-                                     WorldInterface* world,
-                                     EventNetworkInterface* eventNetwork,
-                                     const std::string& sceneryPath,
-                                     DataBufferReadInterface* dataBuffer)
-{
-    for (auto& observationInstance : observationInstances)
-    {
-        try
-        {
+bool ObservationNetwork::Instantiate(const ObservationInstanceCollection &observationInstances, StochasticsInterface *stochastics,
+                                     WorldInterface *world, EventNetworkInterface *eventNetwork, const std::string &sceneryPath,
+                                     DataBufferReadInterface *dataBuffer) {
+    for (auto &observationInstance : observationInstances) {
+        try {
             const auto bindingIter = bindings->find(observationInstance.libraryName);
-            if (bindingIter == bindings->end())
-            {
+            if (bindingIter == bindings->end()) {
                 return false;
             }
 
-            auto& binding = bindingIter->second;
+            auto &binding = bindingIter->second;
 
             openpass::parameter::ParameterSetLevel1 parameters{observationInstance.parameters};
 
-            auto module = binding.Instantiate(observationInstance.libraryName,
-                                              parameters,
-                                              stochastics,
-                                              world,
-                                              eventNetwork,
-                                              dataBuffer);
+            auto module = binding.Instantiate(observationInstance.libraryName, parameters, stochastics, world, eventNetwork, dataBuffer);
 
             modules.insert({observationInstance.id, module});
         }
-        catch (const std::exception& ex)
-        {
+        catch (const std::exception &ex) {
             LOG_INTERN(LogLevel::Error) << "observation " << observationInstance.libraryName << ", could not be initialized: " << ex.what();
             return false;
         }
@@ -78,145 +61,123 @@ bool ObservationNetwork::Instantiate(const ObservationInstanceCollection& observ
     return true;
 }
 
-const std::map<int, ObservationModule*>& ObservationNetwork::GetObservationModules()
-{
+const std::map<int, ObservationModule *> &ObservationNetwork::GetObservationModules() {
     return modules;
 }
 
-bool ObservationNetwork::InitAll()
-{
-    for (auto& item : modules)
-    {
-        auto module = item.second;
-        try
-        {
-            if (!module->GetLibrary()->SimulationPreHook(module->GetImplementation()))
-            {
+bool ObservationNetwork::InitAll() {
+    if (Write_Output) {
+        for (auto &item : modules) {
+            auto module = item.second;
+            try {
+                if (!module->GetLibrary()->SimulationPreHook(module->GetImplementation())) {
+                    LOG_INTERN(LogLevel::Error) << "observation " << module->GetId() << ", simulation pre hook failed";
+                    return false;
+                }
+            }
+            catch (const std::runtime_error &ex) {
+                LOG_INTERN(LogLevel::Error) << "observation " << module->GetId() << ", simulation pre hook failed: " << ex.what();
+                return false;
+            }
+            catch (...) {
                 LOG_INTERN(LogLevel::Error) << "observation " << module->GetId() << ", simulation pre hook failed";
                 return false;
             }
         }
-        catch (const std::runtime_error& ex)
-        {
-            LOG_INTERN(LogLevel::Error) << "observation " << module->GetId() << ", simulation pre hook failed: " << ex.what();
-            return false;
-        }
-        catch (...)
-        {
-            LOG_INTERN(LogLevel::Error) << "observation " << module->GetId() << ", simulation pre hook failed";
-            return false;
-        }
     }
     return true;
 }
 
-bool ObservationNetwork::InitRun()
-{
-    for (auto& item : modules)
-    {
-        auto module = item.second;
-        try
-        {
-            if (!module->GetLibrary()->SimulationPreRunHook(module->GetImplementation()))
-            {
+bool ObservationNetwork::InitRun() {
+    if (Write_Output) {
+        for (auto &item : modules) {
+            auto module = item.second;
+            try {
+                if (!module->GetLibrary()->SimulationPreRunHook(module->GetImplementation())) {
+                    LOG_INTERN(LogLevel::Error) << "observation " << module->GetId() << ", simulation pre run hook failed";
+                    return false;
+                }
+            }
+            catch (std::runtime_error const &ex) {
+                LOG_INTERN(LogLevel::Error) << "observation " << module->GetId() << ", simulation pre run hook failed: " << ex.what();
+                return false;
+            }
+            catch (...) {
                 LOG_INTERN(LogLevel::Error) << "observation " << module->GetId() << ", simulation pre run hook failed";
                 return false;
             }
         }
-        catch (std::runtime_error const& ex)
-        {
-            LOG_INTERN(LogLevel::Error) << "observation " << module->GetId() << ", simulation pre run hook failed: " << ex.what();
-            return false;
-        }
-        catch (...)
-        {
-            LOG_INTERN(LogLevel::Error) << "observation " << module->GetId() << ", simulation pre run hook failed";
-            return false;
-        }
     }
     return true;
 }
 
-bool ObservationNetwork::UpdateTimeStep(int time, RunResult& runResult)
-{
-    for (auto& item : modules)
-    {
-        ObservationModule* module = item.second;
-        try
-        {
-            if (!module->GetLibrary()->SimulationUpdateHook(module->GetImplementation(), time, runResult))
-            {
+bool ObservationNetwork::UpdateTimeStep(int time, RunResult &runResult) {
+    if (Write_Output) {
+        for (auto &item : modules) {
+            ObservationModule *module = item.second;
+            try {
+                if (!module->GetLibrary()->SimulationUpdateHook(module->GetImplementation(), time, runResult)) {
+                    LOG_INTERN(LogLevel::Error) << "observation " << module->GetId() << ", simulation update hook failed";
+                    return false;
+                }
+            }
+            catch (std::runtime_error const &ex) {
+                LOG_INTERN(LogLevel::Error) << "observation " << module->GetId() << ", simulation update hook failed: " << ex.what();
+                return false;
+            }
+            catch (...) {
                 LOG_INTERN(LogLevel::Error) << "observation " << module->GetId() << ", simulation update hook failed";
                 return false;
             }
         }
-        catch (std::runtime_error const& ex)
-        {
-            LOG_INTERN(LogLevel::Error) << "observation " << module->GetId() << ", simulation update hook failed: " << ex.what();
-            return false;
-        }
-        catch (...)
-        {
-            LOG_INTERN(LogLevel::Error) << "observation " << module->GetId() << ", simulation update hook failed";
-            return false;
-        }
     }
     return true;
 }
 
-
-bool ObservationNetwork::FinalizeRun(const RunResult& result)
-{
-    for (auto& item : modules)
-    {
-        auto module = item.second;
-        try
-        {
-            if (!module->GetLibrary()->SimulationPostRunHook(module->GetImplementation(), result))
-            {
+bool ObservationNetwork::FinalizeRun(const RunResult &result) {
+    if (Write_Output) {
+        for (auto &item : modules) {
+            auto module = item.second;
+            try {
+                if (!module->GetLibrary()->SimulationPostRunHook(module->GetImplementation(), result)) {
+                    LOG_INTERN(LogLevel::Error) << "observation " << module->GetId() << ", simulation post run hook failed";
+                    return false;
+                }
+            }
+            catch (std::runtime_error const &ex) {
+                LOG_INTERN(LogLevel::Error) << "observation " << module->GetId() << ", simulation post run hook failed: " << ex.what();
+                return false;
+            }
+            catch (...) {
                 LOG_INTERN(LogLevel::Error) << "observation " << module->GetId() << ", simulation post run hook failed";
                 return false;
             }
         }
-        catch (std::runtime_error const& ex)
-        {
-            LOG_INTERN(LogLevel::Error) << "observation " << module->GetId() << ", simulation post run hook failed: " << ex.what();
-            return false;
-        }
-        catch (...)
-        {
-            LOG_INTERN(LogLevel::Error) << "observation " << module->GetId() << ", simulation post run hook failed";
-            return false;
-        }
     }
-    return true;
+        return true;
 }
 
-bool ObservationNetwork::FinalizeAll()
-{
-    for (auto& item : modules)
-    {
-        auto module = item.second;
-        try
-        {
-            if (!module->GetLibrary()->SimulationPostHook(module->GetImplementation()))
-            {
+bool ObservationNetwork::FinalizeAll() {
+        if (Write_Output) {
+        for (auto &item : modules) {
+            auto module = item.second;
+            try {
+                if (!module->GetLibrary()->SimulationPostHook(module->GetImplementation())) {
+                    LOG_INTERN(LogLevel::Error) << "observation " << module->GetId() << ", simulation post hook failed";
+                    return false;
+                }
+            }
+            catch (std::runtime_error const &ex) {
+                LOG_INTERN(LogLevel::Error) << "observation " << module->GetId() << ", simulation post hook failed: " << ex.what();
+                return false;
+            }
+            catch (...) {
                 LOG_INTERN(LogLevel::Error) << "observation " << module->GetId() << ", simulation post hook failed";
                 return false;
             }
         }
-        catch (std::runtime_error const& ex)
-        {
-            LOG_INTERN(LogLevel::Error) << "observation " << module->GetId() << ", simulation post hook failed: " << ex.what();
-            return false;
         }
-        catch (...)
-        {
-            LOG_INTERN(LogLevel::Error) << "observation " << module->GetId() << ", simulation post hook failed";
-            return false;
-        }
-    }
-    return true;
+        return true;
 }
 
 } // namespace core

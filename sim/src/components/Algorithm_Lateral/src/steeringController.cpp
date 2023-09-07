@@ -120,7 +120,7 @@ double SteeringController::CalculateSteeringAngle(int time)
 }
 
 double SteeringController::CalculateSteeringAngleTUDresden(int time, AgentInterface *agent) {
-    if (in_velocity < 0.1 && in_velocity > -0.1) {
+    if (in_velocity < 0.3 && in_velocity > -0.3) {
         timeLast = time;
         return in_steeringWheelAngle;
     }

@@ -39,7 +39,7 @@ public:
 ///
 /// \brief Starts the calculation of Infrastructure, DriverPerception and VisualPerception.
 ///
-void Trigger(int timestamp, GazeState gazeState, std::optional<Common::Vector2d> mirrorPos);
+void Trigger(int timestamp, GazeState gazeState);
 
 ///
 /// \brief Returns a pointer to the visual sensor, no calculation is performed.

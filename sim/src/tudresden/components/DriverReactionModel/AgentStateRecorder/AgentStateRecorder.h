@@ -46,7 +46,7 @@
 
 namespace AgentStateRecorder {
 
-constexpr bool RECORD_DReaMOUTPUT = true;
+constexpr bool RECORD_DReaMOUTPUT = false;
 
 class EXPORT AgentStateRecorder {
 public:
@@ -90,7 +90,7 @@ public:
         }
     };
 
-    void BufferTimeStep(const int &agentId, const GazeState &gazeState, const std::vector<GeneralAgentPerception> &observedAgents,
+    void BufferTimeStep(const int &agentId, const GazeState &gazeState, const AmbientAgentRepresentations &observedAgents,
                         const CrossingInfo &crossingInfo, const std::vector<Common::Vector2d> &segmentControlFixationPoints,
                         const std::unordered_map<DReaMId, MemorizedTrafficSignal> *trafficSignals);
 

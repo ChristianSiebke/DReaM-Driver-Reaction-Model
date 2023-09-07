@@ -23,7 +23,7 @@ public:
     }
     virtual ~VisualSensorInterface() = default;
 
-    virtual void Trigger(int timestamp, GazeState gazeState, std::optional<Common::Vector2d> mirrorPos) = 0;
+    virtual void Trigger(int timestamp, GazeState gazeState) = 0;
 
     virtual std::vector<T> GetVisible() = 0;
 };

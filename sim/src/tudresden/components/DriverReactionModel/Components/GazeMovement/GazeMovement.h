@@ -59,8 +59,9 @@ class GazeMovement : public Component::ComponentInterface {
   private:
       GazeState DetermineGazeState();
 
-      void UpdateUFOVAngle() {
-          currentGazeState.ufovAngle = roadSegment->UpdateUFOVAngle(currentGazeState);
+      void UpdateUFOV() {
+          currentGazeState.directionUFOV = roadSegment->UpdateUFOVAngle(currentGazeState);
+          currentGazeState.startPosUFOV = roadSegment->UpdateStartPosUFOV(currentGazeState);
       }
 
     void UpdateRoadSegment();

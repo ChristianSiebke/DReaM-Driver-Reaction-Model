@@ -969,6 +969,7 @@ void WorldData::Clear()
 
     for (auto junction : junctions)
     {
+        delete junction.first;
         delete junction.second;
     }
     junctions.clear();

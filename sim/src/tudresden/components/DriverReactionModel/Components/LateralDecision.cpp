@@ -159,11 +159,11 @@ ScanAOI LateralDecision::TriggerLateralGaze() const {
     }
 
     if (egoAgent->GetLanePosition().lane->GetLeftLane() == laneIterNext->lane &&
-        5 > (laneIterStart->s - egoAgent->GetLanePosition().sCoordinate)) {
+        10 > (laneIterStart->s - egoAgent->GetLanePosition().sCoordinate)) {
         return ScanAOI::OuterLeftRVM;
     }
     if (egoAgent->GetLanePosition().lane->GetRightLane() == laneIterNext->lane &&
-        5 > (laneIterStart->s - egoAgent->GetLanePosition().sCoordinate)) {
+        10 > (laneIterStart->s - egoAgent->GetLanePosition().sCoordinate)) {
         return ScanAOI::OuterRightRVM;
     }
 

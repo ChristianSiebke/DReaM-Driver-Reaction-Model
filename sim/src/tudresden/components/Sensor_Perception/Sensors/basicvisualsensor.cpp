@@ -16,22 +16,15 @@
 TimeMeasurement timeMeasureAABB("AABB.cpp");
 TimeMeasurement timeMeasureBasicSensor("BasicSensor.cpp");
 
-void BasicVisualSensor::Trigger(int timestamp, GazeState gazeState, std::optional<Common::Vector2d> mirrorPos) {
+void BasicVisualSensor::Trigger(int timestamp, GazeState gazeState) {
     // use threads for operations
     bool useThreads = false;
 
-    sensorDirection = gazeState.ufovAngle;
-    driverPos = Common::Vector2d(egoAgent->GetPositionX(), egoAgent->GetPositionY());
-    if (mirrorPos.has_value()) {
-        auto relMirrorPos = mirrorPos.value();
-        relMirrorPos.Rotate(egoAgent->GetYaw());
-        driverPos.Add(relMirrorPos);
-    }
+    sensorDirection = gazeState.directionUFOV;
+    startPosUFOV = gazeState.startPosUFOV;
+    minViewAngle = (-gazeState.openingAngle * (M_PI / 180)) / 2.0; // TODO: switch output visualization to radiant
+    maxViewAngle = (gazeState.openingAngle * (M_PI / 180)) / 2.0;  // TODO: switch output visualization to radiant
 
-
-        minViewAngle = -gazeState.openingAngle / 2.0;
-        maxViewAngle = gazeState.openingAngle / 2.0;
-    
     viewDistance = gazeState.viewDistance;
     timeMeasureAABB.StartTimePoint("Trigger AABB");
     aabbTree = aabbTreeHandler->GetCurrentAABBTree(timestamp); // this updates the aabb tree (if needed)
@@ -86,7 +79,7 @@ void BasicVisualSensor::AgentPerceptionThread(unsigned startIndex, unsigned endI
             continue;
 
         auto otherPosition = Common::Vector2d(agent->GetPositionX(), agent->GetPositionY());
-        if ((otherPosition - driverPos).Length() > viewDistance * 1.1)
+        if ((otherPosition - startPosUFOV).Length() > viewDistance * 1.1)
             continue;
 
         auto points = obj->area.outer();
@@ -102,9 +95,9 @@ void BasicVisualSensor::AgentPerceptionThread(unsigned startIndex, unsigned endI
 
             for (unsigned j = 0; j < subdivisions + 1; j++) {
                 auto pointToCheck = currentPoint + (edge * ((distance / subdivisions) * j));
-                auto rayDirection = pointToCheck - driverPos;
+                auto rayDirection = pointToCheck - startPosUFOV;
 
-                const Ray ray(driverPos, rayDirection);
+                const Ray ray(startPosUFOV, rayDirection);
                 // transform point to local sensor funnel direction
                 rayDirection.Rotate(-sensorDirection);
 

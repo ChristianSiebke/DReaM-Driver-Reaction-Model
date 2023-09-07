@@ -61,12 +61,8 @@ void Sensor_Perception_Implementation::UpdateOutput(int localLinkId, std::shared
 
 void Sensor_Perception_Implementation::Trigger(int time) {
     try {
-        std::optional<Common::Vector2d> mPos{std::nullopt};
-        if (currentGazeState.mirrorGaze)
-            mPos.emplace(currentGazeState.mirrorPos);
-
         timeMeasureSensor.StartTimePoint("Trigger Sensor");
-        sensorPerceptionLogic.Trigger(time, currentGazeState, mPos);
+        sensorPerceptionLogic.Trigger(time, currentGazeState);
         timeMeasureSensor.EndTimePoint();
     }
 catch (const char *error) {
@@ -90,6 +86,21 @@ catch (const std::runtime_error &error) {
     throw std::runtime_error(msg);
 }
 catch (const std::logic_error &error) {
+    const std::string msg = COMPONENTNAME + " " + error.what();
+    LOG(CbkLogLevel::Error, msg);
+    throw std::runtime_error(msg);
+}
+catch (const std::bad_typeid &error) {
+    const std::string msg = COMPONENTNAME + " " + error.what();
+    LOG(CbkLogLevel::Error, msg);
+    throw std::runtime_error(msg);
+}
+catch (const std::bad_cast &error) {
+    const std::string msg = COMPONENTNAME + " " + error.what();
+    LOG(CbkLogLevel::Error, msg);
+    throw std::runtime_error(msg);
+}
+catch (const std::bad_alloc &error) {
     const std::string msg = COMPONENTNAME + " " + error.what();
     LOG(CbkLogLevel::Error, msg);
     throw std::runtime_error(msg);

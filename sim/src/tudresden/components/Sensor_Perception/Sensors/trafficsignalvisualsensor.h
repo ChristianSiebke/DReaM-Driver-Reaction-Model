@@ -25,7 +25,7 @@ public:
         }
     }
 
-    void Trigger(int timestamp, GazeState gazeState, std::optional<Common::Vector2d> mirrorPos) override;
+    void Trigger(int timestamp, GazeState gazeState) override;
 
     std::vector<OdId> GetVisible() override {
         return visible;
@@ -44,5 +44,5 @@ private:
     double minViewAngle = 0;
     double maxViewAngle = 0;
     double viewDistance = 0;
-    Common::Vector2d driverPos = Common::Vector2d(0, 0);
+    Common::Vector2d startPosUFOV = Common::Vector2d(0, 0);
 };

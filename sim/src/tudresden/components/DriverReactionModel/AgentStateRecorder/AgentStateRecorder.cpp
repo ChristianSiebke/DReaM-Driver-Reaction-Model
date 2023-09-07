@@ -52,15 +52,14 @@ void AgentStateRecorder::AddInfrastructurePerception(std::shared_ptr<Infrastruct
     }
 }
 
-void AgentStateRecorder::BufferTimeStep(const int &agentId, const GazeState &gazeState,
-                                        const std::vector<GeneralAgentPerception> &observedAgents, const CrossingInfo &crossingInfo,
-                                        const std::vector<Common::Vector2d> &segmentControlFixationPoints,
+void AgentStateRecorder::BufferTimeStep(const int &agentId, const GazeState &gazeState, const AmbientAgentRepresentations &observedAgents,
+                                        const CrossingInfo &crossingInfo, const std::vector<Common::Vector2d> &segmentControlFixationPoints,
                                         const std::unordered_map<DReaMId, MemorizedTrafficSignal> *trafficSignals) {
     if (RECORD_DReaMOUTPUT) {
         std::string outputLine;
 
         // gaze information:
-        // <GazeType>, <ScanAOI>, <ufovAngle>, <openingAngle>, <viewDistance>
+        // <GazeType>, <AOI>,<startPosUFOV>, <directionUFOV>, <openingAngle>, <viewDistance>
         outputLine += gazeTypes.at(static_cast<int>(gazeState.fixationState.first)) + ",";
         if (gazeState.fixationState.first == GazeType::ScanGlance) {
             outputLine += scanAOIs.at(gazeState.fixationState.second) + ",";
@@ -76,8 +75,9 @@ void AgentStateRecorder::BufferTimeStep(const int &agentId, const GazeState &gaz
                 "File: " + static_cast<std::string>(__FILE__) + " Line: " + std::to_string(__LINE__) + " Gaze state can not be logged";
             throw std::runtime_error(msg);
         }
-
-        outputLine += std::to_string(gazeState.ufovAngle) += ",";
+        outputLine += "{" + std::to_string(gazeState.startPosUFOV.x) += " | ";
+        outputLine += std::to_string(gazeState.startPosUFOV.y) += "},";
+        outputLine += std::to_string(gazeState.directionUFOV) += ",";
         outputLine += std::to_string(gazeState.openingAngle) += ",";
         outputLine += std::to_string(gazeState.viewDistance) += ",";
         // TODO catch for empty GazeType
@@ -87,10 +87,10 @@ void AgentStateRecorder::BufferTimeStep(const int &agentId, const GazeState &gaz
         outputLine += "[";
         for (const auto &agent : observedAgents) {
             outputLine += "{";
-            outputLine += std::to_string(agent.id) += " | ";
-            outputLine += std::to_string(agent.refPosition.x) += " | ";
-            outputLine += std::to_string(agent.refPosition.y) += " | ";
-            outputLine += std::to_string(agent.yaw) += "}";
+            outputLine += std::to_string(agent->GetID()) += " | ";
+            outputLine += std::to_string(agent->GetRefPosition().x) += " | ";
+            outputLine += std::to_string(agent->GetRefPosition().y) += " | ";
+            outputLine += std::to_string(agent->GetYawAngle()) += "}";
         }
         outputLine += "],";
 
@@ -133,6 +133,9 @@ std::string AgentStateRecorder::GenerateHeader() {
 
     header += "GazeType, ";
     header += "ScanAOI, ";
+    header += "startPosUFOV{";
+    header += "posX | ";
+    header += "posY},";
     header += "ufovAngle, ";
     header += "openingAngle, ";
     header += "viewDistance, ";
