@@ -50,33 +50,38 @@ GazeState GazeMovement::DetermineGazeState() {
         if (collisionPoint->collisionImminent) {
             return PerformAgentObserveGlance(collisionPoint->oAgentID);
         }
-    }
-
+    };
     if ((!turningAtJunctionShoulderCheckDecision && worldInterpretation.targetLane) &&
         worldRepresentation.egoAgent->GetNextLane() == *worldInterpretation.targetLane) {
         turningAtJunctionShoulderCheckDecision = true;
         if (0.68 >= random || worldRepresentation.egoAgent->GetVehicleType() == DReaMDefinitions::AgentVehicleType::Bicycle) {
-            if (worldInterpretation.triggerShoulderCheckDecision == ScanAOI::ShoulderCheckLeft) {
+            if (currentGazeState.fixationState.second != static_cast<int>(ScanAOI::ShoulderCheckLeft) &&
+                worldInterpretation.triggerShoulderCheckDecision == ScanAOI::ShoulderCheckLeft) {
                 return PerformShoulderCheckLeft(worldInterpretation.triggerShoulderCheckDecision);
             }
-            else if (worldInterpretation.triggerShoulderCheckDecision == ScanAOI::ShoulderCheckRight) {
+            else if (currentGazeState.fixationState.second != static_cast<int>(ScanAOI::ShoulderCheckRight) &&
+                     worldInterpretation.triggerShoulderCheckDecision == ScanAOI::ShoulderCheckRight) {
                 return PerformShoulderCheckRight(worldInterpretation.triggerShoulderCheckDecision);
             }
         }
     }
     if (0.68 >= random || worldRepresentation.egoAgent->GetVehicleType() == DReaMDefinitions::AgentVehicleType::Bicycle) {
-        if (worldInterpretation.triggerShoulderCheckDecision == ScanAOI::ShoulderCheckLeft) {
+        if (currentGazeState.fixationState.second != static_cast<int>(ScanAOI::ShoulderCheckLeft) &&
+            worldInterpretation.triggerShoulderCheckDecision == ScanAOI::ShoulderCheckLeft) {
             return PerformShoulderCheckLeft(worldInterpretation.triggerShoulderCheckDecision);
         }
-        else if (worldInterpretation.triggerShoulderCheckDecision == ScanAOI::ShoulderCheckRight) {
+        else if (currentGazeState.fixationState.second != static_cast<int>(ScanAOI::ShoulderCheckRight) &&
+                 worldInterpretation.triggerShoulderCheckDecision == ScanAOI::ShoulderCheckRight) {
             return PerformShoulderCheckRight(worldInterpretation.triggerShoulderCheckDecision);
         }
     }
 
-    if (worldInterpretation.triggerShoulderCheckDecision == ScanAOI::OuterLeftRVM && 0.5 >= random) {
+    if (currentGazeState.fixationState.second != static_cast<int>(ScanAOI::OuterLeftRVM) &&
+        worldInterpretation.triggerShoulderCheckDecision == ScanAOI::OuterLeftRVM && 0.8 >= random) {
         return PerformMirrowGaze(worldInterpretation.triggerShoulderCheckDecision);
     }
-    if (worldInterpretation.triggerShoulderCheckDecision == ScanAOI::OuterRightRVM && 0.5 >= random) {
+    if (currentGazeState.fixationState.second != static_cast<int>(ScanAOI::OuterRightRVM) &&
+        worldInterpretation.triggerShoulderCheckDecision == ScanAOI::OuterRightRVM && 0.8 >= random) {
         return PerformMirrowGaze(worldInterpretation.triggerShoulderCheckDecision);
     }
 

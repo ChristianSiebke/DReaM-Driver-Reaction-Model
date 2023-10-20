@@ -11,21 +11,15 @@
 
 #include <iostream>
 
-#include "Common/TimeMeasurement.hpp"
-
-TimeMeasurement timeMeasure3("CrossingInfoInterpreter.cpp");
-
 namespace Interpreter {
 
 void CrossingInfoInterpreter::Update(WorldInterpretation* interpretation, const WorldRepresentation& representation) {
     try {
-        timeMeasure3.StartTimePoint("CrossingInfoInterpreter ");
         Localize(representation);
         UpdateStoppingPoints(representation);
         interpretation->crossingInfo = crossingInfo;
         interpretation->targetVelocity = targetVelocityCalculation.Update(representation, crossingInfo);
         interpretation->analysisData->targetDistributionOffset = targetVelocityCalculation.GetVelDistOffset();
-        timeMeasure3.EndTimePoint();
     }
     catch (const std::logic_error &e) {
         const std::string message = "File: " + static_cast<std::string>(__FILE__) + " Line: " + std::to_string(__LINE__) + " " + e.what();

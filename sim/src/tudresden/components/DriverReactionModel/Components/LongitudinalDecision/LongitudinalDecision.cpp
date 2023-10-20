@@ -99,12 +99,14 @@ double LongitudinalDecision::DetermineAccelerationWish() {
         switch (actionStateHandler.GetState(agent)) {
         case ActionState::CollisionImminent: {
             //---debugging--
-            debuggingState += "A:" + std::to_string(agent->agent->GetID()) + " Collision|";
-            //---debugging--
+            if (agent->agent->GetLifeTime() < 1000) {
+                debuggingState += "A:" + std::to_string(agent->agent->GetID()) + " Collision|";
+                //---debugging--
 
-            double deceleration = AgentCrashImminent(agent);
-            minEmergencyBrakeDelay.InsertEmergencyBrakeEvent(agent->agent->GetID(), deceleration);
-            accelerations.push_back({deceleration, agent->agent->GetID()});
+                double deceleration = AgentCrashImminent(agent);
+                minEmergencyBrakeDelay.InsertEmergencyBrakeEvent(agent->agent->GetID(), deceleration);
+                accelerations.push_back({deceleration, agent->agent->GetID()});
+            }
             break;
         }
         case ActionState::Following: {

@@ -3,11 +3,8 @@
 #include <OWL/DataTypes.h>
 
 #include <qglobal.h>
-
-#include "Common/TimeMeasurement.hpp"
 #include "RouteCalculation.h"
 
-TimeMeasurement timeMeasureSensor("Sensor.cpp");
 
 void Sensor_Perception_Implementation::UpdateInput(int localLinkId, const std::shared_ptr<SignalInterface const> &data, int time) {
     Q_UNUSED(time);
@@ -61,9 +58,7 @@ void Sensor_Perception_Implementation::UpdateOutput(int localLinkId, std::shared
 
 void Sensor_Perception_Implementation::Trigger(int time) {
     try {
-        timeMeasureSensor.StartTimePoint("Trigger Sensor");
         sensorPerceptionLogic.Trigger(time, currentGazeState);
-        timeMeasureSensor.EndTimePoint();
     }
 catch (const char *error) {
     const std::string msg = COMPONENTNAME + " " + error;

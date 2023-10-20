@@ -46,7 +46,8 @@ private:
 
     const WorldRepresentation &worldRepresentation;
     const WorldInterpretation &worldInterpretation;
-
+    int waitUntilNextLaneChange = 0;
     LateralAction lateralAction;
+    bool performingLaneChange=false;
 };
 } // namespace LateralDecision

@@ -80,7 +80,6 @@ std::optional<std::vector<GlobalObserver::Routes::InternWaypoint>>
 AgentPerceptionConverter::RouteUpdate(const AgentInterface *agent) const {
     const auto &egoAgent = const_cast<AgentInterface *>(agent)->GetEgoAgent();
     auto worldData = static_cast<OWL::WorldData *>(world->GetWorldData());
-    auto roads = worldData->GetRoads();
     WorldDataQuery helper(*worldData);
     constexpr int maxDepth = 10;
     const auto &roadIds = agent->GetRoads(MeasurementPoint::Front);
@@ -95,7 +94,8 @@ AgentPerceptionConverter::RouteUpdate(const AgentInterface *agent) const {
     RoadGraphVertex newTarget;
     bool sampleRoute = true;
     auto straightRouteGraph = RoadGraph{};
-
+    auto referenceLane = &helper.GetLaneByOdId(egoAgent.GetMainLocatePosition().roadId, egoAgent.GetMainLocatePosition().laneId,
+                                               egoAgent.GetMainLocatePosition().roadPosition.s);
     while (sampleRoute) {
         straightRouteGraph = RoadGraph{};
         RoadGraphVertex targetVertex = RouteCalculation::SampleRoute(branchedGraph, root, weights, *stochastics);
@@ -113,15 +113,12 @@ AgentPerceptionConverter::RouteUpdate(const AgentInterface *agent) const {
                     break;
                 }
             }
+      
         }
         auto [begin, end] = vertices(straightRouteGraph);
-        auto startRoad = roads.at(get(RouteElement(), straightRouteGraph, *begin).roadId);
-        auto referenceLane = &helper.GetLaneByOdId(egoAgent.GetMainLocatePosition().roadId, egoAgent.GetMainLocatePosition().laneId,
-                                                   egoAgent.GetMainLocatePosition().roadPosition.s);
         auto referenceLaneDReaM = infrastructurePerception->lookupTableRoadNetwork.lanes.at(referenceLane->GetId());
         auto nextLane = referenceLaneDReaM->NextLane(egoAgent.GetAgent()->GetIndicatorState(), true);
-        referenceLane->GetNext();
-        if (nextLane->GetRoad()->GetOpenDriveId() == get(RouteElement(), straightRouteGraph, *std::prev(end, 1)).roadId ||
+          if (nextLane->GetRoad()->GetOpenDriveId() == get(RouteElement(), straightRouteGraph, *std::prev(end, 1)).roadId ||
             nextLane->GetRoad()->GetOpenDriveId() == get(RouteElement(), straightRouteGraph, *std::prev(end, 2)).roadId)
             sampleRoute = false;
     }
@@ -132,21 +129,45 @@ AgentPerceptionConverter::RouteUpdate(const AgentInterface *agent) const {
     auto rend = std::make_reverse_iterator(begin);
 
     std::vector<GlobalObserver::Routes::InternWaypoint> newRoute{};
-    auto currentLaneId = egoAgent.GetReferencePointPosition()->laneId;
-    std::transform(
-        rbegin, rend, std::back_inserter(newRoute), [&straightRouteGraph = straightRouteGraph, roads, &currentLaneId](auto element) {
-            GlobalObserver::Routes::InternWaypoint newRoute;
-            newRoute.roadId = get(RouteElement(), straightRouteGraph, element).roadId;
-            newRoute.s = 0;
-            auto road = roads.at(get(RouteElement(), straightRouteGraph, element).roadId);
-            auto section = road->GetSections().front();
-            auto laneId = get(RouteElement(), straightRouteGraph, element).inOdDirection ? -1 : 1;
+    auto owlRefLaneId = referenceLane->GetId();
+    auto nextElement = rbegin;
+    std::transform(rbegin, rend, std::back_inserter(newRoute),
+                   [&nextElement, rend, &straightRouteGraph = straightRouteGraph, &owlRefLaneId, this](auto element) {
+                       GlobalObserver::Routes::InternWaypoint newRoute;
+                       newRoute.s = 0;
+                       newRoute.roadId = get(RouteElement(), straightRouteGraph, element).roadId;
+                       auto referenceLaneDReaM = infrastructurePerception->lookupTableRoadNetwork.lanes.at(owlRefLaneId);
+                       auto lanes = referenceLaneDReaM->NextLanes(true);
+                       newRoute.lane = owlRefLaneId;
+                       nextElement++;
+                       if (nextElement != rend) {
+                           auto nextRoadId = get(RouteElement(), straightRouteGraph, *nextElement).roadId;
 
-            auto iter = std::find_if(section->GetLanes().begin(), section->GetLanes().end(),
-                                     [laneId](auto element) { return element->GetOdId() == laneId; });
-            newRoute.lane = (*iter)->GetId();
-            return newRoute;
-        });
+                           if (auto a = std::find_if(lanes->leftLanes.begin(), lanes->leftLanes.end(),
+                                                     [nextRoadId](const MentalInfrastructure::Lane *element) {
+                                                         return element->GetRoad()->GetOpenDriveId() == nextRoadId;
+                                                     });
+                               a != lanes->leftLanes.end()) {
+                               owlRefLaneId = (*a)->GetOwlId();
+                           }
+                           if (auto a = std::find_if(lanes->rightLanes.begin(), lanes->rightLanes.end(),
+                                                     [nextRoadId](const MentalInfrastructure::Lane *element) {
+                                                         return element->GetRoad()->GetOpenDriveId() == nextRoadId;
+                                                     });
+                               a != lanes->rightLanes.end()) {
+                               owlRefLaneId = (*a)->GetOwlId();
+                           }
+                           if (auto a = std::find_if(lanes->straightLanes.begin(), lanes->straightLanes.end(),
+                                                     [nextRoadId](const MentalInfrastructure::Lane *element) {
+                                                         return element->GetRoad()->GetOpenDriveId() == nextRoadId;
+                                                     });
+                               a != lanes->straightLanes.end()) {
+                               owlRefLaneId = (*a)->GetOwlId();
+                           }
+                       }
+                       return newRoute;
+                   });
+
     const_cast<AgentInterface *>(agent)->GetEgoAgent().SetRoadGraph(std::move(straightRouteGraph), newRoot, newTarget);
     return newRoute;
 }

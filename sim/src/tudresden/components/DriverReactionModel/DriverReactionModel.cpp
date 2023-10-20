@@ -10,12 +10,9 @@
 
 #include "DriverReactionModel.h"
 
-#include "Common/TimeMeasurement.hpp"
 #include "Components/CognitiveMap/CognitiveMap.h"
 #include "Components/GazeMovement/GazeMovement.h"
 #include "Components/LongitudinalDecision/LongitudinalDecision.h"
-
-TimeMeasurement timeMeasure("DriverReactionModel.cpp");
 
 DriverReactionModel::DriverReactionModel(std::string behaviourConfigPath, std::string resultPath, LoggerInterface &loggerInterface,
                                          int cycleTime, StochasticsInterface *stochastics, DReaMDefinitions::AgentVehicleType agentType) {
@@ -51,18 +48,10 @@ void DriverReactionModel::UpdateInput(int time, std::shared_ptr<DetailedAgentPer
 }
 
 void DriverReactionModel::UpdateComponents() {
-    timeMeasure.StartTimePoint("CognitiveMap Update");
     cognitiveMap->Update();
-    timeMeasure.EndTimePoint();
-    timeMeasure.StartTimePoint("Lateral Decision Update");
     lateralDecision->Update();
-    timeMeasure.EndTimePoint();
-    timeMeasure.StartTimePoint("GazeMovement Update");
     gazeMovement->Update();
-    timeMeasure.EndTimePoint();
-    timeMeasure.StartTimePoint("Long. Decision Update");
     longitudinalDecision->Update();
-    timeMeasure.EndTimePoint();
 }
 
 void DriverReactionModel::UpdateAgentStateRecorder(int id, std::shared_ptr<InfrastructurePerception> infrastructure) {

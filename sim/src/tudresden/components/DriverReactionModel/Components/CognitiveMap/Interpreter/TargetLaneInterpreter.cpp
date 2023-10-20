@@ -9,17 +9,11 @@
  *****************************************************************************/
 #include "TargetLaneInterpreter.h"
 
-#include "Common/TimeMeasurement.hpp"
-
-TimeMeasurement timeMeasure5("TargetLaneInterpreter.cpp");
-
 namespace Interpreter {
 
 void TargetLaneInterpreter::Update(WorldInterpretation *interpretation, const WorldRepresentation &representation) {
     try {
-        timeMeasure5.StartTimePoint("TargetLaneInterpreter ");
         interpretation->targetLane = TargetLane(representation);
-        timeMeasure5.EndTimePoint();
     }
     catch (std::logic_error &e) {
         const std::string message = "File: " + static_cast<std::string>(__FILE__) + " Line: " + std::to_string(__LINE__) + " " + e.what();

@@ -30,16 +30,12 @@ double Anticipation::IntersectionGap(const std::unique_ptr<AgentInterpretation> 
     auto tEgo = CalculateTimeToConflictAreaEgo(conflictSituation->egoDistance, worldRepresentation.egoAgent->GetVelocity());
     auto tObserved = CalculateTimeToConflictAreaObserved(*conflictSituation, observedAgent);
 
-    // if (tEgo.vehicleFrontToCAStart - tObserved.vehicleBackToCAEnd >= timeGapAcceptance &&
-    //     (conflictSituation->oAgentDistance.vehicleFrontToCAStart < 0
-    //          ? conflictSituation->oAgentDistance.vehicleBackToCAEnd <
-    //                (conflictSituation->oAgentCA->end.sOffset - conflictSituation->oAgentCA->start.sOffset) / 2
-    //          : true)) {
-    //     // observed agent pass conflict area until ego reaches conflict area
-    //     return freeAccelerationEgo;
-    // }
+
     if (tObserved.vehicleFrontToCAStart - tEgo.vehicleBackToCAEnd >= 0 &&
-        Common::AgentTouchesLane(worldRepresentation.egoAgent, conflictSituation->oAgentCA->lane) &&
+        (Common::AgentTouchesLane(worldRepresentation.egoAgent, conflictSituation->oAgentCA->lane) ||
+         conflictSituation->egoDistance.vehicleFrontToCAStart < -worldRepresentation.egoAgent->GetLength() &&
+             conflictSituation->egoDistance.vehicleBackToCAEnd <
+                 (conflictSituation->egoCA->end.sOffset - conflictSituation->egoCA->start.sOffset) / 2) &&
         !Common::AgentTouchesLane(observedAgent->agent, conflictSituation->egoCA->lane)) {
         return freeAccelerationEgo;
     }

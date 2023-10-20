@@ -120,11 +120,6 @@ double SteeringController::CalculateSteeringAngle(int time)
 }
 
 double SteeringController::CalculateSteeringAngleTUDresden(int time, AgentInterface *agent) {
-    if (in_velocity < 0.3 && in_velocity > -0.3) {
-        timeLast = time;
-        return in_steeringWheelAngle;
-    }
-
     // Time step length
     double dt{(time - timeLast) * 0.001};
 
@@ -137,13 +132,12 @@ double SteeringController::CalculateSteeringAngleTUDresden(int time, AgentInterf
 
     // Limit steering wheel velocity. Human limit set to 400°/s.
     double HUMAN_LIMIT{450.0 * M_PI / 180.0};
-    if (agent->GetVehicleModelParameters().vehicleType == AgentVehicleType::Bicycle)
-        HUMAN_LIMIT = 1000 * M_PI / 180.0;
     const auto maxDeltaSteeringWheelAngle = HUMAN_LIMIT * dt;
     const auto deltaSteeringWheelAngle = deltaH - in_steeringWheelAngle;
     if (std::fabs(deltaSteeringWheelAngle) > maxDeltaSteeringWheelAngle) {
         deltaH = std::copysign(maxDeltaSteeringWheelAngle, deltaSteeringWheelAngle) + in_steeringWheelAngle;
     }
+
 
     timeLast = time;
     return std::clamp(deltaH, -in_steeringMax, in_steeringMax);

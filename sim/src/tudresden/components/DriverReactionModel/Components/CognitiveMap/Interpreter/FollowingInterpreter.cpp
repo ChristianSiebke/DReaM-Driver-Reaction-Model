@@ -10,23 +10,18 @@
 
 #include "FollowingInterpreter.h"
 
-#include "Common/TimeMeasurement.hpp"
 #include "common/Helper.h"
-
-TimeMeasurement timeMeasure4("FollowingInterpreter.cpp");
 
 namespace Interpreter {
 
 void FollowingInterpreter::Update(WorldInterpretation* interpretation, const WorldRepresentation& representation) {
     try {
-        timeMeasure4.StartTimePoint("FollowingInterpreter ");
         for (const auto& agent : *representation.agentMemory) {
             auto state = FollowingState(*agent, representation, interpretation);
 
             interpretation->interpretedAgents.at(agent->GetID())->relativeDistance = state.first;
             interpretation->interpretedAgents.at(agent->GetID())->laneInLineWithEgoLane = state.second;
         }
-        timeMeasure4.EndTimePoint();
     }
     catch (std::logic_error &e) {
         const std::string message = "File: " + static_cast<std::string>(__FILE__) + " Line: " + std::to_string(__LINE__) + " " + e.what();

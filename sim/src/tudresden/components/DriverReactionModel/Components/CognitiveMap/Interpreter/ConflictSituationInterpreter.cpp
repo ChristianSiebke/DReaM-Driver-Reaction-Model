@@ -9,22 +9,17 @@
  *****************************************************************************/
 #include "ConflictSituationInterpreter.h"
 
-#include "Common/TimeMeasurement.hpp"
 #include "Helper.h"
-
-TimeMeasurement timeMeasure2("ConflictSituationInterpreter.cpp");
 
 namespace Interpreter {
 
 void ConflictSituationInterpreter::Update(WorldInterpretation *interpretation, const WorldRepresentation &representation) {
     try {
-        timeMeasure2.StartTimePoint("ConflictSituationInterpreter ");
         for (const auto &observedAgent : *representation.agentMemory) {
             auto conflictSituation = PossibleConflictSituationAlongLane(representation.egoAgent, *observedAgent);
             auto agentInterpretation = &interpretation->interpretedAgents.at(observedAgent->GetID());
             (*agentInterpretation)->conflictSituation = conflictSituation;
         }
-        timeMeasure2.EndTimePoint();
     }
     catch (std::logic_error &e) {
         const std::string message = "File: " + static_cast<std::string>(__FILE__) + " Line: " + std::to_string(__LINE__) + " " + e.what();

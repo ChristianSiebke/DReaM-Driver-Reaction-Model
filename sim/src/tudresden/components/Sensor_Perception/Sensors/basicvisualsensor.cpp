@@ -11,11 +11,6 @@
 
 #include <thread>
 
-#include "Common/TimeMeasurement.hpp"
-
-TimeMeasurement timeMeasureAABB("AABB.cpp");
-TimeMeasurement timeMeasureBasicSensor("BasicSensor.cpp");
-
 void BasicVisualSensor::Trigger(int timestamp, GazeState gazeState) {
     // use threads for operations
     bool useThreads = false;
@@ -26,14 +21,9 @@ void BasicVisualSensor::Trigger(int timestamp, GazeState gazeState) {
     maxViewAngle = (gazeState.openingAngle * (M_PI / 180)) / 2.0;  // TODO: switch output visualization to radiant
 
     viewDistance = gazeState.viewDistance;
-    timeMeasureAABB.StartTimePoint("Trigger AABB");
     aabbTree = aabbTreeHandler->GetCurrentAABBTree(timestamp); // this updates the aabb tree (if needed)
-    timeMeasureAABB.EndTimePoint();
-
     visible.Clear();
-    timeMeasureBasicSensor.StartTimePoint("Trigger BasicSensor");
     ThreadedAgentPerception(useThreads);
-    timeMeasureBasicSensor.EndTimePoint();
 }
 
 void BasicVisualSensor::ThreadedAgentPerception(bool useThreads) {

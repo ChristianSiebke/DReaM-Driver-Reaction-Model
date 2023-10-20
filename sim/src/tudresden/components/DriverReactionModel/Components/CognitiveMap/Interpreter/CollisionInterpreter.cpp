@@ -13,7 +13,6 @@
 #include <future>
 #include <iostream>
 
-#include "Common/TimeMeasurement.hpp"
 #include "common/Helper.h"
 
 namespace Interpreter {
@@ -30,13 +29,9 @@ const int MAX_LANES_AHEAD = 2;
 // pedestrians) e.g. 4 vertices will result in a rectangle
 const int CIRCLE_POLYGON_PRECISION = 8;
 
-TimeMeasurement timeMeasure1("CollisionInterpreter.cpp");
-
 void CollisionInterpreter::Update(WorldInterpretation *interpretation, const WorldRepresentation &representation) {
     try {
-        timeMeasure1.StartTimePoint("CollisionInterpreter ");
         DetermineCollisionPoints(interpretation, representation);
-        timeMeasure1.EndTimePoint();
     }
     catch (std::logic_error &e) {
         const std::string message = "File: " + static_cast<std::string>(__FILE__) + " Line: " + std::to_string(__LINE__) + " " + e.what();
