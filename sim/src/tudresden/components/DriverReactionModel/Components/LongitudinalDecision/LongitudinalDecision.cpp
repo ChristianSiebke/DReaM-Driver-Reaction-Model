@@ -150,7 +150,6 @@ double LongitudinalDecision::DetermineAccelerationWish() {
                                    ? acceleration
                                    : acceleration2;
                 accelerations.push_back({acceleration, agent->agent->GetID()});
-                accelerations.push_back({acceleration, agent->agent->GetID()});
             }
             break;
         }

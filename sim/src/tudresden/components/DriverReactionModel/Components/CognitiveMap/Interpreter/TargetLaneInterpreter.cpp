@@ -60,8 +60,14 @@ std::optional<const MentalInfrastructure::Lane *> TargetLaneInterpreter::TargetL
         return std::nullopt;
     }
 
-    if (lastTimeStepWP != targetWP || egoLane != egoAgent->GetMainLocatorLane())
+    if (lastTimeStepWP != targetWP || egoLane != egoAgent->GetMainLocatorLane()) {
         path = representation.infrastructure->FindShortestPath(egoAgent->GetMainLocatorLane(), targetWP->lane);
+    }
+    auto nextWP = std::next(targetWP);
+    if (waypoints.end() != nextWP &&
+        (egoAgent->GetMainLocatorLane() == nextWP->lane && egoAgent->GetMainLocatorLane()->GetRoad()->GetOpenDriveId() == nextWP->roadId)) {
+        targetWP = std::next(targetWP);
+    }
     lastTimeStepWP = targetWP;
     egoLane = egoAgent->GetMainLocatorLane();
 

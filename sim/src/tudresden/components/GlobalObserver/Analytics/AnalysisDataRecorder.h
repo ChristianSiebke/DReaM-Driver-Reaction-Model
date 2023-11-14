@@ -180,7 +180,7 @@ private:
 
     std::map<std::string, double> observationStartS;
     std::map<std::string, double> observationEndS;
-
+    static std::set<int> countedExitAgents;
     int runtime = 0;
 
     int obstructionCounterLimit = 9;

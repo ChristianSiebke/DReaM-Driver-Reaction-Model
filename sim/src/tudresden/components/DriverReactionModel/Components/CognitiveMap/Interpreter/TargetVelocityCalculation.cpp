@@ -84,7 +84,7 @@ void TargetVelocityCalculation::CalculateVelDistOffset(double targetVelocity, DR
         velocityDistributionOffset = 0;
         return;
     }
-    velocityDistributionOffset = (activeTargetDistribution.mean - targetVelocity) / activeTargetDistribution.std_deviation;
+    velocityDistributionOffset = (targetVelocity - activeTargetDistribution.mean) / activeTargetDistribution.std_deviation;
 }
 
 void TargetVelocityCalculation::CalculatePhaseVelocities(const WorldRepresentation &worldRepresentation, CrossingInfo crossingInfo) {

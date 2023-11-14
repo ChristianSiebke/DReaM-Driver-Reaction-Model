@@ -15,7 +15,7 @@
 #include "bindings/observationBinding.h"
 #include "observationModule.h"
 #include "scheduler/runResult.h"
-bool Write_Output = false;
+bool Write_Output = true;
 
 namespace core {
 ObservationNetwork::~ObservationNetwork() {

@@ -18,7 +18,6 @@ double Anticipation::IntersectionGap(const std::unique_ptr<AgentInterpretation> 
     auto oAgentID = oAgent->GetID();
     auto conflictSituation = observedAgent->conflictSituation;
     assert(conflictSituation.has_value());
-
     double freeAccelerationEgo = CalculatePhaseAcceleration();
     UpdatePriorityAgents(oAgentID, {*conflictSituation, observedAgent->rightOfWay});
     if (conflictSituation->oAgentDistance.vehicleBackToCAEnd <= 0 || conflictSituation->egoDistance.vehicleBackToCAEnd <= 0) {
@@ -45,7 +44,7 @@ double Anticipation::IntersectionGap(const std::unique_ptr<AgentInterpretation> 
                                         observedAgent.get());
     }
 
-    if ((oAgent->GetAcceleration() == 0.0 && oAgent->GetVelocity() == 0.0) &&
+    if ((oAgent->GetAcceleration() < 0.1 && oAgent->GetVelocity() < 0.05) &&
         (observedAgent->rightOfWay.ego ||
          (conflictSituation->junction && (conflictSituation->junction != oAgent->NextJunction() &&
                                           conflictSituation->junction != oAgent->GetLanePosition().lane->GetRoad()->GetJunction())))) {
@@ -382,13 +381,13 @@ double Anticipation::AnticipationAccelerationToAchieveVelocityInDistance(double 
 }
 
 double Anticipation::IDMBrakeStrategy(double distance, double velTarget, double currentVelocity) const {
-    auto s_star = (GetBehaviourData().adBehaviour.minDistanceStationaryTraffic) +
-                  (currentVelocity * GetBehaviourData().adBehaviour.desiredFollowingTimeHeadway) +
-                  ((currentVelocity * (currentVelocity - velTarget)) /
-                   (2.0 * std::sqrt(GetBehaviourData().adBehaviour.maxAcceleration * std::abs(comfortDeceleration))));
+    auto s_star = GetBehaviourData().adBehaviour.minDistanceStationaryTraffic +
+                  std::max(0.0, (currentVelocity * GetBehaviourData().adBehaviour.desiredFollowingTimeHeadway) +
+                                    ((currentVelocity * (currentVelocity - velTarget)) /
+                                     (2.0 * std::sqrt(GetBehaviourData().adBehaviour.maxAcceleration * std::abs(comfortDeceleration)))));
 
-    if (distance == 0.0) {
-        return GetBehaviourData().adBehaviour.maxAcceleration;
+    if (distance - GetBehaviourData().adBehaviour.minDistanceStationaryTraffic <= 0.0) {
+        return maxEmergencyDeceleration;
     }
     else {
         auto a = -GetBehaviourData().adBehaviour.maxAcceleration * ((s_star * s_star) / (distance * distance));

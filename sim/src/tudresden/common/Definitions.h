@@ -317,7 +317,7 @@ struct AnalysisSignal {
     bool obstruction = false;
     bool following = false;
     int followingTarget = -1;
-    double timeHeadway = std::numeric_limits<double>::max();
+    double timeHeadway = 15;
     double targetVelocity = -1.0;
     double targetDistributionOffset = std::numeric_limits<double>::max();
     double maxComfortDeceleration = std::numeric_limits<double>::max();

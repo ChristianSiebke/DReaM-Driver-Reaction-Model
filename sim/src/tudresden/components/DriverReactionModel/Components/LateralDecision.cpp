@@ -60,8 +60,6 @@ void LateralDecision::Update() {
             throw std::runtime_error(msg);
         }
         waitUntilNextLaneChange--;
-        if (waitUntilNextLaneChange > 0)
-            std::cout << "Agent= " << egoAgent->GetID() << " | waitUntilNextLaneChange= " << waitUntilNextLaneChange << std::endl;
         if ((targetLane == egoAgent->GetMainLocatorLane()->GetLeftLane() || targetLane == egoAgent->GetMainLocatorLane()->GetRightLane())) {
             if (waitUntilNextLaneChange < 0 && NeighborLaneIsFree(targetLane)) {
                 if (targetLane == egoAgent->GetMainLocatorLane()->GetLeftLane()) {

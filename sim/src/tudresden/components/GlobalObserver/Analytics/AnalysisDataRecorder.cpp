@@ -12,6 +12,7 @@ std::vector<CollisionData> AnalysisDataRecorder::collisions{};
 std::map<std::string, std::shared_ptr<std::map<DReaMDefinitions::AgentVehicleType, int>>> AnalysisDataRecorder::exitVehicleCounters{};
 std::map<std::string, std::shared_ptr<std::map<DReaMDefinitions::AgentVehicleType, std::shared_ptr<std::vector<double>>>>>
     AnalysisDataRecorder::exitVehicleVelocities{};
+std::set<int> AnalysisDataRecorder::countedExitAgents{};
 
 void AnalysisDataRecorder::Trigger(std::shared_ptr<DetailedAgentPerception> ego, AnalysisSignal data, int time) {
     if (time > runtime)
@@ -83,6 +84,7 @@ void AnalysisDataRecorder::Trigger(std::shared_ptr<DetailedAgentPerception> ego,
 
 void AnalysisDataRecorder::CountExitVelocities(std::shared_ptr<DetailedAgentPerception> ego) {
     DReaMDefinitions::AgentVehicleType vehType = ego->vehicleType;
+
     if (ego->vehicleType == DReaMDefinitions::AgentVehicleType::Car || ego->vehicleType == DReaMDefinitions::AgentVehicleType::Truck ||
         ego->vehicleType == DReaMDefinitions::AgentVehicleType::Motorbike) {
         vehType = DReaMDefinitions::AgentVehicleType::Car;
@@ -112,10 +114,13 @@ void AnalysisDataRecorder::CountExitVelocities(std::shared_ptr<DetailedAgentPerc
             exitVehicleVelocities.at(odRoadId)->insert(std::make_pair(vehType, tmpVec));
         }
         else {
-            exitVehicleCounters.at(odRoadId)->at(vehType)++;
-            exitVehicleVelocities.at(odRoadId)->at(vehType)->emplace_back(ego->velocity);
+            if (countedExitAgents.find(ego->id) == countedExitAgents.end()) {
+                exitVehicleCounters.at(odRoadId)->at(vehType)++;
+                exitVehicleVelocities.at(odRoadId)->at(vehType)->emplace_back(ego->velocity);
+            }
         }
     }
+    countedExitAgents.insert(ego->id);
 }
 
 void AnalysisDataRecorder::AddAgentTrajectoryDataPoint(std::shared_ptr<DetailedAgentPerception> ego, AnalysisSignal data) {
@@ -530,19 +535,20 @@ void AnalysisDataRecorder::WriteOutput() {
     instance.reset();
     std::filesystem::remove_all(scenarioConfigPath + "\\analysis");
     std::filesystem::create_directories(scenarioConfigPath + "\\analysis\\groups");
-    std::ofstream file(scenarioConfigPath + "\\analysis\\ttc.csv");
+    std::ofstream file;
+    file.open(scenarioConfigPath + "\\analysis\\ttc.csv");
     if (file.is_open()) {
         file << "Run ID" << SEPERATOR << "Ego ID" << SEPERATOR << "Other Agent ID" << SEPERATOR << "Min TTC" << std::endl;
         for (auto &data : ttcData) {
             file << data.runId << SEPERATOR << data.egoId << SEPERATOR << data.otherId << SEPERATOR << data.minTTC << std::endl;
         }
-        file.close();
     }
+
+    file.close();
     file.open(scenarioConfigPath + "\\analysis\\exits.csv");
     if (file.is_open())
         ComputeExitDistributions(file);
     file.close();
-
     for (auto &group : analysisData) {
         file.open(scenarioConfigPath + "\\analysis\\groups\\" + std::to_string(group.first) + ".csv");
         if (!file.is_open())
@@ -599,13 +605,13 @@ std::string AnalysisDataRecorder::GroupInfo(uint16_t group) {
         info += "Start Road = '3' (Tharandter Str. stadteinwärts) | ";
         break;
     case 0b0100000000:
-        info += "Start Road = '4' (Frankenbergstr.) | ";
+        info += "Start Road = '4' (Netto Einfahrt) | ";
         break;
     case 0b1000000000:
         info += "Start Road = '1' (Tharandter Str. stadtauswärts) | ";
         break;
     case 0b1100000000:
-        info += "Start Road = '5' (Netto Einfahrt) | ";
+        info += "Start Road = '5' (Frankenbergstr.) | ";
         break;
     default:
         info += "Start Road = ? | ";
@@ -616,13 +622,13 @@ std::string AnalysisDataRecorder::GroupInfo(uint16_t group) {
         info += "Exit Road = '3' (Tharandter Str. stadteinwärts) | ";
         break;
     case 0b0001000000:
-        info += "Exit Road = '4' (Frankenbergstr.) | ";
+        info += "Exit Road = '4' (Netto Einfahrt) | ";
         break;
     case 0b0010000000:
         info += "Exit Road = '1' (Tharandter Str. stadtauswärts) | ";
         break;
     case 0b0011000000:
-        info += "Exit Road = '5' (Netto Einfahrt) | ";
+        info += "Exit Road = '5' (Frankenbergstr.) | ";
         break;
     default:
         info += "Exit Road = ? | ";
@@ -688,15 +694,15 @@ void AnalysisDataRecorder::ComputeExitDistributions(std::ofstream &file) {
             if (count == 0)
                 continue;
             double sum = 0;
-            for (auto &vel : *exitVehicleVelocities.at(roads.first)->at(vehicles.first)) {
+            for (const auto &vel : *exitVehicleVelocities.at(roads.first)->at(vehicles.first)) {
                 sum += vel;
             }
             double mean = sum / count;
-            double sum2 = 0;
-            for (auto &vel : *exitVehicleVelocities.at(roads.first)->at(vehicles.first)) {
-                sum += (vel - mean) * (vel - mean);
+            double stdDev = 0;
+            for (const auto &vel : *exitVehicleVelocities.at(roads.first)->at(vehicles.first)) {
+                stdDev += (vel - mean) * (vel - mean);
             }
-            double stdDev = sqrt(sum2 / count);
+            stdDev = sqrt(stdDev / count);
             std::string type;
             switch (vehicles.first) {
             case DReaMDefinitions::AgentVehicleType::Car:
