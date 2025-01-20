@@ -12,6 +12,7 @@
 #include "include/agentInterface.h"
 #include "common/RoutePlanning/RouteCalculation.h"
 #include "common/commonTools.h"
+#include "../World_OSI/egoAgent.h"
 
 namespace
 {
@@ -263,6 +264,23 @@ double WorldAnalyzer::CalculateSpawnVelocityToPreventCrashing(const RoadId &road
 
     return intendedVelocity;
 }
+
+bool WorldAnalyzer::TrafficJamAtSpwanPoint(const RoadId &roadId, const LaneId laneId, const double intendedSpawnPosition, const double agentFrontLength, const double agentRearLength, const double intendedVelocity, const Route &route) const
+{
+    const auto &agents = world->GetAgents();
+    for(const auto &agent : agents){
+        auto &actualEgoAgent = agent.second->GetEgoAgent();
+        if(actualEgoAgent.GetReferencePointPosition()->roadId == roadId){
+            if(actualEgoAgent.GetReferencePointPosition()->roadPosition.s < 65 && actualEgoAgent.GetVelocity(VelocityScope::Absolute) < 2){
+                return true;
+            }
+
+        }
+    }
+
+    return false;
+}
+
 
 double WorldAnalyzer::CalculateSpawnVelocityToPreventCrashing(const std::unique_ptr<LaneStreamInterface> &laneStream,
                                                               const double intendedSpawnPosition,

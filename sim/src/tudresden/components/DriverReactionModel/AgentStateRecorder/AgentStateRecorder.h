@@ -46,7 +46,7 @@
 
 namespace AgentStateRecorder {
 
-constexpr bool RECORD_DReaMOUTPUT = true;
+constexpr bool RECORD_DReaMOUTPUT = false;
 
 class EXPORT AgentStateRecorder {
 public:

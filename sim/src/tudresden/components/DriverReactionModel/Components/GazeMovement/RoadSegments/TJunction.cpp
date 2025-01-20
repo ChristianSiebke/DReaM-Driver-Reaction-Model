@@ -134,6 +134,7 @@ std::vector<Common::Vector2d> TJunction::CalculateControlFixPointsOnJunction() c
 GazeState TJunction::ControlGlance(CrossingPhase phase) {
     AOIProbabilities scaledAOIProbs = LookUpControlAOIProbability(phase);
     auto aoi = static_cast<ControlAOI>(Sampler::Sample(scaledAOIProbs, stochastics));
+    
 
     if (worldRepresentation.egoAgent->GetJunctionDistance().on > 0 && (phase > CrossingPhase::Deceleration_TWO)) {
         // control gazes on junction

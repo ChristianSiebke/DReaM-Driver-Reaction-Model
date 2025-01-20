@@ -24,7 +24,6 @@ add_openpass_target(
         SpawnerRuntimeCommonExport.h
         SpawnerRuntimeCommonGlobal.h
         SpawnerRuntimeCommonParameterExtractor.h
-
   SOURCES
     ../../../framework/sampler.cpp
     ../../../modelElements/agentBlueprint.cpp

@@ -84,6 +84,8 @@ private:
                                  const SPosition sPosition,
                                  const double velocity) const;
 
+    bool TrafficJam(SpawnDetails& spawnDetails,const SpawnPosition& sceneryInformation) const;
+  
     SpawningAgentProfile SampleAgentProfile(bool rightLane);
 
     const LaneTypes supportedLaneTypes = {LaneType::Driving, LaneType::OnRamp, LaneType::Biking, LaneType::Sidewalk};

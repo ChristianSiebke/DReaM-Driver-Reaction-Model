@@ -377,18 +377,18 @@ std::shared_ptr<BehaviourData> BehaviourConverter::ConvertGazeMovementParameters
         key = "BaseParameters";
         DReaM::StatisticsSet base = main.sets.at(key);
         data->gmBehaviour.foresightTime = std::static_pointer_cast<DReaM::StandardDoubleEntry>(base.entries.at("foresightTime"))->value;
-        if (data->gmBehaviour.XInt_controlOpeningAngle < 0)
+        if (data->gmBehaviour.foresightTime < 0)
             throw std::logic_error(" GazeMovement -> foresightTime must be a positive value! ");
         data->gmBehaviour.minForesightDistance =
             std::static_pointer_cast<DReaM::StandardDoubleEntry>(base.entries.at("minForesightDistance"))->value;
-        if (data->gmBehaviour.XInt_controlOpeningAngle < 0)
+        if (data->gmBehaviour.minForesightDistance < 0)
             throw std::logic_error(" GazeMovement ->  minForesightDistance must be a positive value! ");
 
         key = "AgentObserveParameters";
         DReaM::StatisticsSet obs = main.sets.at(key);
         data->gmBehaviour.observe_openingAngle =
             std::static_pointer_cast<DReaM::StandardDoubleEntry>(obs.entries.at("openingAngle"))->value;
-        if (data->gmBehaviour.XInt_controlOpeningAngle < 0)
+        if (data->gmBehaviour.observe_openingAngle < 0)
             throw std::logic_error(" GazeMovement -> AgentObserveParameters -> openingAngle must be a positive value! ");
         data->gmBehaviour.observe_fixationDuration =
             std::static_pointer_cast<DReaM::NormalDistribution>(obs.entries.at("fixationDuration"));
@@ -402,27 +402,27 @@ std::shared_ptr<BehaviourData> BehaviourConverter::ConvertGazeMovementParameters
         DReaM::StatisticsSet XInt_params = XJunction.sets.at(key);
         key = "probabilityFixateLeadCar";
         data->gmBehaviour.std_probabilityFixateLeadCar =
-            static_cast<int>(std::static_pointer_cast<DReaM::StandardDoubleEntry>(std_params.entries.at(key))->value);
+            static_cast<double>(std::static_pointer_cast<DReaM::StandardDoubleEntry>(std_params.entries.at(key))->value);
         if (data->gmBehaviour.std_probabilityFixateLeadCar < 0)
             throw std::logic_error(" standard road -> probabilityFixateLeadCar must be a positive value! ");
         data->gmBehaviour.XInt_probabilityFixateLeadCar =
-            static_cast<int>(std::static_pointer_cast<DReaM::StandardDoubleEntry>(XInt_params.entries.at(key))->value);
+            static_cast<double>(std::static_pointer_cast<DReaM::StandardDoubleEntry>(XInt_params.entries.at(key))->value);
         if (data->gmBehaviour.XInt_probabilityFixateLeadCar < 0)
             throw std::logic_error(" XJunction -> probabilityFixateLeadCar must be a positive value! ");
 
         key = "probabilityControlGlance";
         data->gmBehaviour.std_probabilityControlGlance =
-            static_cast<int>(std::static_pointer_cast<DReaM::StandardDoubleEntry>(std_params.entries.at(key))->value);
+            static_cast<double>(std::static_pointer_cast<DReaM::StandardDoubleEntry>(std_params.entries.at(key))->value);
         if (data->gmBehaviour.std_probabilityControlGlance < 0)
             throw std::logic_error(" standard road -> probabilityControlGlance must be a positive value! ");
         data->gmBehaviour.XInt_probabilityControlGlance =
-            static_cast<int>(std::static_pointer_cast<DReaM::StandardDoubleEntry>(XInt_params.entries.at(key))->value);
+            static_cast<double>(std::static_pointer_cast<DReaM::StandardDoubleEntry>(XInt_params.entries.at(key))->value);
         if (data->gmBehaviour.XInt_probabilityControlGlance < 0)
             throw std::logic_error(" XJunction -> probabilityControlGlance must be a positive value! ");
 
         key = "viewingDepthIntoRoad";
         data->gmBehaviour.XInt_viewingDepthIntoRoad =
-            static_cast<int>(std::static_pointer_cast<DReaM::StandardDoubleEntry>(XInt_params.entries.at(key))->value);
+            static_cast<double>(std::static_pointer_cast<DReaM::StandardDoubleEntry>(XInt_params.entries.at(key))->value);
         if (data->gmBehaviour.XInt_viewingDepthIntoRoad < 0)
             throw std::logic_error(" XJunction -> viewingDepthIntoRoad must be a positive value! ");
 

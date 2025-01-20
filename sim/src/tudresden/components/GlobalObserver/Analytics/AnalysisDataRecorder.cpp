@@ -12,7 +12,6 @@ std::vector<CollisionData> AnalysisDataRecorder::collisions{};
 std::map<std::string, std::shared_ptr<std::map<DReaMDefinitions::AgentVehicleType, int>>> AnalysisDataRecorder::exitVehicleCounters{};
 std::map<std::string, std::shared_ptr<std::map<DReaMDefinitions::AgentVehicleType, std::shared_ptr<std::vector<double>>>>>
     AnalysisDataRecorder::exitVehicleVelocities{};
-std::set<int> AnalysisDataRecorder::countedExitAgents{};
 
 void AnalysisDataRecorder::Trigger(std::shared_ptr<DetailedAgentPerception> ego, AnalysisSignal data, int time) {
     if (time > runtime)
@@ -41,23 +40,16 @@ void AnalysisDataRecorder::Trigger(std::shared_ptr<DetailedAgentPerception> ego,
         trajectoryData.insert(std::make_pair(ego->id, td));
         groupingData.insert(std::make_pair(ego->id, gd));
     }
-    if (startRoadId == lane->GetRoad()->GetOpenDriveId() && observationStartS.find(startRoadId) != observationStartS.end() &&
+
+    if (!relevantAgents.at(ego->id) && startRoadId == lane->GetRoad()->GetOpenDriveId() && observationStartS.find(startRoadId) != observationStartS.end() &&
         observationStartS.at(startRoadId) < s) {
         relevantAgents.at(ego->id) = true;
         lastLane.insert(std::make_pair(ego->id, lane));
         lastRoad.insert(std::make_pair(ego->id, lane->GetRoad()));
-        lastS.insert(std::make_pair(ego->id, s));
+        lastS.insert(std::make_pair(ego->id, observationStartS.at(startRoadId)));
+        AddAgentTrajectoryDataPoint(ego, data);
     }
-    if (exitRoadId == lane->GetRoad()->GetOpenDriveId() && observationEndS.find(exitRoadId) != observationEndS.end() &&
-        observationEndS.at(exitRoadId) < s + vel * 0.1) {
-        CountExitVelocities(ego);
-        if (relevantAgents.at(ego->id)) {
-            lastLane.erase(ego->id);
-            lastRoad.erase(ego->id);
-            lastS.erase(ego->id);
-        }
-        relevantAgents.at(ego->id) = false;
-    }
+
     if (relevantAgents.at(ego->id)) {
         double dist;
         if (lastLane.at(ego->id)->GetDReaMId() == lane->GetDReaMId() &&
@@ -71,15 +63,38 @@ void AnalysisDataRecorder::Trigger(std::shared_ptr<DetailedAgentPerception> ego,
         else {
             dist = lastLane.at(ego->id)->GetLength() - lastS.at(ego->id) + s;
         }
-        if (dist > trajectorySampleRate) {
+
+        if (dist >= trajectorySampleRate) {
             lastLane.at(ego->id) = lane;
-            lastRoad.at(ego->id) = lane->GetRoad();
-            lastS.at(ego->id) = s;
-            AddAgentTrajectoryDataPoint(ego, data);
+            lastRoad.at(ego->id) = lane->GetRoad();          
+            lastS.at(ego->id) = s - (dist - trajectorySampleRate);
+
+            if (exitRoadId == lane->GetRoad()->GetOpenDriveId()){
+                if(observationEndS.at(exitRoadId) - lastS.at(ego->id) >= 0){
+                  AddAgentTrajectoryDataPoint(ego, data);
+                }
+            }
+            else{
+                AddAgentTrajectoryDataPoint(ego, data);
+            }   
         }
+
+        if (relevantAgents.at(ego->id) && exitRoadId == lane->GetRoad()->GetOpenDriveId() && observationEndS.find(exitRoadId) != observationEndS.end() &&
+            (observationEndS.at(exitRoadId) - lastS.at(ego->id) <= trajectorySampleRate  && s >= lastS.at(ego->id))) {
+            CountExitVelocities(ego);
+            if (relevantAgents.at(ego->id)) {
+                lastLane.erase(ego->id);
+                lastRoad.erase(ego->id);
+                lastS.erase(ego->id);
+            }
+            relevantAgents.at(ego->id) = false;
+        }
+
+
         UpdateGroupDataPoint(ego, data);
         UpdateTTCs(ego, data);
     }
+    
 }
 
 void AnalysisDataRecorder::CountExitVelocities(std::shared_ptr<DetailedAgentPerception> ego) {
@@ -114,13 +129,11 @@ void AnalysisDataRecorder::CountExitVelocities(std::shared_ptr<DetailedAgentPerc
             exitVehicleVelocities.at(odRoadId)->insert(std::make_pair(vehType, tmpVec));
         }
         else {
-            if (countedExitAgents.find(ego->id) == countedExitAgents.end()) {
-                exitVehicleCounters.at(odRoadId)->at(vehType)++;
-                exitVehicleVelocities.at(odRoadId)->at(vehType)->emplace_back(ego->velocity);
-            }
+            exitVehicleCounters.at(odRoadId)->at(vehType)++;
+            exitVehicleVelocities.at(odRoadId)->at(vehType)->emplace_back(ego->velocity);
+            
         }
     }
-    countedExitAgents.insert(ego->id);
 }
 
 void AnalysisDataRecorder::AddAgentTrajectoryDataPoint(std::shared_ptr<DetailedAgentPerception> ego, AnalysisSignal data) {
@@ -207,6 +220,9 @@ void AnalysisDataRecorder::CheckCollisions(std::vector<std::pair<int, std::share
         cd.runId = this->runId;
         cd.timestamp = time;
         cd.type = DetermineCollisionType(egoId, partner.first, egoData, partner.second, data);
+        cd.egoType = egoData->vehicleType;
+        cd.otherType = partner.second->vehicleType;
+        cd.onIntersection = egoData->junctionDistance.on >=0 || partner.second->junctionDistance.on >=0;
         collisions.emplace_back(cd);
     }
 }
@@ -575,7 +591,7 @@ void AnalysisDataRecorder::WriteOutput() {
             }
             velocities.back() = '}';
             timeHeadways.back() = '}';
-            file << agent.runId << SEPERATOR << "Car" << SEPERATOR << agent.agentId << SEPERATOR << velocities << SEPERATOR << timeHeadways
+            file << agent.runId << SEPERATOR << "CAR" << SEPERATOR << agent.agentId << SEPERATOR << velocities << SEPERATOR << timeHeadways
                  << std::endl;
         }
         file.close();
@@ -583,11 +599,30 @@ void AnalysisDataRecorder::WriteOutput() {
 
     file.open(scenarioConfigPath + "\\analysis\\collisions.csv");
     if (file.is_open()) {
-        file << "Run ID" << SEPERATOR << "Timestamp" << SEPERATOR << "Ego ID" << SEPERATOR << "Other Agent ID" << SEPERATOR
-             << "Collision Type ID" << std::endl;
+        file << "Run ID" << SEPERATOR << "Timestamp" << SEPERATOR << "Ego ID" << SEPERATOR<< "Ego Vehicle Type" <<SEPERATOR<< "Other Agent ID" << SEPERATOR<< "Other Agent Vehicle Type"<< SEPERATOR
+             << "On Junction" <<SEPERATOR << "Collision Type ID" << std::endl;
         for (auto col : collisions) {
-            file << col.runId << SEPERATOR << col.timestamp << SEPERATOR << col.egoId << SEPERATOR << col.otherId << SEPERATOR << col.type
-                 << std::endl;
+            std::string egoType = "";
+            std::string otherType = "";
+            if(col.egoType == DReaMDefinitions::AgentVehicleType::Bicycle){
+                    egoType = "Bicycle";
+            }
+            else{
+                    egoType = "Car";
+    
+            }
+            if(col.otherType == DReaMDefinitions::AgentVehicleType::Bicycle){
+                otherType = "Bicycle";
+            }
+            else{
+                    otherType = "Car";
+    
+            }
+    
+            std::string onIntersection = col.onIntersection ? "true" : "false";
+    
+            file << col.runId << SEPERATOR << col.timestamp << SEPERATOR << col.egoId <<SEPERATOR <<egoType<< SEPERATOR << col.otherId << SEPERATOR<<otherType <<SEPERATOR <<onIntersection<< SEPERATOR  <<col.type
+                     << std::endl;
         }
     }
     file.close();
@@ -690,7 +725,7 @@ void AnalysisDataRecorder::ComputeExitDistributions(std::ofstream &file) {
          << "Velocity StdDev" << std::endl;
     for (auto &roads : exitVehicleCounters) {
         for (auto &vehicles : *roads.second.get()) {
-            int count = vehicles.second;
+            double count = static_cast<double>(vehicles.second);
             if (count == 0)
                 continue;
             double sum = 0;
@@ -706,10 +741,10 @@ void AnalysisDataRecorder::ComputeExitDistributions(std::ofstream &file) {
             std::string type;
             switch (vehicles.first) {
             case DReaMDefinitions::AgentVehicleType::Car:
-                type = "Car";
+                type = "CAR";
                 break;
             case DReaMDefinitions::AgentVehicleType::Bicycle:
-                type = "Bicycle";
+                type = "BICYCLE";
                 break;
             default:
                 type = "Other";

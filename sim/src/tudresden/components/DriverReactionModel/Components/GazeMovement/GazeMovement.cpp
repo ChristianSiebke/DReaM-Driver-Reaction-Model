@@ -54,7 +54,7 @@ GazeState GazeMovement::DetermineGazeState() {
     if ((!turningAtJunctionShoulderCheckDecision && worldInterpretation.targetLane) &&
         worldRepresentation.egoAgent->GetNextLane() == *worldInterpretation.targetLane) {
         turningAtJunctionShoulderCheckDecision = true;
-        if (0.68 >= random || worldRepresentation.egoAgent->GetVehicleType() == DReaMDefinitions::AgentVehicleType::Bicycle) {
+        if (0.494 >= random || worldRepresentation.egoAgent->GetVehicleType() == DReaMDefinitions::AgentVehicleType::Bicycle) {
             if (currentGazeState.fixationState.second != static_cast<int>(ScanAOI::ShoulderCheckLeft) &&
                 worldInterpretation.triggerShoulderCheckDecision == ScanAOI::ShoulderCheckLeft) {
                 return PerformShoulderCheckLeft(worldInterpretation.triggerShoulderCheckDecision);
@@ -65,7 +65,7 @@ GazeState GazeMovement::DetermineGazeState() {
             }
         }
     }
-    if (0.68 >= random || worldRepresentation.egoAgent->GetVehicleType() == DReaMDefinitions::AgentVehicleType::Bicycle) {
+    if (0.494 >= random || worldRepresentation.egoAgent->GetVehicleType() == DReaMDefinitions::AgentVehicleType::Bicycle) {
         if (currentGazeState.fixationState.second != static_cast<int>(ScanAOI::ShoulderCheckLeft) &&
             worldInterpretation.triggerShoulderCheckDecision == ScanAOI::ShoulderCheckLeft) {
             return PerformShoulderCheckLeft(worldInterpretation.triggerShoulderCheckDecision);
@@ -92,7 +92,6 @@ GazeState GazeMovement::DetermineGazeState() {
     }
 
     CrossingPhase phase = worldInterpretation.crossingInfo.phase;
-
     if (ProbabilityToPerformControlGlance() > random && phase != CrossingPhase::Exit) {
         return PerformControlGaze(phase);
     }
@@ -102,7 +101,7 @@ GazeState GazeMovement::DetermineGazeState() {
 void GazeMovement::UpdateRoadSegment() {
     if (worldInterpretation.crossingInfo.phase >= CrossingPhase::Approach) {
         auto nextJunction = worldRepresentation.egoAgent->NextJunction();
-        if (nextJunction != nullptr) {
+        if (nextJunction != nullptr && lastJunctionID != nextJunction->GetOpenDriveId()) {
             if (nextJunction->GetIncomingRoads().size() == 4) {
                 if (currentSegmentType != SegmentType::XJunction) {
                     turningAtJunctionShoulderCheckDecision = false;
@@ -143,11 +142,11 @@ void GazeMovement::UpdateRoadSegment() {
                     throw std::runtime_error(message);
                 }
 
-                if (currentSegmentType != SegmentType::TJunction) {
-                    turningAtJunctionShoulderCheckDecision = false;
-                    roadSegment = std::make_unique<TJunction>(worldRepresentation, GetStochastic(), GetBehaviourData(), layout);
-                    currentSegmentType = SegmentType::TJunction;
-                }
+                turningAtJunctionShoulderCheckDecision = false;
+                roadSegment = std::make_unique<TJunction>(worldRepresentation, GetStochastic(), GetBehaviourData(), layout);
+                currentSegmentType = SegmentType::TJunction;
+                lastJunctionID = nextJunction->GetOpenDriveId();
+                
             }
             else if (nextJunction->GetIncomingRoads().size() == 2) {
                 // connection of two roads

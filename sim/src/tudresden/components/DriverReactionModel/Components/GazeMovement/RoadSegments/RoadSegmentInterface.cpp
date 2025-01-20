@@ -259,6 +259,7 @@ GazeState RoadSegmentInterface::MirrowGaze(ScanAOI aoi) {
         RoadSegmentInterface(worldRepresentation, stochastics, behaviourData) {
         probabilityFixateLeadCar = behaviourData.gmBehaviour.XInt_probabilityFixateLeadCar;
         probabilityControlGlance = behaviourData.gmBehaviour.XInt_probabilityControlGlance;
+
         viewingDepthIntoRoad = behaviourData.gmBehaviour.XInt_viewingDepthIntoRoad;
         controlFixPointsOnRoads = CalculateControlFixPointsOnRoads();
         controlFixationPoints.insert(controlFixationPoints.begin(), controlFixPointsOnJunction.begin(), controlFixPointsOnJunction.end());

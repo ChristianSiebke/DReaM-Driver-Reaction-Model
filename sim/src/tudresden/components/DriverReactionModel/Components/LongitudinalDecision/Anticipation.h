@@ -42,7 +42,7 @@ public:
                  StochasticsInterface* stochastics, const LoggerInterface* loggerInterface, const BehaviourData& behaviourData)
         : worldRepresentation{worldRepresentation}, worldInterpretation{worldInterpretation}, stochastics{stochastics},
           loggerInterface{loggerInterface}, behaviourData{behaviourData} {
-        DReaM::NormalDistribution maxEmergencyDecelDistribution = GetBehaviourData().adBehaviour.maxEmergencyDeceleration;
+        auto maxEmergencyDecelDistribution = GetBehaviourData().adBehaviour.maxEmergencyDeceleration;
         double emergencyDec = -stochastics->GetLogNormalDistributed(std::abs(maxEmergencyDecelDistribution.mean),
                                                                     maxEmergencyDecelDistribution.std_deviation);
         maxEmergencyDeceleration =
@@ -54,7 +54,7 @@ public:
         comfortDeceleration =
             Common::ValueInBounds(comfortDecelerationDistribution.min, drawnComfortDec, comfortDecelerationDistribution.max);
 
-        DReaM::LogNormalDistribution timeGapAcceptanceDistribution = GetBehaviourData().adBehaviour.timeGapAcceptance;
+        auto timeGapAcceptanceDistribution = GetBehaviourData().adBehaviour.timeGapAcceptance;
         double drawnTimeGapAcceptance =
             stochastics->GetLogNormalDistributedMuSigma(timeGapAcceptanceDistribution.mu, timeGapAcceptanceDistribution.sigma);
         timeGapAcceptance =

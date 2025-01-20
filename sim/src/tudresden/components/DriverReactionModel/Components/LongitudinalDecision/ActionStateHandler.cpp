@@ -19,19 +19,17 @@ ActionState ActionStateHandler::GetState(const std::unique_ptr<AgentInterpretati
             IncrementState();
         }
     }
-    if (currentState == ActionState::Following) {
+    if (agent->relativeDistance.has_value() && agent->relativeDistance.value() > 0 && worldRepresentation.egoAgent->GetVelocity() > 0.55 ) {
         worldInterpretation.analysisData->following = true;
-        if (agent->relativeDistance.has_value() && agent->relativeDistance.value() > 0) {
-            double dist = agent->relativeDistance.value();
-            if (worldRepresentation.egoAgent->GetVelocity() > 0) {
-                double headway = dist / worldRepresentation.egoAgent->GetVelocity();
-                if (headway < worldInterpretation.analysisData->timeHeadway) {
-                    worldInterpretation.analysisData->timeHeadway = headway;
-                    worldInterpretation.analysisData->followingTarget = agent->agent->GetID();
-                }
-            }
+        double dist = agent->relativeDistance.value();
+        double headway = dist / worldRepresentation.egoAgent->GetVelocity();
+        if (headway < worldInterpretation.analysisData->timeHeadway) {
+            worldInterpretation.analysisData->timeHeadway = headway;
+            worldInterpretation.analysisData->followingTarget = agent->agent->GetID();
         }
+        
     }
+    
     if (currentState == ActionState::CollisionImminent || currentState == ActionState::ReactToIntersectionSituation)
         worldInterpretation.analysisData->obstruction = true;
 

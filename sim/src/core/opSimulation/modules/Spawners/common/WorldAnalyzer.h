@@ -109,6 +109,10 @@ public:
                                                    const double intendedVelocity,
                                                    const Route& route) const;
 
+
+    bool TrafficJamAtSpwanPoint(const RoadId &roadId, const LaneId laneId, const double intendedSpawnPosition, const double agentFrontLength, const double agentRearLength, const double intendedVelocity, const Route &route) const;
+
+
     //! Adjust spawning velocity so that the spawned agent won't immediately crash.
     //!
     //! \param laneStream               LaneStream to spawn in

@@ -93,7 +93,7 @@ class GazeMovement : public Component::ComponentInterface {
     std::unique_ptr<RoadSegmentInterface> roadSegment{nullptr};
     SegmentType currentSegmentType = SegmentType::NONE;
     bool turningAtJunctionShoulderCheckDecision = false;
-
+    OdId lastJunctionID = "";
     int durationCounter = 0;
 };
 // namespace RoadSegments

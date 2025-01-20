@@ -36,18 +36,18 @@ SpawnPointInterface::Agents SpawnerRuntimeCommon::Trigger(int time)
     {
         if (time >= queuedSpawnDetails[i].spawnTime && AreSpawningCoordinatesValid(queuedSpawnDetails[i], parameters.spawnPositions[i]))
         {
-            AdjustVelocityForCrash(queuedSpawnDetails[i], parameters.spawnPositions[i]);
-            core::Agent* newAgent = dependencies.agentFactory->AddAgent(&(queuedSpawnDetails[i].agentBlueprint));
-
-            if (newAgent != nullptr)
-            {
-                agents.emplace_back(newAgent);
+            if (!TrafficJam(queuedSpawnDetails[i], parameters.spawnPositions[i])){
+                core::Agent* newAgent = dependencies.agentFactory->AddAgent(&(queuedSpawnDetails[i].agentBlueprint));
+                if (newAgent != nullptr){
+                    agents.emplace_back(newAgent);
+                }
+                queuedSpawnDetails[i] = GenerateSpawnDetailsForLane(parameters.spawnPositions[i], time);
             }
-
-            queuedSpawnDetails[i] = GenerateSpawnDetailsForLane(parameters.spawnPositions[i], time);
+            else{
+            }
+      
         }
     }
-
     return agents;
 }
 
@@ -84,6 +84,22 @@ SpawnDetails SpawnerRuntimeCommon::GenerateSpawnDetailsForLane(const SpawnPositi
         LogError("Encountered an Error while generating Spawn Details: " + std::string(error.what()));
     }
 }
+
+bool SpawnerRuntimeCommon::TrafficJam(SpawnDetails& spawnDetails,const SpawnPosition& sceneryInformation) const
+{
+    const double agentFrontLength = spawnDetails.agentBlueprint.GetVehicleModelParameters().boundingBoxDimensions.length * 0.5 + spawnDetails.agentBlueprint.GetVehicleModelParameters().boundingBoxCenter.x;
+    const double agentRearLength = spawnDetails.agentBlueprint.GetVehicleModelParameters().boundingBoxDimensions.length * 0.5 - spawnDetails.agentBlueprint.GetVehicleModelParameters().boundingBoxCenter.x;
+    const auto intendedVelocity = spawnDetails.agentBlueprint.GetSpawnParameter().velocity;
+
+    return worldAnalyzer.TrafficJamAtSpwanPoint(sceneryInformation.roadId,
+                                                                         sceneryInformation.laneId,
+                                                                         sceneryInformation.sPosition,
+                                                                         agentFrontLength,
+                                                                         agentRearLength,
+                                                                         intendedVelocity,
+                                                                         spawnDetails.agentBlueprint.GetSpawnParameter().route);
+}
+
 
 void SpawnerRuntimeCommon::AdjustVelocityForCrash(SpawnDetails& spawnDetails,
                                                      const SpawnPosition& sceneryInformation) const

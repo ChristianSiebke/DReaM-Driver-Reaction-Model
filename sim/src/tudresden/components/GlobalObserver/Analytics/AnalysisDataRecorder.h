@@ -75,6 +75,9 @@ struct CollisionData {
     int egoId = -1;
     int otherId = -1;
     int type = -1;
+    DReaMDefinitions::AgentVehicleType egoType = DReaMDefinitions::AgentVehicleType::Undefined;
+    DReaMDefinitions::AgentVehicleType otherType = DReaMDefinitions::AgentVehicleType::Undefined;
+    bool onIntersection = false;
 };
 
 class DLL_EXPORT AnalysisDataRecorder {
@@ -86,15 +89,15 @@ public:
     }
 
     AnalysisDataRecorder() {
-        observationStartS.insert(std::make_pair("3", 144));
-        observationStartS.insert(std::make_pair("4", 255));
-        observationStartS.insert(std::make_pair("1", 160));
-        observationStartS.insert(std::make_pair("5", 220));
+        observationStartS.insert(std::make_pair("3", 144.7));
+        observationStartS.insert(std::make_pair("4", 269));
+        observationStartS.insert(std::make_pair("1", 190));
+        observationStartS.insert(std::make_pair("5", 224.5));
 
-        observationEndS.insert(std::make_pair("3", 15));
-        observationEndS.insert(std::make_pair("4", 15));
-        observationEndS.insert(std::make_pair("1", 40));
-        observationEndS.insert(std::make_pair("5", 12));
+        observationEndS.insert(std::make_pair("3", 16));
+        observationEndS.insert(std::make_pair("4", 0.5));
+        observationEndS.insert(std::make_pair("1", 9));
+        observationEndS.insert(std::make_pair("5", 9.3));
     }
     AnalysisDataRecorder(AnalysisDataRecorder const &) = delete;
     AnalysisDataRecorder &operator=(AnalysisDataRecorder const &) = delete;
@@ -173,18 +176,17 @@ private:
     std::map<int, bool> relevantAgents;
     std::map<int, const MentalInfrastructure::Lane *> lastLane;
     std::map<int, const MentalInfrastructure::Road *> lastRoad;
-    std::map<int, uint64_t> lastS;
+    std::map<int, double> lastS;
     std::map<int, std::shared_ptr<std::map<int, double>>> minTTCs;
     std::map<int, std::shared_ptr<std::list<int>>> collisionPartners;
     std::map<int, AnalysisSignal> analysisSignalLog;
 
     std::map<std::string, double> observationStartS;
     std::map<std::string, double> observationEndS;
-    static std::set<int> countedExitAgents;
     int runtime = 0;
 
-    int obstructionCounterLimit = 9;
-    double minTTCUpperBound = 3.0;
+    int obstructionCounterLimit = 20;
+    double minTTCUpperBound = 4.0;
     double trajectorySampleRate = 5.0; // every x meters
 };
 
