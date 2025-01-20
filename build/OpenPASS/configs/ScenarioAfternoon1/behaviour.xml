@@ -1,0 +1,889 @@
+<?xml version='1.0' encoding='utf-8'?>
+<group name="main">
+	<group name="Car">
+		<group name="ActionDecision">
+			<group name="Velocity Statistics">
+				<group name="IntersectionID">
+					<group name="default">
+						<set name="IndicatorOff">
+							<entry type="NormalDistribution" name="IntersectionEntry" mean="3.20" stdDeviation="0" min="0" max="10.02" />
+							<entry type="NormalDistribution" name="IntersectionExit" mean="7.16" stdDeviation="0" min="0" max="10.52" />
+						</set>
+						<set name="IndicatorLeft">
+							<entry type="NormalDistribution" name="IntersectionEntry" mean="8.20" stdDeviation="0" min="0" max="10.02" />
+							<entry type="NormalDistribution" name="IntersectionExit" mean="1.16" stdDeviation="0" min="0" max="10.52" />
+						</set>
+						<set name="IndicatorRight">
+							<entry type="NormalDistribution" name="IntersectionEntry" mean="2.20" stdDeviation="0" min="0" max="10.02" />
+							<entry type="NormalDistribution" name="IntersectionExit" mean="7.16" stdDeviation="0" min="0" max="10.52" />
+						</set>
+					</group>
+					<group name="94">
+						<group name="Appraoch RoadID">
+							<group name="1">
+								<set name="IndicatorOff">
+									<entry type="NormalDistribution" name="IntersectionEntry" mean="13.606129518072288" stdDeviation="3.1443021406359564" min="0.45552777777777775" max="19.126805555555553" />
+									<entry type="NormalDistribution" name="IntersectionExit" mean="12.79455271084337" stdDeviation="3.169761439709395" min="1.1861388888888889" max="18.0475" />
+								</set>
+								<set name="IndicatorLeft">
+									<entry type="NormalDistribution" name="IntersectionEntry" mean="5.164557291666667" stdDeviation="1.8121053877707565" min="1.0113333333333334" max="7.479916666666667" />
+									<entry type="NormalDistribution" name="IntersectionExit" mean="4.355604166666667" stdDeviation="1.0857636106891233" min="2.5376666666666665" max="6.1307222222222215" />
+								</set>
+								<set name="IndicatorRight">
+									<entry type="NormalDistribution" name="IntersectionEntry" mean="5.20" stdDeviation="2" min="4" max="10.02" />
+									<entry type="NormalDistribution" name="IntersectionExit" mean="8.16" stdDeviation="2" min="4" max="10.52" />
+								</set>
+							</group>
+							<group name="4">
+								<set name="IndicatorOff">
+									<entry type="NormalDistribution" name="IntersectionEntry" mean="8.20" stdDeviation="0" min="5" max="10.02" />
+									<entry type="NormalDistribution" name="IntersectionExit" mean="11.16" stdDeviation="0" min="5" max="10.52" />
+								</set>
+								<set name="IndicatorLeft">
+									<entry type="NormalDistribution" name="IntersectionEntry" mean="1.1506256613756616" stdDeviation="0.3895098621757174" min="0.5723055555555555" max="1.9704444444444444" />
+									<entry type="NormalDistribution" name="IntersectionExit" mean="6.20488492063492" stdDeviation="0.8679692430437316" min="4.404388888888889" max="7.834083333333333" />
+								</set>
+								<set name="IndicatorRight">
+									<entry type="NormalDistribution" name="IntersectionEntry" mean="1.4357690972222223" stdDeviation="0.6754067967667386" min="0.32475" max="2.6998611111111113" />
+									<entry type="NormalDistribution" name="IntersectionExit" mean="4.539671875" stdDeviation="0.7249054472332968" min="3.6248888888888886" max="6.175833333333333" />
+								</set>
+							</group>
+							<group name="2">			
+								<set name="IndicatorOff">
+									<entry type="NormalDistribution" name="IntersectionEntry" mean="13.316208614864872" stdDeviation="2.553690171818932" min="3.887694444444444" max="20.194388888888888" />
+									<entry type="NormalDistribution" name="IntersectionExit" mean="14.127577421171159" stdDeviation="2.281108424769842" min="5.904083333333333" max="21.068472222222223" />
+								</set>
+								<set name="IndicatorLeft">
+									<entry type="NormalDistribution" name="IntersectionEntry" mean="5.20" stdDeviation="2" min="4" max="10.02" />
+									<entry type="NormalDistribution" name="IntersectionExit" mean="7.16" stdDeviation="2" min="4" max="10.52" />
+								</set>
+								<set name="IndicatorRight">
+									<entry type="NormalDistribution" name="IntersectionEntry" mean="5.508367063492062" stdDeviation="1.158765315070267" min="2.302638888888889" max="7.425666666666666" />
+									<entry type="NormalDistribution" name="IntersectionExit" mean="3.3919384920634923" stdDeviation="0.7784579337345076" min="1.76275" max="4.667472222222222" />
+								</set>
+							</group>
+						</group>
+					</group>
+					<group name="17">
+						<group name="Appraoch RoadID">
+							<group name="5">
+								<set name="IndicatorOff">
+									<entry type="NormalDistribution" name="IntersectionEntry" mean="8.20" stdDeviation="2" min="4" max="10.02" />
+									<entry type="NormalDistribution" name="IntersectionExit" mean="11.16" stdDeviation="2" min="4" max="10.52" />
+								</set>
+								<set name="IndicatorLeft">
+									<entry type="NormalDistribution" name="IntersectionEntry" mean="1.9990802469135802" stdDeviation="0.7309754075604993" min="0.4455555555555556" max="3.5064722222222224" />
+									<entry type="NormalDistribution" name="IntersectionExit" mean="6.05987962962963" stdDeviation="0.8649340016707793" min="4.426972222222222" max="7.99875" />
+								</set>
+								<set name="IndicatorRight">
+									<entry type="NormalDistribution" name="IntersectionEntry" mean="2.880722222222222" stdDeviation="0.2429883282688638" min="2.634611111111111" max="3.211472222222222" />
+									<entry type="NormalDistribution" name="IntersectionExit" mean="6.015453703703703" stdDeviation="0.4765034395985464" min="5.410444444444444" max="6.574972222222222" />
+								</set>
+							</group>
+							<group name="3">
+								<set name="IndicatorOff">
+									<entry type="NormalDistribution" name="IntersectionEntry" mean="12.957340521442491" stdDeviation="1.9827028440452859" min="3.078222222222222" max="18.58152777777778" />
+									<entry type="NormalDistribution" name="IntersectionExit" mean="13.480642543859645" stdDeviation="2.2517380731692382" min="4.875472222222222" max="19.750444444444444" />
+								</set>
+								<set name="IndicatorLeft">
+									<entry type="NormalDistribution" name="IntersectionEntry" mean="5.650161111111112" stdDeviation="1.6726610665768409" min="2.017027777777778" max="8.481361111111111" />
+									<entry type="NormalDistribution" name="IntersectionExit" mean="5.398524999999999" stdDeviation="0.4114435672362149" min="4.718111111111111" max="6.213111111111111" />
+								</set>
+								<set name="IndicatorRight">
+									<entry type="NormalDistribution" name="IntersectionEntry" mean="5.20" stdDeviation="2" min="4" max="10.02" />
+									<entry type="NormalDistribution" name="IntersectionExit" mean="6" stdDeviation="2" min="4" max="10.52" />
+								</set>
+							</group>
+							<group name="2">			
+								<set name="IndicatorOff">
+									<entry type="NormalDistribution" name="IntersectionEntry" mean="12.449503841607564" stdDeviation="3.0805384620068113" min="0.7317777777777777" max="18.114388888888886" />
+									<entry type="NormalDistribution" name="IntersectionExit" mean="12.08549615839243" stdDeviation="2.65842626071826" min="2.549111111111111" max="18.55288888888889" />
+								</set>
+								<set name="IndicatorLeft">
+									<entry type="NormalDistribution" name="IntersectionEntry" mean="7.20" stdDeviation="2" min="4" max="10.02" />
+									<entry type="NormalDistribution" name="IntersectionExit" mean="6.16" stdDeviation="2" min="4" max="10.52" />
+								</set>
+								<set name="IndicatorRight">
+									<entry type="NormalDistribution" name="IntersectionEntry" mean="4.81580855855856" stdDeviation="1.3310796571623236" min="2.0585833333333334" max="8.40036111111111" />
+									<entry type="NormalDistribution" name="IntersectionExit" mean="5.154067567567566" stdDeviation="1.2591206775741888" min="3.248472222222222" max="9.484444444444444" />
+								</set>
+							</group>
+						</group>
+					</group>
+				</group>
+				<set name="default">
+					<entry type="NormalDistribution" name="default" mean="11.569144172113289" stdDeviation="2.34" min="10" max="18.487027777777776" />
+				</set>
+				<set name="SpecificRoads">
+					<entry type="NormalDistribution" name="X" mean="10" stdDeviation="0" min="1" max="10" />
+					<entry type="NormalDistribution" name="Y" mean="2.5" stdDeviation="0" min="1" max="10" />
+					<entry type="NormalDistribution" name="Z" mean="8" stdDeviation="0" min="1" max="10" />
+				</set>
+			</group>
+			<set name="BehaviourParameters">
+				<entry type="parameter" name="collisionImminentMargin" value="1.5" />
+				<entry type="parameter" name="minDistanceStationaryTraffic" value="1.5" />
+				<entry type="parameter" name="desiredFollowingTimeHeadway" value="1.006693990761517" />
+				<entry type="NormalDistribution" name="comfortDeceleration" mean="-0.31443679831243854" stdDeviation="0" min="-3" max="0" />
+				<entry type="parameter" name="maxAcceleration" value="1.29" />
+				<entry type="NormalDistribution" name="maxEmergencyDeceleration" mean="-5.74" stdDeviation="1.42" min="-9.67" max="-4" />
+				<entry type="LogNormalDistribution" name="timeGapAcceptance" mu="0.3832864141142079" sigma="0.5" min="0" max="4" />
+				<entry type="parameter" name="minTimeEmergencyBrakeIsActive" value="2" />
+			</set>
+		</group>
+		<group name="CognitiveMap">
+			<set name="BehaviourParameters">
+				<entry type="parameter" name="memoryCapacity" value="1000" />
+				<entry type="parameter" name="memorytime" value="5000" />
+				<entry type="NormalDistribution" name="initialPerceptionTime" mean="1.210" stdDeviation="0.630" min="0.650" max="1.95" />
+				<entry type="NormalDistribution" name="perceptionLatency" mean="0" stdDeviation="0" min="0" max="0" />
+			</set>
+			<set name="TrafficSignalMemoryParameters">
+				<entry type="parameter" name="memoryCapacity" value="100" />
+				<entry type="parameter" name="memorytime" value="2000000" />
+			</set>
+		</group>
+		<group name="GazeMovement">
+			<set name="BaseParameters">
+				<entry type="parameter" name="foresightTime" value="2" />
+				<entry type="parameter" name="minForesightDistance" value="5" />
+			</set>
+			<set name="AgentObserveParameters">
+				<entry type="parameter" name="openingAngle" value="100" />
+				<entry type="NormalDistribution" name="fixationDuration" mean="200" stdDeviation="0" min="0" max="800" />
+			</set>
+			<group name="ScanAreasOfInterest">
+				<group name="DriverGaze">
+					<set name="Straight">
+						<entry type="parameter" name="direction" value="0" />
+						<entry type="parameter" name="openingAngle" value="100" />
+						<entry type="NormalDistribution" name="fixationDuration" mean="285.787640740741" stdDeviation="136.477490277491" min="100" max="1000" />
+					</set>
+					<set name="Left">
+						<entry type="parameter" name="direction" value="30" />
+						<entry type="parameter" name="openingAngle" value="100" />
+						<entry type="NormalDistribution" name="fixationDuration" mean="213.924791666667" stdDeviation="45.7427251441335" min="100" max="1000" />
+					</set>
+					<set name="Right">
+						<entry type="parameter" name="direction" value="-30" />
+						<entry type="parameter" name="openingAngle" value="100" />
+						<entry type="NormalDistribution" name="fixationDuration" mean="324.60275" stdDeviation="189.599363638694" min="0" max="1000" />
+					</set>
+					<set name="Dashboard">
+						<entry type="parameter" name="direction" value="30" />
+						<entry type="parameter" name="openingAngle" value="0" />
+						<entry type="NormalDistribution" name="fixationDuration" mean="178.5155" stdDeviation="88.1555899007545" min="0" max="500" />
+					</set>
+					<set name="Other">
+						<entry type="parameter" name="direction" value="30" />
+						<entry type="parameter" name="openingAngle" value="0" />
+						<entry type="NormalDistribution" name="fixationDuration" mean="155.692" stdDeviation="189.599363638694" min="0" max="500" />
+					</set>
+				</group>
+				<group name="MirrorGaze">
+					<set name="Left">
+						<entry type="parameter" name="direction" value="165" />
+						<entry type="parameter" name="openingAngle" value="50" />
+						<entry type="NormalDistribution" name="fixationDuration" mean="400" stdDeviation="0" min="0" max="800" />
+						<entry type="parameter" name="mirrorPosX" value="-1.1" />
+						<entry type="parameter" name="mirrorPosY" value="-1.5" />
+					</set>
+					<set name="Right">
+						<entry type="parameter" name="direction" value="-165" />
+						<entry type="parameter" name="openingAngle" value="50" />
+						<entry type="NormalDistribution" name="fixationDuration" mean="400" stdDeviation="0" min="0" max="800" />
+						<entry type="parameter" name="mirrorPosX" value="1.1" />
+						<entry type="parameter" name="mirrorPosY" value="-1.5" />
+					</set>
+					<set name="Inside">
+						<entry type="parameter" name="direction" value="-180" />
+						<entry type="parameter" name="openingAngle" value="40" />
+						<entry type="NormalDistribution" name="fixationDuration" mean="400" stdDeviation="0" min="0" max="800" />
+						<entry type="parameter" name="mirrorPosX" value="0" />
+						<entry type="parameter" name="mirrorPosY" value="-1.2" />
+					</set>
+				</group>
+			</group>
+			<group name="Standard Road">
+				<set name="BehaviourParameters">
+					<entry type="parameter" name="probabilityFixateLeadCar" value="0.6" />
+					<entry type="parameter" name="probabilityControlGlance" value="0.0" />
+				</set>
+				<set name="ScanAOIProbabilities">
+					<entry type="NormalDistribution" name="Scan Dashboard" mean="0.0128205128205128" stdDeviation="0.0653720450460614" min="0" max="1" />
+					<entry type="NormalDistribution" name="Scan Straight" mean="0.581440781440782" stdDeviation="0.308863771383145" min="0" max="1" />
+					<entry type="NormalDistribution" name="Scan Left" mean="0.163827838827839" stdDeviation="0.198461222393695" min="0" max="1" />
+					<entry type="NormalDistribution" name="Scan Right" mean="0.187881562881563" stdDeviation="0.220783615269782" min="0" max="1" />
+					<entry type="NormalDistribution" name="Scan Other" mean="0.054029304029304" stdDeviation="0.114768364233879" min="0" max="1" />
+				</set>
+			</group>
+			<group name="XJunction">
+				<set name="BehaviourParameters">
+					<entry type="parameter" name="probabilityFixateLeadCar" value="0.4" />
+					<entry type="parameter" name="probabilityControlGlance" value="0.6" />
+					<entry type="parameter" name="viewingDepthIntoRoad" value="10.0" />
+				</set>
+				<set name="ControlGlanceParameters">
+					<entry type="parameter" name="openingAngle" value="100" />
+					<entry type="NormalDistribution" name="fixationDuration" mean="200" stdDeviation="0" min="0" max="800" />
+				</set>
+				<group name="ControlAOIProbabilities">
+					<set name="Phase APP">
+						<entry type="parameter" name="Control Left" value="0.7" />
+						<entry type="parameter" name="Control Oncoming" value="0" />
+						<entry type="parameter" name="Control Right" value="0.3" />
+					</set>
+					<set name="Phase DEC1">
+						<entry type="parameter" name="Control Left" value="0.5" />
+						<entry type="parameter" name="Control Oncoming" value="0.0" />
+						<entry type="parameter" name="Control Right" value="0.5" />
+					</set>
+					<set name="Phase DEC2">
+						<entry type="parameter" name="Control Left" value="0.7" />
+						<entry type="parameter" name="Control Oncoming" value="0.0" />
+						<entry type="parameter" name="Control Right" value="0.3" />
+					</set>
+					<set name="Phase CR_L1">
+						<entry type="parameter" name="Control Left" value="0.5" />
+						<entry type="parameter" name="Control Oncoming" value="0.0" />
+						<entry type="parameter" name="Control Right" value="0.5" />
+					</set>
+					<set name="Phase CR_L2">
+						<entry type="parameter" name="Control Left" value="0.5" />
+						<entry type="parameter" name="Control Oncoming" value="0.0" />
+						<entry type="parameter" name="Control Right" value="0.5" />
+					</set>
+					<set name="Phase CR_R">
+						<entry type="parameter" name="Control Left" value="0.8" />
+						<entry type="parameter" name="Control Oncoming" value="0.0" />
+						<entry type="parameter" name="Control Right" value="0.2" />
+					</set>
+					<set name="Phase CR_S">
+						<entry type="parameter" name="Control Left" value="0.5" />
+						<entry type="parameter" name="Control Oncoming" value="0.0" />
+						<entry type="parameter" name="Control Right" value="0.5" />
+					</set>
+				</group>
+				<group name="ScanAOIProbabilities">
+					<group name="IndicatorLeft">
+							<set name="Phase APP">
+								<entry type="NormalDistribution" name="Scan Dashboard" mean="0.0643707482993197" stdDeviation="0.129147384174803" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Straight" mean="0.771641156462585" stdDeviation="0.187375011831164" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Left" mean="0.0619047619047619" stdDeviation="0.132315337805032" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Right" mean="0.102083333333333" stdDeviation="0.173199512088384" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Other" mean="0" stdDeviation="0" min="0" max="1" />
+							</set>
+							<set name="Phase DEC1">
+								<entry type="NormalDistribution" name="Scan Dashboard" mean="0.0320436507936508" stdDeviation="0.0884553539773954" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Straight" mean="0.581964365000079" stdDeviation="0.272480960575393" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Left" mean="0.223455810062953" stdDeviation="0.245463030927821" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Right" mean="0.154294415901559" stdDeviation="0.171076283518907" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Other" mean="0.00824175824175824" stdDeviation="0.0436112853472185" min="0" max="1" />
+							</set>
+							<set name="Phase DEC2">
+								<entry type="NormalDistribution" name="Scan Dashboard" mean="0.0793650793650794" stdDeviation="0.0419960525565808" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Straight" mean="0.542800575036702" stdDeviation="0.244116866910891" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Left" mean="0.305460526687164" stdDeviation="0.224687365987702" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Right" mean="0.112273111961608" stdDeviation="0.124394319101615" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Other" mean="0.0315292783780179" stdDeviation="0.0699571660571938" min="0" max="1" />
+							</set>
+							<set name="Phase CR_R">
+								<entry type="NormalDistribution" name="Scan Dashboard" mean="0" stdDeviation="0" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Straight" mean="0.79937641723356" stdDeviation="0.33396550990062" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Left" mean="0.20062358276644" stdDeviation="0.33396550990062" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Right" mean="0" stdDeviation="0" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Other" mean="0" stdDeviation="0" min="0" max="1" />
+							</set>
+							<set name="Phase CR_L1">
+								<entry type="NormalDistribution" name="Scan Dashboard" mean="0" stdDeviation="0" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Straight" mean="0.79937641723356" stdDeviation="0.33396550990062" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Left" mean="0.20062358276644" stdDeviation="0.33396550990062" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Right" mean="0" stdDeviation="0" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Other" mean="0" stdDeviation="0" min="0" max="1" />
+							</set>
+							<set name="Phase CR_L2">
+								<entry type="NormalDistribution" name="Scan Dashboard" mean="0" stdDeviation="0" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Straight" mean="0.79937641723356" stdDeviation="0.33396550990062" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Left" mean="0.20062358276644" stdDeviation="0.33396550990062" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Right" mean="0" stdDeviation="0" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Other" mean="0" stdDeviation="0" min="0" max="1" />
+							</set>
+							<set name="Phase CR_S">
+								<entry type="NormalDistribution" name="Scan Dashboard" mean="0" stdDeviation="0" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Straight" mean="0.79937641723356" stdDeviation="0.33396550990062" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Left" mean="0.20062358276644" stdDeviation="0.33396550990062" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Right" mean="0" stdDeviation="0" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Other" mean="0" stdDeviation="0" min="0" max="1" />
+							</set>
+							<set name="Phase EX">
+								<entry type="NormalDistribution" name="Scan Dashboard" mean="0.340360122968819" stdDeviation="0.0775092467587676" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Straight" mean="0.955819060166886" stdDeviation="0.0993734335492598" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Left" mean="0" stdDeviation="0" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Right" mean="0" stdDeviation="0" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Other" mean="0.0101449275362319" stdDeviation="0.0339857109140429" min="0" max="1" />
+							</set>
+					</group>
+					<group name="IndicatorOff">
+							<set name="Phase APP">
+								<entry type="NormalDistribution" name="Scan Dashboard" mean="0.0312037037037037" stdDeviation="0.0997860720824183" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Straight" mean="0.693405483405483" stdDeviation="0.223918281796641" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Left" mean="0.123603896103896" stdDeviation="0.165191253763552" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Right" mean="0.141998556998557" stdDeviation="0.198184361640043" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Other" mean="0.00978835978835979" stdDeviation="0.0421861217763402" min="0" max="1" />
+							</set>
+							<set name="Phase DEC1">
+								<entry type="NormalDistribution" name="Scan Dashboard" mean="0.0261904761904762" stdDeviation="0.103566474033582" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Straight" mean="0.437525252525253" stdDeviation="0.276580118205618" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Left" mean="0.308771783771784" stdDeviation="0.256817118387149" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Right" mean="0.201059496059496" stdDeviation="0.230301714368495" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Other" mean="0.0264529914529915" stdDeviation="0.073937403200756" min="0" max="1" />
+							</set>
+							<set name="Phase DEC2">
+								<entry type="NormalDistribution" name="Scan Dashboard" mean="0.0270457612562876" stdDeviation="0.0739733845277923" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Straight" mean="0.508408045533949" stdDeviation="0.186355545245287" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Left" mean="0.202078804313066" stdDeviation="0.154703578254376" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Right" mean="0.233018112109959" stdDeviation="0.14610621716356" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Other" mean="0.0294492767867381" stdDeviation="0.0551679147849017" min="0" max="1" />
+							</set>
+							<set name="Phase CR_R">
+								<entry type="NormalDistribution" name="Scan Dashboard" mean="0.139444444444444" stdDeviation="0.280615201732136" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Straight" mean="0.617936507936508" stdDeviation="0.318193433742147" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Left" mean="0.00476190476190476" stdDeviation="0.0260820265478651" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Right" mean="0.140634920634921" stdDeviation="0.221580745892426" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Other" mean="0.0972222222222222" stdDeviation="0.22292393997516" min="0" max="1" />
+							</set>
+							<set name="Phase CR_L1">
+								<entry type="NormalDistribution" name="Scan Dashboard" mean="0.139444444444444" stdDeviation="0.280615201732136" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Straight" mean="0.617936507936508" stdDeviation="0.318193433742147" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Left" mean="0.00476190476190476" stdDeviation="0.0260820265478651" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Right" mean="0.140634920634921" stdDeviation="0.221580745892426" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Other" mean="0.0972222222222222" stdDeviation="0.22292393997516" min="0" max="1" />
+							</set>
+							<set name="Phase CR_L2">
+								<entry type="NormalDistribution" name="Scan Dashboard" mean="0.139444444444444" stdDeviation="0.280615201732136" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Straight" mean="0.617936507936508" stdDeviation="0.318193433742147" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Left" mean="0.00476190476190476" stdDeviation="0.0260820265478651" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Right" mean="0.140634920634921" stdDeviation="0.221580745892426" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Other" mean="0.0972222222222222" stdDeviation="0.22292393997516" min="0" max="1" />
+							</set>
+							<set name="Phase CR_S">
+								<entry type="NormalDistribution" name="Scan Dashboard" mean="0.139444444444444" stdDeviation="0.280615201732136" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Straight" mean="0.617936507936508" stdDeviation="0.318193433742147" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Left" mean="0.00476190476190476" stdDeviation="0.0260820265478651" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Right" mean="0.140634920634921" stdDeviation="0.221580745892426" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Other" mean="0.0972222222222222" stdDeviation="0.22292393997516" min="0" max="1" />
+							</set>
+							<set name="Phase EX">
+								<entry type="NormalDistribution" name="Scan Dashboard" mean="0.14290293040293" stdDeviation="0.251526912723083" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Straight" mean="0.626963776963777" stdDeviation="0.397871390479016" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Left" mean="0" stdDeviation="0" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Right" mean="0.146825396825397" stdDeviation="0.332757606048437" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Other" mean="0.0833078958078958" stdDeviation="0.237806895757703" min="0" max="1" />
+							</set>
+					</group>
+					<group name="IndicatorRight">
+							<set name="Phase APP">
+								<entry type="NormalDistribution" name="Scan Dashboard" mean="0.0142857142857143" stdDeviation="0.0782460796435952" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Straight" mean="0.599867724867725" stdDeviation="0.244167587914613" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Left" mean="0.170544733044733" stdDeviation="0.208545708017924" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Right" mean="0.209746272246272" stdDeviation="0.257212994542772" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Other" mean="0.00555555555555556" stdDeviation="0.0304290309725092" min="0" max="1" />
+							</set>
+							<set name="Phase DEC1">
+								<entry type="NormalDistribution" name="Scan Dashboard" mean="0.015" stdDeviation="0.0574606312002491" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Straight" mean="0.483882691382691" stdDeviation="0.228450207041309" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Left" mean="0.351683686683687" stdDeviation="0.241359911023428" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Right" mean="0.121933621933622" stdDeviation="0.1730183432942" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Other" mean="0.0275" stdDeviation="0.0723560137121063" min="0" max="1" />
+							</set>
+							<set name="Phase DEC2">
+								<entry type="NormalDistribution" name="Scan Dashboard" mean="0.00196078431372549" stdDeviation="0.0107396579902974" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Straight" mean="0.570296465517054" stdDeviation="0.240531183910221" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Left" mean="0.242954031262855" stdDeviation="0.171215780540306" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Right" mean="0.142004207665972" stdDeviation="0.192714601857278" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Other" mean="0.427845112403936" stdDeviation="0.613380139884025" min="0" max="1" />
+							</set>
+							<set name="Phase CR_R">
+								<entry type="NormalDistribution" name="Scan Dashboard" mean="0" stdDeviation="0" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Straight" mean="0.920454545454546" stdDeviation="0.209681783225082" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Left" mean="0" stdDeviation="0" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Right" mean="0.0795454545454546" stdDeviation="0.209681783225082" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Other" mean="0" stdDeviation="0" min="0" max="1" />
+							</set>
+							<set name="Phase CR_L1">
+								<entry type="NormalDistribution" name="Scan Dashboard" mean="0" stdDeviation="0" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Straight" mean="0.920454545454546" stdDeviation="0.209681783225082" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Left" mean="0" stdDeviation="0" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Right" mean="0.0795454545454546" stdDeviation="0.209681783225082" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Other" mean="0" stdDeviation="0" min="0" max="1" />
+							</set>
+							<set name="Phase CR_L2">
+								<entry type="NormalDistribution" name="Scan Dashboard" mean="0" stdDeviation="0" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Straight" mean="0.920454545454546" stdDeviation="0.209681783225082" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Left" mean="0" stdDeviation="0" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Right" mean="0.0795454545454546" stdDeviation="0.209681783225082" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Other" mean="0" stdDeviation="0" min="0" max="1" />
+							</set>
+							<set name="Phase CR_S">
+								<entry type="NormalDistribution" name="Scan Dashboard" mean="0" stdDeviation="0" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Straight" mean="0.920454545454546" stdDeviation="0.209681783225082" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Left" mean="0" stdDeviation="0" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Right" mean="0.0795454545454546" stdDeviation="0.209681783225082" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Other" mean="0" stdDeviation="0" min="0" max="1" />
+							</set>
+							<set name="Phase EX">
+								<entry type="NormalDistribution" name="Scan Dashboard" mean="0" stdDeviation="0" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Straight" mean="0.953517316017316" stdDeviation="0.133615987956564" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Left" mean="0" stdDeviation="0" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Right" mean="0.0125" stdDeviation="0.0503222374920561" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Other" mean="0.033982683982684" stdDeviation="0.0986623024605446" min="0" max="1" />
+							</set>
+					</group>
+				</group>
+			</group>
+		</group>
+	</group>
+	<group name="Cyclist">
+		<group name="ActionDecision">
+			<group name="Velocity Statistics">
+				<group name="IntersectionID">
+					<group name="default">
+						<set name="IndicatorOff">
+							<entry type="NormalDistribution" name="IntersectionEntry" mean="4" stdDeviation="0" min="0" max="10.02" />
+							<entry type="NormalDistribution" name="IntersectionExit" mean="4" stdDeviation="0" min="0" max="10.52" />
+						</set>
+						<set name="IndicatorLeft">
+							<entry type="NormalDistribution" name="IntersectionEntry" mean="4" stdDeviation="0" min="0" max="10.02" />
+							<entry type="NormalDistribution" name="IntersectionExit" mean="4" stdDeviation="0" min="0" max="10.52" />
+						</set>
+						<set name="IndicatorRight">
+							<entry type="NormalDistribution" name="IntersectionEntry" mean="4" stdDeviation="0" min="0" max="10.02" />
+							<entry type="NormalDistribution" name="IntersectionExit" mean="4" stdDeviation="0" min="0" max="10.52" />
+						</set>
+					</group>
+					<group name="94">
+						<group name="Appraoch RoadID">
+							<group name="1">
+								<set name="IndicatorOff">
+									<entry type="NormalDistribution" name="IntersectionEntry" mean="7.383169238683128" stdDeviation="1.675" min="0.45552777777777775" max="9.505527777777779" />
+									<entry type="NormalDistribution" name="IntersectionExit" mean="7.383169238683128" stdDeviation="1.675" min="1.1861388888888889" max="9.505527777777779" />
+								</set>
+								<set name="IndicatorLeft">
+									<entry type="NormalDistribution" name="IntersectionEntry" mean="5.164557291666667" stdDeviation="1.8121053877707565" min="1.0113333333333334" max="7.479916666666667" />
+									<entry type="NormalDistribution" name="IntersectionExit" mean="4.355604166666667" stdDeviation="1.0857636106891233" min="2.5376666666666665" max="6.1307222222222215" />
+								</set>
+								<set name="IndicatorRight">
+									<entry type="NormalDistribution" name="IntersectionEntry" mean="4" stdDeviation="0" min="0" max="10.02" />
+									<entry type="NormalDistribution" name="IntersectionExit" mean="4" stdDeviation="0" min="0" max="10.52" />
+								</set>
+							</group>
+							<group name="4">
+								<set name="IndicatorOff">
+									<entry type="NormalDistribution" name="IntersectionEntry" mean="4" stdDeviation="0" min="0" max="10.02" />
+									<entry type="NormalDistribution" name="IntersectionExit" mean="4" stdDeviation="0" min="0" max="10.52" />
+								</set>
+								<set name="IndicatorLeft">
+									<entry type="NormalDistribution" name="IntersectionEntry" mean="1.1506256613756616" stdDeviation="0.3895098621757174" min="0.5723055555555555" max="1.9704444444444444" />
+									<entry type="NormalDistribution" name="IntersectionExit" mean="6.20488492063492" stdDeviation="0.8679692430437316" min="4.404388888888889" max="7.834083333333333" />
+								</set>
+								<set name="IndicatorRight">
+									<entry type="NormalDistribution" name="IntersectionEntry" mean="1.4357690972222223" stdDeviation="0.6754067967667386" min="0.32475" max="2.6998611111111113" />
+									<entry type="NormalDistribution" name="IntersectionExit" mean="4.539671875" stdDeviation="0.7249054472332968" min="3.6248888888888886" max="6.175833333333333" />
+								</set>
+							</group>
+							<group name="2">			
+								<set name="IndicatorOff">
+									<entry type="NormalDistribution" name="IntersectionEntry" mean="7.383169238683128" stdDeviation="1.675" min="3.887694444444444" max="9.505527777777779" />
+									<entry type="NormalDistribution" name="IntersectionExit" mean="7.383169238683128" stdDeviation="1.675" min="5.904083333333333" max="9.505527777777779" />
+								</set>
+								<set name="IndicatorLeft">
+									<entry type="NormalDistribution" name="IntersectionEntry" mean="4" stdDeviation="0" min="0" max="10.02" />
+									<entry type="NormalDistribution" name="IntersectionExit" mean="4" stdDeviation="0" min="0" max="10.52" />
+								</set>
+								<set name="IndicatorRight">
+									<entry type="NormalDistribution" name="IntersectionEntry" mean="5.508367063492062" stdDeviation="1.158765315070267" min="2.302638888888889" max="7.425666666666666" />
+									<entry type="NormalDistribution" name="IntersectionExit" mean="3.3919384920634923" stdDeviation="0.7784579337345076" min="1.76275" max="4.667472222222222" />
+								</set>
+							</group>
+						</group>
+					</group>
+					<group name="17">
+						<group name="Appraoch RoadID">
+							<group name="5">
+								<set name="IndicatorOff">
+									<entry type="NormalDistribution" name="IntersectionEntry" mean="4" stdDeviation="0" min="0" max="10.02" />
+									<entry type="NormalDistribution" name="IntersectionExit" mean="4" stdDeviation="0" min="0" max="10.52" />
+								</set>
+								<set name="IndicatorLeft">
+									<entry type="NormalDistribution" name="IntersectionEntry" mean="1.9990802469135802" stdDeviation="0.7309754075604993" min="0.4455555555555556" max="3.5064722222222224" />
+									<entry type="NormalDistribution" name="IntersectionExit" mean="6.05987962962963" stdDeviation="0.8649340016707793" min="4.426972222222222" max="7.99875" />
+								</set>
+								<set name="IndicatorRight">
+									<entry type="NormalDistribution" name="IntersectionEntry" mean="2.880722222222222" stdDeviation="0.2429883282688638" min="2.634611111111111" max="3.211472222222222" />
+									<entry type="NormalDistribution" name="IntersectionExit" mean="6.015453703703703" stdDeviation="0.4765034395985464" min="5.410444444444444" max="6.574972222222222" />
+								</set>
+							</group>
+							<group name="3">
+								<set name="IndicatorOff">
+									<entry type="NormalDistribution" name="IntersectionEntry" mean="7.383169238683128" stdDeviation="1.675" min="3.078222222222222" max="9.505527777777779" />
+									<entry type="NormalDistribution" name="IntersectionExit" mean="7.383169238683128" stdDeviation="1.675" min="4.875472222222222" max="9.505527777777779" />
+								</set>
+								<set name="IndicatorLeft">
+									<entry type="NormalDistribution" name="IntersectionEntry" mean="5.650161111111112" stdDeviation="1.6726610665768409" min="2.017027777777778" max="8.481361111111111" />
+									<entry type="NormalDistribution" name="IntersectionExit" mean="5.398524999999999" stdDeviation="0.4114435672362149" min="4.718111111111111" max="6.213111111111111" />
+								</set>
+								<set name="IndicatorRight">
+									<entry type="NormalDistribution" name="IntersectionEntry" mean="4" stdDeviation="0" min="0" max="10.02" />
+									<entry type="NormalDistribution" name="IntersectionExit" mean="4" stdDeviation="0" min="0" max="10.52" />
+								</set>
+							</group>
+							<group name="2">			
+								<set name="IndicatorOff">
+									<entry type="NormalDistribution" name="IntersectionEntry" mean="7.383169238683128" stdDeviation="1.675" min="0.7317777777777777" max="9.505527777777779" />
+									<entry type="NormalDistribution" name="IntersectionExit" mean="7.383169238683128" stdDeviation="1.675" min="2.549111111111111" max="9.505527777777779" />
+								</set>
+								<set name="IndicatorLeft">
+									<entry type="NormalDistribution" name="IntersectionEntry" mean="4" stdDeviation="0" min="0" max="10.02" />
+									<entry type="NormalDistribution" name="IntersectionExit" mean="4" stdDeviation="0" min="0" max="10.52" />
+								</set>
+								<set name="IndicatorRight">
+									<entry type="NormalDistribution" name="IntersectionEntry" mean="4.81580855855856" stdDeviation="1.3310796571623236" min="2.0585833333333334" max="8.40036111111111" />
+									<entry type="NormalDistribution" name="IntersectionExit" mean="5.154067567567566" stdDeviation="1.2591206775741888" min="3.248472222222222" max="9.484444444444444" />
+								</set>
+							</group>
+						</group>
+					</group>
+				</group>
+				<set name="default">
+					<entry type="NormalDistribution" name="default" mean="7" stdDeviation="0" min="1" max="20" />
+				</set>
+				<set name="SpecificRoads">
+					<entry type="NormalDistribution" name="X" mean="10" stdDeviation="0" min="1" max="10" />
+					<entry type="NormalDistribution" name="Y" mean="2.5" stdDeviation="0" min="1" max="10" />
+					<entry type="NormalDistribution" name="Z" mean="8" stdDeviation="0" min="1" max="10" />
+				</set>
+			</group>
+			<set name="BehaviourParameters">
+				<entry type="parameter" name="collisionImminentMargin" value="1.5" />
+				<entry type="parameter" name="minDistanceStationaryTraffic" value="1.5" />
+				<entry type="parameter" name="desiredFollowingTimeHeadway" value="1.006693990761517" />
+				<entry type="NormalDistribution" name="comfortDeceleration" mean="-0.31443679831243854" stdDeviation="0" min="-3" max="0" />
+				<entry type="parameter" name="maxAcceleration" value="1.29" />
+				<entry type="NormalDistribution" name="maxEmergencyDeceleration" mean="-5.74" stdDeviation="1.42" min="-9.67" max="-4" />
+				<entry type="LogNormalDistribution" name="timeGapAcceptance" mu="0.3832864141142079" sigma="0.5" min="0" max="4" />
+				<entry type="parameter" name="minTimeEmergencyBrakeIsActive" value="2" />
+			</set>
+		</group>
+		<group name="CognitiveMap">
+			<set name="BehaviourParameters">
+				<entry type="parameter" name="memoryCapacity" value="1000" />
+				<entry type="parameter" name="memorytime" value="5000" />
+				<entry type="NormalDistribution" name="initialPerceptionTime" mean="1.210" stdDeviation="0.630" min="0.650" max="1.95" />
+				<entry type="NormalDistribution" name="perceptionLatency" mean="0" stdDeviation="0" min="0" max="0" />
+			</set>
+			<set name="TrafficSignalMemoryParameters">
+				<entry type="parameter" name="memoryCapacity" value="20" />
+				<entry type="parameter" name="memorytime" value="2000000" />
+			</set>
+		</group>
+		<group name="GazeMovement">
+			<set name="BaseParameters">
+				<entry type="parameter" name="foresightTime" value="2" />
+				<entry type="parameter" name="minForesightDistance" value="5" />
+			</set>
+			<set name="AgentObserveParameters">
+				<entry type="parameter" name="openingAngle" value="100" />
+				<entry type="NormalDistribution" name="fixationDuration" mean="200" stdDeviation="0" min="0" max="800" />
+			</set>
+			<group name="ScanAreasOfInterest">
+				<group name="DriverGaze">
+					<set name="Straight">
+						<entry type="parameter" name="direction" value="0" />
+						<entry type="parameter" name="openingAngle" value="100" />
+						<entry type="NormalDistribution" name="fixationDuration" mean="285.787640740741" stdDeviation="136.477490277491" min="100" max="1000" />
+					</set>
+					<set name="Left">
+						<entry type="parameter" name="direction" value="30" />
+						<entry type="parameter" name="openingAngle" value="100" />
+						<entry type="NormalDistribution" name="fixationDuration" mean="213.924791666667" stdDeviation="45.7427251441335" min="100" max="1000" />
+					</set>
+					<set name="Right">
+						<entry type="parameter" name="direction" value="-30" />
+						<entry type="parameter" name="openingAngle" value="100" />
+						<entry type="NormalDistribution" name="fixationDuration" mean="324.60275" stdDeviation="189.599363638694" min="0" max="1000" />
+					</set>
+					<set name="Dashboard">
+						<entry type="parameter" name="direction" value="30" />
+						<entry type="parameter" name="openingAngle" value="0" />
+						<entry type="NormalDistribution" name="fixationDuration" mean="178.5155" stdDeviation="88.1555899007545" min="0" max="500" />
+					</set>
+					<set name="Other">
+						<entry type="parameter" name="direction" value="30" />
+						<entry type="parameter" name="openingAngle" value="0" />
+						<entry type="NormalDistribution" name="fixationDuration" mean="155.692" stdDeviation="189.599363638694" min="0" max="500" />
+					</set>
+				</group>
+				<group name="MirrorGaze">
+					<set name="Left">
+						<entry type="parameter" name="direction" value="165" />
+						<entry type="parameter" name="openingAngle" value="90" />
+						<entry type="NormalDistribution" name="fixationDuration" mean="400" stdDeviation="0" min="0" max="800" />
+						<entry type="parameter" name="mirrorPosX" value="-1.1" />
+						<entry type="parameter" name="mirrorPosY" value="-1.5" />
+					</set>
+					<set name="Right">
+						<entry type="parameter" name="direction" value="-165" />
+						<entry type="parameter" name="openingAngle" value="90" />
+						<entry type="NormalDistribution" name="fixationDuration" mean="400" stdDeviation="0" min="0" max="800" />
+						<entry type="parameter" name="mirrorPosX" value="1.1" />
+						<entry type="parameter" name="mirrorPosY" value="-1.5" />
+					</set>
+					<set name="Inside">
+						<entry type="parameter" name="direction" value="-180" />
+						<entry type="parameter" name="openingAngle" value="40" />
+						<entry type="NormalDistribution" name="fixationDuration" mean="400" stdDeviation="0" min="0" max="800" />
+						<entry type="parameter" name="mirrorPosX" value="0" />
+						<entry type="parameter" name="mirrorPosY" value="-1.2" />
+					</set>
+				</group>
+			</group>
+			<group name="Standard Road">
+				<set name="BehaviourParameters">
+					<entry type="parameter" name="probabilityFixateLeadCar" value="0.6" />
+					<entry type="parameter" name="probabilityControlGlance" value="0.0" />
+				</set>
+				<set name="ScanAOIProbabilities">
+					<entry type="NormalDistribution" name="Scan Dashboard" mean="0.0128205128205128" stdDeviation="0.0653720450460614" min="0" max="1" />
+					<entry type="NormalDistribution" name="Scan Straight" mean="0.581440781440782" stdDeviation="0.308863771383145" min="0" max="1" />
+					<entry type="NormalDistribution" name="Scan Left" mean="0.163827838827839" stdDeviation="0.198461222393695" min="0" max="1" />
+					<entry type="NormalDistribution" name="Scan Right" mean="0.187881562881563" stdDeviation="0.220783615269782" min="0" max="1" />
+					<entry type="NormalDistribution" name="Scan Other" mean="0.054029304029304" stdDeviation="0.114768364233879" min="0" max="1" />
+				</set>
+			</group>
+			<group name="XJunction">
+				<set name="BehaviourParameters">
+					<entry type="parameter" name="probabilityFixateLeadCar" value="0.6" />
+					<entry type="parameter" name="probabilityControlGlance" value="0.6" />
+					<entry type="parameter" name="viewingDepthIntoRoad" value="10.0" />
+				</set>
+				<set name="ControlGlanceParameters">
+					<entry type="parameter" name="openingAngle" value="100" />
+					<entry type="NormalDistribution" name="fixationDuration" mean="200" stdDeviation="0" min="0" max="800" />
+				</set>
+				<group name="ControlAOIProbabilities">
+					<set name="Phase APP">
+						<entry type="parameter" name="Control Left" value="0.7" />
+						<entry type="parameter" name="Control Oncoming" value="0" />
+						<entry type="parameter" name="Control Right" value="0.3" />
+					</set>
+					<set name="Phase DEC1">
+						<entry type="parameter" name="Control Left" value="0.5" />
+						<entry type="parameter" name="Control Oncoming" value="0.0" />
+						<entry type="parameter" name="Control Right" value="0.5" />
+					</set>
+					<set name="Phase DEC2">
+						<entry type="parameter" name="Control Left" value="0.7" />
+						<entry type="parameter" name="Control Oncoming" value="0.0" />
+						<entry type="parameter" name="Control Right" value="0.3" />
+					</set>
+					<set name="Phase CR_L1">
+						<entry type="parameter" name="Control Left" value="0.5" />
+						<entry type="parameter" name="Control Oncoming" value="0.0" />
+						<entry type="parameter" name="Control Right" value="0.5" />
+					</set>
+					<set name="Phase CR_L2">
+						<entry type="parameter" name="Control Left" value="0.5" />
+						<entry type="parameter" name="Control Oncoming" value="0.0" />
+						<entry type="parameter" name="Control Right" value="0.5" />
+					</set>
+					<set name="Phase CR_R">
+						<entry type="parameter" name="Control Left" value="0.8" />
+						<entry type="parameter" name="Control Oncoming" value="0.0" />
+						<entry type="parameter" name="Control Right" value="0.2" />
+					</set>
+					<set name="Phase CR_S">
+						<entry type="parameter" name="Control Left" value="0.5" />
+						<entry type="parameter" name="Control Oncoming" value="0.0" />
+						<entry type="parameter" name="Control Right" value="0.5" />
+					</set>
+				</group>
+				<group name="ScanAOIProbabilities">
+					<group name="IndicatorLeft">
+							<set name="Phase APP">
+								<entry type="NormalDistribution" name="Scan Dashboard" mean="0.0643707482993197" stdDeviation="0.129147384174803" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Straight" mean="0.771641156462585" stdDeviation="0.187375011831164" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Left" mean="0.0619047619047619" stdDeviation="0.132315337805032" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Right" mean="0.102083333333333" stdDeviation="0.173199512088384" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Other" mean="0" stdDeviation="0" min="0" max="1" />
+							</set>
+							<set name="Phase DEC1">
+								<entry type="NormalDistribution" name="Scan Dashboard" mean="0.0320436507936508" stdDeviation="0.0884553539773954" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Straight" mean="0.581964365000079" stdDeviation="0.272480960575393" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Left" mean="0.223455810062953" stdDeviation="0.245463030927821" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Right" mean="0.154294415901559" stdDeviation="0.171076283518907" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Other" mean="0.00824175824175824" stdDeviation="0.0436112853472185" min="0" max="1" />
+							</set>
+							<set name="Phase DEC2">
+								<entry type="NormalDistribution" name="Scan Dashboard" mean="0.0793650793650794" stdDeviation="0.0419960525565808" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Straight" mean="0.542800575036702" stdDeviation="0.244116866910891" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Left" mean="0.305460526687164" stdDeviation="0.224687365987702" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Right" mean="0.112273111961608" stdDeviation="0.124394319101615" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Other" mean="0.0315292783780179" stdDeviation="0.0699571660571938" min="0" max="1" />
+							</set>
+							<set name="Phase CR_R">
+								<entry type="NormalDistribution" name="Scan Dashboard" mean="0" stdDeviation="0" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Straight" mean="0.79937641723356" stdDeviation="0.33396550990062" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Left" mean="0.20062358276644" stdDeviation="0.33396550990062" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Right" mean="0" stdDeviation="0" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Other" mean="0" stdDeviation="0" min="0" max="1" />
+							</set>
+							<set name="Phase CR_L1">
+								<entry type="NormalDistribution" name="Scan Dashboard" mean="0" stdDeviation="0" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Straight" mean="0.79937641723356" stdDeviation="0.33396550990062" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Left" mean="0.20062358276644" stdDeviation="0.33396550990062" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Right" mean="0" stdDeviation="0" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Other" mean="0" stdDeviation="0" min="0" max="1" />
+							</set>
+							<set name="Phase CR_L2">
+								<entry type="NormalDistribution" name="Scan Dashboard" mean="0" stdDeviation="0" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Straight" mean="0.79937641723356" stdDeviation="0.33396550990062" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Left" mean="0.20062358276644" stdDeviation="0.33396550990062" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Right" mean="0" stdDeviation="0" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Other" mean="0" stdDeviation="0" min="0" max="1" />
+							</set>
+							<set name="Phase CR_S">
+								<entry type="NormalDistribution" name="Scan Dashboard" mean="0" stdDeviation="0" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Straight" mean="0.79937641723356" stdDeviation="0.33396550990062" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Left" mean="0.20062358276644" stdDeviation="0.33396550990062" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Right" mean="0" stdDeviation="0" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Other" mean="0" stdDeviation="0" min="0" max="1" />
+							</set>
+							<set name="Phase EX">
+								<entry type="NormalDistribution" name="Scan Dashboard" mean="0.340360122968819" stdDeviation="0.0775092467587676" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Straight" mean="0.955819060166886" stdDeviation="0.0993734335492598" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Left" mean="0" stdDeviation="0" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Right" mean="0" stdDeviation="0" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Other" mean="0.0101449275362319" stdDeviation="0.0339857109140429" min="0" max="1" />
+							</set>
+					</group>
+					<group name="IndicatorOff">
+							<set name="Phase APP">
+								<entry type="NormalDistribution" name="Scan Dashboard" mean="0.0312037037037037" stdDeviation="0.0997860720824183" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Straight" mean="0.693405483405483" stdDeviation="0.223918281796641" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Left" mean="0.123603896103896" stdDeviation="0.165191253763552" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Right" mean="0.141998556998557" stdDeviation="0.198184361640043" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Other" mean="0.00978835978835979" stdDeviation="0.0421861217763402" min="0" max="1" />
+							</set>
+							<set name="Phase DEC1">
+								<entry type="NormalDistribution" name="Scan Dashboard" mean="0.0261904761904762" stdDeviation="0.103566474033582" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Straight" mean="0.437525252525253" stdDeviation="0.276580118205618" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Left" mean="0.308771783771784" stdDeviation="0.256817118387149" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Right" mean="0.201059496059496" stdDeviation="0.230301714368495" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Other" mean="0.0264529914529915" stdDeviation="0.073937403200756" min="0" max="1" />
+							</set>
+							<set name="Phase DEC2">
+								<entry type="NormalDistribution" name="Scan Dashboard" mean="0.0270457612562876" stdDeviation="0.0739733845277923" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Straight" mean="0.508408045533949" stdDeviation="0.186355545245287" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Left" mean="0.202078804313066" stdDeviation="0.154703578254376" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Right" mean="0.233018112109959" stdDeviation="0.14610621716356" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Other" mean="0.0294492767867381" stdDeviation="0.0551679147849017" min="0" max="1" />
+							</set>
+							<set name="Phase CR_R">
+								<entry type="NormalDistribution" name="Scan Dashboard" mean="0.139444444444444" stdDeviation="0.280615201732136" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Straight" mean="0.617936507936508" stdDeviation="0.318193433742147" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Left" mean="0.00476190476190476" stdDeviation="0.0260820265478651" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Right" mean="0.140634920634921" stdDeviation="0.221580745892426" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Other" mean="0.0972222222222222" stdDeviation="0.22292393997516" min="0" max="1" />
+							</set>
+							<set name="Phase CR_L1">
+								<entry type="NormalDistribution" name="Scan Dashboard" mean="0.139444444444444" stdDeviation="0.280615201732136" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Straight" mean="0.617936507936508" stdDeviation="0.318193433742147" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Left" mean="0.00476190476190476" stdDeviation="0.0260820265478651" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Right" mean="0.140634920634921" stdDeviation="0.221580745892426" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Other" mean="0.0972222222222222" stdDeviation="0.22292393997516" min="0" max="1" />
+							</set>
+							<set name="Phase CR_L2">
+								<entry type="NormalDistribution" name="Scan Dashboard" mean="0.139444444444444" stdDeviation="0.280615201732136" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Straight" mean="0.617936507936508" stdDeviation="0.318193433742147" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Left" mean="0.00476190476190476" stdDeviation="0.0260820265478651" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Right" mean="0.140634920634921" stdDeviation="0.221580745892426" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Other" mean="0.0972222222222222" stdDeviation="0.22292393997516" min="0" max="1" />
+							</set>
+							<set name="Phase CR_S">
+								<entry type="NormalDistribution" name="Scan Dashboard" mean="0.139444444444444" stdDeviation="0.280615201732136" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Straight" mean="0.617936507936508" stdDeviation="0.318193433742147" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Left" mean="0.00476190476190476" stdDeviation="0.0260820265478651" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Right" mean="0.140634920634921" stdDeviation="0.221580745892426" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Other" mean="0.0972222222222222" stdDeviation="0.22292393997516" min="0" max="1" />
+							</set>
+							<set name="Phase EX">
+								<entry type="NormalDistribution" name="Scan Dashboard" mean="0.14290293040293" stdDeviation="0.251526912723083" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Straight" mean="0.626963776963777" stdDeviation="0.397871390479016" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Left" mean="0" stdDeviation="0" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Right" mean="0.146825396825397" stdDeviation="0.332757606048437" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Other" mean="0.0833078958078958" stdDeviation="0.237806895757703" min="0" max="1" />
+							</set>
+					</group>
+					<group name="IndicatorRight">
+							<set name="Phase APP">
+								<entry type="NormalDistribution" name="Scan Dashboard" mean="0.0142857142857143" stdDeviation="0.0782460796435952" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Straight" mean="0.599867724867725" stdDeviation="0.244167587914613" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Left" mean="0.170544733044733" stdDeviation="0.208545708017924" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Right" mean="0.209746272246272" stdDeviation="0.257212994542772" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Other" mean="0.00555555555555556" stdDeviation="0.0304290309725092" min="0" max="1" />
+							</set>
+							<set name="Phase DEC1">
+								<entry type="NormalDistribution" name="Scan Dashboard" mean="0.015" stdDeviation="0.0574606312002491" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Straight" mean="0.483882691382691" stdDeviation="0.228450207041309" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Left" mean="0.351683686683687" stdDeviation="0.241359911023428" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Right" mean="0.121933621933622" stdDeviation="0.1730183432942" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Other" mean="0.0275" stdDeviation="0.0723560137121063" min="0" max="1" />
+							</set>
+							<set name="Phase DEC2">
+								<entry type="NormalDistribution" name="Scan Dashboard" mean="0.00196078431372549" stdDeviation="0.0107396579902974" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Straight" mean="0.570296465517054" stdDeviation="0.240531183910221" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Left" mean="0.242954031262855" stdDeviation="0.171215780540306" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Right" mean="0.142004207665972" stdDeviation="0.192714601857278" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Other" mean="0.427845112403936" stdDeviation="0.613380139884025" min="0" max="1" />
+							</set>
+							<set name="Phase CR_R">
+								<entry type="NormalDistribution" name="Scan Dashboard" mean="0" stdDeviation="0" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Straight" mean="0.920454545454546" stdDeviation="0.209681783225082" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Left" mean="0" stdDeviation="0" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Right" mean="0.0795454545454546" stdDeviation="0.209681783225082" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Other" mean="0" stdDeviation="0" min="0" max="1" />
+							</set>
+							<set name="Phase CR_L1">
+								<entry type="NormalDistribution" name="Scan Dashboard" mean="0" stdDeviation="0" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Straight" mean="0.920454545454546" stdDeviation="0.209681783225082" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Left" mean="0" stdDeviation="0" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Right" mean="0.0795454545454546" stdDeviation="0.209681783225082" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Other" mean="0" stdDeviation="0" min="0" max="1" />
+							</set>
+							<set name="Phase CR_L2">
+								<entry type="NormalDistribution" name="Scan Dashboard" mean="0" stdDeviation="0" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Straight" mean="0.920454545454546" stdDeviation="0.209681783225082" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Left" mean="0" stdDeviation="0" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Right" mean="0.0795454545454546" stdDeviation="0.209681783225082" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Other" mean="0" stdDeviation="0" min="0" max="1" />
+							</set>
+							<set name="Phase CR_S">
+								<entry type="NormalDistribution" name="Scan Dashboard" mean="0" stdDeviation="0" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Straight" mean="0.920454545454546" stdDeviation="0.209681783225082" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Left" mean="0" stdDeviation="0" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Right" mean="0.0795454545454546" stdDeviation="0.209681783225082" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Other" mean="0" stdDeviation="0" min="0" max="1" />
+							</set>
+							<set name="Phase EX">
+								<entry type="NormalDistribution" name="Scan Dashboard" mean="0" stdDeviation="0" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Straight" mean="0.953517316017316" stdDeviation="0.133615987956564" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Left" mean="0" stdDeviation="0" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Right" mean="0.0125" stdDeviation="0.0503222374920561" min="0" max="1" />
+								<entry type="NormalDistribution" name="Scan Other" mean="0.033982683982684" stdDeviation="0.0986623024605446" min="0" max="1" />
+							</set>
+					</group>		
+				</group>
+			</group>
+		</group>
+	</group>
+</group>

@@ -1,0 +1,399 @@
+<?xml version='1.0' encoding='utf-8'?>
+<Profiles SchemaVersion="0.4.6">
+  <AgentProfiles>
+    <AgentProfile Name="LuxuryClassCarAgent" Type="Dynamic">
+      <DriverProfiles>
+        <DriverProfile Name="Regular" Probability="1.0" />
+      </DriverProfiles>
+      <VehicleProfiles>
+        <VehicleProfile Name="BMW 7 1" Probability="1.0" />
+      </VehicleProfiles>
+    </AgentProfile>
+	<AgentProfile Name="cyclist" Type="Dynamic">
+      <DriverProfiles>
+        <DriverProfile Name="Regular" Probability="1.0" />
+      </DriverProfiles>
+      <VehicleProfiles>
+        <VehicleProfile Name="cyclist" Probability="1.0" />
+      </VehicleProfiles>
+    </AgentProfile>
+  </AgentProfiles>
+  <VehicleProfiles>
+    <VehicleProfile Name="BMW 7 1">
+      <Model Name="car_bmw_7_1" />
+      <Components />
+      <Sensors />
+    </VehicleProfile>
+	<VehicleProfile Name="cyclist">
+      <Model Name="cyclist" />
+      <Components />
+      <Sensors />
+    </VehicleProfile>
+  </VehicleProfiles>
+  <ProfileGroup Type="Driver">
+    <Profile Name="Regular">
+      <String Key="Type" Value="DriverReactionModel" />
+	  <String Key="GlobalObserver" Value="GlobalObserver" />
+	  <String Key="SensorDriverModule" Value="Sensor_Perception" />
+      <String Key="AlgorithmLateralModule" Value="Algorithm_Lateral_TUDresden" />
+      <String Key="AlgorithmLongitudinalModule" Value="Algorithm_Longitudinal" />
+    </Profile>
+  </ProfileGroup>
+  <ProfileGroup Type="TrafficGroup">
+    <Profile Name="LightVehicles Road 0">
+      <List Name="AgentProfiles">
+        <ListItem>
+          <String Key="Name" Value="LuxuryClassCarAgent" />
+          <Double Key="Weight" Value="1" />
+        </ListItem>
+      </List>
+      <NormalDistribution Key="Velocity" Max="17.99825" Mean="12.271233863531581" Min="10" SD="1.6163794683612964" />
+      <LogNormalDistribution Key="TGap" Max="95.49539999999999" Min="3" Mu="1.4593466211262436" Sigma="1.0646927481195876" />
+      <DoubleVector Key="Homogeneity" Value="1.0, 1.0" />
+    </Profile>
+	<Profile Name="Cyclist Road 0">
+      <List Name="AgentProfiles">
+        <ListItem>
+          <String Key="Name" Value="cyclist" />
+          <Double Key="Weight" Value="1" />
+        </ListItem>
+      </List>
+      <NormalDistribution Key="Velocity" Max="9.801583333333333" Mean="7.131005464480875" Min="4" SD="1.3592214263033127" />
+      <LogNormalDistribution Key="TGap" Max="260.526933" Min="3" Mu="3.6331169493574684" Sigma="0.785391991114299" />
+      <DoubleVector Key="Homogeneity" Value="1.0, 1.0" />
+    </Profile>
+	<Profile Name="LightVehicles Road 1">
+      <List Name="AgentProfiles">
+        <ListItem>
+          <String Key="Name" Value="LuxuryClassCarAgent" />
+          <Double Key="Weight" Value="1" />
+        </ListItem>
+      </List>
+      <NormalDistribution Key="Velocity" Max="19.175916666666666" Mean="13.381538532763532" Min="10" SD="2.305024736097837" />
+      <LogNormalDistribution Key="TGap" Max="81.9819" Min="3" Mu="1.6390212682987173" Sigma="1.0603538131128996" />
+      <DoubleVector Key="Homogeneity" Value="1.0, 1.0" />
+    </Profile>
+	<Profile Name="Cyclist Road 1">
+      <List Name="AgentProfiles">
+        <ListItem>
+          <String Key="Name" Value="cyclist" />
+          <Double Key="Weight" Value="1" />
+        </ListItem>
+      </List>
+      <NormalDistribution Key="Velocity" Max="9.794722222222223" Mean="6.845673280423282" Min="3.742222222222222" SD="1.2693617976959095" />
+      <LogNormalDistribution Key="TGap" Max="202.368833" Min="3" Mu="3.940620482016913" Sigma="0.695838608637413" />
+      <DoubleVector Key="Homogeneity" Value="1.0, 1.0" />
+    </Profile>
+	<Profile Name="LightVehicles and Cyclist Road 4">
+      <List Name="AgentProfiles">
+        <ListItem>
+          <String Key="Name" Value="LuxuryClassCarAgent" />
+          <Double Key="Weight" Value="21" />
+        </ListItem>
+		<ListItem>
+          <String Key="Name" Value="cyclist" />
+          <Double Key="Weight" Value="4" />
+        </ListItem>
+      </List>
+      <NormalDistribution Key="Velocity" Max="3.985472222222222" Mean="2.0989511494252873" Min="2" SD="0.8075128032735989" />
+      <LogNormalDistribution Key="TGap" Max="322.9226" Min="8.641965999999996" Mu="4.544844371537559" Sigma="0.7604899130921479" />
+      <DoubleVector Key="Homogeneity" Value="1.0, 1.0" />
+    </Profile>
+	<Profile Name="LightVehicles and Cyclist Road 5">
+      <List Name="AgentProfiles">
+        <ListItem>
+          <String Key="Name" Value="LuxuryClassCarAgent" />
+          <Double Key="Weight" Value="60" />
+        </ListItem>
+		<ListItem>
+          <String Key="Name" Value="cyclist" />
+          <Double Key="Weight" Value="0" />
+        </ListItem>
+      </List>
+      <NormalDistribution Key="Velocity" Max="8.251166666666666" Mean="5.838920524691357" Min="2" SD="1.6535484840504333" />
+      <LogNormalDistribution Key="TGap" Max="273.3731" Min="2.3023000000000025" Mu="3.2544014783020936" Sigma="0.9489393324606157" />
+      <DoubleVector Key="Homogeneity" Value="1.0, 1.0" />
+    </Profile>
+  </ProfileGroup>
+  <ProfileGroup Type="Spawner">
+  	<Profile Name="SpawnPoint Road:0 Car">
+      <List Name="SpawnPoints">
+        <ListItem>
+          <StringVector Key="Roads" Value="0" />
+          <IntVector Key="Lanes" Value="-1" />
+          <Double Key="SCoordinate" Value="10.0" />
+        </ListItem>
+      </List>
+	  <List Name="TrafficGroups">
+        <ListItem>
+          <Double Key="Weight" Value="1" />
+          <Reference Type="TrafficGroup" Name="LightVehicles Road 0" />
+        </ListItem>
+      </List>
+	  <List Name="Routes">
+		<ListItem>
+		  <String Key="AgentType" Value="Car" />
+          <StringVector Key="openDriveRoadIDs" Value="0,13,3,63,5" />
+          <DoubleVector Key="openDriveLaneID" Value="-1,-1,1,1,1" />
+          <DoubleVector Key="SCoordinates" Value="0,0,0,0,0" />
+          <Double Key="Weight" Value="0.0018535681186283596" />
+        </ListItem>
+		<ListItem>
+		  <String Key="AgentType" Value="Car" />
+          <StringVector Key="openDriveRoadIDs" Value="0,13,3,31,2,144,4" />
+          <DoubleVector Key="openDriveLaneID" Value="-1,-1,1,1,1,1,1" />
+          <DoubleVector Key="SCoordinates" Value="0,0,0,0,0,0,0" />
+          <Double Key="Weight" Value="0.012974976830398516" />
+        </ListItem>
+	    <ListItem>
+		  <String Key="AgentType" Value="Car" />
+          <StringVector Key="openDriveRoadIDs" Value="0,13,3,31,2,159,1" />
+          <DoubleVector Key="openDriveLaneID" Value="-1,-1,1,1,1,1,1" />
+          <DoubleVector Key="SCoordinates" Value="0,0,0,0,0,0,0" />
+          <Double Key="Weight" Value="0.48841519925857274" />
+        </ListItem>
+	  </List>
+    </Profile>
+	<Profile Name="SpawnPoint Road:0 Cyclist">
+      <List Name="SpawnPoints">
+        <ListItem>
+          <StringVector Key="Roads" Value="0" />
+          <IntVector Key="Lanes" Value="-2" />
+          <Double Key="SCoordinate" Value="10.0" />
+        </ListItem>
+      </List>
+	  <List Name="TrafficGroups">
+        <ListItem>
+          <Double Key="Weight" Value="1" />
+          <Reference Type="TrafficGroup" Name="Cyclist Road 0" />
+        </ListItem>
+      </List>
+	  <List Name="Routes">
+		<ListItem>
+		  <String Key="AgentType" Value="Cyclist" />
+          <StringVector Key="openDriveRoadIDs" Value="0,14,3,3,63,5" />
+          <DoubleVector Key="openDriveLaneID" Value="-2,-1,2,1,1,1" />
+          <DoubleVector Key="SCoordinates" Value="0,0,100,0,0,0" />
+          <Double Key="Weight" Value="0.0018535681186283596" />
+        </ListItem>
+		<ListItem>
+		  <String Key="AgentType" Value="Cyclist" />
+          <StringVector Key="openDriveRoadIDs" Value="0,14,3,31,2,136,4" />
+          <DoubleVector Key="openDriveLaneID" Value="-2,-1,2,2,2,1,1" />
+          <DoubleVector Key="SCoordinates" Value="0,0,0,0,0,0,0" />
+          <Double Key="Weight" Value="0.012974976830398516" />
+        </ListItem>
+		<ListItem>
+		  <String Key="AgentType" Value="Cyclist" />
+          <StringVector Key="openDriveRoadIDs" Value="0,14,3,31,2,159,1" />
+          <DoubleVector Key="openDriveLaneID" Value="-2,-1,2,2,2,2,2" />
+          <DoubleVector Key="SCoordinates" Value="0,0,0,0,0,0,0" />
+          <Double Key="Weight" Value="0.48841519925857274" />
+        </ListItem>
+	  </List>
+    </Profile>
+    <Profile Name="SpawnPoint Road:1 Car">
+      <List Name="SpawnPoints">
+        <ListItem>
+          <StringVector Key="Roads" Value="1" />
+          <IntVector Key="Lanes" Value="-1" />
+          <Double Key="SCoordinate" Value="10.0" />
+        </ListItem>
+      </List>
+      <List Name="TrafficGroups">
+        <ListItem>
+          <Double Key="Weight" Value="1" />
+          <Reference Type="TrafficGroup" Name="LightVehicles Road 1" />
+        </ListItem>
+      </List>
+	  <List Name="Routes">
+		<ListItem>
+		  <String Key="AgentType" Value="Car" />
+          <StringVector Key="openDriveRoadIDs" Value="1,110,4" />
+          <DoubleVector Key="openDriveLaneID" Value="-1,-1,1" />
+          <DoubleVector Key="SCoordinates" Value="0,0,0" />
+          <Double Key="Weight" Value="0.017608897126969416" />
+        </ListItem>
+		<ListItem>
+		  <String Key="AgentType" Value="Car" />
+          <StringVector Key="openDriveRoadIDs" Value="1,160,2,32,3,15,0" />
+          <DoubleVector Key="openDriveLaneID" Value="-1,-1,-1,-1,-1,-1,1" />
+          <DoubleVector Key="SCoordinates" Value="0,0,0,0,0,0,0" />
+          <Double Key="Weight" Value="0.3670064874884152" />
+        </ListItem>
+		<ListItem>
+		  <String Key="AgentType" Value="Car" />
+          <StringVector Key="openDriveRoadIDs" Value="1,160,2,33,5" />
+          <DoubleVector Key="openDriveLaneID" Value="-1,-1,-1,-1,1" />
+          <DoubleVector Key="SCoordinates" Value="0,0,0,0,0" />
+          <Double Key="Weight" Value="0.015755329008341055" />
+        </ListItem>
+      </List>
+    </Profile>
+	<Profile Name="SpawnPoint Road:1 Cyclist">
+      <List Name="SpawnPoints">
+        <ListItem>
+          <StringVector Key="Roads" Value="1" />
+          <IntVector Key="Lanes" Value="-2" />
+          <Double Key="SCoordinate" Value="10.0" />
+        </ListItem>
+      </List>
+      <List Name="TrafficGroups">
+        <ListItem>
+          <Double Key="Weight" Value="1" />
+          <Reference Type="TrafficGroup" Name="Cyclist Road 1" />
+        </ListItem>
+      </List>
+	  <List Name="Routes">
+		<ListItem>
+		  <String Key="AgentType" Value="Cyclist" />
+          <StringVector Key="openDriveRoadIDs" Value="1,1,110,4" />
+          <DoubleVector Key="openDriveLaneID" Value="-2,-1,-1,1" />
+          <DoubleVector Key="SCoordinates" Value="100,0,0,0" />
+          <Double Key="Weight" Value="0.01760889712696941" />
+        </ListItem>
+		<ListItem>
+		  <String Key="AgentType" Value="Cyclist" />
+          <StringVector Key="openDriveRoadIDs" Value="1,160,2,32,3,16,0" />
+          <DoubleVector Key="openDriveLaneID" Value="-2,-2,-2,-2,-2,-1,2" />
+          <DoubleVector Key="SCoordinates" Value="0,0,0,0,0,0,0" />
+          <Double Key="Weight" Value="0.3670064874884152" />
+        </ListItem>
+		<ListItem>
+		  <String Key="AgentType" Value="Cyclist" />
+          <StringVector Key="openDriveRoadIDs" Value="1,160,2,56,5" />
+          <DoubleVector Key="openDriveLaneID" Value="-2,-2,-2,-1,1" />
+          <DoubleVector Key="SCoordinates" Value="0,0,0,0,0" />
+          <Double Key="Weight" Value="0.015755329008341055" />
+        </ListItem>
+      </List>
+    </Profile>
+	<Profile Name="SpawnPoint Road:4 Car and Cyclist">
+      <List Name="SpawnPoints">
+        <ListItem>
+          <StringVector Key="Roads" Value="4" />
+          <IntVector Key="Lanes" Value="-1" />
+          <Double Key="SCoordinate" Value="10.0" />
+        </ListItem>
+      </List>
+      <List Name="TrafficGroups">
+        <ListItem>
+          <Double Key="Weight" Value="1" />
+          <Reference Type="TrafficGroup" Name="LightVehicles and Cyclist Road 4" />
+        </ListItem>
+      </List>
+	  <List Name="Routes">
+		<ListItem>
+		  <String Key="AgentType" Value="Car" />
+          <StringVector Key="openDriveRoadIDs" Value="4,95,1" />
+          <DoubleVector Key="openDriveLaneID" Value="-1,-1,1" />
+          <DoubleVector Key="SCoordinates" Value="0,0,0" />
+          <Double Key="Weight" Value="0.014828544949026877" />
+        </ListItem>
+		<ListItem>
+		  <String Key="AgentType" Value="Car" />
+          <StringVector Key="openDriveRoadIDs" Value="4,118,2,33,5" />
+          <DoubleVector Key="openDriveLaneID" Value="-1,-1,-1,-1,1," />
+          <DoubleVector Key="SCoordinates" Value="0,0,0,0,0" />
+          <Double Key="Weight" Value="0.0018535681186283596" />
+        </ListItem>
+		<ListItem>
+		  <String Key="AgentType" Value="Car" />
+          <StringVector Key="openDriveRoadIDs" Value="4,118,2,32,3,15,0" />
+          <DoubleVector Key="openDriveLaneID" Value="-1,-1,-1,-1,-1,-1,1" />
+          <DoubleVector Key="SCoordinates" Value="0,0,0,0,0,0,0" />
+          <Double Key="Weight" Value="0.010194624652455977" />
+        </ListItem>
+		<ListItem>
+		  <String Key="AgentType" Value="Cyclist" />
+          <StringVector Key="openDriveRoadIDs" Value="4,99,1" />
+          <DoubleVector Key="openDriveLaneID" Value="-1,-1,2" />
+          <DoubleVector Key="SCoordinates" Value="0,0,0" />
+          <Double Key="Weight" Value="0.014828544949026877" />
+        </ListItem>
+		<ListItem>
+		  <String Key="AgentType" Value="Cyclist" />
+          <StringVector Key="openDriveRoadIDs" Value="4,118,2,2,56,5" />
+          <DoubleVector Key="openDriveLaneID" Value="-1,-1,-1,-2,-1,1" />
+          <DoubleVector Key="SCoordinates" Value="0,0,0,0,0,0" />
+          <Double Key="Weight" Value="0.0018535681186283596" />
+        </ListItem>
+		<ListItem>
+		  <String Key="AgentType" Value="Cyclist" />
+          <StringVector Key="openDriveRoadIDs" Value="4,118,2,32,3,3,16,0" />
+          <DoubleVector Key="openDriveLaneID" Value="-1,-1,-1,-1,-1,-2,-1,2" />
+          <DoubleVector Key="SCoordinates" Value="0,0,0,0,0,0,0,0" />
+          <Double Key="Weight" Value="0.010194624652455977" />
+        </ListItem>
+      </List>
+    </Profile>
+	<Profile Name="SpawnPoint Road:5 Car and Cyclist">
+      <List Name="SpawnPoints">
+        <ListItem>
+          <StringVector Key="Roads" Value="5" />
+          <IntVector Key="Lanes" Value="-1" />
+          <Double Key="SCoordinate" Value="10.0" />
+        </ListItem>
+      </List>
+      <List Name="TrafficGroups">
+        <ListItem>
+          <Double Key="Weight" Value="1" />
+          <Reference Type="TrafficGroup" Name="LightVehicles and Cyclist Road 5" />
+        </ListItem>
+      </List>
+	  <List Name="Routes">
+		<ListItem>
+		  <String Key="AgentType" Value="Car" />
+          <StringVector Key="openDriveRoadIDs" Value="5,44,2,144,4" />
+          <DoubleVector Key="openDriveLaneID" Value="-1,-1,1,1,1" />
+          <DoubleVector Key="SCoordinates" Value="0,0,0,0,0" />
+          <Double Key="Weight" Value="0.005560704355885079" />
+        </ListItem>
+		<ListItem>
+		  <String Key="AgentType" Value="Car" />
+          <StringVector Key="openDriveRoadIDs" Value="5,44,2,159,1" />
+          <DoubleVector Key="openDriveLaneID" Value="-1,-1,1,1,1" />
+          <DoubleVector Key="SCoordinates" Value="0,0,0,0,0" />
+          <Double Key="Weight" Value="0.05560704355885079" />
+        </ListItem>
+		<ListItem>
+		  <String Key="AgentType" Value="Car" />
+          <StringVector Key="openDriveRoadIDs" Value="5,65,3,15,0" />
+          <DoubleVector Key="openDriveLaneID" Value="-1,-1,-1,-1,1" />
+          <DoubleVector Key="SCoordinates" Value="0,0,0,0,0" />
+          <Double Key="Weight" Value="0.008341056533827619" />
+        </ListItem>
+		<ListItem>
+		  <String Key="AgentType" Value="Cyclist" />
+          <StringVector Key="openDriveRoadIDs" Value="5,44,2,2,136,4" />
+          <DoubleVector Key="openDriveLaneID" Value="-1,-1,1,2,1,1" />
+          <DoubleVector Key="SCoordinates" Value="0,0,0,0,0,0" />
+          <Double Key="Weight" Value="0.005560704355885079" />
+        </ListItem>
+		<ListItem>
+		  <String Key="AgentType" Value="Cyclist" />
+          <StringVector Key="openDriveRoadIDs" Value="5,44,2,159,1,1" />
+          <DoubleVector Key="openDriveLaneID" Value="-1,-1,1,1,1,2" />
+          <DoubleVector Key="SCoordinates" Value="0,0,0,0,0,0" />
+          <Double Key="Weight" Value="0.05560704355885079" />
+        </ListItem>
+		<ListItem>
+		  <String Key="AgentType" Value="Cyclist" />
+          <StringVector Key="openDriveRoadIDs" Value="5,74,3,16,0" />
+          <DoubleVector Key="openDriveLaneID" Value="-1,-1,-2,-1,2" />
+          <DoubleVector Key="SCoordinates" Value="0,0,0,0,0" />
+          <Double Key="Weight" Value="0.008341056533827619" />
+        </ListItem>
+      </List>
+    </Profile>
+  </ProfileGroup>
+  <ProfileGroup Type="TrafficRules">
+    <Profile Name="Germany">
+      <Double Key="OpenSpeedLimit" Value="INF" />
+      <Bool Key="KeepToOuterLanes" Value="true" />
+      <Bool Key="DontOvertakeOnOuterLanes" Value="true" />
+      <Bool Key="FormRescueLane" Value="true" />
+      <Bool Key="ZipperMerge" Value="true" />
+    </Profile>
+  </ProfileGroup>
+</Profiles>
